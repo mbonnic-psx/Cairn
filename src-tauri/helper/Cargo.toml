@@ -1,0 +1,32 @@
+[package]
+name = "cairn-helper"
+description = "Cairn's privileged helper — the only elevated component"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "cairn-helper"
+path = "src/main.rs"
+
+# The helper links the pure domain code and nothing else from the app. It has no
+# Tauri, no database, no credential store: it writes system files, binds sockets,
+# and advances the trusted clock. Its blast radius is fixed at compile time
+# (contracts/helper-ipc.md).
+[dependencies]
+cairn = { path = "..", default-features = false }
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+thiserror.workspace = true
+
+[dev-dependencies]
+tempfile = "3"
+
+[lints.rust]
+unsafe_code = "allow" # descriptor passing and peer credentials need it; kept to channel/
+
+[lints.clippy]
+unwrap_used = "warn"
+expect_used = "warn"

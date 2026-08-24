@@ -1,0 +1,128 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  # The constitutional guards run first and on every platform-independent push.
+  # They are cheap, they fail loudly, and a failure here is not a style problem.
+  guards:
+    name: Constitutional guards
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: No word of failure reaches a person (SC-019)
+        run: npm run check:banned-words
+      - name: No ambient reach surface (SC-006)
+        run: npm run check:ambient-counts
+      # The network guard resolves the real build graph, so it needs cargo and
+      # runs in the `core` job below rather than here.
+      - name: No notification capability (FR-023, SC-007)
+        run: npm run check:no-notifications
+      - name: Domain code stays pure (platform abstraction)
+        run: npm run check:domain-purity
+
+  frontend:
+    name: Frontend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npx tsc --noEmit
+      - run: npm test
+
+  # The four constitution-critical functions are pure and have no system
+  # dependencies, so they are tested on every platform without a GUI toolchain.
+  domain:
+    name: Domain (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+      - name: Format
+        working-directory: src-tauri
+        run: cargo fmt --all --check
+      - name: Clippy
+        working-directory: src-tauri
+        run: cargo clippy -p cairn --no-default-features --all-targets -- -D warnings
+      - name: Domain tests
+        working-directory: src-tauri
+        run: cargo test -p cairn --no-default-features
+
+  # The full tree, including the privileged helper and the store. Needs each
+  # platform's own toolchain; on Linux it needs the webview libraries too.
+  core:
+    name: Core (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+      - name: Linux webview dependencies
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev \
+            librsvg2-dev patchelf libssl-dev
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Workspace tests
+        working-directory: src-tauri
+        run: cargo test --workspace
+      - name: Nothing network-capable entered the tree
+        run: bash scripts/check-no-network-deps.sh
+
+  # SC-002: a non-browser client cannot reach a protected site either. The
+  # browser matrix is manual and lives in scripts/acceptance/README.md.
+  acceptance:
+    name: Non-browser client (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    needs: core
+    if: github.event_name == 'push'
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Acceptance run
+        shell: bash
+        run: |
+          if [ -x scripts/acceptance/non-browser-client.sh ]; then
+            bash scripts/acceptance/non-browser-client.sh
+          else
+            echo "acceptance script arrives with T067"
+          fi

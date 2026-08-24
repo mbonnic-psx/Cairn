@@ -38,16 +38,16 @@ Two Rust binaries plus a React frontend, per [plan.md](./plan.md):
 **Purpose**: Scaffolding and the automated guards that enforce constitutional rules from the
 first commit rather than at review time.
 
-- [ ] T001 Create the workspace layout from plan.md in `src-tauri/`, `src-tauri/helper/`, `src/`, `scripts/`
-- [ ] T002 Initialize the Tauri 2.x application with React 18 + TypeScript + Tailwind in `src-tauri/tauri.conf.json` and `src/`
-- [ ] T003 Define the Cargo workspace with a pure `domain` crate, the app binary, and the helper binary in `src-tauri/Cargo.toml`
-- [ ] T004 [P] Configure rustfmt and clippy in `src-tauri/rustfmt.toml` and `src-tauri/clippy.toml`
-- [ ] T005 [P] Configure ESLint and Prettier in `.eslintrc.cjs` and `.prettierrc`
-- [ ] T006 [P] Write the banned-word guard over extracted UI strings in `scripts/check-banned-words.mjs` (SC-019)
-- [ ] T007 [P] Write the dependency guard that fails the build if an HTTP client crate enters the tree in `scripts/check-no-network-deps.sh` (Principle II)
-- [ ] T008 [P] Add a clippy lint denying `cfg(target_os)` and all I/O inside `src-tauri/src/domain/` in `src-tauri/clippy.toml`
-- [ ] T009 [P] Add a guard asserting no notification capability is declared, in `scripts/check-no-notifications.sh` (FR-023, SC-007)
-- [ ] T010 CI workflow running `cargo test`, `npm test`, and every `scripts/check-*` guard in `.github/workflows/ci.yml`
+- [X] T001 Create the workspace layout from plan.md in `src-tauri/`, `src-tauri/helper/`, `src/`, `scripts/`
+- [X] T002 Initialize the Tauri 2.x application with React 18 + TypeScript + Tailwind in `src-tauri/tauri.conf.json` and `src/`
+- [X] T003 Define the Cargo workspace with a pure `domain` crate, the app binary, and the helper binary in `src-tauri/Cargo.toml`
+- [X] T004 [P] Configure rustfmt and clippy in `src-tauri/rustfmt.toml` and `src-tauri/clippy.toml`
+- [X] T005 [P] Configure ESLint and Prettier in `.eslintrc.cjs` and `.prettierrc`
+- [X] T006 [P] Write the banned-word guard over extracted UI strings in `scripts/check-banned-words.mjs` (SC-019)
+- [X] T007 [P] Write the dependency guard that fails the build if an HTTP client crate enters the tree in `scripts/check-no-network-deps.sh` (Principle II)
+- [X] T008 [P] Add a clippy lint denying `cfg(target_os)` and all I/O inside `src-tauri/src/domain/` in `src-tauri/clippy.toml`
+- [X] T009 [P] Add a guard asserting no notification capability is declared, in `scripts/check-no-notifications.sh` (FR-023, SC-007)
+- [X] T010 CI workflow running `cargo test`, `npm test`, and every `scripts/check-*` guard in `.github/workflows/ci.yml`
 
 **Checkpoint**: The guards fail loudly on an empty project. Everything after this inherits them.
 
@@ -68,15 +68,15 @@ functions, and the privileged helper with its verbs built in apply/remove pairs.
 
 ### Constitution-critical pure functions (all in `domain/`, no I/O, no platform code)
 
-- [ ] T014 [P] Implement domain normalization and deduplication in `src-tauri/src/domain/normalize.rs` (FR-004, FR-005, FR-006, FR-007)
-- [ ] T015 [P] Write table-driven normalization tests covering scheme/port/path stripping, case, `www.` pairing, cross-source dedup, and refusal of system-breaking entries in `src-tauri/tests/normalize.rs`
-- [ ] T016 [P] Implement marker splicing over raw bytes in `src-tauri/src/domain/splice.rs`, preserving line endings, BOM, and trailing bytes (FR-040, FR-042)
-- [ ] T017 [P] Write the `proptest` property asserting byte-identity outside the markers across apply, repair, and teardown in `src-tauri/tests/splice_properties.rs`
-- [ ] T018 [P] Implement the capped destination-name parser for TLS `server_name` and HTTP `Host` in `src-tauri/src/domain/sni.rs` (FR-025, research R2)
-- [ ] T019 [P] Write parser tests asserting the byte cap holds and that nothing beyond the domain is retained, in `src-tauri/tests/sni.rs`
-- [ ] T020 [P] Implement trusted-clock waiting-period arithmetic in `src-tauri/src/domain/gate.rs` (FR-047a, FR-047d, research R4)
-- [ ] T021 [P] Write gate tests for clock moved forward while running, moved backward, and machine powered off, in `src-tauri/tests/gate.rs`
-- [ ] T022 [P] Implement Trail, SourceRef, and paired IPv4/IPv6 hosts-line emission in `src-tauri/src/domain/entries.rs`
+- [X] T014 [P] Implement domain normalization and deduplication in `src-tauri/src/domain/normalize.rs` (FR-004, FR-005, FR-006, FR-007)
+- [X] T015 [P] Write table-driven normalization tests covering scheme/port/path stripping, case, `www.` pairing, cross-source dedup, and refusal of system-breaking entries in `src-tauri/tests/normalize.rs`
+- [X] T016 [P] Implement marker splicing over raw bytes in `src-tauri/src/domain/splice.rs`, preserving line endings, BOM, and trailing bytes (FR-040, FR-042)
+- [X] T017 [P] Write the `proptest` property asserting byte-identity outside the markers across apply, repair, and teardown in `src-tauri/tests/splice_properties.rs`
+- [X] T018 [P] Implement the capped destination-name parser for TLS `server_name` and HTTP `Host` in `src-tauri/src/domain/sni.rs` (FR-025, research R2)
+- [X] T019 [P] Write parser tests asserting the byte cap holds and that nothing beyond the domain is retained, in `src-tauri/tests/sni.rs`
+- [X] T020 [P] Implement trusted-clock waiting-period arithmetic in `src-tauri/src/domain/gate.rs` (FR-047a, FR-047d, research R4)
+- [X] T021 [P] Write gate tests for clock moved forward while running, moved backward, and machine powered off, in `src-tauri/tests/gate.rs`
+- [X] T022 [P] Implement Trail, SourceRef, and paired IPv4/IPv6 hosts-line emission in `src-tauri/src/domain/entries.rs`
 
 ### Service traits and stores
 
@@ -199,7 +199,7 @@ protection, confirm automatic silent mode with blocking fully in force.
 - [ ] T078 [P] [US3] Build the reaches screen reachable only by deliberate navigation, stating that counting covers only running time, in `src/screens/Reaches.tsx` (FR-030, FR-030a)
 - [ ] T079 [US3] Add the ESLint rule restricting the `list_todays_reaches` import to the reaches screen in `.eslintrc.cjs` (FR-030a)
 - [ ] T080 [P] [US3] Add the plain statement of what encryption at rest does and does not protect against, in `src/screens/Limits.tsx` (FR-035)
-- [ ] T081 [P] [US3] Write the ambient-surface sweep check asserting no count, badge, or hint exists outside the reaches screen in `scripts/check-no-ambient-counts.mjs` (SC-006)
+- [X] T081 [P] [US3] Write the ambient-surface sweep check asserting no count, badge, or hint exists outside the reaches screen in `scripts/check-no-ambient-counts.mjs` (SC-006)
 
 **Checkpoint**: Counting works, degrades honestly, and stays invisible. SC-006, SC-009, SC-010,
 SC-014, SC-018 are measurable.

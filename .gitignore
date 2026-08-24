@@ -1,0 +1,36 @@
+# Rust
+target/
+**/*.rs.bk
+*.pdb
+
+# Node
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# Tauri
+src-tauri/gen/
+
+# Editors and OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.swp
+*.tmp
+
+# Logs — Cairn writes diagnostics locally only (FR-038a); never commit them
+*.log
+logs/
+
+# Machine-local Spec Kit state
+.specify/feature.json
+
+# Never commit anything holding reach data or keys
+*.db
+*.db-journal
+*.sqlite
+.env
+.env.*

@@ -1,0 +1,13 @@
+# Workspace-wide clippy configuration.
+#
+# Note on domain purity: clippy.toml applies to a whole crate, and `domain` is a
+# module of the `cairn` crate rather than a separate crate, so a `disallowed-types`
+# ban here would also hit `store/` and `platform/`, which legitimately do I/O.
+# The domain purity rule — no `cfg(target_os)`, no I/O, no clock reads inside
+# src-tauri/src/domain/ — is therefore enforced by scripts/check-domain-purity.sh,
+# which runs in CI alongside clippy. Do not relax it in either place.
+
+avoid-breaking-exported-api = false
+disallowed-macros = [
+    { path = "std::dbg", reason = "diagnostic output must never carry a domain or a reach (FR-038b)" },
+]

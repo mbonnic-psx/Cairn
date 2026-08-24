@@ -1,0 +1,82 @@
+[workspace]
+members = ["helper"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.83"
+license = "MIT"
+
+# Every dependency is a supply-chain surface for a tool people trust with their
+# recovery (research R10). The set stays small, and nothing that speaks HTTP is
+# permitted anywhere in the tree — see scripts/check-no-network-deps.sh.
+[workspace.dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha2 = "0.10"
+thiserror = "2"
+uuid = { version = "1", features = ["v4", "serde"] }
+
+[package]
+name = "cairn"
+description = "Cairn — machine-wide protection with a recovery layer"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+# The library is what the privileged helper links against: `domain` is pure and
+# carries no platform code, no I/O, and none of the app's dependencies. The
+# binary is the unelevated Tauri application and is the only thing that needs
+# the `app` feature.
+[lib]
+name = "cairn"
+path = "src/lib.rs"
+
+[[bin]]
+name = "cairn"
+path = "src/main.rs"
+required-features = ["app"]
+
+[features]
+default = ["app"]
+# Everything the unelevated UI process needs. Kept optional so `domain` — the
+# constitution-critical code — builds and tests with no system dependencies.
+app = [
+  "dep:tauri",
+  "dep:rusqlite",
+  "dep:keyring",
+  "dep:tokio",
+  "dep:dirs",
+  "dep:tauri-build",
+]
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+thiserror.workspace = true
+uuid.workspace = true
+
+tauri = { version = "2", optional = true }
+rusqlite = { version = "0.32", features = ["bundled-sqlcipher-vendored-openssl"], optional = true }
+keyring = { version = "3", optional = true }
+tokio = { version = "1", features = ["rt-multi-thread", "net", "time", "macros", "io-util"], optional = true }
+dirs = { version = "5", optional = true }
+idna = "1"
+
+[build-dependencies]
+# Optional so the pure domain code builds and tests with no GUI toolchain
+# present: `cargo test -p cairn --no-default-features` needs none of this.
+tauri-build = { version = "2", optional = true, features = [] }
+
+[dev-dependencies]
+proptest = "1"
+tempfile = "3"
+
+[lints.rust]
+unsafe_code = "warn"
+
+[lints.clippy]
+unwrap_used = "warn"
+expect_used = "warn"

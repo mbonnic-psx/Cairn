@@ -1,0 +1,17 @@
+@import 'tailwindcss';
+
+/* The full palette and type scale arrive with T057. This keeps the shell warm
+   rather than default-white in the meantime. */
+:root {
+  color-scheme: light;
+}
+
+body {
+  margin: 0;
+  font-family:
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    sans-serif;
+}
