@@ -74,6 +74,46 @@ export const setCategoryEnabled = (id: CategoryId, on: boolean) =>
 export const addCustomEntry = (input: string) =>
   invoke<string[]>('add_custom_entry', { input });
 
+/** A change that is waiting. Never more than one. */
+export interface PendingChange {
+  id: string;
+  /** What it would do, in plain words. */
+  what: string;
+  /** A phrase — "23 hours" — never a countdown. */
+  time_remaining: string;
+  eligible_now: boolean;
+}
+
+export interface TeardownReport {
+  complete: boolean;
+  residue: string[];
+  confirmed: string[];
+}
+
+/**
+ * The single reduction path (FR-047).
+ *
+ * There is no command here that turns protection off now. Asking returns a
+ * change that waits a day, and protection stays fully on for all of it.
+ */
+export const requestProtectionOff = () => invoke<PendingChange>('request_protection_off');
+
+export const removeCustomEntry = (domain: string) =>
+  invoke<PendingChange>('remove_custom_entry', { domain });
+
+export const getPendingChange = () => invoke<PendingChange | null>('get_pending_change');
+
+/** Always available while a change is waiting (FR-047c). */
+export const cancelPendingChange = (id: string) =>
+  invoke<void>('cancel_pending_change', { id });
+
+/**
+ * There is no wrapper for teardown, because there is no command for it.
+ * Removing everything at once is what a reduction does *after* it has waited —
+ * offering it directly would be an off-switch with a different name.
+ */
+export const deleteAllData = () => invoke<string[]>('delete_all_data');
+
 /**
  * The words for each protection state.
  *

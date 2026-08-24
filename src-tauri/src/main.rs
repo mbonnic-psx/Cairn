@@ -36,6 +36,10 @@ fn main() {
     // that cannot do that is still protected; the interface says so.
     let _ = state.ensure_seeded();
 
+    // A change that served its day takes effect because time passed, not
+    // because someone came back and asked again. This is the only caller.
+    let _ = state.apply_due_reduction();
+
     tauri::Builder::default()
         .manage(state)
         .invoke_handler(tauri::generate_handler![
@@ -47,6 +51,11 @@ fn main() {
             commands::turn_protection_on,
             commands::get_reach_mode,
             commands::get_disclosures,
+            commands::request_protection_off,
+            commands::remove_custom_entry,
+            commands::cancel_pending_change,
+            commands::get_pending_change,
+            commands::delete_all_data,
         ])
         .run(tauri::generate_context!())
         .expect("Cairn could not open its window");

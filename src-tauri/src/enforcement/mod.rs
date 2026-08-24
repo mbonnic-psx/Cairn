@@ -11,6 +11,8 @@
 //! for it rather than by discipline here.
 
 pub mod apply;
+pub mod reduce;
 pub mod seed;
 pub mod state;
+pub mod teardown;
 pub mod trail;

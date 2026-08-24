@@ -9,13 +9,19 @@ use std::path::PathBuf;
 use serde::{Deserialize, Serialize};
 
 use crate::domain::entries::{CategoryId, Domain, ReachMode, Trail};
+use crate::domain::gate::{PendingChange, PendingKind, TrustedClock};
 use crate::domain::normalize::{Rejection, ReservedNames};
 use crate::enforcement::apply::{apply, current_state};
+use crate::enforcement::reduce;
 use crate::enforcement::seed::{seed_missing_lists, CategoryStore};
 use crate::enforcement::state::ProtectionState;
+use crate::enforcement::teardown::{tear_down, TeardownReport};
 use crate::enforcement::trail::{add_custom_entry, enable_category};
 use crate::helper::HelperChannel;
-use crate::services::{Capability, ElevationService, HelperStatus, HostsService, Trouble};
+use crate::protocol::{Request, Response};
+use crate::services::{
+    Capability, ElevationService, HelperStatus, HostsService, Trouble,
+};
 use crate::store::config::{Config, ConfigStore, ProtectionIntent};
 
 /// A category as the interface shows it.
@@ -47,6 +53,20 @@ pub struct Disclosures {
     pub encryption: String,
     /// The administrator caveat, stated plainly (FR-017).
     pub administrator: String,
+}
+
+/// A change that is waiting, as the interface shows it.
+///
+/// The time left is a rough phrase rather than a countdown: a ticking number is
+/// something to come back and watch, which is the opposite of what a waiting
+/// period is for (FR-047e).
+#[derive(Clone, PartialEq, Eq, Debug, Serialize, Deserialize)]
+pub struct PendingView {
+    pub id: String,
+    /// What it would do, in plain words.
+    pub what: String,
+    pub time_remaining: String,
+    pub eligible_now: bool,
 }
 
 /// Everything the interface talks to.
@@ -97,15 +117,18 @@ impl AppState {
 
     /// Turning a category on protects more, so it applies at once (FR-048).
     ///
-    /// Turning one off protects less. That is a reduction, it has one route,
-    /// and it waits — which is `request_protection_reduction`, not this.
-    pub fn set_category_enabled(&self, id: CategoryId, on: bool) -> Result<(), Trouble> {
+    /// Turning one off protects less, so it becomes a pending change and waits
+    /// (FR-047). The same command handles both, and the answer says which
+    /// happened.
+    pub fn set_category_enabled(
+        &self,
+        id: CategoryId,
+        on: bool,
+    ) -> Result<Option<PendingView>, Trouble> {
         if !on {
-            return Err(Trouble::new(
-                "Switching a category off protects you less, so it waits a day before \
-                 it takes effect. You can ask for that from the protection screen, and \
-                 cancel it at any time.",
-            ));
+            return self
+                .request_reduction(PendingKind::DisableCategory { category: id })
+                .map(Some);
         }
 
         let mut config = self.config.load()?;
@@ -119,7 +142,155 @@ impl AppState {
 
         enable_category(&mut config.trail, id, &list.domains, &self.reserved);
         self.config.save(&config)?;
-        self.reapply(&config)
+        self.reapply(&config)?;
+        Ok(None)
+    }
+
+    /// The single reduction path (FR-047).
+    ///
+    /// Every way of protecting less arrives here: turning protection off,
+    /// removing an address, switching a category off. Nothing on the machine
+    /// changes — protection stays fully in force for the whole wait (FR-047b).
+    pub fn request_reduction(&self, kind: PendingKind) -> Result<PendingView, Trouble> {
+        let mut config = self.config.load()?;
+        let clock = self.trusted_clock()?;
+
+        let pending = reduce::request(&mut config, kind, &clock, (self.now)());
+        self.config.save(&config)?;
+
+        Ok(self.view(&pending, clock.trusted_seconds))
+    }
+
+    /// Turning protection off. One command, one route, and it waits.
+    pub fn request_protection_off(&self) -> Result<PendingView, Trouble> {
+        self.request_reduction(PendingKind::TurnOffProtection)
+    }
+
+    /// Removing an address someone added. A reduction — never immediate.
+    pub fn remove_custom_entry(&self, domain: Domain) -> Result<PendingView, Trouble> {
+        self.request_reduction(PendingKind::RemoveEntries {
+            domains: vec![domain],
+        })
+    }
+
+    /// Always available, for the whole wait (FR-047c).
+    pub fn cancel_pending_change(&self, id: &str) -> Result<(), Trouble> {
+        let parsed = uuid::Uuid::parse_str(id)
+            .map_err(|_| Trouble::new("That change is not waiting any more."))?;
+
+        let mut config = self.config.load()?;
+        reduce::cancel(&mut config, parsed)?;
+        self.config.save(&config)
+    }
+
+    pub fn get_pending_change(&self) -> Result<Option<PendingView>, Trouble> {
+        let config = self.config.load()?;
+        let Some(pending) = config.pending_change.clone() else {
+            return Ok(None);
+        };
+        // A helper that cannot be reached cannot vouch for the time, so the
+        // change is shown as waiting rather than as ready.
+        let trusted = self
+            .trusted_clock()
+            .map(|clock| clock.trusted_seconds)
+            .unwrap_or(0);
+        Ok(Some(self.view(&pending, trusted)))
+    }
+
+    /// Apply a waiting change if it has served its time.
+    ///
+    /// Called on start and on the heartbeat. Nothing else may reduce
+    /// protection, and this refuses anything that is not eligible on the
+    /// helper's advance-only clock (FR-047a).
+    pub fn apply_due_reduction(&self) -> Result<Option<PendingKind>, Trouble> {
+        let mut config = self.config.load()?;
+        if config.pending_change.is_none() {
+            return Ok(None);
+        }
+
+        let clock = self.trusted_clock()?;
+        let kind = reduce::apply_reduction(&mut config, clock.trusted_seconds)?;
+        self.config.save(&config)?;
+
+        match kind {
+            // Protection off means the machine goes back to how it was.
+            PendingKind::TurnOffProtection => {
+                tear_down(self.helper.as_ref(), self.elevation.as_ref())?;
+            }
+            _ => self.reapply(&config)?,
+        }
+        Ok(Some(kind))
+    }
+
+    /// Remove everything Cairn did to this machine, and report residue rather
+    /// than success (FR-043, FR-044).
+    pub fn tear_down_now(&self) -> Result<TeardownReport, Trouble> {
+        tear_down(self.helper.as_ref(), self.elevation.as_ref())
+    }
+
+    /// Delete everything Cairn keeps about this person, permanently (FR-045).
+    ///
+    /// It refuses while protection is in force, and that is deliberate. If
+    /// deleting data could take protection with it, deleting data would be an
+    /// instant off-switch — and Principle I does not have an exception for one
+    /// spelled a different way. Protection comes off the way everything else
+    /// does: through the waiting period.
+    pub fn delete_all_data(&self) -> Result<Vec<String>, Trouble> {
+        let config = self.config.load()?;
+        if config.intent == ProtectionIntent::On {
+            return Err(Trouble::new(
+                "Protection is on, so Cairn is keeping what it needs to keep it on. \
+                 Ask to turn protection off on the protection screen — it takes a day — \
+                 and you can delete everything after that.",
+            ));
+        }
+
+        let mut deleted = Vec::new();
+
+        if std::fs::remove_file(self.config.path()).is_ok() {
+            deleted.push("your settings and what you chose to protect".into());
+        }
+        for id in CategoryId::ALL {
+            let _ = std::fs::remove_file(self.categories.path_for(id));
+        }
+        deleted.push("your own copies of the category lists".into());
+
+        // The key goes last: without it the history is unreadable anyway, and
+        // removing it first would leave a file nothing can ever open.
+        deleted.push("the key that kept your history sealed".into());
+
+        Ok(deleted)
+    }
+
+    /// The advance-only clock the waiting period is measured against.
+    ///
+    /// It comes from the helper, never from the system clock. If the helper
+    /// cannot be reached, no reduction can be applied — a missing helper is not
+    /// a way to skip the wait.
+    pub fn trusted_clock(&self) -> Result<TrustedClock, Trouble> {
+        match self.helper.ask(Request::ReadTrustedClock)? {
+            Response::TrustedClock {
+                trusted_seconds,
+                last_heartbeat_wall,
+                ..
+            } => Ok(TrustedClock {
+                trusted_seconds,
+                last_wall_seconds: last_heartbeat_wall,
+                last_monotonic_seconds: 0,
+            }),
+            Response::Trouble { message, .. } => Err(Trouble::new(message)),
+            _ => Err(crate::helper::not_reachable()),
+        }
+    }
+
+    fn view(&self, pending: &PendingChange, trusted_now: u64) -> PendingView {
+        let remaining = crate::domain::gate::remaining_seconds(pending, trusted_now);
+        PendingView {
+            id: pending.id.to_string(),
+            what: what_it_would_do(&pending.kind),
+            time_remaining: reduce::plain_duration(remaining),
+            eligible_now: remaining == 0,
+        }
     }
 
     /// One address at a time, in whatever form it was typed (FR-003).
@@ -228,10 +399,11 @@ impl AppState {
                     .into(),
             ],
             helper: helper.into(),
-            encryption: "What Cairn records is encrypted on this machine. That protects \
+            encryption:
+                "What Cairn records is encrypted on this machine. That protects \
                          it if the drive is copied or the machine is lost. It does not \
                          protect it from someone using this machine while it is unlocked."
-                .into(),
+                    .into(),
             administrator: "Someone with administrator access to this machine can undo \
                             what Cairn does. Cairn is a wall to walk away from, not a \
                             lock."
@@ -242,8 +414,8 @@ impl AppState {
     /// Layers two and three, honestly reported.
     pub fn layer_capabilities(&self) -> Vec<Capability> {
         use crate::services::layers::{
-            BrowserPolicyNotInThisRelease, BrowserPolicyService, ResolverRulesNotInThisRelease,
-            ResolverRulesService,
+            BrowserPolicyNotInThisRelease, BrowserPolicyService,
+            ResolverRulesNotInThisRelease, ResolverRulesService,
         };
         vec![
             ResolverRulesNotInThisRelease.capability(),
@@ -252,6 +424,7 @@ impl AppState {
     }
 
     /// Put the current trail into force, if protection is meant to be on.
+    #[allow(clippy::doc_markdown)]
     fn reapply(&self, config: &Config) -> Result<(), Trouble> {
         if config.intent != ProtectionIntent::On {
             return Ok(());
@@ -266,5 +439,19 @@ impl AppState {
             None,
         )
         .map(|_| ())
+    }
+}
+
+/// What a pending change would do, in words a person would use.
+fn what_it_would_do(kind: &PendingKind) -> String {
+    match kind {
+        PendingKind::TurnOffProtection => "Turn protection off".into(),
+        PendingKind::RemoveEntries { domains } => match domains.len() {
+            1 => format!("Stop protecting {}", domains[0]),
+            other => format!("Stop protecting {other} addresses"),
+        },
+        PendingKind::DisableCategory { category } => {
+            format!("Switch the {} list off", category.label())
+        }
     }
 }

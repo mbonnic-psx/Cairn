@@ -217,21 +217,21 @@ and confirm byte-identical restoration with no residue.
 
 ### Tests for User Story 4
 
-- [ ] T082 [P] [US4] Integration test asserting no pending reduction applies early across restart and clock change in `src-tauri/tests/us4_gate.rs` (SC-011)
-- [ ] T083 [P] [US4] Test asserting an increase in protection applies immediately and does not disturb a pending reduction in `src-tauri/tests/us4_increase.rs` (FR-048)
+- [X] T082 [P] [US4] Integration test asserting no pending reduction applies early across restart and clock change in `src-tauri/tests/us4_gate.rs` (SC-011)
+- [X] T083 [P] [US4] Test asserting an increase in protection applies immediately and does not disturb a pending reduction in `src-tauri/tests/us4_increase.rs` (FR-048)
 
 ### Implementation for User Story 4
 
-- [ ] T084 [US4] Implement `PendingChange` persistence carrying the trusted-clock values in `src-tauri/src/store/pending.rs` (FR-047a)
-- [ ] T085 [US4] Implement the single reduction path that every reduction routes through in `src-tauri/src/enforcement/reduce.rs` (FR-047)
-- [ ] T086 [US4] Implement `request_protection_off`, `remove_custom_entry`, and category-disable as pending changes in `src-tauri/src/ipc/protection.rs` (FR-047, FR-047b)
-- [ ] T087 [P] [US4] Implement `cancel_pending_change` and `get_pending_change` in `src-tauri/src/ipc/pending.rs` (FR-047c)
-- [ ] T088 [US4] Implement the eligibility check refusing any reduction without an eligible pending change in `src-tauri/src/enforcement/reduce.rs` (FR-047a, Principle I)
-- [ ] T089 [P] [US4] Show remaining time wherever protection state is shown, and nowhere that draws the person back, in `src/screens/Protection.tsx` (FR-047e)
-- [ ] T090 [US4] Implement teardown orchestration walking the inventory in reverse with verification in `src-tauri/src/enforcement/teardown.rs` (FR-043)
-- [ ] T091 [US4] Implement the post-teardown confirmation reporting residue rather than success in `src/screens/Teardown.tsx` (FR-044)
-- [ ] T092 [P] [US4] Implement the `delete_all_data` command in `src-tauri/src/ipc/data.rs` (FR-045)
-- [ ] T093 [US4] Verify no command anywhere reduces protection immediately, by review against contracts/ui-ipc.md, recorded in `src-tauri/src/ipc/mod.rs` doc comment (Principle I)
+- [X] T084 [US4] Implement `PendingChange` persistence carrying the trusted-clock values in `src-tauri/src/store/pending.rs` (FR-047a)
+- [X] T085 [US4] Implement the single reduction path that every reduction routes through in `src-tauri/src/enforcement/reduce.rs` (FR-047)
+- [X] T086 [US4] Implement `request_protection_off`, `remove_custom_entry`, and category-disable as pending changes in `src-tauri/src/ipc/protection.rs` (FR-047, FR-047b)
+- [X] T087 [P] [US4] Implement `cancel_pending_change` and `get_pending_change` in `src-tauri/src/ipc/pending.rs` (FR-047c)
+- [X] T088 [US4] Implement the eligibility check refusing any reduction without an eligible pending change in `src-tauri/src/enforcement/reduce.rs` (FR-047a, Principle I)
+- [X] T089 [P] [US4] Show remaining time wherever protection state is shown, and nowhere that draws the person back, in `src/screens/Protection.tsx` (FR-047e)
+- [X] T090 [US4] Implement teardown orchestration walking the inventory in reverse with verification in `src-tauri/src/enforcement/teardown.rs` (FR-043)
+- [X] T091 [US4] Implement the post-teardown confirmation reporting residue rather than success in `src/screens/Teardown.tsx` (FR-044)
+- [X] T092 [P] [US4] Implement the `delete_all_data` command in `src-tauri/src/ipc/data.rs` (FR-045)
+- [X] T093 [US4] Verify no command anywhere reduces protection immediately, by review against contracts/ui-ipc.md, recorded in `src-tauri/src/ipc/mod.rs` doc comment (Principle I)
 
 **Checkpoint**: All four stories functional. SC-011, SC-012, SC-013 measurable. Slice is
 releasable.
