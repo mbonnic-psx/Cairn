@@ -118,11 +118,48 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
     steps:
       - uses: actions/checkout@v4
-      - name: Acceptance run
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
+      # Put protection into force for one address, on the real machine, using
+      # the real privileged verbs — then check it, then take it off and confirm
+      # the file is byte-for-byte as it was. A skipped acceptance run says so
+      # rather than passing quietly.
+      - name: Build the acceptance binaries
+        working-directory: src-tauri
+        run: cargo build -p cairn-helper --bins
+
+      # Writing the system file needs the privilege it needs. Windows runners
+      # are already elevated; the others go through sudo.
+      - name: Protect a test address
         shell: bash
+        env:
+          CAIRN_DATA_DIR: ${{ runner.temp }}/cairn
         run: |
-          if [ -x scripts/acceptance/non-browser-client.sh ]; then
-            bash scripts/acceptance/non-browser-client.sh
+          apply=src-tauri/target/debug/acceptance-apply
+          [ "$RUNNER_OS" = "Windows" ] && apply=src-tauri/target/debug/acceptance-apply.exe
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            "$apply" cairn-acceptance.example
           else
-            echo "acceptance script arrives with T067"
+            sudo -E "$apply" cairn-acceptance.example
+          fi
+
+      - name: Non-browser client cannot reach it (SC-002)
+        shell: bash
+        run: bash scripts/acceptance/non-browser-client.sh cairn-acceptance.example
+
+      - name: Take it off and confirm the machine is as it was (SC-012)
+        if: always()
+        shell: bash
+        env:
+          CAIRN_DATA_DIR: ${{ runner.temp }}/cairn
+        run: |
+          teardown=src-tauri/target/debug/acceptance-teardown
+          [ "$RUNNER_OS" = "Windows" ] && teardown=src-tauri/target/debug/acceptance-teardown.exe
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            "$teardown"
+          else
+            sudo -E "$teardown"
           fi

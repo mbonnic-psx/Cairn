@@ -22,11 +22,15 @@ fn main() {
     let clock = ClockKeeper::at(&data);
     clock.start();
 
+    // The cycle that keeps protection in force: advance the trusted clock, check
+    // Cairn's section, and put it back silently if something changed it
+    // (FR-013, FR-047d). It runs whether or not the application is open.
     std::thread::spawn({
         let keeper = ClockKeeper::at(&data);
+        let machine = Machine::real(&data);
         move || loop {
             std::thread::sleep(Duration::from_secs(HEARTBEAT_SECONDS));
-            keeper.beat();
+            cairn_helper::heartbeat::cycle(&machine, &keeper);
         }
     });
 

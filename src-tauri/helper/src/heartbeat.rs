@@ -19,7 +19,10 @@ use std::time::Instant;
 use cairn::domain::gate::TrustedClock;
 use serde::{Deserialize, Serialize};
 
+use crate::machine::Machine;
+use crate::verbs::hosts::read_in_force;
 use crate::verbs::now_seconds;
+use crate::verbs::verify::repair_hosts_section;
 
 /// How often the helper beats.
 pub const HEARTBEAT_SECONDS: u64 = 60;
@@ -89,7 +92,47 @@ impl ClockKeeper {
         self.write(&state);
         state
     }
+}
 
+/// What one beat did. Returned for tests; never shown to anyone.
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
+pub struct Beat {
+    pub trusted_seconds: u64,
+    /// True when something outside Cairn had changed the file and Cairn put it
+    /// back.
+    pub repaired: bool,
+}
+
+/// One cycle: advance the clock, check Cairn's section, and put it back if it
+/// is not what it should be.
+///
+/// The repair is **silent**. Nothing is shown, nothing is logged that names a
+/// domain, and the person is not interrupted to be told their machine was
+/// tampered with — being told would itself be a reminder of protection, which
+/// is close to the ambient surface FR-030a rules out (FR-013).
+pub fn cycle(machine: &Machine, keeper: &ClockKeeper) -> Beat {
+    let clock = keeper.beat();
+
+    let Some(in_force) = read_in_force(machine) else {
+        // Nothing is meant to be in force, so there is nothing to put back.
+        return Beat {
+            trusted_seconds: clock.clock.trusted_seconds,
+            repaired: false,
+        };
+    };
+
+    let repaired = matches!(
+        repair_hosts_section(machine, &in_force.domains, in_force.mode),
+        cairn::protocol::Response::HostsRepaired { repaired: true, .. }
+    );
+
+    Beat {
+        trusted_seconds: clock.clock.trusted_seconds,
+        repaired,
+    }
+}
+
+impl ClockKeeper {
     fn write(&self, state: &HelperClock) {
         if let Some(directory) = self.path.parent() {
             let _ = std::fs::create_dir_all(directory);

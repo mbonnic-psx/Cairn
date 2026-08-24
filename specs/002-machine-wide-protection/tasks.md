@@ -154,20 +154,20 @@ repair within 60 seconds.
 
 ### Tests for User Story 2
 
-- [ ] T058 [P] [US2] Integration test asserting silent repair within 60 seconds with no user-visible output in `src-tauri/tests/us2_repair.rs` (SC-008)
+- [X] T058 [P] [US2] Integration test asserting silent repair within 60 seconds with no user-visible output in `src-tauri/tests/us2_repair.rs` (SC-008)
 - [ ] T059 [P] [US2] Test asserting the counting path has no channel to the frontend and emits no event in `src-tauri/tests/us2_no_ui.rs` (FR-019, SC-005)
 
 ### Implementation for User Story 2
 
-- [ ] T060 [US2] Implement the 60-second verification cycle in the helper heartbeat in `src-tauri/helper/src/heartbeat.rs` (FR-013)
-- [ ] T061 [US2] Implement silent automatic repair triggered by drift detection in `src-tauri/src/enforcement/repair.rs` (FR-013)
-- [ ] T062 [US2] Implement `ProtectionState` derivation from verified read-back, with `NotVerified` as a distinct status, in `src-tauri/src/enforcement/state.rs` (FR-012)
-- [ ] T063 [US2] Render `NotVerified` as its own state, never as protected, in `src/screens/Protection.tsx` (FR-012)
+- [X] T060 [US2] Implement the 60-second verification cycle in the helper heartbeat in `src-tauri/helper/src/heartbeat.rs` (FR-013)
+- [X] T061 [US2] Implement silent automatic repair triggered by drift detection in `src-tauri/src/enforcement/repair.rs` (FR-013)
+- [X] T062 [US2] Implement `ProtectionState` derivation from verified read-back, with `NotVerified` as a distinct status, in `src-tauri/src/enforcement/state.rs` (FR-012)
+- [X] T063 [US2] Render `NotVerified` as its own state, never as protected, in `src/screens/Protection.tsx` (FR-012)
 - [X] T064 [P] [US2] Implement the `get_disclosures` command carrying coverage limits, helper presence, and the administrator caveat in `src-tauri/src/ipc/disclosures.rs` (FR-017, FR-018)
 - [X] T065 [P] [US2] Build the coverage and limits screen naming what is not covered in this release in `src/screens/Limits.tsx` (FR-009a, FR-018)
-- [ ] T066 [P] [US2] Add the administrator-can-defeat-Cairn and uncovered-application statements to `README.md` (FR-017, FR-018)
-- [ ] T067 [P] [US2] Script the non-browser client acceptance check for CI in `scripts/acceptance/non-browser-client.sh` (SC-002)
-- [ ] T068 [P] [US2] Document the manual browser matrix run for all three platforms in `scripts/acceptance/README.md` (SC-002, SC-003)
+- [X] T066 [P] [US2] Add the administrator-can-defeat-Cairn and uncovered-application statements to `README.md` (FR-017, FR-018)
+- [X] T067 [P] [US2] Script the non-browser client acceptance check for CI in `scripts/acceptance/non-browser-client.sh` (SC-002)
+- [X] T068 [P] [US2] Document the manual browser matrix run for all three platforms in `scripts/acceptance/README.md` (SC-002, SC-003)
 
 **Checkpoint**: The wall holds and repairs itself. SC-002, SC-003, SC-005, and SC-008 are measurable.
 
