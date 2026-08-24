@@ -84,10 +84,10 @@ functions, and the privileged helper with its verbs built in apply/remove pairs.
 - [X] T024 [P] Declare `ResolverRulesService` and `BrowserPolicyService` returning `Capability::Unsupported`, with no implementation, in `src-tauri/src/services/layers.rs`
 - [X] T025 [P] Implement JSON configuration storage holding no reach data in `src-tauri/src/store/config.rs` (FR-032)
 - [X] T026 Implement the change inventory and backup manifest, deliberately unencrypted so teardown survives a missing key, in `src-tauri/src/store/inventory.rs` (FR-039, FR-041)
-- [ ] T027 Implement SQLCipher-backed reach history in `src-tauri/src/store/history.rs` (FR-033)
-- [ ] T028 Implement key retrieval and creation through the platform credential store in `src-tauri/src/store/key.rs` (FR-034)
-- [ ] T029 Implement the fail-closed path: report unreadable history, keep protecting, keep recording, never overwrite, in `src-tauri/src/store/history.rs` (FR-036)
-- [ ] T030 Write the fail-closed test asserting the existing history file is byte-identical after a start with no key, in `src-tauri/tests/fail_closed.rs`
+- [X] T027 Implement SQLCipher-backed reach history in `src-tauri/src/store/history.rs` (FR-033)
+- [X] T028 Implement key retrieval and creation through the platform credential store in `src-tauri/src/store/key.rs` (FR-034)
+- [X] T029 Implement the fail-closed path: report unreadable history, keep protecting, keep recording, never overwrite, in `src-tauri/src/store/history.rs` (FR-036)
+- [X] T030 Write the fail-closed test asserting the existing history file is byte-identical after a start with no key, in `src-tauri/tests/fail_closed.rs`
 
 ### Privileged helper — every verb built with its teardown counterpart
 

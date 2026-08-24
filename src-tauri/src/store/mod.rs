@@ -16,6 +16,10 @@
 
 pub mod config;
 pub mod inventory;
+pub mod key;
+
+#[cfg(feature = "history")]
+pub mod history;
 
 use std::io;
 use std::path::Path;

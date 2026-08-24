@@ -189,6 +189,7 @@ impl fmt::Debug for Key {
 /// Every variant here means the same thing operationally: keep protecting, keep
 /// recording, never overwrite what cannot be read (FR-036, research R5).
 #[derive(Clone, PartialEq, Eq, Debug)]
+#[allow(clippy::enum_variant_names)]
 pub enum KeyUnavailable {
     /// No credential store on this machine — some minimal Linux setups.
     NoCredentialStore { because: String },
