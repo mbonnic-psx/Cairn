@@ -18,5 +18,8 @@ pub mod heartbeat;
 pub mod machine;
 pub mod verbs;
 
+#[cfg(unix)]
+pub mod channel;
+
 /// Reported by `Ping`, and recorded when the helper is installed.
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");

@@ -118,7 +118,8 @@ pub trait HostsService: Send + Sync {
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct Verification {
     pub section_present: bool,
-    /// Entries found, counted from the file.
+    /// Distinct domains found, counted from the file — not lines. Each domain
+    /// occupies two lines, IPv4 and IPv6.
     pub entry_count: usize,
     /// Expected entries that were not there.
     pub missing: Vec<Domain>,

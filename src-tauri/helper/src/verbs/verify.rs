@@ -26,12 +26,14 @@ pub fn verify_hosts_section(machine: &Machine, expected: &[Domain]) -> Response 
 
     let found = match section_domains(&current) {
         Ok(found) => found,
-        Err(problem) => return trouble(
-            TroubleKind::SectionUnreadable,
-            format!(
+        Err(problem) => {
+            return trouble(
+                TroubleKind::SectionUnreadable,
+                format!(
                 "Cairn could not read its own section confidently, because {problem}."
             ),
-        ),
+            )
+        }
     };
 
     let present = !found.is_empty();
@@ -53,7 +55,10 @@ pub fn verify_hosts_section(machine: &Machine, expected: &[Domain]) -> Response 
 
     Response::HostsVerified(SectionState {
         present,
-        entry_count: found.len(),
+        // Domains, not lines: each domain is written as an IPv4 and an IPv6
+        // line, and reporting double what is protected would be its own kind
+        // of dishonesty.
+        entry_count: found_set.len(),
         drift,
         missing,
         unexpected,

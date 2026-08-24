@@ -92,7 +92,7 @@ functions, and the privileged helper with its verbs built in apply/remove pairs.
 ### Privileged helper — every verb built with its teardown counterpart
 
 - [X] T031 Implement the helper binary skeleton with closed-verb dispatch, rejecting unknown verbs, in `src-tauri/helper/src/main.rs` (contracts/helper-ipc.md)
-- [ ] T032 Implement the peer-authenticated channel per platform — named pipe DACL, XPC code-signing requirement, `SO_PEERCRED` — in `src-tauri/helper/src/channel/`
+- [X] T032 Implement the peer-authenticated channel per platform — named pipe DACL, XPC code-signing requirement, `SO_PEERCRED` — in `src-tauri/helper/src/channel/`
 - [X] T033 Implement `WriteBackupOnce` and `RemoveBackup` as a pair, never overwriting an existing backup, in `src-tauri/helper/src/verbs/backup.rs` (FR-039, FR-042)
 - [X] T034 Implement `ApplyHostsSection` and `RemoveHostsSection` as a pair, using atomic same-directory rename with preserved permissions, in `src-tauri/helper/src/verbs/hosts.rs` (FR-040, FR-043)
 - [X] T035 Implement `VerifyHostsSection` and `RepairHostsSection` returning what was actually found, in `src-tauri/helper/src/verbs/verify.rs` (FR-012, FR-013)
@@ -100,9 +100,9 @@ functions, and the privileged helper with its verbs built in apply/remove pairs.
 - [X] T037 [P] Implement `FlushDnsCache` per platform, treating failure as non-fatal and reported in `src-tauri/helper/src/verbs/dnsflush.rs` (research R8)
 - [X] T038 Implement `ReadTrustedClock` and the 60-second heartbeat advancing the trusted clock in `src-tauri/helper/src/heartbeat.rs` (FR-047d)
 - [X] T039 Implement `Uninstall`, walking the inventory in reverse and reporting residue, in `src-tauri/helper/src/verbs/uninstall.rs` (FR-043)
-- [ ] T040 [P] Implement `ElevationService` per platform, installing the helper once and recording it in the inventory, in `src-tauri/src/platform/{windows,macos,linux}/elevation.rs` (FR-014)
-- [ ] T041 [P] Implement `HostsService` read-only access per platform in `src-tauri/src/platform/{windows,macos,linux}/hosts.rs`
-- [ ] T042 [P] Implement `CredentialStore` per platform in `src-tauri/src/platform/{windows,macos,linux}/credentials.rs`
+- [X] T040 [P] Implement `ElevationService` per platform, installing the helper once and recording it in the inventory, in `src-tauri/src/platform/{windows,macos,linux}/elevation.rs` (FR-014)
+- [X] T041 [P] Implement `HostsService` read-only access per platform in `src-tauri/src/platform/{windows,macos,linux}/hosts.rs`
+- [X] T042 [P] Implement `CredentialStore` per platform in `src-tauri/src/platform/{windows,macos,linux}/credentials.rs`
 - [X] T043 Write the teardown restoration test proving byte-level restoration for every verb pair, on every platform, in `src-tauri/tests/teardown_restoration.rs` (SC-012, SC-013)
 
 **Checkpoint**: Helper installs, applies, verifies, repairs, and fully removes itself, with the
