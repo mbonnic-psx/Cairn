@@ -128,16 +128,16 @@ duplicate in another form adds nothing, and that protection reads in force withi
 
 - [X] T046 [US1] Author the nine preset category seed files, sized against the T011 result, in `src-tauri/resources/categories/` (FR-001, FR-002)
 - [X] T047 [US1] Implement first-run copying of seed data into the person's own editable copy in `src-tauri/src/enforcement/seed.rs` (FR-002)
-- [ ] T048 [P] [US1] Implement the `get_trail`, `list_categories`, and `set_category_enabled` commands in `src-tauri/src/ipc/trail.rs`
-- [ ] T049 [P] [US1] Implement the `add_custom_entry` command returning normalized entries or a plain-language rejection in `src-tauri/src/ipc/entries.rs` (FR-003, FR-004)
+- [X] T048 [P] [US1] Implement the `get_trail`, `list_categories`, and `set_category_enabled` commands in `src-tauri/src/ipc/trail.rs`
+- [X] T049 [P] [US1] Implement the `add_custom_entry` command returning normalized entries or a plain-language rejection in `src-tauri/src/ipc/entries.rs` (FR-003, FR-004)
 - [X] T050 [US1] Implement the apply orchestration — backup, apply, verify, flush — in `src-tauri/src/enforcement/apply.rs` (FR-009, FR-010)
-- [ ] T051 [US1] Implement the `turn_protection_on` command with one-time helper install in `src-tauri/src/ipc/protection.rs`
-- [ ] T052 [US1] Implement the disclosure-and-confirm step shown before the first system change in `src/screens/Disclosure.tsx` (FR-016, Principle III)
-- [ ] T053 [P] [US1] Build the setup wizard screens for category choice and custom entry in `src/screens/Setup/`
-- [ ] T054 [P] [US1] Build the protection screen showing state at a glance in `src/screens/Protection.tsx` (FR-011)
-- [ ] T055 [P] [US1] Build the trail screen for reviewing and editing what is protected in `src/screens/Trail.tsx`
-- [ ] T056 [US1] Implement typed frontend wrappers over the Tauri commands in `src/ipc/index.ts` (contracts/ui-ipc.md)
-- [ ] T057 [US1] Apply the warm palette, serif/sans split, and whitespace rules, with no lock, shield, chain, or alarm-red imagery, in `src/styles/theme.css` (FR-052)
+- [X] T051 [US1] Implement the `turn_protection_on` command with one-time helper install in `src-tauri/src/ipc/protection.rs`
+- [X] T052 [US1] Implement the disclosure-and-confirm step shown before the first system change in `src/screens/Disclosure.tsx` (FR-016, Principle III)
+- [X] T053 [P] [US1] Build the setup wizard screens for category choice and custom entry in `src/screens/Setup/`
+- [X] T054 [P] [US1] Build the protection screen showing state at a glance in `src/screens/Protection.tsx` (FR-011)
+- [X] T055 [P] [US1] Build the trail screen for reviewing and editing what is protected in `src/screens/Trail.tsx`
+- [X] T056 [US1] Implement typed frontend wrappers over the Tauri commands in `src/ipc/index.ts` (contracts/ui-ipc.md)
+- [X] T057 [US1] Apply the warm palette, serif/sans split, and whitespace rules, with no lock, shield, chain, or alarm-red imagery, in `src/styles/theme.css` (FR-052)
 
 **Checkpoint**: Setup completes and protection goes into force. SC-001 and SC-004 are measurable.
 
@@ -163,8 +163,8 @@ repair within 60 seconds.
 - [ ] T061 [US2] Implement silent automatic repair triggered by drift detection in `src-tauri/src/enforcement/repair.rs` (FR-013)
 - [ ] T062 [US2] Implement `ProtectionState` derivation from verified read-back, with `NotVerified` as a distinct status, in `src-tauri/src/enforcement/state.rs` (FR-012)
 - [ ] T063 [US2] Render `NotVerified` as its own state, never as protected, in `src/screens/Protection.tsx` (FR-012)
-- [ ] T064 [P] [US2] Implement the `get_disclosures` command carrying coverage limits, helper presence, and the administrator caveat in `src-tauri/src/ipc/disclosures.rs` (FR-017, FR-018)
-- [ ] T065 [P] [US2] Build the coverage and limits screen naming what is not covered in this release in `src/screens/Limits.tsx` (FR-009a, FR-018)
+- [X] T064 [P] [US2] Implement the `get_disclosures` command carrying coverage limits, helper presence, and the administrator caveat in `src-tauri/src/ipc/disclosures.rs` (FR-017, FR-018)
+- [X] T065 [P] [US2] Build the coverage and limits screen naming what is not covered in this release in `src/screens/Limits.tsx` (FR-009a, FR-018)
 - [ ] T066 [P] [US2] Add the administrator-can-defeat-Cairn and uncovered-application statements to `README.md` (FR-017, FR-018)
 - [ ] T067 [P] [US2] Script the non-browser client acceptance check for CI in `scripts/acceptance/non-browser-client.sh` (SC-002)
 - [ ] T068 [P] [US2] Document the manual browser matrix run for all three platforms in `scripts/acceptance/README.md` (SC-002, SC-003)

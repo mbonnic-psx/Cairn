@@ -8,6 +8,7 @@
 pub mod domain;
 pub mod enforcement;
 pub mod helper;
+pub mod ipc;
 pub mod platform;
 pub mod protocol;
 pub mod services;

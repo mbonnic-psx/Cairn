@@ -38,6 +38,14 @@ const SCAN = [
 /** Lines carrying this marker are code, not copy — e.g. a Rust variant name. */
 const ALLOW_MARKER = 'cairn-allow-banned-word';
 
+/**
+ * Tests are not shipped text. They are also where the banned words legitimately
+ * appear, as the thing being asserted against — a test that checks Cairn never
+ * says "denied" has to write "denied" somewhere.
+ */
+const isTest = (path) =>
+  path.includes('__tests__') || /\.(test|spec)\.[jt]sx?$/.test(path);
+
 function walk(dir, exts, out = []) {
   let entries;
   try {
@@ -50,7 +58,7 @@ function walk(dir, exts, out = []) {
     if (statSync(path).isDirectory()) {
       if (entry === 'node_modules' || entry === 'target') continue;
       walk(path, exts, out);
-    } else if (exts.includes(extname(path))) {
+    } else if (exts.includes(extname(path)) && !isTest(path)) {
       out.push(path);
     }
   }
