@@ -80,10 +80,10 @@ functions, and the privileged helper with its verbs built in apply/remove pairs.
 
 ### Service traits and stores
 
-- [ ] T023 [P] Define `ElevationService`, `HostsService`, `DnsFlushService`, `CredentialStore`, `AutostartService` per contracts/platform-services.md in `src-tauri/src/services/mod.rs`
-- [ ] T024 [P] Declare `ResolverRulesService` and `BrowserPolicyService` returning `Capability::Unsupported`, with no implementation, in `src-tauri/src/services/layers.rs`
-- [ ] T025 [P] Implement JSON configuration storage holding no reach data in `src-tauri/src/store/config.rs` (FR-032)
-- [ ] T026 Implement the change inventory and backup manifest, deliberately unencrypted so teardown survives a missing key, in `src-tauri/src/store/inventory.rs` (FR-039, FR-041)
+- [X] T023 [P] Define `ElevationService`, `HostsService`, `DnsFlushService`, `CredentialStore`, `AutostartService` per contracts/platform-services.md in `src-tauri/src/services/mod.rs`
+- [X] T024 [P] Declare `ResolverRulesService` and `BrowserPolicyService` returning `Capability::Unsupported`, with no implementation, in `src-tauri/src/services/layers.rs`
+- [X] T025 [P] Implement JSON configuration storage holding no reach data in `src-tauri/src/store/config.rs` (FR-032)
+- [X] T026 Implement the change inventory and backup manifest, deliberately unencrypted so teardown survives a missing key, in `src-tauri/src/store/inventory.rs` (FR-039, FR-041)
 - [ ] T027 Implement SQLCipher-backed reach history in `src-tauri/src/store/history.rs` (FR-033)
 - [ ] T028 Implement key retrieval and creation through the platform credential store in `src-tauri/src/store/key.rs` (FR-034)
 - [ ] T029 Implement the fail-closed path: report unreadable history, keep protecting, keep recording, never overwrite, in `src-tauri/src/store/history.rs` (FR-036)

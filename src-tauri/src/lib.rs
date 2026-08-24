@@ -6,3 +6,5 @@
 //! behind the `app` feature; `domain` needs nothing at all.
 
 pub mod domain;
+pub mod services;
+pub mod store;
