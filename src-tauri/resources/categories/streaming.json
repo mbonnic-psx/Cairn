@@ -1,0 +1,22 @@
+{
+  "id": "streaming",
+  "label": "Streaming",
+  "note": "A starting point, not a finished list. It is copied into your own data on first run and is yours to edit from then on \u2014 Cairn never writes over your copy. Sizes here are deliberately modest until the scale measurement in research.md R7 says what this platform can carry.",
+  "domains": [
+    "crunchyroll.com",
+    "dailymotion.com",
+    "disneyplus.com",
+    "hbomax.com",
+    "hulu.com",
+    "max.com",
+    "netflix.com",
+    "paramountplus.com",
+    "peacocktv.com",
+    "primevideo.com",
+    "soundcloud.com",
+    "spotify.com",
+    "twitch.tv",
+    "vimeo.com",
+    "youtube.com"
+  ]
+}

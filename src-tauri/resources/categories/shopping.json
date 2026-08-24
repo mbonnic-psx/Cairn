@@ -1,0 +1,21 @@
+{
+  "id": "shopping",
+  "label": "Shopping",
+  "note": "A starting point, not a finished list. It is copied into your own data on first run and is yours to edit from then on \u2014 Cairn never writes over your copy. Sizes here are deliberately modest until the scale measurement in research.md R7 says what this platform can carry.",
+  "domains": [
+    "alibaba.com",
+    "aliexpress.com",
+    "amazon.com",
+    "argos.co.uk",
+    "asos.com",
+    "ebay.com",
+    "etsy.com",
+    "shein.com",
+    "target.com",
+    "temu.com",
+    "walmart.com",
+    "wayfair.com",
+    "wish.com",
+    "zalando.com"
+  ]
+}

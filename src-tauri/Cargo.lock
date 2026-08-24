@@ -390,6 +390,7 @@ dependencies = [
 name = "cairn"
 version = "0.1.0"
 dependencies = [
+ "cairn-helper",
  "dirs 5.0.1",
  "getrandom 0.4.3",
  "idna",

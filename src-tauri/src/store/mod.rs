@@ -25,7 +25,7 @@ use std::path::Path;
 /// Rename is atomic only within a filesystem, so the temporary file is created
 /// in the target's own directory — never in a temp directory (research R6).
 /// A half-written config or inventory is worse than an old one.
-pub(crate) fn write_atomically(path: &Path, bytes: &[u8]) -> io::Result<()> {
+pub fn write_atomically(path: &Path, bytes: &[u8]) -> io::Result<()> {
     let directory = path.parent().ok_or_else(|| {
         io::Error::new(io::ErrorKind::InvalidInput, "that path has no directory")
     })?;

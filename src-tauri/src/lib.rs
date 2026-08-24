@@ -6,6 +6,8 @@
 //! behind the `app` feature; `domain` needs nothing at all.
 
 pub mod domain;
+pub mod enforcement;
+pub mod helper;
 pub mod platform;
 pub mod protocol;
 pub mod services;

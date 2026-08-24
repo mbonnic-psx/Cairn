@@ -121,16 +121,16 @@ duplicate in another form adds nothing, and that protection reads in force withi
 
 ### Tests for User Story 1
 
-- [ ] T044 [P] [US1] Integration test for the full setup-to-protected journey in `src-tauri/tests/us1_setup.rs`
-- [ ] T045 [P] [US1] Test that an entry breaking the system or Cairn is refused with a plain-language reason in `src-tauri/tests/us1_refusal.rs`
+- [X] T044 [P] [US1] Integration test for the full setup-to-protected journey in `src-tauri/tests/us1_setup.rs`
+- [X] T045 [P] [US1] Test that an entry breaking the system or Cairn is refused with a plain-language reason in `src-tauri/tests/us1_refusal.rs`
 
 ### Implementation for User Story 1
 
-- [ ] T046 [US1] Author the nine preset category seed files, sized against the T011 result, in `src-tauri/resources/categories/` (FR-001, FR-002)
-- [ ] T047 [US1] Implement first-run copying of seed data into the person's own editable copy in `src-tauri/src/enforcement/seed.rs` (FR-002)
+- [X] T046 [US1] Author the nine preset category seed files, sized against the T011 result, in `src-tauri/resources/categories/` (FR-001, FR-002)
+- [X] T047 [US1] Implement first-run copying of seed data into the person's own editable copy in `src-tauri/src/enforcement/seed.rs` (FR-002)
 - [ ] T048 [P] [US1] Implement the `get_trail`, `list_categories`, and `set_category_enabled` commands in `src-tauri/src/ipc/trail.rs`
 - [ ] T049 [P] [US1] Implement the `add_custom_entry` command returning normalized entries or a plain-language rejection in `src-tauri/src/ipc/entries.rs` (FR-003, FR-004)
-- [ ] T050 [US1] Implement the apply orchestration — backup, apply, verify, flush — in `src-tauri/src/enforcement/apply.rs` (FR-009, FR-010)
+- [X] T050 [US1] Implement the apply orchestration — backup, apply, verify, flush — in `src-tauri/src/enforcement/apply.rs` (FR-009, FR-010)
 - [ ] T051 [US1] Implement the `turn_protection_on` command with one-time helper install in `src-tauri/src/ipc/protection.rs`
 - [ ] T052 [US1] Implement the disclosure-and-confirm step shown before the first system change in `src/screens/Disclosure.tsx` (FR-016, Principle III)
 - [ ] T053 [P] [US1] Build the setup wizard screens for category choice and custom entry in `src/screens/Setup/`

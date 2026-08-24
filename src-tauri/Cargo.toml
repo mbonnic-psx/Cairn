@@ -81,6 +81,10 @@ tauri-build = { version = "2", optional = true, features = [] }
 [dev-dependencies]
 proptest = "1"
 tempfile = "3"
+# A dev-dependency cycle, and a deliberate one: the end-to-end tests drive the
+# app's own orchestration against the helper's real verbs rather than against a
+# hand-written double that could drift from them.
+cairn-helper = { path = "helper" }
 
 [lints.rust]
 unsafe_code = "warn"
