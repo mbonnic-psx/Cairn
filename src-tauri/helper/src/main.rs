@@ -13,7 +13,9 @@ use std::time::Duration;
 use cairn_helper::heartbeat::{ClockKeeper, HEARTBEAT_SECONDS};
 use cairn_helper::machine::Machine;
 
-/// Recorded at install time: the person Cairn was installed for.
+/// Recorded at install time: the person Cairn was installed for. Read by the
+/// Unix peer check; Windows will use the named pipe's own ACL.
+#[cfg(unix)]
 const OWNER_FILE: &str = "owner";
 
 fn main() {

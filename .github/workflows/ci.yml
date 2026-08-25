@@ -80,6 +80,21 @@ jobs:
         working-directory: src-tauri
         run: cargo test -p cairn --no-default-features
 
+      # Platform-conditional code is where cross-platform bugs hide, and waiting
+      # for three matrix legs to report them is slow. Checking the other targets
+      # from one runner catches an unused import behind a cfg in seconds — no
+      # linker needed, because checking does not link.
+      - name: Cross-check the other platforms
+        if: matrix.os == 'ubuntu-latest'
+        working-directory: src-tauri
+        run: |
+          rustup target add x86_64-pc-windows-msvc aarch64-apple-darwin
+          for target in x86_64-pc-windows-msvc aarch64-apple-darwin; do
+            cargo clippy -p cairn --no-default-features --target "$target" \
+              --all-targets -- -D warnings
+            cargo clippy -p cairn-helper --target "$target" --all-targets -- -D warnings
+          done
+
   # The full tree, including the privileged helper and the store. Needs each
   # platform's own toolchain; on Linux it needs the webview libraries too.
   core:

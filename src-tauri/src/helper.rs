@@ -9,6 +9,9 @@
 //! that lives in the same process. A test that has to install a system service
 //! to run is a test nobody runs.
 
+// The client is the Unix end of the channel; Windows talks to the helper over a
+// named pipe, which is still to come.
+#[cfg(unix)]
 use std::path::PathBuf;
 use std::time::Duration;
 
