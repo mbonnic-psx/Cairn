@@ -1,8 +1,11 @@
 name: CI
 
 on:
+  # Every branch, not just main. Feature work is where these checks earn their
+  # keep — a guard that only runs after a merge is a guard that found out too
+  # late.
   push:
-    branches: [main]
+    branches: ['**']
   pull_request:
 
 env:
