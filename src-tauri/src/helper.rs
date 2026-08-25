@@ -10,9 +10,18 @@
 //! to run is a test nobody runs.
 
 use std::path::PathBuf;
+use std::time::Duration;
 
 use crate::protocol::{Request, Response};
 use crate::services::Trouble;
+
+/// How long the application waits for the helper before saying it cannot reach
+/// it.
+///
+/// The interface must never hang on a component that has stopped answering: a
+/// window that has frozen tells someone nothing, and Cairn has something true
+/// to say instead.
+pub const ANSWER_TIMEOUT: Duration = Duration::from_secs(10);
 
 /// Somewhere to send a verb.
 pub trait HelperChannel: Send + Sync {

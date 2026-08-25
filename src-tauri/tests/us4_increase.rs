@@ -73,7 +73,8 @@ fn protecting_more_does_not_disturb_a_change_that_is_waiting() {
         PendingKind::TurnOffProtection,
         &clock(),
         1_700_000_000,
-    );
+    )
+    .unwrap();
 
     add_custom_entry(&mut config.trail, "news.example", &ReservedNames::default())
         .unwrap();

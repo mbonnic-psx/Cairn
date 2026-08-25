@@ -26,24 +26,40 @@ use crate::domain::gate::{
 use crate::services::Trouble;
 use crate::store::config::{Config, ProtectionIntent};
 
+/// Something else is already waiting.
+///
+/// One change at a time, and the person is told which — being handed back a
+/// different change than the one they asked for, with no word about it, would
+/// look like their request had been registered when it had not.
+#[derive(Clone, PartialEq, Eq, Debug)]
+pub struct AlreadyWaiting {
+    pub existing: PendingChange,
+}
+
 /// Ask for a reduction. Nothing on the machine changes.
 ///
-/// One at a time: while a change is pending, asking again returns the one
-/// already waiting rather than starting the clock over. Restarting the wait on
-/// every ask would turn the gate into something to be worn down.
+/// Asking again for the *same* thing returns the change already waiting rather
+/// than starting its clock over — restarting the wait on every ask would turn
+/// the gate into something to be worn down. Asking for something *different*
+/// while one waits is refused and says so.
 pub fn request(
     config: &mut Config,
     kind: PendingKind,
     clock: &TrustedClock,
     wall_seconds: i64,
-) -> PendingChange {
+) -> Result<PendingChange, AlreadyWaiting> {
     if let Some(existing) = &config.pending_change {
-        return existing.clone();
+        if existing.kind == kind {
+            return Ok(existing.clone());
+        }
+        return Err(AlreadyWaiting {
+            existing: existing.clone(),
+        });
     }
 
     let pending = PendingChange::request(kind, clock, wall_seconds);
     config.pending_change = Some(pending.clone());
-    pending
+    Ok(pending)
 }
 
 /// Call it off. Always available, for the whole wait (FR-047c).
@@ -108,16 +124,46 @@ pub fn apply_reduction(
 
 /// Remove what the person typed, and nothing another source still needs
 /// (FR-006).
+///
+/// A root brings its generated `www.` form with it. That form exists only
+/// because the root does (FR-005), so leaving it behind would half-protect a
+/// site someone waited a day to stop protecting — and would tell them the
+/// change had been made.
 fn remove_entries(config: &mut Config, domains: &[Domain]) {
+    let targets = with_generated_www_forms(config, domains);
+
     config.trail.entries.retain_mut(|entry| {
-        if !domains.contains(&entry.domain) {
+        if !targets.contains(&entry.domain) {
             return true;
         }
-        // Their own reason goes; a category that also protects this keeps it.
-        let mut still_needed = entry.remove_source(&SourceRef::Custom);
-        still_needed = entry.remove_source(&SourceRef::AutoWww) && still_needed;
-        still_needed
+        // Their own reason goes, and the generated one with it; a category that
+        // also protects this keeps it. The answer that matters is whether
+        // anything still needs the entry after both are gone.
+        let _ = entry.remove_source(&SourceRef::Custom);
+        entry.remove_source(&SourceRef::AutoWww)
     });
+}
+
+/// The domains asked for, plus the `www.` forms Cairn generated for them.
+///
+/// A `www.` entry someone typed themselves is not swept up by removing the
+/// root: it is theirs, and it carries its own reason.
+fn with_generated_www_forms(config: &Config, domains: &[Domain]) -> Vec<Domain> {
+    let mut targets = domains.to_vec();
+
+    for entry in &config.trail.entries {
+        if !entry.auto_www {
+            continue;
+        }
+        let Some(root) = entry.domain.as_str().strip_prefix("www.") else {
+            continue;
+        };
+        if domains.iter().any(|asked| asked.as_str() == root) {
+            targets.push(entry.domain.clone());
+        }
+    }
+
+    targets
 }
 
 /// "23 hours", "40 minutes" — never a ticking countdown, and never a number

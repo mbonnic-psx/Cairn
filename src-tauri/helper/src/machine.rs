@@ -39,6 +39,7 @@ fn hosts_path() -> PathBuf {
 /// Constructed from real paths in production and from a temporary directory in
 /// tests — the verbs cannot tell the difference, which is what makes the
 /// restoration test meaningful.
+#[derive(Clone)]
 pub struct Machine {
     hosts: PathBuf,
     data: PathBuf,

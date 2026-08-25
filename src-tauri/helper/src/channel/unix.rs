@@ -8,6 +8,7 @@
 use std::io;
 use std::os::unix::net::{UnixListener, UnixStream};
 use std::path::{Path, PathBuf};
+use std::time::Duration;
 
 use cairn::protocol::{Request, Response, TroubleKind};
 
@@ -17,6 +18,16 @@ use crate::heartbeat::ClockKeeper;
 use crate::machine::Machine;
 
 pub const SOCKET_NAME: &str = "helper.sock";
+
+/// How long a connection has to send its request and take its answer.
+///
+/// Without this, a process running as the same person could connect, say
+/// nothing, and the helper would wait for it forever — answering nobody else in
+/// the meantime. Blocking would carry on, because the heartbeat is elsewhere and
+/// the file is already written, but nothing could be read, applied, or torn
+/// down. A privileged interface that can be wedged by a connection is not one to
+/// leave lying around.
+pub const REQUEST_TIMEOUT: Duration = Duration::from_secs(5);
 
 /// Where the socket lives. The directory is the helper's own, owned by root.
 pub fn socket_path(data_directory: &Path) -> PathBuf {
@@ -36,14 +47,17 @@ pub fn serve(machine: &Machine, clock: &ClockKeeper, allowed_uid: u32) -> io::Re
     restrict(&path)?;
 
     for connection in listener.incoming() {
-        match connection {
-            Ok(stream) => {
-                // One request, one answer, one connection. Nothing is kept open
-                // waiting for a second thought.
-                let _ = answer(machine, clock, stream, allowed_uid);
-            }
-            Err(_) => continue,
-        }
+        let Ok(stream) = connection else { continue };
+
+        // One request, one answer, one connection — and each on its own thread,
+        // so a slow or hostile caller cannot hold up anybody else. The threads
+        // are short-lived by construction: a connection is bounded by
+        // REQUEST_TIMEOUT and closes after a single answer.
+        let machine = machine.clone();
+        let clock = clock.clone();
+        std::thread::spawn(move || {
+            let _ = answer(&machine, &clock, stream, allowed_uid);
+        });
     }
     Ok(())
 }
@@ -59,6 +73,10 @@ fn answer(
         // Refused before the request is even read.
         return Ok(());
     }
+
+    // Bounded from here on. A connection that stops talking is dropped.
+    stream.set_read_timeout(Some(REQUEST_TIMEOUT))?;
+    stream.set_write_timeout(Some(REQUEST_TIMEOUT))?;
 
     let payload = read_frame(&mut stream)?;
     let response = match serde_json::from_slice::<Request>(&payload) {

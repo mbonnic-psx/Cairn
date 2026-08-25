@@ -27,6 +27,10 @@ use crate::services::{
 use crate::store::config::{Config, ConfigStore, ProtectionIntent, ReachModeSetting};
 use crate::store::gaps::Gap;
 
+/// The reach history's file name. Known here without the history feature so
+/// deleting a person's data never depends on whether this build can read it.
+const HISTORY_FILE: &str = "history.db";
+
 /// A category as the interface shows it.
 #[derive(Clone, PartialEq, Eq, Debug, Serialize, Deserialize)]
 pub struct CategoryPreset {
@@ -181,7 +185,20 @@ impl AppState {
         let mut config = self.config.load()?;
         let clock = self.trusted_clock()?;
 
-        let pending = reduce::request(&mut config, kind, &clock, (self.now)());
+        let pending = reduce::request(&mut config, kind, &clock, (self.now)()).map_err(
+            |waiting| {
+                Trouble::new(format!(
+                    "One change is already waiting: {}. It takes effect in {}. You can \
+                     keep things as they are on the protection screen, and then ask for \
+                     this instead.",
+                    what_it_would_do(&waiting.existing.kind),
+                    reduce::plain_duration(crate::domain::gate::remaining_seconds(
+                        &waiting.existing,
+                        clock.trusted_seconds
+                    ))
+                ))
+            },
+        )?;
         self.config.save(&config)?;
 
         Ok(self.view(&pending, clock.trusted_seconds))
@@ -271,19 +288,35 @@ impl AppState {
             ));
         }
 
+        // Only what was actually removed is reported. Saying a thing is gone
+        // when it is still on the disk is the same kind of dishonesty as
+        // reporting protection from a write that was never verified.
         let mut deleted = Vec::new();
 
-        if std::fs::remove_file(self.config.path()).is_ok() {
+        if remove_if_present(self.config.path()) {
             deleted.push("your settings and what you chose to protect".into());
         }
-        for id in CategoryId::ALL {
-            let _ = std::fs::remove_file(self.categories.path_for(id));
-        }
-        deleted.push("your own copies of the category lists".into());
 
-        // The key goes last: without it the history is unreadable anyway, and
-        // removing it first would leave a file nothing can ever open.
-        deleted.push("the key that kept your history sealed".into());
+        let mut lists_removed = false;
+        for id in CategoryId::ALL {
+            lists_removed |= remove_if_present(&self.categories.path_for(id));
+        }
+        if lists_removed {
+            deleted.push("your own copies of the category lists".into());
+        }
+
+        // The history itself, and then the key. In that order: a key removed
+        // first would leave a file nothing could ever open, which is residue
+        // rather than deletion.
+        if remove_if_present(&self.data_directory.join(HISTORY_FILE)) {
+            deleted
+                .push("everything Cairn recorded about the sites you reached for".into());
+        }
+
+        match self.credentials.delete_history_key() {
+            Ok(()) => deleted.push("the key that kept your history sealed".into()),
+            Err(trouble) => return Err(trouble),
+        }
 
         Ok(deleted)
     }
@@ -370,8 +403,18 @@ impl AppState {
         let config = self.config.load()?;
         let entries: Vec<Domain> = config.trail.domains().cloned().collect();
 
-        if config.intent == ProtectionIntent::Off && entries.is_empty() {
-            return Ok(ProtectionState::off());
+        // Protection that has not been turned on is off, not unconfirmed.
+        // Someone choosing what to protect during setup has not done anything
+        // wrong, and telling them Cairn "could not check" would be alarming and
+        // untrue. It is still read from the machine: if Cairn's section is
+        // there while protection is meant to be off, that is worth saying.
+        if config.intent == ProtectionIntent::Off {
+            return Ok(match self.hosts.section_present() {
+                Ok(false) => ProtectionState::off(),
+                Ok(true) | Err(_) => {
+                    current_state(self.hosts.as_ref(), &entries, (self.now)(), None)
+                }
+            });
         }
         Ok(current_state(
             self.hosts.as_ref(),
@@ -562,6 +605,15 @@ impl AppState {
             None,
         )
         .map(|_| ())
+    }
+}
+
+/// True when a file was there and is not any more. A file that was never there
+/// is not something to report as deleted.
+fn remove_if_present(path: &std::path::Path) -> bool {
+    match std::fs::remove_file(path) {
+        Ok(()) => true,
+        Err(_) => false,
     }
 }
 

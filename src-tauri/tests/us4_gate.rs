@@ -10,6 +10,7 @@ use cairn::domain::entries::{CategoryId, ProtectedEntry, SourceRef, Trail};
 use cairn::domain::gate::{PendingKind, TrustedClock, WAITING_PERIOD_SECONDS};
 use cairn::domain::normalize::{normalize, ReservedNames};
 use cairn::enforcement::reduce;
+use cairn::enforcement::trail::add_custom_entry;
 use cairn::store::config::{Config, ProtectionIntent};
 
 const DAY: u64 = WAITING_PERIOD_SECONDS;
@@ -52,7 +53,8 @@ fn asking_changes_nothing_on_the_machine() {
         PendingKind::TurnOffProtection,
         &clock(0),
         1_700_000_000,
-    );
+    )
+    .unwrap();
 
     assert_eq!(config.trail, before, "nothing is unprotected by asking");
     assert_eq!(config.intent, ProtectionIntent::On);
@@ -67,7 +69,8 @@ fn a_reduction_does_not_apply_early() {
         PendingKind::TurnOffProtection,
         &clock(0),
         1_700_000_000,
-    );
+    )
+    .unwrap();
 
     for elapsed in [0, 60, 3600, DAY - 1] {
         let refused = reduce::apply_reduction(&mut config.clone(), elapsed);
@@ -86,7 +89,8 @@ fn restarting_the_app_does_not_restart_or_shorten_the_wait() {
         PendingKind::TurnOffProtection,
         &clock(0),
         1_700_000_000,
-    );
+    )
+    .unwrap();
 
     // The app closes and opens: the pending change comes back off disk exactly
     // as it was, because eligibility is a stored number rather than a timer.
@@ -108,14 +112,16 @@ fn asking_again_does_not_start_the_clock_over() {
         PendingKind::TurnOffProtection,
         &clock(0),
         1_700_000_000,
-    );
+    )
+    .unwrap();
 
     let later = reduce::request(
         &mut config,
         PendingKind::TurnOffProtection,
         &clock(12 * 3600),
         1_700_043_200,
-    );
+    )
+    .unwrap();
 
     assert_eq!(later, first, "the same change, still waiting");
     assert!(reduce::apply_reduction(&mut config, 12 * 3600).is_err());
@@ -132,7 +138,8 @@ fn the_wait_is_measured_on_the_trusted_clock_not_the_system_one() {
         PendingKind::TurnOffProtection,
         &clock(0),
         1_700_000_000,
-    );
+    )
+    .unwrap();
 
     let running =
         TrustedClock::started(1_700_000_000, 0).heartbeat(1_700_000_000 + 2 * 86_400, 60);
@@ -149,7 +156,8 @@ fn cancelling_is_available_the_whole_time_and_costs_nothing() {
         PendingKind::TurnOffProtection,
         &clock(0),
         1_700_000_000,
-    );
+    )
+    .unwrap();
     let before = config.trail.clone();
 
     reduce::cancel(&mut config, pending.id).unwrap();
@@ -193,7 +201,8 @@ fn removing_one_address_leaves_what_another_source_still_needs() {
         },
         &clock(0),
         1_700_000_000,
-    );
+    )
+    .unwrap();
     reduce::apply_reduction(&mut config, DAY).unwrap();
 
     assert!(
@@ -219,7 +228,8 @@ fn switching_a_category_off_removes_only_what_that_category_needed() {
         },
         &clock(0),
         1_700_000_000,
-    );
+    )
+    .unwrap();
     reduce::apply_reduction(&mut config, DAY).unwrap();
 
     let left: Vec<String> = config.trail.domains().map(|d| d.to_string()).collect();
@@ -244,4 +254,112 @@ fn the_time_remaining_is_a_phrase_not_a_countdown() {
         let phrase = reduce::plain_duration(seconds);
         assert!(!phrase.contains(':'), "{phrase} looks like a clock");
     }
+}
+
+#[test]
+fn removing_a_root_takes_the_www_form_cairn_generated_with_it() {
+    // Found in review: without this, someone waits a day to stop protecting a
+    // site, and www.example.com is still protected afterwards — while Cairn
+    // reports the change as made.
+    let mut config = Config {
+        intent: ProtectionIntent::On,
+        ..Config::default()
+    };
+    add_custom_entry(&mut config.trail, "example.com", &ReservedNames::default())
+        .unwrap();
+
+    let root = config
+        .trail
+        .entries
+        .iter()
+        .find(|entry| entry.domain.as_str() == "example.com")
+        .unwrap()
+        .domain
+        .clone();
+
+    reduce::request(
+        &mut config,
+        PendingKind::RemoveEntries {
+            domains: vec![root],
+        },
+        &clock(0),
+        1_700_000_000,
+    )
+    .unwrap();
+    reduce::apply_reduction(&mut config, DAY).unwrap();
+
+    let left: Vec<String> = config.trail.domains().map(|d| d.to_string()).collect();
+    assert!(
+        left.is_empty(),
+        "the site is no longer protected at all: {left:?}"
+    );
+}
+
+#[test]
+fn the_pair_leaves_together_whichever_form_was_typed() {
+    // The root and its www form are one request (FR-005) — typing either yields
+    // both, so removing either takes both. They can never drift apart, which is
+    // the point of pairing them in the first place.
+    for typed in ["example.com", "www.example.com"] {
+        let mut config = Config {
+            intent: ProtectionIntent::On,
+            ..Config::default()
+        };
+        add_custom_entry(&mut config.trail, typed, &ReservedNames::default()).unwrap();
+        assert_eq!(config.trail.entries.len(), 2, "{typed}");
+
+        let root = config
+            .trail
+            .entries
+            .iter()
+            .find(|entry| entry.domain.as_str() == "example.com")
+            .unwrap()
+            .domain
+            .clone();
+
+        reduce::request(
+            &mut config,
+            PendingKind::RemoveEntries {
+                domains: vec![root],
+            },
+            &clock(0),
+            1_700_000_000,
+        )
+        .unwrap();
+        reduce::apply_reduction(&mut config, DAY).unwrap();
+
+        let left: Vec<String> = config.trail.domains().map(|d| d.to_string()).collect();
+        assert!(left.is_empty(), "typed {typed}, left behind {left:?}");
+    }
+}
+
+#[test]
+fn asking_for_something_different_while_one_waits_is_refused_and_says_which() {
+    // Found in review: it used to hand back the change already waiting, with no
+    // word about it — which reads as though the new request had been taken.
+    let mut config = a_config();
+    reduce::request(
+        &mut config,
+        PendingKind::TurnOffProtection,
+        &clock(0),
+        1_700_000_000,
+    )
+    .unwrap();
+
+    let refused = reduce::request(
+        &mut config,
+        PendingKind::DisableCategory {
+            category: CategoryId::Social,
+        },
+        &clock(0),
+        1_700_000_000,
+    )
+    .expect_err("one change at a time");
+
+    assert_eq!(refused.existing.kind, PendingKind::TurnOffProtection);
+    assert_eq!(
+        config.pending_change.as_ref().unwrap().kind,
+        PendingKind::TurnOffProtection,
+        "and the one that was waiting is untouched"
+    );
 }

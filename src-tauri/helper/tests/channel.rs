@@ -12,7 +12,7 @@ use std::io::Write;
 use std::os::unix::net::UnixStream;
 
 use cairn::protocol::{Request, Response, TroubleKind};
-use cairn_helper::channel::unix::{serve, socket_path};
+use cairn_helper::channel::unix::{serve, socket_path, REQUEST_TIMEOUT};
 use cairn_helper::channel::{read_frame, write_frame, MAX_FRAME_BYTES};
 use cairn_helper::heartbeat::ClockKeeper;
 use cairn_helper::machine::Machine;
@@ -107,6 +107,56 @@ fn an_oversized_frame_is_refused_before_it_is_read() {
     assert!(refused.is_err(), "an oversized frame must not be read");
 
     sink.write_all(b"").unwrap();
+}
+
+#[test]
+fn a_connection_that_says_nothing_cannot_wedge_the_helper() {
+    // Found in review: any process running as the same person could connect,
+    // send nothing, and the helper would answer nobody else — for as long as it
+    // held the connection open.
+    use std::sync::mpsc;
+    use std::time::Duration;
+
+    let (_directory, socket) = helper();
+
+    let _stalled = UnixStream::connect(&socket).unwrap();
+    std::thread::sleep(Duration::from_millis(100));
+
+    let (sender, receiver) = mpsc::channel();
+    let asking = socket.clone();
+    std::thread::spawn(move || {
+        let answer = ask(&asking, &Request::Ping);
+        let _ = sender.send(answer);
+    });
+
+    let answer = receiver
+        .recv_timeout(Duration::from_secs(5))
+        .expect("the helper has to keep answering while a connection sits idle");
+    assert!(matches!(answer, Response::Pong { .. }), "{answer:?}");
+}
+
+#[test]
+fn a_connection_that_stops_talking_is_dropped_rather_than_waited_on() {
+    use std::time::{Duration, Instant};
+
+    let (_directory, socket) = helper();
+
+    // Announce a frame and then never send it.
+    let mut stream = UnixStream::connect(&socket).unwrap();
+    stream.write_all(&64u32.to_be_bytes()).unwrap();
+    stream.flush().unwrap();
+
+    let started = Instant::now();
+    let mut answer = Vec::new();
+    use std::io::Read as _;
+    let _ = stream.read_to_end(&mut answer);
+
+    assert!(
+        started.elapsed() < REQUEST_TIMEOUT + Duration::from_secs(3),
+        "the helper waited {:?} on a connection that stopped talking",
+        started.elapsed()
+    );
+    assert!(answer.is_empty(), "and it answered nothing");
 }
 
 #[test]

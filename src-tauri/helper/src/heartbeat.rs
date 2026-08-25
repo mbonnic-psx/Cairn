@@ -40,6 +40,7 @@ pub struct HelperClock {
 }
 
 /// Reads, advances, and persists the trusted clock.
+#[derive(Clone)]
 pub struct ClockKeeper {
     path: PathBuf,
     started: Instant,
