@@ -25,6 +25,10 @@ jobs:
         run: npm run check:banned-words
       - name: No ambient reach surface (SC-006)
         run: npm run check:ambient-counts
+      - name: No streak, no day count, no chain (FR-053, SC-020)
+        run: npm run check:no-streaks
+      - name: Nothing that could charge anybody (FR-054, SC-021)
+        run: npm run check:free
       # The network guard resolves the real build graph, so it needs cargo and
       # runs in the `core` job below rather than here.
       - name: No notification capability (FR-023, SC-007)

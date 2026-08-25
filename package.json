@@ -17,7 +17,9 @@
     "check:no-network-deps": "bash scripts/check-no-network-deps.sh",
     "check:no-notifications": "bash scripts/check-no-notifications.sh",
     "check:domain-purity": "bash scripts/check-domain-purity.sh",
-    "check": "npm run check:banned-words && npm run check:ambient-counts && npm run check:no-network-deps && npm run check:no-notifications && npm run check:domain-purity"
+    "check": "npm run check:banned-words && npm run check:ambient-counts && npm run check:no-streaks && npm run check:free && npm run check:no-network-deps && npm run check:no-notifications && npm run check:domain-purity",
+    "check:no-streaks": "node scripts/check-no-streaks.mjs",
+    "check:free": "node scripts/check-free.mjs"
   },
   "dependencies": {
     "@tauri-apps/api": "^2.0.0",

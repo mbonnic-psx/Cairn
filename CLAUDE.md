@@ -27,10 +27,51 @@ code — then follow the user's decision.
 
 ## Current state
 
-**No application code exists yet.** The repository holds VISION, the constitution,
-the v1 PRD, and Spec Kit scaffolding. Nothing has been scaffolded, no build system,
-no dependencies. Do not invent build or test commands — there are none yet. This
-section gets replaced with real commands when the app is scaffolded.
+Feature `002-machine-wide-protection` is built: layer 1 enforcement, the
+privileged helper, the waiting period, reach counting, and the interface. Three
+research spikes (T011–T013) are unresolved and gate preset sizing, the macOS
+helper, and the Linux fail-closed history path — see `specs/002-*/tasks.md`.
+
+### Commands
+
+```sh
+npm install
+npm run check                                # every constitutional guard
+npm test                                     # frontend (vitest)
+npm run lint                                 # eslint
+npm run build                                # typecheck + production build
+npm run tauri dev                            # the application
+
+cd src-tauri
+cargo test -p cairn --no-default-features    # domain, stores, enforcement, ipc
+cargo test -p cairn-helper                   # privileged verbs, teardown, channel
+cargo test --workspace                       # everything, needs a GUI toolchain
+cargo fmt --all && cargo clippy --all-targets -- -D warnings
+```
+
+`--no-default-features` skips Tauri and SQLCipher, so the constitution-critical
+code builds and tests with no GUI toolchain and no C dependencies. CI runs the
+full workspace on all three platforms.
+
+### The guards
+
+Seven checks run in CI, and each one has been verified to fail on a planted
+violation. Do not weaken one to make a change pass:
+
+| Script | Enforces |
+| --- | --- |
+| `check-banned-words.mjs` | no *failed/denied/violation/relapsed/forbidden/you lost* in shipped text (SC-019) |
+| `check-no-ambient-counts.mjs` | no reach surface outside the Reaches screen (SC-006) |
+| `check-no-streaks.mjs` | no streak, day count, or chain (SC-020) |
+| `check-free.mjs` | no payment, account, entitlement, or trial path (SC-021) |
+| `check-no-network-deps.sh` | nothing network-capable in the build graph (Principle II) |
+| `check-no-notifications.sh` | no notification capability (FR-023) |
+| `check-domain-purity.sh` | no platform conditionals or I/O in `domain/` |
+
+Two tests are guards in disguise and matter as much:
+`src-tauri/tests/ipc_surface.rs` refuses to pass until every exposed command is
+classified as reads / protects-more / asks-and-waits, and
+`helper/tests/teardown_restoration.rs` proves every privileged verb restores.
 
 ## Workflow — Spec Kit
 

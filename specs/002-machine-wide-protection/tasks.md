@@ -240,13 +240,21 @@ releasable.
 
 ## Phase 7: Polish & Cross-Cutting Concerns
 
-- [ ] T094 [P] Run the full banned-word check over every shipped string and fix any hit in `scripts/check-banned-words.mjs` (SC-019)
-- [ ] T095 [P] Sweep every screen for streak counters, day-counts, and chain imagery in `src/screens/` (SC-020)
-- [ ] T096 [P] Verify no payment, account, entitlement, or trial code path exists anywhere in `src-tauri/src/` and `src/` (SC-021)
+- [X] T094 [P] Run the full banned-word check over every shipped string and fix any hit in `scripts/check-banned-words.mjs` (SC-019)
+- [X] T095 [P] Sweep every screen for streak counters, day-counts, and chain imagery in `src/screens/` (SC-020)
+- [X] T096 [P] Verify no payment, account, entitlement, or trial code path exists anywhere in `src-tauri/src/` and `src/` (SC-021)
 - [ ] T097 [P] Run a 30-day network capture asserting zero bytes leave the machine (SC-017)
+      — **not started.** It is a 30-day observation on a real machine. The build-graph
+      guard (`check-no-network-deps.sh`) is the standing check in the meantime: nothing
+      network-capable compiles into the binary on any desktop target.
 - [ ] T098 Measure added latency for unprotected sites at 10,000 entries against the 50 ms bound (SC-016)
+      — **blocked with T011.** Needs real machines on all three platforms. What is done:
+      `tests/at_scale.rs` measures Cairn's own cost at 10,000 entries (write, splice,
+      verify, remove) so an accidentally quadratic path cannot hide behind the spike.
+      The resolver latency itself is still unmeasured.
 - [ ] T099 Run every quickstart.md scenario on Windows, macOS, and Linux and record results
-- [ ] T100 Update `CLAUDE.md` to replace "no application code exists yet" with the real build and test commands
+      — **not possible here.** Single Linux/WSL machine, no Windows or macOS hardware.
+- [X] T100 Update `CLAUDE.md` to replace "no application code exists yet" with the real build and test commands
 
 ---
 
