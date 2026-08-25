@@ -11,7 +11,9 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 use cairn::domain::normalize::ReservedNames;
 use cairn::enforcement::seed::CategoryStore;
-use cairn::helper::{HelperChannel, NoHelper};
+use cairn::helper::HelperChannel;
+#[cfg(not(unix))]
+use cairn::helper::NoHelper;
 use cairn::ipc::{commands, AppState};
 use cairn::platform::{PlatformElevation, SystemHosts};
 use cairn::store::config::ConfigStore;

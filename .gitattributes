@@ -1,0 +1,16 @@
+# Line endings are normalised to LF in the working tree on every platform.
+#
+# Without this, a Windows checkout converts sources to CRLF, and `cargo fmt
+# --check` fails against rustfmt.toml's `newline_style = "Unix"` — which is how
+# this was found.
+#
+# Note this is about *repository* files. It has nothing to do with the line
+# endings Cairn preserves in a system hosts file: those are read as raw bytes at
+# runtime and adopted as found (research R6).
+* text=auto eol=lf
+
+# Binary, and not to be touched.
+*.png binary
+*.ico binary
+*.icns binary
+*.db binary
