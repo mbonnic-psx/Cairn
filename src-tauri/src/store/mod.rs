@@ -15,6 +15,7 @@
 //! exposed by that choice.
 
 pub mod config;
+pub mod gaps;
 pub mod inventory;
 pub mod key;
 

@@ -14,6 +14,8 @@
 //! are the whole of its input surface.
 
 #[cfg(unix)]
+pub mod fds;
+#[cfg(unix)]
 pub mod unix;
 
 use std::io::{self, Read, Write};

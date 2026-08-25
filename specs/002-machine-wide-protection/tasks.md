@@ -96,7 +96,7 @@ functions, and the privileged helper with its verbs built in apply/remove pairs.
 - [X] T033 Implement `WriteBackupOnce` and `RemoveBackup` as a pair, never overwriting an existing backup, in `src-tauri/helper/src/verbs/backup.rs` (FR-039, FR-042)
 - [X] T034 Implement `ApplyHostsSection` and `RemoveHostsSection` as a pair, using atomic same-directory rename with preserved permissions, in `src-tauri/helper/src/verbs/hosts.rs` (FR-040, FR-043)
 - [X] T035 Implement `VerifyHostsSection` and `RepairHostsSection` returning what was actually found, in `src-tauri/helper/src/verbs/verify.rs` (FR-012, FR-013)
-- [ ] T036 Implement `BindCountingSockets` and `ReleaseCountingSockets` with descriptor passing to the unelevated process in `src-tauri/helper/src/verbs/sockets.rs` (research R3)
+- [X] T036 Implement `BindCountingSockets` and `ReleaseCountingSockets` with descriptor passing to the unelevated process in `src-tauri/helper/src/verbs/sockets.rs` (research R3)
 - [X] T037 [P] Implement `FlushDnsCache` per platform, treating failure as non-fatal and reported in `src-tauri/helper/src/verbs/dnsflush.rs` (research R8)
 - [X] T038 Implement `ReadTrustedClock` and the 60-second heartbeat advancing the trusted clock in `src-tauri/helper/src/heartbeat.rs` (FR-047d)
 - [X] T039 Implement `Uninstall`, walking the inventory in reverse and reporting residue, in `src-tauri/helper/src/verbs/uninstall.rs` (FR-043)
@@ -155,7 +155,7 @@ repair within 60 seconds.
 ### Tests for User Story 2
 
 - [X] T058 [P] [US2] Integration test asserting silent repair within 60 seconds with no user-visible output in `src-tauri/tests/us2_repair.rs` (SC-008)
-- [ ] T059 [P] [US2] Test asserting the counting path has no channel to the frontend and emits no event in `src-tauri/tests/us2_no_ui.rs` (FR-019, SC-005)
+- [X] T059 [P] [US2] Test asserting the counting path has no channel to the frontend and emits no event in `src-tauri/tests/us2_no_ui.rs` (FR-019, SC-005)
 
 ### Implementation for User Story 2
 
@@ -184,21 +184,21 @@ protection, confirm automatic silent mode with blocking fully in force.
 
 ### Tests for User Story 3
 
-- [ ] T069 [P] [US3] Integration test asserting recorded reaches carry domain and timestamp only in `src-tauri/tests/us3_counting.rs` (FR-024, SC-009)
-- [ ] T070 [P] [US3] Degradation test asserting a counting loss never reduces blocking in `src-tauri/tests/degradation.rs` (FR-028, SC-010)
-- [ ] T071 [P] [US3] Log-scan test asserting no domain or reach appears in any diagnostic output in `src-tauri/tests/log_scan.rs` (FR-038b, SC-018)
+- [X] T069 [P] [US3] Integration test asserting recorded reaches carry domain and timestamp only in `src-tauri/tests/us3_counting.rs` (FR-024, SC-009)
+- [X] T070 [P] [US3] Degradation test asserting a counting loss never reduces blocking in `src-tauri/tests/degradation.rs` (FR-028, SC-010)
+- [X] T071 [P] [US3] Log-scan test asserting no domain or reach appears in any diagnostic output in `src-tauri/tests/log_scan.rs` (FR-038b, SC-018)
 
 ### Implementation for User Story 3
 
-- [ ] T072 [US3] Implement the counting listener accepting passed descriptors, parsing the destination name, recording, and closing without a response in `src-tauri/src/counting/listener.rs` (FR-024, research R2)
-- [ ] T073 [US3] Implement port-conflict detection at setup and at every protection start in `src-tauri/src/counting/availability.rs` (FR-027)
-- [ ] T074 [US3] Implement automatic silent-mode fallback with a one-sentence explanation in `src-tauri/src/enforcement/reach_mode.rs` (FR-027, FR-028)
-- [ ] T075 [P] [US3] Implement `get_reach_mode` and `set_reach_mode` allowing override in either direction in `src-tauri/src/ipc/reach_mode.rs` (FR-029)
-- [ ] T076 [US3] Implement coverage-gap recording on shutdown and inference on start in `src-tauri/src/store/gaps.rs` (FR-030)
-- [ ] T077 [US3] Implement the `list_todays_reaches` command returning reaches with their coverage gaps in `src-tauri/src/ipc/reaches.rs`
-- [ ] T078 [P] [US3] Build the reaches screen reachable only by deliberate navigation, stating that counting covers only running time, in `src/screens/Reaches.tsx` (FR-030, FR-030a)
-- [ ] T079 [US3] Add the ESLint rule restricting the `list_todays_reaches` import to the reaches screen in `.eslintrc.cjs` (FR-030a)
-- [ ] T080 [P] [US3] Add the plain statement of what encryption at rest does and does not protect against, in `src/screens/Limits.tsx` (FR-035)
+- [X] T072 [US3] Implement the counting listener accepting passed descriptors, parsing the destination name, recording, and closing without a response in `src-tauri/src/counting/listener.rs` (FR-024, research R2)
+- [X] T073 [US3] Implement port-conflict detection at setup and at every protection start in `src-tauri/src/counting/availability.rs` (FR-027)
+- [X] T074 [US3] Implement automatic silent-mode fallback with a one-sentence explanation in `src-tauri/src/enforcement/reach_mode.rs` (FR-027, FR-028)
+- [X] T075 [P] [US3] Implement `get_reach_mode` and `set_reach_mode` allowing override in either direction in `src-tauri/src/ipc/reach_mode.rs` (FR-029)
+- [X] T076 [US3] Implement coverage-gap recording on shutdown and inference on start in `src-tauri/src/store/gaps.rs` (FR-030)
+- [X] T077 [US3] Implement the `list_todays_reaches` command returning reaches with their coverage gaps in `src-tauri/src/ipc/reaches.rs`
+- [X] T078 [P] [US3] Build the reaches screen reachable only by deliberate navigation, stating that counting covers only running time, in `src/screens/Reaches.tsx` (FR-030, FR-030a)
+- [X] T079 [US3] Add the ESLint rule restricting the `list_todays_reaches` import to the reaches screen in `.eslintrc.cjs` (FR-030a)
+- [X] T080 [P] [US3] Add the plain statement of what encryption at rest does and does not protect against, in `src/screens/Limits.tsx` (FR-035)
 - [X] T081 [P] [US3] Write the ambient-surface sweep check asserting no count, badge, or hint exists outside the reaches screen in `scripts/check-no-ambient-counts.mjs` (SC-006)
 
 **Checkpoint**: Counting works, degrades honestly, and stays invisible. SC-006, SC-009, SC-010,

@@ -12,7 +12,9 @@ use crate::domain::entries::{CategoryId, Domain, ReachMode, Trail};
 use crate::domain::normalize::Rejection;
 use crate::enforcement::state::ProtectionState;
 
-use super::state::{AppState, CategoryPreset, Disclosures, PendingView};
+use crate::store::config::ReachModeSetting;
+
+use super::state::{AppState, CategoryPreset, Disclosures, PendingView, TodaysReaches};
 
 #[tauri::command]
 pub fn get_protection_state(
@@ -128,8 +130,30 @@ pub fn turn_protection_on(state: State<'_, AppState>) -> Result<ProtectionState,
 }
 
 #[tauri::command]
-pub fn get_reach_mode(state: State<'_, AppState>) -> Result<ReachMode, String> {
+pub fn get_reach_mode(state: State<'_, AppState>) -> Result<ReachModeSetting, String> {
     state.get_reach_mode().map_err(|trouble| trouble.message)
+}
+
+/// In either direction (FR-029). Choosing silence is honoured; choosing
+/// counting depends on whether the ports are free, and says so if they are not.
+#[tauri::command]
+pub fn set_reach_mode(
+    state: State<'_, AppState>,
+    mode: ReachMode,
+) -> Result<ReachModeSetting, String> {
+    state
+        .set_reach_mode(mode)
+        .map_err(|trouble| trouble.message)
+}
+
+/// **The Reaches screen is the only caller** (FR-030a).
+#[tauri::command]
+pub fn list_todays_reaches(
+    state: State<'_, AppState>,
+    day_start: i64,
+    day_end: i64,
+) -> TodaysReaches {
+    state.list_todays_reaches(day_start, day_end)
 }
 
 #[tauri::command]

@@ -26,6 +26,27 @@ export default tseslint.config(
         { name: 'WebSocket', message: 'Cairn makes no outbound calls (Principle II).' },
       ],
 
+      // FR-030a: recorded reaches are visible on exactly one screen, reached
+      // by deliberate navigation. A count in a header, a tray, or a badge is a
+      // reminder of the thing someone is trying to walk away from.
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: '../ipc/reaches',
+              message:
+                'Only the Reaches screen may read reaches (FR-030a). Nothing else may put a count in front of someone who did not ask to see it.',
+            },
+            {
+              name: './ipc/reaches',
+              message:
+                'Only the Reaches screen may read reaches (FR-030a). Nothing else may put a count in front of someone who did not ask to see it.',
+            },
+          ],
+        },
+      ],
+
       // Principle V: nothing in this release interrupts the person.
       'no-restricted-syntax': [
         'error',
@@ -35,5 +56,11 @@ export default tseslint.config(
         },
       ],
     },
+  },
+
+  // The one screen allowed to read them.
+  {
+    files: ['src/screens/Reaches.tsx'],
+    rules: { 'no-restricted-imports': 'off' },
   },
 );

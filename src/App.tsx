@@ -10,6 +10,7 @@ import { Button } from './components/Button';
 import { Disclosure } from './screens/Disclosure';
 import { Limits } from './screens/Limits';
 import { Protection } from './screens/Protection';
+import { Reaches } from './screens/Reaches';
 import { Categories } from './screens/Setup/Categories';
 import { CustomEntry } from './screens/Setup/CustomEntry';
 import { Trail } from './screens/Trail';
@@ -26,7 +27,7 @@ import {
   type Trail as TrailData,
 } from './ipc';
 
-type Step = 'choosing' | 'disclosure' | 'protected' | 'trail' | 'limits';
+type Step = 'choosing' | 'disclosure' | 'protected' | 'trail' | 'limits' | 'reaches';
 
 export default function App() {
   const [step, setStep] = useState<Step>('choosing');
@@ -87,6 +88,14 @@ export default function App() {
               What is protected
             </Button>
           )}
+          {step === 'protected' && (
+            // Deliberate navigation, and nothing anywhere that draws someone
+            // here: no count, no badge, no hint that there is something new to
+            // look at (FR-030a, FR-030b).
+            <Button tone="quiet" onClick={() => setStep('reaches')}>
+              Today
+            </Button>
+          )}
           <Button tone="quiet" onClick={() => setStep('limits')}>
             What Cairn covers
           </Button>
@@ -115,6 +124,8 @@ export default function App() {
         {step === 'protected' && <Protection state={state} />}
 
         {step === 'trail' && trail && <Trail trail={trail} />}
+
+        {step === 'reaches' && <Reaches />}
 
         {step === 'limits' && disclosures && <Limits disclosures={disclosures} />}
       </div>

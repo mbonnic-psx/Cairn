@@ -114,6 +114,19 @@ export const cancelPendingChange = (id: string) =>
  */
 export const deleteAllData = () => invoke<string[]>('delete_all_data');
 
+export type ReachMode = 'counted' | 'silent';
+
+export interface ReachModeSetting {
+  mode: ReachMode;
+  chosen_by: 'person' | 'automatic';
+  /** One sentence, present only when Cairn made the choice. */
+  fallback_reason: string | null;
+}
+
+export const getReachMode = () => invoke<ReachModeSetting>('get_reach_mode');
+export const setReachMode = (mode: ReachMode) =>
+  invoke<ReachModeSetting>('set_reach_mode', { mode });
+
 /**
  * The words for each protection state.
  *

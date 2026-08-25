@@ -5,7 +5,7 @@
 //! closed enum, "unknown" means bytes that did not parse, not a verb someone
 //! added at runtime.
 
-use cairn::protocol::{Request, Response, TroubleKind};
+use cairn::protocol::{Request, Response};
 use cairn::store::inventory::Target;
 
 use crate::heartbeat::ClockKeeper;
@@ -49,17 +49,12 @@ pub fn handle(machine: &Machine, clock: &ClockKeeper, request: Request) -> Respo
 
         Request::Uninstall => verbs::uninstall::uninstall(machine),
 
-        // Not built yet. Said plainly rather than answered with a conflict,
-        // which would drop reach counting to silent mode as though a port were
-        // taken — true in effect, dishonest in reason (Principle III).
-        Request::BindCountingSockets | Request::ReleaseCountingSockets => {
-            Response::Trouble {
-                message: "Counting reaches is not part of this build yet. Protection is \
-                      unaffected."
-                    .into(),
-                kind: TroubleKind::Unsupported,
-            }
+        // The helper binds the ports because they need privilege; the parsing
+        // happens outside this process (research R3).
+        Request::BindCountingSockets => {
+            verbs::sockets::bind_counting_sockets(&verbs::sockets::COUNTING_PORTS)
         }
+        Request::ReleaseCountingSockets => verbs::sockets::release_counting_sockets(),
     }
 }
 

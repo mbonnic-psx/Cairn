@@ -21,6 +21,8 @@ fn main() {
 
     let state = AppState {
         config: ConfigStore::at(&data),
+        data_directory: data.clone(),
+        credentials: Box::new(cairn::platform::PlatformCredentials),
         categories: CategoryStore::at(&data),
         shipped_categories: shipped_categories(),
         hosts: Box::new(SystemHosts::default()),
@@ -50,6 +52,8 @@ fn main() {
             commands::add_custom_entry,
             commands::turn_protection_on,
             commands::get_reach_mode,
+            commands::set_reach_mode,
+            commands::list_todays_reaches,
             commands::get_disclosures,
             commands::request_protection_off,
             commands::remove_custom_entry,

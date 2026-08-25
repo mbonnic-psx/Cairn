@@ -12,6 +12,7 @@
 pub mod backup;
 pub mod dnsflush;
 pub mod hosts;
+pub mod sockets;
 pub mod uninstall;
 pub mod verify;
 

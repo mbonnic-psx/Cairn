@@ -5,6 +5,7 @@
 //! unelevated application's dependencies. Everything the UI process needs sits
 //! behind the `app` feature; `domain` needs nothing at all.
 
+pub mod counting;
 pub mod domain;
 pub mod enforcement;
 pub mod helper;

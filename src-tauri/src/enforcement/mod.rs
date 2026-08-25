@@ -11,6 +11,7 @@
 //! for it rather than by discipline here.
 
 pub mod apply;
+pub mod reach_mode;
 pub mod reduce;
 pub mod seed;
 pub mod state;

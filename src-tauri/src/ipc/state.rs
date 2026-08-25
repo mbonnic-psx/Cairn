@@ -8,10 +8,12 @@ use std::path::PathBuf;
 
 use serde::{Deserialize, Serialize};
 
+use crate::counting::availability;
 use crate::domain::entries::{CategoryId, Domain, ReachMode, Trail};
 use crate::domain::gate::{PendingChange, PendingKind, TrustedClock};
 use crate::domain::normalize::{Rejection, ReservedNames};
 use crate::enforcement::apply::{apply, current_state};
+use crate::enforcement::reach_mode;
 use crate::enforcement::reduce;
 use crate::enforcement::seed::{seed_missing_lists, CategoryStore};
 use crate::enforcement::state::ProtectionState;
@@ -22,7 +24,8 @@ use crate::protocol::{Request, Response};
 use crate::services::{
     Capability, ElevationService, HelperStatus, HostsService, Trouble,
 };
-use crate::store::config::{Config, ConfigStore, ProtectionIntent};
+use crate::store::config::{Config, ConfigStore, ProtectionIntent, ReachModeSetting};
+use crate::store::gaps::Gap;
 
 /// A category as the interface shows it.
 #[derive(Clone, PartialEq, Eq, Debug, Serialize, Deserialize)]
@@ -69,9 +72,32 @@ pub struct PendingView {
     pub eligible_now: bool,
 }
 
+/// One reach, as the interface shows it: where, and when. Nothing else exists
+/// to show.
+#[derive(Clone, PartialEq, Eq, Debug, Serialize, Deserialize)]
+pub struct ReachView {
+    pub domain: String,
+    pub at: i64,
+}
+
+/// A day's reaches, with what Cairn did not see.
+#[derive(Clone, PartialEq, Eq, Debug, Serialize, Deserialize)]
+pub struct TodaysReaches {
+    pub reaches: Vec<ReachView>,
+    pub gaps: Vec<Gap>,
+    /// Shown above the list when part of the day was not observed (FR-030).
+    pub coverage_note: Option<String>,
+    /// Present when the history could not be opened. Protection is unaffected,
+    /// and the sentence says so (FR-036).
+    pub sealed: Option<String>,
+}
+
 /// Everything the interface talks to.
 pub struct AppState {
     pub config: ConfigStore,
+    /// The person's own data directory. Reach history lives here, encrypted.
+    pub data_directory: PathBuf,
+    pub credentials: Box<dyn crate::services::CredentialStore>,
     pub categories: CategoryStore,
     pub shipped_categories: PathBuf,
     pub hosts: Box<dyn HostsService>,
@@ -355,8 +381,105 @@ impl AppState {
         ))
     }
 
-    pub fn get_reach_mode(&self) -> Result<ReachMode, Trouble> {
-        Ok(self.config.load()?.reach_mode.mode)
+    pub fn get_reach_mode(&self) -> Result<ReachModeSetting, Trouble> {
+        Ok(self.config.load()?.reach_mode)
+    }
+
+    /// A person choosing for themselves, in either direction (FR-029).
+    ///
+    /// Asking for counting when the ports are taken falls back and says so
+    /// rather than pretending to count.
+    pub fn set_reach_mode(&self, mode: ReachMode) -> Result<ReachModeSetting, Trouble> {
+        let mut config = self.config.load()?;
+        let chosen = reach_mode::choose(mode);
+
+        let settled = match mode {
+            ReachMode::Silent => chosen,
+            ReachMode::Counted => {
+                reach_mode::settle(&chosen, &availability::check(self.helper.as_ref()))
+            }
+        };
+
+        config.reach_mode = settled.clone();
+        self.config.save(&config)?;
+
+        // Silent means nothing listens, so nothing holds the ports either.
+        if settled.mode == ReachMode::Silent {
+            let _ = self.helper.ask(Request::ReleaseCountingSockets);
+        }
+
+        self.reapply(&config)?;
+        Ok(settled)
+    }
+
+    /// Today's reaches, and the periods Cairn was not watching.
+    ///
+    /// **Called only by the Reaches screen** (FR-030a). Wiring this into a
+    /// header, a tray, a badge, or a background poll would put a count in front
+    /// of someone who did not ask to see it — an ESLint rule restricts the
+    /// import, and `scripts/check-no-ambient-counts.mjs` fails the build if it
+    /// appears anywhere else.
+    pub fn list_todays_reaches(&self, day_start: i64, day_end: i64) -> TodaysReaches {
+        #[cfg(feature = "history")]
+        {
+            use crate::store::gaps::coverage_note;
+            use crate::store::history::History;
+            use crate::store::key::HistoryKey;
+
+            let key = HistoryKey::obtain(self.credentials.as_ref());
+            let sealed = key.explanation();
+
+            match History::open(&self.data_directory, &key) {
+                History::Open(history) => {
+                    let reaches = history
+                        .between(day_start, day_end)
+                        .unwrap_or_default()
+                        .into_iter()
+                        .map(|reach| ReachView {
+                            domain: reach.domain,
+                            at: reach.at,
+                        })
+                        .collect();
+                    let gaps = history
+                        .gaps_between(day_start, day_end)
+                        .unwrap_or_default()
+                        .into_iter()
+                        .map(|gap| Gap {
+                            from: gap.from,
+                            to: gap.to,
+                        })
+                        .collect::<Vec<_>>();
+
+                    TodaysReaches {
+                        coverage_note: coverage_note(&gaps),
+                        gaps,
+                        reaches,
+                        sealed: None,
+                    }
+                }
+                History::Sealed { because } => TodaysReaches {
+                    reaches: Vec::new(),
+                    gaps: Vec::new(),
+                    coverage_note: None,
+                    sealed: Some(sealed.unwrap_or(because)),
+                },
+            }
+        }
+
+        #[cfg(not(feature = "history"))]
+        {
+            let _ = (day_start, day_end);
+            TodaysReaches {
+                reaches: Vec::new(),
+                gaps: Vec::new(),
+                coverage_note: None,
+                sealed: Some(
+                    "This build of Cairn does not keep a history. Protection is \
+                     unaffected."
+                        .into(),
+                ),
+            }
+        }
     }
 
     /// What is true about coverage on this machine, in this release.

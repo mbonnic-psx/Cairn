@@ -13,7 +13,7 @@
 ///
 /// Adding a command without adding it here fails this test — which is the
 /// point.
-const CLASSIFIED: [(&str, Effect); 13] = [
+const CLASSIFIED: [(&str, Effect); 15] = [
     // Reads. They change nothing.
     ("get_protection_state", Effect::Reads),
     ("get_trail", Effect::Reads),
@@ -21,6 +21,10 @@ const CLASSIFIED: [(&str, Effect); 13] = [
     ("get_reach_mode", Effect::Reads),
     ("get_disclosures", Effect::Reads),
     ("get_pending_change", Effect::Reads),
+    // Reach counting. Neither direction touches what is protected: silent mode
+    // blocks exactly the same addresses (FR-028).
+    ("set_reach_mode", Effect::Reads),
+    ("list_todays_reaches", Effect::Reads),
     // Increases. Immediate, and never gated (FR-048).
     ("add_custom_entry", Effect::Increases),
     ("turn_protection_on", Effect::Increases),
