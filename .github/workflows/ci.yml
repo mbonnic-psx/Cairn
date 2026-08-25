@@ -1,0 +1,192 @@
+name: CI
+
+on:
+  # Every branch, not just main. Feature work is where these checks earn their
+  # keep — a guard that only runs after a merge is a guard that found out too
+  # late.
+  push:
+    branches: ['**']
+  pull_request:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  # The constitutional guards run first and on every platform-independent push.
+  # They are cheap, they fail loudly, and a failure here is not a style problem.
+  guards:
+    name: Constitutional guards
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: No word of failure reaches a person (SC-019)
+        run: npm run check:banned-words
+      - name: No ambient reach surface (SC-006)
+        run: npm run check:ambient-counts
+      - name: No streak, no day count, no chain (FR-053, SC-020)
+        run: npm run check:no-streaks
+      - name: Nothing that could charge anybody (FR-054, SC-021)
+        run: npm run check:free
+      # The network guard resolves the real build graph, so it needs cargo and
+      # runs in the `core` job below rather than here.
+      - name: No notification capability (FR-023, SC-007)
+        run: npm run check:no-notifications
+      - name: Domain code stays pure (platform abstraction)
+        run: npm run check:domain-purity
+
+  frontend:
+    name: Frontend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npx tsc --noEmit
+      - run: npm test
+
+  # The four constitution-critical functions are pure and have no system
+  # dependencies, so they are tested on every platform without a GUI toolchain.
+  domain:
+    name: Domain (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+      - name: Format
+        working-directory: src-tauri
+        run: cargo fmt --all --check
+      - name: Clippy
+        working-directory: src-tauri
+        run: cargo clippy -p cairn --no-default-features --all-targets -- -D warnings
+      - name: Domain tests
+        working-directory: src-tauri
+        run: cargo test -p cairn --no-default-features
+
+      # Platform-conditional code is where cross-platform bugs hide, and waiting
+      # for three matrix legs to report them is slow. Checking the other targets
+      # from one runner catches an unused import behind a cfg in seconds — no
+      # linker needed, because checking does not link.
+      - name: Cross-check the other platforms
+        if: matrix.os == 'ubuntu-latest'
+        working-directory: src-tauri
+        run: |
+          rustup target add x86_64-pc-windows-msvc aarch64-apple-darwin
+          for target in x86_64-pc-windows-msvc aarch64-apple-darwin; do
+            cargo clippy -p cairn --no-default-features --target "$target" \
+              --all-targets -- -D warnings
+            cargo clippy -p cairn-helper --target "$target" --all-targets -- -D warnings
+          done
+
+  # The full tree, including the privileged helper and the store. Needs each
+  # platform's own toolchain; on Linux it needs the webview libraries too.
+  core:
+    name: Core (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+      - name: Linux webview dependencies
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev \
+            librsvg2-dev patchelf libssl-dev
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Workspace tests
+        working-directory: src-tauri
+        run: cargo test --workspace
+      - name: Nothing network-capable entered the tree
+        run: bash scripts/check-no-network-deps.sh
+
+  # SC-002: a non-browser client cannot reach a protected site either. The
+  # browser matrix is manual and lives in scripts/acceptance/README.md.
+  acceptance:
+    name: Non-browser client (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    needs: core
+    if: github.event_name == 'push'
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
+      # Put protection into force for one address, on the real machine, using
+      # the real privileged verbs — then check it, then take it off and confirm
+      # the file is byte-for-byte as it was. A skipped acceptance run says so
+      # rather than passing quietly.
+      - name: Build the acceptance binaries
+        working-directory: src-tauri
+        run: cargo build -p cairn-helper --bins
+
+      # Writing the system file needs the privilege it needs. Windows runners
+      # are already elevated; the others go through sudo.
+      - name: Protect a test address
+        shell: bash
+        env:
+          CAIRN_DATA_DIR: ${{ runner.temp }}/cairn
+        run: |
+          apply=src-tauri/target/debug/acceptance-apply
+          [ "$RUNNER_OS" = "Windows" ] && apply=src-tauri/target/debug/acceptance-apply.exe
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            "$apply" cairn-acceptance.example
+          else
+            sudo -E "$apply" cairn-acceptance.example
+          fi
+
+      # Required here: this is the only automated evidence for SC-002, and a
+      # skipped check that still goes green is how it went unverified on Windows
+      # for a whole run.
+      - name: Non-browser client cannot reach it (SC-002)
+        shell: bash
+        env:
+          CAIRN_ACCEPTANCE_REQUIRED: '1'
+        run: bash scripts/acceptance/non-browser-client.sh cairn-acceptance.example
+
+      - name: Take it off and confirm the machine is as it was (SC-012)
+        if: always()
+        shell: bash
+        env:
+          CAIRN_DATA_DIR: ${{ runner.temp }}/cairn
+        run: |
+          teardown=src-tauri/target/debug/acceptance-teardown
+          [ "$RUNNER_OS" = "Windows" ] && teardown=src-tauri/target/debug/acceptance-teardown.exe
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            "$teardown"
+          else
+            sudo -E "$teardown"
+          fi

@@ -1,0 +1,21 @@
+{
+  "id": "news",
+  "label": "News",
+  "note": "A starting point, not a finished list. It is copied into your own data on first run and is yours to edit from then on \u2014 Cairn never writes over your copy. Sizes here are deliberately modest until the scale measurement in research.md R7 says what this platform can carry.",
+  "domains": [
+    "apnews.com",
+    "bbc.co.uk",
+    "buzzfeednews.com",
+    "cnn.com",
+    "dailymail.co.uk",
+    "foxnews.com",
+    "huffpost.com",
+    "news.google.com",
+    "nypost.com",
+    "nytimes.com",
+    "reuters.com",
+    "telegraph.co.uk",
+    "theguardian.com",
+    "washingtonpost.com"
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "id": "ai",
+  "label": "AI",
+  "note": "A starting point, not a finished list. It is copied into your own data on first run and is yours to edit from then on \u2014 Cairn never writes over your copy. Sizes here are deliberately modest until the scale measurement in research.md R7 says what this platform can carry.",
+  "domains": [
+    "character.ai",
+    "chatgpt.com",
+    "civitai.com",
+    "claude.ai",
+    "copilot.microsoft.com",
+    "gemini.google.com",
+    "huggingface.co",
+    "midjourney.com",
+    "openai.com",
+    "perplexity.ai",
+    "poe.com",
+    "runwayml.com"
+  ]
+}

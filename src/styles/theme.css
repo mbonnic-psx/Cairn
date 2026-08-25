@@ -1,0 +1,86 @@
+@import 'tailwindcss';
+
+/* Cairn's surface.
+ *
+ * Warm, quiet, and generous with space. Serif where someone is meant to slow
+ * down and read; sans for the working parts of the interface.
+ *
+ * What is deliberately absent: locks, shields, chains, and alarm-red. A wall
+ * you walk away from does not need to look like a cell. When something is not
+ * in force, the colour is a warm amber that says "not confirmed", never a red
+ * that says "you are in trouble" (FR-052). */
+
+@theme {
+  /* Warm neutrals — the ground everything sits on. */
+  --color-sand-50: #faf7f2;
+  --color-sand-100: #f3ede3;
+  --color-sand-200: #e6dccd;
+  --color-sand-300: #d3c4ae;
+  --color-sand-400: #b3a189;
+
+  /* Ink — warm rather than black. */
+  --color-ink-900: #2f2a24;
+  --color-ink-700: #4a4239;
+  --color-ink-500: #6f6558;
+  --color-ink-400: #8b8073;
+
+  /* Moss — protection in force. Steady, not triumphant. */
+  --color-moss-600: #5c7052;
+  --color-moss-500: #6f8462;
+  --color-moss-100: #e4ebdd;
+
+  /* Amber — not confirmed, or waiting. Warm, never alarming. */
+  --color-amber-600: #9a7134;
+  --color-amber-500: #b38845;
+  --color-amber-100: #f2e7d2;
+
+  /* Clay — a quiet accent for the things you can act on. */
+  --color-clay-600: #8c5f4d;
+  --color-clay-500: #a5735f;
+  --color-clay-100: #f0e2da;
+
+  --font-sans:
+    ui-sans-serif, system-ui, -apple-system, 'Segoe UI', 'Helvetica Neue', sans-serif;
+  --font-serif:
+    'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, ui-serif, serif;
+
+  /* Soft motion. Nothing snaps. */
+  --ease-gentle: cubic-bezier(0.32, 0.72, 0.24, 1);
+}
+
+:root {
+  color-scheme: light;
+}
+
+body {
+  margin: 0;
+  background: var(--color-sand-50);
+  color: var(--color-ink-700);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Reflective moments get the serif and a slower line. */
+.reflective {
+  font-family: var(--font-serif);
+  line-height: 1.65;
+  letter-spacing: 0.005em;
+}
+
+/* Everything that appears does so gently. */
+@media (prefers-reduced-motion: no-preference) {
+  .settle {
+    animation: settle 420ms var(--ease-gentle) both;
+  }
+}
+
+@keyframes settle {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}

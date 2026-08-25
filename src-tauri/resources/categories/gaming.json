@@ -1,0 +1,22 @@
+{
+  "id": "gaming",
+  "label": "Gaming",
+  "note": "A starting point, not a finished list. It is copied into your own data on first run and is yours to edit from then on \u2014 Cairn never writes over your copy. Sizes here are deliberately modest until the scale measurement in research.md R7 says what this platform can carry.",
+  "domains": [
+    "battle.net",
+    "chess.com",
+    "epicgames.com",
+    "gog.com",
+    "itch.io",
+    "lichess.org",
+    "miniclip.com",
+    "nintendo.com",
+    "origin.com",
+    "playstation.com",
+    "poki.com",
+    "roblox.com",
+    "steampowered.com",
+    "twitch.tv",
+    "xbox.com"
+  ]
+}

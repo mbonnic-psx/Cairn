@@ -1,0 +1,95 @@
+[workspace]
+members = ["helper"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.83"
+license = "MIT"
+
+# Every dependency is a supply-chain surface for a tool people trust with their
+# recovery (research R10). The set stays small, and nothing that speaks HTTP is
+# permitted anywhere in the tree — see scripts/check-no-network-deps.sh.
+[workspace.dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha2 = "0.10"
+thiserror = "2"
+uuid = { version = "1", features = ["v4", "serde"] }
+
+[package]
+name = "cairn"
+description = "Cairn — machine-wide protection with a recovery layer"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+# The library is what the privileged helper links against: `domain` is pure and
+# carries no platform code, no I/O, and none of the app's dependencies. The
+# binary is the unelevated Tauri application and is the only thing that needs
+# the `app` feature.
+[lib]
+name = "cairn"
+path = "src/lib.rs"
+
+[[bin]]
+name = "cairn"
+path = "src/main.rs"
+required-features = ["app"]
+
+[features]
+default = ["app"]
+# The window and everything that draws it. Kept optional so the rest of the core
+# — domain, stores, platform services, enforcement — builds and tests with no
+# GUI toolchain present.
+app = ["dep:tauri", "dep:tokio", "dep:tauri-build", "history"]
+# Reach history. Separate because bundled SQLCipher is a C build, and nothing in
+# the teardown path may depend on it (data-model.md).
+history = ["dep:rusqlite"]
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+thiserror.workspace = true
+uuid.workspace = true
+
+tauri = { version = "2", optional = true }
+rusqlite = { version = "0.32", features = ["bundled-sqlcipher-vendored-openssl"], optional = true }
+# The Linux backend is the pure-Rust Secret Service client rather than the one
+# that links libdbus: fewer system dependencies for a tool people install to
+# protect themselves, and one less thing to go wrong on a minimal desktop.
+keyring = { version = "3", default-features = false, features = [
+  "apple-native",
+  "windows-native",
+  "async-secret-service",
+  "crypto-rust",
+  "tokio",
+] }
+tokio = { version = "1", features = ["rt-multi-thread", "net", "time", "macros", "io-util"], optional = true }
+dirs = "5"
+idna = "1"
+getrandom = "0.4"
+libc = "0.2.189"
+
+[build-dependencies]
+# Optional so the pure domain code builds and tests with no GUI toolchain
+# present: `cargo test -p cairn --no-default-features` needs none of this.
+tauri-build = { version = "2", optional = true, features = [] }
+
+[dev-dependencies]
+proptest = "1"
+tempfile = "3"
+# A dev-dependency cycle, and a deliberate one: the end-to-end tests drive the
+# app's own orchestration against the helper's real verbs rather than against a
+# hand-written double that could drift from them.
+cairn-helper = { path = "helper" }
+libc = "0.2"
+
+[lints.rust]
+unsafe_code = "warn"
+
+[lints.clippy]
+unwrap_used = "warn"
+expect_used = "warn"

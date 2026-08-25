@@ -1,0 +1,17 @@
+{
+  "id": "messenger",
+  "label": "Messenger",
+  "note": "A starting point, not a finished list. It is copied into your own data on first run and is yours to edit from then on \u2014 Cairn never writes over your copy. Sizes here are deliberately modest until the scale measurement in research.md R7 says what this platform can carry.",
+  "domains": [
+    "discord.com",
+    "line.me",
+    "messenger.com",
+    "signal.org",
+    "slack.com",
+    "viber.com",
+    "web.skype.com",
+    "web.telegram.org",
+    "web.whatsapp.com",
+    "wechat.com"
+  ]
+}

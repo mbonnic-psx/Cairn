@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "The window's entire capability set. Cairn's frontend talks to the core through its own commands and nothing else — no filesystem access, no shell, no HTTP, and no notification permission of any kind (FR-023).",
+  "windows": ["main"],
+  "permissions": ["core:default"]
+}
