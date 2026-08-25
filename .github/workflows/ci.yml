@@ -168,8 +168,13 @@ jobs:
             sudo -E "$apply" cairn-acceptance.example
           fi
 
+      # Required here: this is the only automated evidence for SC-002, and a
+      # skipped check that still goes green is how it went unverified on Windows
+      # for a whole run.
       - name: Non-browser client cannot reach it (SC-002)
         shell: bash
+        env:
+          CAIRN_ACCEPTANCE_REQUIRED: '1'
         run: bash scripts/acceptance/non-browser-client.sh cairn-acceptance.example
 
       - name: Take it off and confirm the machine is as it was (SC-012)

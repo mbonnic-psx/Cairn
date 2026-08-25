@@ -14,31 +14,60 @@ set -uo pipefail
 DOMAIN="${1:-example.com}"
 MARKER="# >>> Cairn: protected sites."
 
-# Nothing to check if Cairn is not in force. Said out loud: a check that
-# silently passes when it did not run is worse than no check.
-hosts_file() {
-    if [ -z "${SystemRoot:-}" ]; then
-        printf '%s\n' /etc/hosts
-        return
+# In CI this check is the only automated evidence for SC-002, so a skip there is
+# a failure: a job that goes green having verified nothing is worse than a red
+# one. Run by hand, a skip is just a skip.
+REQUIRE="${CAIRN_ACCEPTANCE_REQUIRED:-0}"
+
+skipped() {
+    echo "acceptance: SKIPPED — $1"
+    echo "            hosts file looked at: $(hosts_file)"
+    if [ "$REQUIRE" = "1" ]; then
+        echo "acceptance: this run required the check to happen, so that is a failure." >&2
+        exit 1
     fi
-    # $SystemRoot is a Windows path — C:\Windows — and the shell tools here read
-    # a backslash as an escape. cygpath is what Git Bash ships for exactly this.
+    exit 0
+}
+
+# Where this platform keeps the file.
+#
+# On Windows the variable naming is not dependable: bash on a GitHub runner may
+# expose SYSTEMROOT rather than SystemRoot, and taking the /etc/hosts fallback
+# there silently points at Git Bash's own copy — a real file, with no Cairn
+# section, which reads exactly like "protection is not in force". That is how
+# this check skipped on Windows while the job stayed green.
+hosts_file() {
+    local root="${SystemRoot:-${SYSTEMROOT:-${WINDIR:-}}}"
+
+    if [ -z "$root" ]; then
+        case "$(uname -s 2>/dev/null)" in
+            MINGW* | MSYS* | CYGWIN*) root='C:\Windows' ;;
+            *)
+                printf '%s\n' /etc/hosts
+                return
+                ;;
+        esac
+    fi
+
+    # A Windows path — C:\Windows — and the shell tools here read a backslash as
+    # an escape. cygpath is what Git Bash ships for exactly this.
     if command -v cygpath >/dev/null 2>&1; then
-        cygpath -u "$SystemRoot\\System32\\drivers\\etc\\hosts"
+        cygpath -u "$root\\System32\\drivers\\etc\\hosts"
     else
-        printf '%s\n' "$SystemRoot/System32/drivers/etc/hosts"
+        printf '%s\n' "${root//\\//}/System32/drivers/etc/hosts"
     fi
 }
 
+if [ ! -r "$(hosts_file)" ]; then
+    skipped "Cairn cannot read this machine's list of site addresses."
+fi
+
 if ! grep -qF "$MARKER" "$(hosts_file)" 2>/dev/null; then
-    echo "acceptance: SKIPPED — Cairn is not in force on this machine, so there is"
-    echo "            nothing to check. Apply protection first, then run this."
-    exit 0
+    skipped "Cairn is not in force on this machine, so there is nothing to check."
 fi
 
 if ! grep -qF " $DOMAIN" "$(hosts_file)" 2>/dev/null; then
-    echo "acceptance: SKIPPED — $DOMAIN is not one of the protected addresses here."
-    exit 0
+    skipped "$DOMAIN is not one of the protected addresses here."
 fi
 
 resolve() {
