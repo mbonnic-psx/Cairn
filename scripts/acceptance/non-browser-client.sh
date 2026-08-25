@@ -17,10 +17,16 @@ MARKER="# >>> Cairn: protected sites."
 # Nothing to check if Cairn is not in force. Said out loud: a check that
 # silently passes when it did not run is worse than no check.
 hosts_file() {
-    if [ -n "${SystemRoot:-}" ]; then
-        printf '%s\n' "$SystemRoot/System32/drivers/etc/hosts"
-    else
+    if [ -z "${SystemRoot:-}" ]; then
         printf '%s\n' /etc/hosts
+        return
+    fi
+    # $SystemRoot is a Windows path — C:\Windows — and the shell tools here read
+    # a backslash as an escape. cygpath is what Git Bash ships for exactly this.
+    if command -v cygpath >/dev/null 2>&1; then
+        cygpath -u "$SystemRoot\\System32\\drivers\\etc\\hosts"
+    else
+        printf '%s\n' "$SystemRoot/System32/drivers/etc/hosts"
     fi
 }
 
