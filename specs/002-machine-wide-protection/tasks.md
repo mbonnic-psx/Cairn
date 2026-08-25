@@ -253,7 +253,14 @@ releasable.
       verify, remove) so an accidentally quadratic path cannot hide behind the spike.
       The resolver latency itself is still unmeasured.
 - [ ] T099 Run every quickstart.md scenario on Windows, macOS, and Linux and record results
-      — **not possible here.** Single Linux/WSL machine, no Windows or macOS hardware.
+      — **partly done, by CI rather than by hand.** No Windows or macOS hardware here, but
+      the acceptance jobs now run the privileged path on real machines on every push, and
+      as of run 32879278702 all three platforms pass with the check *actually executing*
+      (a skip fails the job): protection applied to the real hosts file, a non-browser
+      client unable to resolve the address — `::` on Linux, `0.0.0.0` on macOS and
+      Windows — and the file restored with no residue. That is SC-002 and SC-012 measured
+      per platform. The rest of quickstart.md, which needs a desktop session and a human
+      at the keyboard, is still unrun.
 - [X] T100 Update `CLAUDE.md` to replace "no application code exists yet" with the real build and test commands
 
 ---
