@@ -6,6 +6,7 @@
 
 use std::io::Read;
 use std::net::{TcpListener, TcpStream};
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::Duration;
 
 use crate::domain::sni::{parse_destination_name, MAX_INSPECT};
@@ -45,14 +46,48 @@ pub fn handle_connection(
     Some(domain.as_str().to_string())
 }
 
-/// Accept forever on one listener.
+/// How often an accept that is waiting looks up to see whether counting has
+/// been stopped.
+///
+/// Short, because the person turning counting off is entitled to have the port
+/// given back promptly; a poll rather than a blocking accept, because the
+/// alternative is waking a blocked accept with a connection to itself, and a
+/// trick in the counting path is a thing to explain forever.
+pub const STOP_CHECK: Duration = Duration::from_millis(100);
+
+/// Accept until told to stop.
 ///
 /// Each connection is handled and dropped. A connection that says nothing
 /// useful costs nothing and is treated identically — there is no error path
 /// that behaves differently, because a difference in behaviour is a signal.
-pub fn serve(listener: &TcpListener, sink: &dyn NoteReach, now: fn() -> i64) {
-    for connection in listener.incoming() {
-        let Ok(stream) = connection else { continue };
-        let _ = handle_connection(stream, sink, now());
+///
+/// The listener is taken by value: when this returns, it drops, and the port
+/// goes back. That is what makes turning counting off actually release the port
+/// rather than leaving Cairn holding one it has stopped using.
+pub fn serve_until(
+    listener: TcpListener,
+    sink: &dyn NoteReach,
+    now: fn() -> i64,
+    stop: &AtomicBool,
+) {
+    if listener.set_nonblocking(true).is_err() {
+        return;
+    }
+
+    while !stop.load(Ordering::Relaxed) {
+        match listener.accept() {
+            Ok((stream, _)) => {
+                // Back to blocking for the read, which is bounded by
+                // READ_TIMEOUT rather than by polling.
+                if stream.set_nonblocking(false).is_err() {
+                    continue;
+                }
+                let _ = handle_connection(stream, sink, now());
+            }
+            // Nothing waiting, or something went wrong with one connection.
+            // Neither is worth treating differently, and neither is worth
+            // spinning over.
+            Err(_) => std::thread::sleep(STOP_CHECK),
+        }
     }
 }

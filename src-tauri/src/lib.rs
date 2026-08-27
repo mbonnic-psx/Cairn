@@ -8,6 +8,8 @@
 pub mod counting;
 pub mod domain;
 pub mod enforcement;
+#[cfg(unix)]
+pub mod fds;
 pub mod helper;
 pub mod ipc;
 pub mod platform;

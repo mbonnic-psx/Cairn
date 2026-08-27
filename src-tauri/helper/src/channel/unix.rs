@@ -10,12 +10,13 @@ use std::os::unix::net::{UnixListener, UnixStream};
 use std::path::{Path, PathBuf};
 use std::time::Duration;
 
-use cairn::protocol::{Request, Response, TroubleKind};
+use cairn::protocol::{CountingSockets, Request, Response, TroubleKind};
 
-use super::{read_frame, write_frame};
+use super::{fds, read_frame, write_frame};
 use crate::dispatch;
 use crate::heartbeat::ClockKeeper;
 use crate::machine::Machine;
+use crate::verbs;
 
 pub const SOCKET_NAME: &str = "helper.sock";
 
@@ -79,7 +80,12 @@ fn answer(
     stream.set_write_timeout(Some(REQUEST_TIMEOUT))?;
 
     let payload = read_frame(&mut stream)?;
-    let response = match serde_json::from_slice::<Request>(&payload) {
+    let parsed = serde_json::from_slice::<Request>(&payload);
+    // Whether this answer carries listening sockets with it. Decided from the
+    // request before dispatch consumes it.
+    let hands_over_sockets = matches!(parsed, Ok(Request::BindCountingSockets));
+
+    let response = match parsed {
         Ok(request) => dispatch::handle(machine, clock, request),
         // Unknown verbs are rejected, never ignored.
         Err(_) => Response::Trouble {
@@ -88,9 +94,28 @@ fn answer(
         },
     };
 
+    let bound = matches!(
+        response,
+        Response::CountingSockets(CountingSockets::Bound { .. })
+    );
+
     let answer = serde_json::to_vec(&response)
         .map_err(|error| io::Error::new(io::ErrorKind::InvalidData, error))?;
-    write_frame(&mut stream, &answer)
+    write_frame(&mut stream, &answer)?;
+
+    // The descriptors follow the answer that announced them, on the same
+    // connection. Only ever after `Bound` — a conflict has nothing to hand over,
+    // and the caller knows not to wait for anything (contracts/helper-ipc.md).
+    //
+    // The helper binds because the ports need privilege; the parsing of whatever
+    // a client sends happens out here, in the unelevated process (research R3).
+    if hands_over_sockets && bound {
+        let descriptors = verbs::sockets::held_descriptors();
+        if !descriptors.is_empty() {
+            fds::send_fds(&stream, &descriptors)?;
+        }
+    }
+    Ok(())
 }
 
 /// Only the owner may connect. Belt and braces alongside the peer check: the

@@ -44,6 +44,13 @@ fn main() {
     // because someone came back and asked again. This is the only caller.
     let _ = state.apply_due_reduction();
 
+    // Counting is threads accepting on Cairn's ports, and closing the window
+    // ends it — there is no autostart and no tray yet. So it starts here, the
+    // gap since Cairn was last running goes into the record first, and the reach
+    // mode settles to whatever this actually achieved rather than to what was
+    // intended (Principle III).
+    let _ = state.start_counting();
+
     tauri::Builder::default()
         .manage(state)
         .invoke_handler(tauri::generate_handler![

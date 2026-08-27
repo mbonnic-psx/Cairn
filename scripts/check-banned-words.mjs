@@ -31,7 +31,12 @@ const BANNED = [
 
 const SCAN = [
   { dir: 'src', exts: ['.ts', '.tsx'] },
-  { dir: 'src-tauri/src/ipc', exts: ['.rs'] },
+  // All of the core, not just the command layer. A sentence shown to a person
+  // is shipped text wherever it is written, and scanning only `ipc` made that a
+  // question of which file it landed in: the sentence Windows shows when Cairn
+  // cannot count lives in `helper.rs`, and went unchecked for exactly that
+  // reason.
+  { dir: 'src-tauri/src', exts: ['.rs'] },
   { dir: 'src-tauri/resources', exts: ['.json', '.txt'] },
 ];
 
