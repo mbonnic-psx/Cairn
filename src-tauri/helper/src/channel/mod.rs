@@ -14,9 +14,12 @@
 //! are the whole of its input surface.
 
 #[cfg(unix)]
-pub mod fds;
-#[cfg(unix)]
 pub mod unix;
+
+// Descriptor passing lives in the shared crate: the helper sends and the
+// application receives, and one copy keeps the two halves from drifting.
+#[cfg(unix)]
+pub use cairn::fds;
 
 use std::io::{self, Read, Write};
 

@@ -191,6 +191,14 @@ protection, confirm automatic silent mode with blocking fully in force.
 ### Implementation for User Story 3
 
 - [X] T072 [US3] Implement the counting listener accepting passed descriptors, parsing the destination name, recording, and closing without a response in `src-tauri/src/counting/listener.rs` (FR-024, research R2)
+      — **was marked done while half-built, and corrected later.** The parsing and the
+      accept loop were written and unit-tested; taking the passed descriptors and
+      running the loop in the application were not. Nothing called `serve`, nothing
+      implemented `NoteReach` outside a test, and the application only ever opened the
+      history to read. So the helper bound the ports, Cairn reported counted mode, and
+      no reach was ever recorded. Every piece had a passing test; none tested that the
+      pieces were connected. Fixed on `fix-counting-never-recorded`, along with the
+      coverage-gap recording that was empty for the same reason.
 - [X] T073 [US3] Implement port-conflict detection at setup and at every protection start in `src-tauri/src/counting/availability.rs` (FR-027)
 - [X] T074 [US3] Implement automatic silent-mode fallback with a one-sentence explanation in `src-tauri/src/enforcement/reach_mode.rs` (FR-027, FR-028)
 - [X] T075 [P] [US3] Implement `get_reach_mode` and `set_reach_mode` allowing override in either direction in `src-tauri/src/ipc/reach_mode.rs` (FR-029)

@@ -90,6 +90,16 @@ impl History {
         }
     }
 
+    /// Record a period nobody was watching, if there is anywhere to record it.
+    ///
+    /// Sealed behaves as it does for a reach: nothing is written, nothing is
+    /// overwritten, and blocking is unaffected.
+    pub fn record_gap(&self, gap: &CoverageGap) {
+        if let History::Open(history) = self {
+            let _ = history.record_gap(gap);
+        }
+    }
+
     pub fn is_open(&self) -> bool {
         matches!(self, History::Open(_))
     }

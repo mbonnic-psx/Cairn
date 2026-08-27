@@ -7,6 +7,10 @@
 //!
 //! This is the only unsafe code in Cairn that touches a buffer. It is kept to
 //! two functions, both bounded, both here.
+//!
+//! It lives in the shared crate rather than in the helper because both ends of
+//! the handover need it: the helper sends, and the unelevated application
+//! receives. One copy means the sending and receiving halves cannot drift apart.
 
 use std::io;
 use std::os::fd::{AsRawFd, FromRawFd, OwnedFd, RawFd};

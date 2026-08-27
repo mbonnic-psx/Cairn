@@ -8,7 +8,7 @@ use std::path::PathBuf;
 
 use serde::{Deserialize, Serialize};
 
-use crate::counting::availability;
+use crate::counting::availability::Counting;
 use crate::domain::entries::{CategoryId, Domain, ReachMode, Trail};
 use crate::domain::gate::{PendingChange, PendingKind, TrustedClock};
 use crate::domain::normalize::{Rejection, ReservedNames};
@@ -24,7 +24,9 @@ use crate::protocol::{Request, Response};
 use crate::services::{
     Capability, ElevationService, HelperStatus, HostsService, Trouble,
 };
-use crate::store::config::{Config, ConfigStore, ProtectionIntent, ReachModeSetting};
+use crate::store::config::{
+    ChosenBy, Config, ConfigStore, ProtectionIntent, ReachModeSetting,
+};
 use crate::store::gaps::Gap;
 
 /// The reach history's file name. Known here without the history feature so
@@ -394,6 +396,12 @@ impl AppState {
             Some((self.now)()),
         )?;
 
+        // Protection is in force, so the addresses now point at Cairn. Start
+        // accepting on them — and let the reach mode settle to whatever that
+        // attempt actually achieved. A failure to count never affects what was
+        // just applied (FR-028).
+        let _ = self.start_counting();
+
         Ok(applied.state)
     }
 
@@ -428,26 +436,113 @@ impl AppState {
         Ok(self.config.load()?.reach_mode)
     }
 
+    /// Begin counting, and answer with what is true once the attempt is over.
+    ///
+    /// Called at start and whenever protection starts. The answer comes from
+    /// whether Cairn is accepting on its ports, not from whether the helper
+    /// managed to bind them — those are different facts, and reporting the
+    /// second as the first is how slice 002 came to claim counting over an empty
+    /// record (Principle III).
+    ///
+    /// A person who chose silence is never started against that choice.
+    pub fn start_counting(&self) -> Result<ReachModeSetting, Trouble> {
+        let mut config = self.config.load()?;
+        let chosen = config.reach_mode.clone();
+
+        // Nothing is pointed at Cairn's ports while protection is off, so there
+        // is nothing to accept and no reason to hold a port. The stored mode is
+        // an intention for when protection starts; whether Cairn is counting
+        // right now is `session::is_running`, and the two are not the same
+        // question.
+        if config.intent != ProtectionIntent::On {
+            return Ok(chosen);
+        }
+
+        if chosen.chosen_by == ChosenBy::Person && chosen.mode == ReachMode::Silent {
+            return Ok(chosen);
+        }
+
+        let settled = reach_mode::settle(&chosen, &self.begin_counting_session());
+        config.reach_mode = settled.clone();
+        self.config.save(&config)?;
+        Ok(settled)
+    }
+
+    /// Take the ports and start accepting, recording first how long Cairn was
+    /// away.
+    ///
+    /// The gap goes in before counting starts, so that it sits in the record
+    /// ahead of any reach that follows it rather than being interleaved with
+    /// them.
+    #[cfg(feature = "history")]
+    fn begin_counting_session(&self) -> Counting {
+        use std::sync::Arc;
+
+        use crate::counting::{presence, session, sink::RecordReach};
+        use crate::store::history::History;
+        use crate::store::key::HistoryKey;
+
+        let key = HistoryKey::obtain(self.credentials.as_ref());
+        let history = History::open(&self.data_directory, &key);
+
+        let mark = presence::Mark::at(&self.data_directory);
+        presence::record_gap_since_last_seen(&history, &mark, (self.now)());
+
+        let counting = session::start(
+            self.helper.as_ref(),
+            Arc::new(RecordReach::over(history)),
+            self.now,
+        );
+
+        // The mark says "Cairn was counting at this moment", so it is only kept
+        // while that is true.
+        if counting == Counting::Available {
+            presence::keep_marking(presence::Mark::at(&self.data_directory), self.now);
+        }
+        counting
+    }
+
+    /// A build with no history has nowhere to put a reach, so it does not
+    /// pretend to collect one.
+    #[cfg(not(feature = "history"))]
+    fn begin_counting_session(&self) -> Counting {
+        Counting::Unavailable {
+            because:
+                "This build of Cairn does not keep a history, so it is not counting \
+                      the sites you reach for. Everything you have protected is still \
+                      protected."
+                    .into(),
+        }
+    }
+
     /// A person choosing for themselves, in either direction (FR-029).
     ///
     /// Asking for counting when the ports are taken falls back and says so
     /// rather than pretending to count.
     pub fn set_reach_mode(&self, mode: ReachMode) -> Result<ReachModeSetting, Trouble> {
+        // Their choice is recorded first, so that starting counting settles
+        // against what they just asked for rather than against what was there
+        // before.
         let mut config = self.config.load()?;
-        let chosen = reach_mode::choose(mode);
+        config.reach_mode = reach_mode::choose(mode);
+        self.config.save(&config)?;
 
         let settled = match mode {
-            ReachMode::Silent => chosen,
-            ReachMode::Counted => {
-                reach_mode::settle(&chosen, &availability::check(self.helper.as_ref()))
-            }
+            ReachMode::Silent => config.reach_mode.clone(),
+            // Asking for counting is a request, not a result. What comes back is
+            // whether Cairn is actually accepting on its ports.
+            ReachMode::Counted => self.start_counting()?,
         };
 
+        let mut config = self.config.load()?;
         config.reach_mode = settled.clone();
         self.config.save(&config)?;
 
-        // Silent means nothing listens, so nothing holds the ports either.
+        // Silent means nothing listens, so nothing holds the ports either — and
+        // Cairn's own accept threads have to stop before the helper's release
+        // can actually free the port, because the descriptors were handed over.
         if settled.mode == ReachMode::Silent {
+            crate::counting::session::stop();
             let _ = self.helper.ask(Request::ReleaseCountingSockets);
         }
 
