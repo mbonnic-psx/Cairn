@@ -43,7 +43,7 @@ default = ["app"]
 # The window and everything that draws it. Kept optional so the rest of the core
 # — domain, stores, platform services, enforcement — builds and tests with no
 # GUI toolchain present.
-app = ["dep:tauri", "dep:tokio", "dep:tauri-build", "history"]
+app = ["dep:tauri", "dep:tauri-plugin-notification", "dep:tokio", "dep:tauri-build", "history"]
 # Reach history. Separate because bundled SQLCipher is a C build, and nothing in
 # the teardown path may depend on it (data-model.md).
 history = ["dep:rusqlite"]
@@ -56,6 +56,13 @@ thiserror.workspace = true
 uuid.workspace = true
 
 tauri = { version = "2", optional = true }
+# The one quiet announcement a day (FR-002). Optional and behind `app` for the
+# same reason tauri is: the pure domain, store, and enforcement layers must keep
+# building and testing with no GUI toolchain present. T001 resolved the real
+# build graph on all three desktop targets and it admits nothing that speaks
+# HTTP — scripts/check-no-notifications.sh asserts the optional-and-gated part,
+# and scripts/check-no-network-deps.sh re-checks the graph on every push.
+tauri-plugin-notification = { version = "2", optional = true }
 rusqlite = { version = "0.32", features = ["bundled-sqlcipher-vendored-openssl"], optional = true }
 # The Linux backend is the pure-Rust Secret Service client rather than the one
 # that links libdbus: fewer system dependencies for a tool people install to

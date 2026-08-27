@@ -65,6 +65,7 @@ slice `002` set for its seven checks. Confirmed so far:
 | `check-no-ambient-counts.mjs` | T002 — ten planted cases | Seven fail and three pass, exactly as specified. Table below |
 | `eslint` import restriction | T003 — nine planted cases | Six fail and three pass. Closed two pre-existing holes: literal specifiers missed deeper nesting, and the allowlist switched the whole rule off |
 | `eslint` notification rules | T004 — 17-case combined matrix | All 17 correct. Caught an exemption T003 had left inherited by two screens |
+| `check-no-notifications.sh` (rewritten) | T005 — 13 planted cases | All 13 correct, including the comment-versus-capability case its first draft got wrong |
 
 **T002's ten cases.** Seven must fail:
 
@@ -104,6 +105,19 @@ immediately before it ran.
 The two rows with no passing case are deliberate. There is no file in which a browser
 notification route is acceptable, `announce.ts` included — the announcement goes through the
 plugin, and the browser routes each ask for a permission Cairn has no use for.
+
+### T005's 13 cases
+
+Eleven must fail: `new Notification` in a screen; a badge in the shell; two modules importing
+the plugin; the importer not being `announce.ts`; `announce.ts` able to notify but never asking
+`announce_check_in_if_due`; a send call outside `announce.ts`; two capability files declaring a
+notification permission; notification machinery in the privileged helper; a notification
+dependency in the helper's manifest; the dependency declared non-optional; the dependency not
+gated behind `app`.
+
+Two must pass: the same forbidden words appearing in a *comment* — prose is not a capability,
+and the first draft of this rewrite got that wrong on a helper test comment — and `announce.ts`
+importing the plugin while asking the decision command, which is the one permitted shape.
 
 Then confirm the classification test still holds, since ten commands were added to it:
 
