@@ -47,6 +47,11 @@ DayView {
 `day` is the local calendar date; `day_start`/`day_end` are its bounds in epoch seconds,
 computed by the interface exactly as `Reaches.tsx` already does (research R3).
 
+**The frontend wrapper is named `getDayView`, not `getDay`.** `getDay` is a `Date` method, so
+the ambient-counts guard cannot watch for the shorter name without false-positiving on every
+date calculation in the codebase — and a guard that cries wolf gets edited into uselessness.
+The Rust command keeps its `get_day` name; only the TypeScript wrapper differs.
+
 When `sealed` is set, `entry`, `estimate`, and `reaches` are all absent and the interface
 shows the sentence and nothing else. It does **not** offer the journaling space — see
 `save_journal_entry`.

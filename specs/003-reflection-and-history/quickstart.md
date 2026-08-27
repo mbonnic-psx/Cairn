@@ -53,6 +53,33 @@ npm run check
 | `check:no-network-deps` | The notification dependency admitted nothing network-capable (research R1) |
 | `check:domain-purity` | The pattern and announcement arithmetic stayed free of I/O and platform code |
 
+### Guard verifications on record
+
+Each modified guard must be proven to fail on the violation it exists to catch, the standard
+slice `002` set for its seven checks. Confirmed so far:
+
+| Guard | Demonstrated by | Result |
+| --- | --- | --- |
+| `check-no-network-deps.sh` | T001 — the notification plugin in the tree | `clean on 3 desktop targets`, reported independently from all three Core runners. **GO** |
+| `check-no-notifications.sh` (old form) | T001 — the same push | Failed with `src-tauri/Cargo.toml declares tauri-plugin-notification`. The rewritten form needs its own planted violation |
+| `check-no-ambient-counts.mjs` | T002 — ten planted cases | Seven fail and three pass, exactly as specified. Table below |
+
+**T002's ten cases.** Seven must fail:
+
+1. A badge on the allowlisted `Reaches.tsx` — *this passed before T002*, and is the hole T002 closed
+2. A badge on a newly-allowlisted screen
+3. A reach count in the shell (`App.tsx`)
+4. Reach data in a shared component
+5. A reach summary on a screen not on the allowlist
+6. A tray surface, anywhere
+7. A dock or taskbar progress surface, anywhere
+
+Three must pass:
+
+8. Reach data on an allowlisted screen — the whole point of the allowlist
+9. The typed IPC wrapper declaring a reach command
+10. A test naming a surface it asserts is absent
+
 Then confirm the classification test still holds, since ten commands were added to it:
 
 ```sh
