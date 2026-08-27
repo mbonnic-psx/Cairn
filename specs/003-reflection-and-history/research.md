@@ -11,25 +11,44 @@ nothing, and that rule applies here.
 
 ## R1 — Can Cairn raise a notification without admitting anything network-capable?
 
-**Status: GO/NO-GO. Must be resolved before the announcement is built.**
+**Status: RESOLVED — GO.** Measured 2026-08-27 (task T001).
 
-**Decision (proposed)**: add `tauri-plugin-notification` 2 and its npm counterpart, and
-verify the resolved build graph on all three desktop targets before writing a line against
-it.
+**Decision**: `tauri-plugin-notification` 2, declared **optional and gated behind the `app`
+feature** exactly as `tauri` itself is, so the pure domain, store, and enforcement layers keep
+building and testing with `--no-default-features` and no GUI toolchain. A non-optional
+dependency here would have quietly taken that property away.
 
-**Why this cannot be settled here**: `cargo` is not available on this machine, so the graph
-cannot be resolved. `check-no-network-deps.sh` reads the real per-target build graph with
-`cargo tree` rather than the lockfile, precisely because the lockfile over-reports. That
-check *is* the answer to this question, and it has to be run.
+**The measurement**: `scripts/check-no-network-deps.sh` reported `no-network-deps: clean on 3
+desktop targets` from all three Core runners independently — Linux, Windows, and macOS — with
+the plugin in the tree. The full workspace test suite and the privileged acceptance runs
+passed unchanged on all three platforms in the same run. The script resolves the real
+per-target build graph with `cargo tree` rather than reading the lockfile, which is what makes
+the result trustworthy: a lockfile check would have over-reported `tauri`'s mobile-only
+`reqwest`.
 
-**What is expected, stated as an expectation and not a finding**: the plugin's backends are
-D-Bus on Linux, WinRT toast on Windows, and the platform notification framework on macOS.
-None of those is HTTP. The guard's banned list already anticipates the category — it names
-`tauri-plugin-updater` and `tauri-plugin-http` explicitly — so Tauri plugins were understood
-as a risk surface when it was written, and this one is expected to pass. Expected is not
-verified.
+**How it was measured without cargo**: it was not needed locally. CI's `core` job already runs
+that guard on all three platforms and the script loops the three targets internally, so the
+spike was a push to a throwaway branch and CI was the instrument. This is worth remembering as
+a pattern — several of this project's open questions are answerable by the machinery it already
+has, without installing anything.
 
-**Fallback ladder if it does not pass**, in order of preference:
+**What the expectation got right, and what it missed.** The prediction was that the plugin's
+backends — D-Bus, WinRT toast, and the platform notification framework — carry no HTTP, and
+that held. What the prediction did not anticipate is that the same push would fail
+`check-no-notifications.sh` with `src-tauri/Cargo.toml declares tauri-plugin-notification`.
+That is not a problem; it is the guard doing precisely its job, and rewriting it is T005. It
+also **discharges part of T008 for free**: the guard is now demonstrated to fail on the exact
+violation it exists to catch, which is the standard slice `002` set for its seven checks.
+
+**Consequence for the tasks**: T004, T005, and T028 are unblocked. The fallback ladder below
+is not needed and is kept only as a record of what would have happened had the answer gone the
+other way.
+
+**`package.json` was deliberately left untouched by the spike.** `npm ci` fails when it
+disagrees with the lockfile, which would have turned CI red for a reason unrelated to the
+question. The npm counterpart belongs to T028, where the plugin is actually called.
+
+**Fallback ladder, had it not passed** — kept as a record, not a plan:
 
 1. **Implement the announcement behind the platform seam directly, with no new dependency.**
    This is more attractive than it first appears on Linux: `keyring` is already configured
