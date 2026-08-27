@@ -30,19 +30,56 @@ fn helper() -> (tempfile::TempDir, std::path::PathBuf) {
     let clock = ClockKeeper::at(&data);
     let uid = unsafe { libc::getuid() };
 
+    // `serve`'s error used to be discarded. It binds before it accepts, and
+    // binding is what puts the socket file on disk — so a failure after that
+    // point leaves a socket nothing is listening on, and every later connect
+    // gets ECONNREFUSED. The test then reported a refused connection and never
+    // the reason for it. Keep the error so the wait below can say what happened.
+    let trouble = std::sync::Arc::new(std::sync::Mutex::new(None::<String>));
+    let reporting = std::sync::Arc::clone(&trouble);
     std::thread::spawn(move || {
-        let _ = serve(&machine, &clock, uid);
+        if let Err(problem) = serve(&machine, &clock, uid) {
+            if let Ok(mut slot) = reporting.lock() {
+                *slot = Some(problem.to_string());
+            }
+        }
     });
 
-    // The listener is up once the socket exists.
-    for _ in 0..200 {
-        if socket.exists() {
-            break;
+    // Ready means a connection is accepted, not that the socket file exists.
+    //
+    // Existence proves `bind` happened and nothing about whether anything is
+    // serving. Three tests in this file failed together on a macOS runner with
+    // ECONNREFUSED against a socket that existed, which is the shape of that
+    // gap: the file was there, the listener was not. Probing with a real
+    // connect is the only readiness check that answers the question actually
+    // being asked, and it is correct whether the cause is a slow start or a
+    // `serve` that gave up after binding.
+    let said = || trouble.lock().ok().and_then(|slot| slot.as_ref().cloned());
+
+    for attempt in 0..400 {
+        match UnixStream::connect(&socket) {
+            Ok(probe) => {
+                // Accepted, so the helper is serving. The probe says nothing and
+                // closes, which the helper treats as any connection that ends:
+                // it reads EOF and drops it.
+                drop(probe);
+                return (directory, socket);
+            }
+            Err(problem) => {
+                if let Some(reason) = said() {
+                    panic!("the helper stopped serving before it was asked: {reason}");
+                }
+                assert!(
+                    attempt < 399,
+                    "the helper never accepted a connection on {} after 4s: {problem}",
+                    socket.display()
+                );
+                std::thread::sleep(std::time::Duration::from_millis(10));
+            }
         }
-        std::thread::sleep(std::time::Duration::from_millis(10));
     }
 
-    (directory, socket)
+    unreachable!("the loop above either connects or panics")
 }
 
 fn ask(socket: &std::path::Path, request: &Request) -> Response {
