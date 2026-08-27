@@ -548,7 +548,7 @@ not author is byte-identical, and no Cairn-authored entry remains anywhere.
 - **Recovery gate (later slice).** Constitution Principle I requires every reduction of
   protection to pass the active gate. This slice satisfies that with a fixed 24-hour
   waiting period on a single reduction path. The later slice extends it — a duration the
-  person chooses between 1 hour and 7 days, the rule that a decrease must itself wait out
+  person chooses between 5 minutes and 7 days, the rule that a decrease must itself wait out
   the current period, and partner approval — and MUST be able to do so without redesigning
   the path built here.
 - **Enhanced protection layers (later slice).** Layers 2 and 3 are the largest engineering
@@ -565,7 +565,7 @@ unambiguous, not to defer it indefinitely.
 
 - Enhanced protection layers — deeper system-wide coverage, subdomain coverage, and
   prevention of browser workarounds (v1: FR-014, FR-016, FR-017, FR-020).
-- The configurable recovery gate: a waiting period the person chooses between 1 hour and
+- The configurable recovery gate: a waiting period the person chooses between 5 minutes and
   7 days, and the rule that shortening it must itself wait out the current period
   (v1: FR-040a, FR-040b). The fixed 24-hour period is in scope; choosing its length is not.
 - Applying the gate to ending a scheduled protection period early, to quitting the app, and
