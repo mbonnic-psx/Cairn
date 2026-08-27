@@ -64,6 +64,7 @@ slice `002` set for its seven checks. Confirmed so far:
 | `check-no-notifications.sh` (old form) | T001 — the same push | Failed with `src-tauri/Cargo.toml declares tauri-plugin-notification`. The rewritten form needs its own planted violation |
 | `check-no-ambient-counts.mjs` | T002 — ten planted cases | Seven fail and three pass, exactly as specified. Table below |
 | `eslint` import restriction | T003 — nine planted cases | Six fail and three pass. Closed two pre-existing holes: literal specifiers missed deeper nesting, and the allowlist switched the whole rule off |
+| `eslint` notification rules | T004 — 17-case combined matrix | All 17 correct. Caught an exemption T003 had left inherited by two screens |
 
 **T002's ten cases.** Seven must fail:
 
@@ -86,6 +87,23 @@ reaches on a screen not allowlisted; reaches in the shell; journal on an unrelat
 journal on `History.tsx`; and journal on `Reaches.tsx` — the last two being what the old
 `off` allowlist silently permitted. Three must pass: reaches on `History.tsx`, both modules
 on `CheckIn.tsx`, and journal on `Day.tsx`.
+
+### The 17-case ESLint matrix
+
+Re-run this whenever an allowlist or a restricted module changes. It has caught a hole in
+each of the three guards it has been pointed at so far, including one introduced by the task
+immediately before it ran.
+
+| Group | Must fail | Must pass |
+| --- | --- | --- |
+| Reach data | two levels deep; a screen not allowlisted; the shell | on `History.tsx` |
+| Journal entries | an unrelated screen; `Reaches.tsx`; `History.tsx` | on `Day.tsx` |
+| Browser notification routes | `new Notification` on a screen **and inside `announce.ts`**; `Notification.requestPermission`; service-worker `showNotification` | — |
+| The notification plugin | `CheckIn.tsx`; `Day.tsx`; the shell; `announce.ts` importing reach data | the plugin in `announce.ts` |
+
+The two rows with no passing case are deliberate. There is no file in which a browser
+notification route is acceptable, `announce.ts` included — the announcement goes through the
+plugin, and the browser routes each ask for a permission Cairn has no use for.
 
 Then confirm the classification test still holds, since ten commands were added to it:
 

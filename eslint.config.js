@@ -49,16 +49,44 @@ export default tseslint.config(
               message:
                 'Only the check-in and a single day may read journal entries (FR-033). Nothing else may put what someone wrote in front of them unasked.',
             },
+            {
+              group: ['@tauri-apps/plugin-notification', '**/plugin-notification'],
+              message:
+                'Only src/announce.ts may raise the one daily announcement (FR-002, FR-005). A second module that can notify is a second thing that can interrupt someone.',
+            },
           ],
         },
       ],
 
-      // Principle V: nothing in this release interrupts the person.
+      // Principle V: exactly one quiet announcement a day, and nothing else,
+      // ever. Slice 002 could say "no notifications at all" because it had no
+      // way to send one. That sentence stops being true here, so the rule has
+      // to say the narrower thing precisely instead of the broad thing loosely.
+      //
+      // Every selector below stays forbidden **everywhere, src/announce.ts
+      // included**. None of them is how Cairn announces: the announcement goes
+      // through the Tauri plugin, which is import-restricted to that one file
+      // above. The browser routes are not narrowed for anybody, because each
+      // one asks the person for a permission Cairn has no use for and each is
+      // reachable without the single-per-day decision that makes the
+      // announcement legitimate.
       'no-restricted-syntax': [
         'error',
         {
           selector: "NewExpression[callee.name='Notification']",
-          message: 'This release produces no notifications at all (FR-023).',
+          message:
+            'The browser notification constructor is never how Cairn notifies. The one daily announcement goes through the plugin, from src/announce.ts alone (FR-002).',
+        },
+        {
+          selector:
+            "MemberExpression[object.name='Notification'][property.name='requestPermission']",
+          message:
+            'Cairn never asks for the browser notification permission. The one daily announcement goes through the plugin (FR-002).',
+        },
+        {
+          selector: "CallExpression[callee.property.name='showNotification']",
+          message:
+            'A service-worker notification bypasses the once-a-day decision entirely (FR-004). There is one announcement path and it is src/announce.ts.',
         },
       ],
     },
@@ -102,11 +130,59 @@ export default tseslint.config(
     },
   },
 
-  // The two screens that legitimately hold both. There is nothing left to
-  // restrict here, so the rule is off — but if a third restricted module is
-  // ever added, this block must be revisited rather than inherited.
+  // The one module permitted to raise the announcement. It may import the
+  // plugin — and, per the lesson from the allowlists above, it stays barred
+  // from reaches and journal entries, which it has no business touching. It
+  // decides nothing and renders nothing; it asks the core whether an
+  // announcement is due and passes on the answer.
+  {
+    files: ['src/announce.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['**/ipc/reaches'],
+              message:
+                'The announcement carries no reach data. It says a check-in is ready and nothing about what is in it (FR-002).',
+            },
+            {
+              group: ['**/ipc/journal'],
+              message:
+                'The announcement carries nothing the person wrote (FR-033).',
+            },
+          ],
+        },
+      ],
+    },
+  },
+
+  // The two screens that legitimately hold both reaches and journal entries —
+  // and are still barred from the notification plugin, which is announce.ts's
+  // alone.
+  //
+  // This block was written as `'no-restricted-imports': 'off'` one task ago,
+  // with a comment warning that a third restricted module would have to be
+  // handled here rather than inherited. A third one was added in the very next
+  // task and it inherited the exemption silently. The verification matrix
+  // caught it; the comment did not, because a comment cannot fail a build.
+  // Hence: never `off`, always re-declare what still applies.
   {
     files: ['src/screens/CheckIn.tsx', 'src/screens/Day.tsx'],
-    rules: { 'no-restricted-imports': 'off' },
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['@tauri-apps/plugin-notification', '**/plugin-notification'],
+              message:
+                'Only src/announce.ts may raise the one daily announcement (FR-002, FR-005). A screen that can notify is a screen that can interrupt someone.',
+            },
+          ],
+        },
+      ],
+    },
   },
 );
