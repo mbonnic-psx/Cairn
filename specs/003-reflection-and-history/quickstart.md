@@ -63,6 +63,7 @@ slice `002` set for its seven checks. Confirmed so far:
 | `check-no-network-deps.sh` | T001 — the notification plugin in the tree | `clean on 3 desktop targets`, reported independently from all three Core runners. **GO** |
 | `check-no-notifications.sh` (old form) | T001 — the same push | Failed with `src-tauri/Cargo.toml declares tauri-plugin-notification`. The rewritten form needs its own planted violation |
 | `check-no-ambient-counts.mjs` | T002 — ten planted cases | Seven fail and three pass, exactly as specified. Table below |
+| `eslint` import restriction | T003 — nine planted cases | Six fail and three pass. Closed two pre-existing holes: literal specifiers missed deeper nesting, and the allowlist switched the whole rule off |
 
 **T002's ten cases.** Seven must fail:
 
@@ -79,6 +80,12 @@ Three must pass:
 8. Reach data on an allowlisted screen — the whole point of the allowlist
 9. The typed IPC wrapper declaring a reach command
 10. A test naming a surface it asserts is absent
+
+**T003's nine cases.** Six must fail: reaches imported two levels deep (the old hole);
+reaches on a screen not allowlisted; reaches in the shell; journal on an unrelated screen;
+journal on `History.tsx`; and journal on `Reaches.tsx` — the last two being what the old
+`off` allowlist silently permitted. Three must pass: reaches on `History.tsx`, both modules
+on `CheckIn.tsx`, and journal on `Day.tsx`.
 
 Then confirm the classification test still holds, since ten commands were added to it:
 
