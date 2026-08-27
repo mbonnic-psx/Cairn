@@ -34,3 +34,6 @@ logs/
 *.sqlite
 .env
 .env.*
+
+# Machine-local slice pipeline state
+.cursor/
