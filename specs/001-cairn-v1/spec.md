@@ -18,6 +18,11 @@
 - Q: Should uninstalling Cairn pass the recovery gate, given an OS-level uninstall cannot be intercepted? → A: Removal started inside the app passes the active gate. An uninstall started from the operating system removes everything immediately, because Cairn cannot intercept it, and this is stated plainly in the app and the README.
 - Q: At the evening hour the person chose, should Cairn announce that the check-in is ready? → A: One quiet system notification at that hour, at most once a day, dismissible, turn-off-able in settings. No other unsolicited prompt at any point in the day.
 
+### Session 2026-08-27
+
+- Q: Should the gate stay mandatory, or become a mode the person opts into like an ordinary blocker with a separate locked mode? → A: The gate stays mandatory. There is no ungated mode and no "none" option, because a wall that is switched on is unlocked at exactly the moment it is needed. What changes instead is the floor of the range, below. Principle I is unamended.
+- Q: How short may the waiting period be? → A: 5 minutes, revised down from the 1 hour agreed on 2026-08-18 (superseding that answer's lower bound; the 7-day upper bound and 24-hour default are unchanged). The floor is not an escape hatch, because FR-040b makes any decrease wait out the currently configured period — reaching a 5-minute setting from the 24-hour default itself takes 24 hours, so no impulse can arrive at it. The intent is that someone who finds always-on gating too heavy has a gentler setting to move toward rather than an off switch to reach for.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Set the trail and be protected (Priority: P1)
@@ -172,8 +177,9 @@ fully enforced throughout, and the request can be cancelled.
    unprotect a site, **Then** the site stays protected for the full 24 hours, the
    time remaining is visible, and the request can be cancelled at any point.
 2. **Given** delay-mode gating is set to 24 hours, **When** the person changes the
-   waiting period to 1 hour, **Then** the shorter period takes effect only after 24
-   hours have passed; changing it to 7 days takes effect at once.
+   waiting period to 5 minutes — the shortest the range allows — **Then** the shorter
+   period takes effect only after 24 hours have passed; changing it to 7 days takes
+   effect at once.
 3. **Given** partner-mode gating is active, **When** the person requests a change,
    **Then** the change applies only once the partner's passphrase is entered.
 4. **Given** a gate is active, **When** the person quits Cairn, restarts the machine,
@@ -490,7 +496,7 @@ active before the person opens anything, with Cairn present in the tray.
 - **FR-040**: System MUST gate every reduction or removal of protection behind the
   active recovery mode — a waiting period, a partner's approval, or both.
 - **FR-040a**: System MUST let the person choose the waiting period at setup from a
-  bounded range of 1 hour to 7 days, and MUST default it to 24 hours.
+  bounded range of 5 minutes to 7 days, and MUST default it to 24 hours.
 - **FR-040b**: System MUST apply an increase to the waiting period immediately, and
   MUST make any decrease to it wait out the currently configured period before taking
   effect.
@@ -632,7 +638,7 @@ active before the person opens anything, with Cairn present in the tray.
 - **Pattern View**: A derived summary of reaches over a chosen range, by site, hour,
   and day.
 - **Recovery Gate**: The friction configured for reducing protection — a waiting
-  period between 1 hour and 7 days, a partner's approval, or both — and any change
+  period between 5 minutes and 7 days, a partner's approval, or both — and any change
   currently pending against it.
 - **Pending Change**: A requested reduction in protection, what it would change, when
   it becomes eligible, and its approval state.
