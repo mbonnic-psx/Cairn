@@ -229,3 +229,34 @@ pub trait AutostartService: Send + Sync {
     fn is_enabled(&self) -> Outcome<bool>;
     fn set_enabled(&self, on: bool) -> Outcome<()>;
 }
+
+/// Raising the one quiet evening announcement. Never decides whether one is
+/// due — that is the domain's job (research R2) — only whether the platform
+/// took this one when asked (FR-002, FR-004, FR-006).
+pub trait AnnounceService: Send + Sync {
+    fn capability(&self) -> Capability;
+
+    /// Asks the platform to raise a single notification with this title and
+    /// body. Carries no schedule, no id, and no way to cancel or list what
+    /// came before — the trait can do nothing this call does not name.
+    fn announce(&self, title: &str, body: &str) -> Outcome<Announced>;
+}
+
+/// What happened when Cairn asked the platform to raise the announcement.
+///
+/// [`Announced::Accepted`] means the platform took it, not that the person
+/// saw it: permission can be granted and do-not-disturb can still swallow the
+/// notice, or there may be no notification daemon listening at all. Cairn
+/// cannot see past the platform's own delivery and this type does not claim
+/// to (Principle III). A platform that cannot announce at all — no
+/// notification surface present — answers through [`Capability::Unsupported`]
+/// instead; this type only speaks to a call that was actually attempted.
+#[derive(Clone, PartialEq, Eq, Debug)]
+pub enum Announced {
+    Accepted,
+    /// The platform declined to raise it, in words that can be shown to a
+    /// person — permission withheld, or asked and refused.
+    Declined {
+        because: String,
+    },
+}

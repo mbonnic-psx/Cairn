@@ -5,6 +5,7 @@
 //! a systemd unit name. The composition root picks the implementations here and
 //! everything else talks to the traits in [`crate::services`].
 
+pub mod announce;
 pub mod credentials;
 pub mod hosts;
 
@@ -15,6 +16,7 @@ pub mod macos;
 #[cfg(windows)]
 pub mod windows;
 
+pub use announce::{LinuxAnnounce, MacosAnnounce, WindowsAnnounce};
 pub use credentials::PlatformCredentials;
 pub use hosts::SystemHosts;
 
