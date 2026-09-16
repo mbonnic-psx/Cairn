@@ -8,6 +8,7 @@ use std::path::{Path, PathBuf};
 
 use serde::{Deserialize, Serialize};
 
+use crate::domain::dates::LocalDate;
 use crate::domain::entries::{ReachMode, Trail};
 use crate::domain::gate::{PendingChange, TrustedClock};
 use crate::services::Trouble;
@@ -54,8 +55,23 @@ impl Default for ReachModeSetting {
     }
 }
 
+/// The evening hour used before the person has chosen one: a stated default,
+/// not an arbitrary zero, so the check-in behaves correctly from the first
+/// run (FR-007). Named so the same value backs both `serde`'s default and the
+/// struct's own `Default` impl below, which is what keeps a freshly created
+/// `Config` and a slice `002` file with the field missing indistinguishable.
+fn default_evening_hour() -> u8 {
+    21
+}
+
+/// FR-003's switch defaults to on: the announcement is part of the feature
+/// until a person turns it off, not something they have to opt into.
+fn default_announce_check_in() -> bool {
+    true
+}
+
 /// Everything Cairn remembers that is not a reach.
-#[derive(Clone, PartialEq, Eq, Debug, Default, Serialize, Deserialize)]
+#[derive(Clone, PartialEq, Eq, Debug, Serialize, Deserialize)]
 pub struct Config {
     #[serde(default)]
     pub trail: Trail,
@@ -74,6 +90,43 @@ pub struct Config {
     /// own editable data (FR-002).
     #[serde(default)]
     pub seeded: bool,
+    /// The hour, 0–23, at which the check-in becomes reachable and, if
+    /// `announce_check_in` is on, announced. A slice `002` file has no such
+    /// key and loads with the stated default above rather than an unchosen
+    /// zero (FR-007).
+    #[serde(default = "default_evening_hour")]
+    pub evening_hour: u8,
+    /// Whether the single daily announcement is raised at all. Off never
+    /// changes whether the check-in can be opened — only whether Cairn says
+    /// anything about it (FR-003).
+    #[serde(default = "default_announce_check_in")]
+    pub announce_check_in: bool,
+    /// The local calendar date an announcement was last raised *for* — which
+    /// date, never a count of anything. It lives here, in plain configuration,
+    /// rather than in the encrypted history, because it has to survive that
+    /// store's key being unavailable: were it sealed instead, a missing key
+    /// would make every later check look like the date had never been
+    /// announced, and the notification would go out a second time for a date
+    /// that already had one — right when the encrypted store is already
+    /// unreadable and the person can least afford a repeat (data-model.md).
+    #[serde(default)]
+    pub last_announced_day: Option<LocalDate>,
+}
+
+impl Default for Config {
+    fn default() -> Self {
+        Config {
+            trail: Trail::default(),
+            intent: ProtectionIntent::default(),
+            reach_mode: ReachModeSetting::default(),
+            pending_change: None,
+            trusted_clock: TrustedClock::default(),
+            seeded: false,
+            evening_hour: default_evening_hour(),
+            announce_check_in: default_announce_check_in(),
+            last_announced_day: None,
+        }
+    }
 }
 
 /// Reads and writes [`Config`] in the person's own user-data directory.

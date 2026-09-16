@@ -54,6 +54,53 @@ fn a_first_run_is_not_a_problem() {
 }
 
 #[test]
+fn a_slice_002_configuration_loads_unchanged() {
+    // T020: a file written before this slice existed has none of
+    // `evening_hour`, `announce_check_in`, or `last_announced_day`. It must
+    // still load — with the stated defaults, never an error — so upgrading
+    // asks a person nothing (data-model.md, FR-007).
+    let directory = tempfile::tempdir().unwrap();
+    let store = ConfigStore::at(directory.path());
+
+    let clock = TrustedClock::started(1_700_000_000, 0);
+    let expected = Config {
+        trail: a_trail(),
+        intent: ProtectionIntent::On,
+        seeded: true,
+        trusted_clock: clock,
+        ..Config::default()
+    };
+
+    // Take a config exactly as slice 002's writer would have produced it, by
+    // serializing today's `Config` and then deleting the three keys 002 could
+    // never have written. That is what a real upgrade file looks like.
+    let mut value = serde_json::to_value(&expected).unwrap();
+    let object = value.as_object_mut().unwrap();
+    assert!(
+        object.remove("evening_hour").is_some(),
+        "the fixture setup is wrong: the field is not there to remove"
+    );
+    assert!(
+        object.remove("announce_check_in").is_some(),
+        "the fixture setup is wrong: the field is not there to remove"
+    );
+    assert!(
+        object.remove("last_announced_day").is_some(),
+        "the fixture setup is wrong: the field is not there to remove"
+    );
+    std::fs::write(store.path(), serde_json::to_vec_pretty(&value).unwrap()).unwrap();
+
+    let loaded = store.load().unwrap();
+
+    // `expected` already carries the stated defaults for all three fields,
+    // since it was built with `..Config::default()` and never overrode them.
+    assert_eq!(loaded, expected);
+    assert_eq!(loaded.evening_hour, 21);
+    assert!(loaded.announce_check_in);
+    assert_eq!(loaded.last_announced_day, None);
+}
+
+#[test]
 fn configuration_holds_no_reach_data() {
     // FR-032 and the reason config is plain JSON at all: there is nothing
     // sensitive in it. If a reach ever appears here, this test is the tripwire.
