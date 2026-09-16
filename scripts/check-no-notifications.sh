@@ -30,6 +30,8 @@
 #   5. The privileged helper may never notify, on any path, at all.
 #   6. The dependency stays optional and behind `app`, so the pure layers keep
 #      building with no GUI toolchain.
+#   7. Every notification permission held is one of the three Cairn needs.
+#   8. Nothing is ever scheduled to fire later.
 #
 # A rule here that starts permitting more than it forbids has gone wrong. This
 # file forbids strictly more than the version it replaced; the one thing it now
@@ -45,6 +47,14 @@ ANNOUNCER='src/announce.ts'
 # The command it must ask. Anything that notifies without asking this has
 # escaped the once-a-day decision.
 DECISION='announce_check_in_if_due'
+
+# The only notification permissions Cairn may hold. The plugin defines sixteen
+# and bundles all of them into `notification:default`, which is why that bundle
+# is not used: it would grant scheduling management, action buttons, listeners,
+# batching, and inspection of what the system is holding, none of which this
+# product has any use for. Narrowing once is a decision; checking it here is
+# what makes it an invariant.
+ALLOWED_PERMISSIONS='notification:allow-notify notification:allow-is-permission-granted notification:allow-request-permission'
 
 # Tests do not ship, and a test asserting a surface is absent has to name it.
 # Same exemption the streak and ambient-count guards make.
@@ -151,6 +161,45 @@ if [ -f "$MANIFEST" ] && grep -q '^tauri-plugin-notification' "$MANIFEST"; then
         fail 'tauri-plugin-notification must be declared optional = true'
     grep -E '^app = \[.*dep:tauri-plugin-notification' "$MANIFEST" >/dev/null ||
         fail 'tauri-plugin-notification must be gated behind the `app` feature'
+fi
+
+# ── 7. Every held permission is one of the three ──────────────────────────────
+for f in src-tauri/tauri.conf.json src-tauri/capabilities/*.json; do
+    [ -f "$f" ] || continue
+    while IFS= read -r permission; do
+        [ -n "$permission" ] || continue
+        case " $ALLOWED_PERMISSIONS " in
+            *" $permission "*) ;;
+            *)
+                fail "$f holds $permission"
+                report 'Only notify, is-permission-granted, and request-permission.'
+                report 'notification:default grants all sixteen and must not be used.'
+                ;;
+        esac
+    done < <(grep -oE '"notification:[a-z-]+"' "$f" | tr -d '"' || true)
+done
+
+# ── 8. Nothing is scheduled ───────────────────────────────────────────────────
+#
+# The plugin's send function takes a `schedule` option, and its Schedule type
+# offers `interval` and `every` as well as `at`. A repeating notification is the
+# escalation FR-004 forbids in the plainest possible form, and a deferred one
+# fires without passing the decision that makes an announcement legitimate.
+#
+# Scoped to the announcer rather than all of src/, because "schedule" is an
+# ordinary word in this product — protection schedules are a v1 feature — and a
+# guard that fires on the wrong Schedule gets edited into uselessness.
+#
+# Inert today: $ANNOUNCER (src/announce.ts) doesn't exist until T035, so the
+# `[ -f "$ANNOUNCER" ]` test below skips this block entirely. That means this
+# rule has not been demonstrated against a planted violation. It must get one
+# when T035 lands — an unverified guard is a guard in name only.
+if [ -f "$ANNOUNCER" ]; then
+    if hits=$(uncommented "$ANNOUNCER" | grep -nE '\bSchedule\b|\bschedule\s*:' || true); [ -n "$hits" ]; then
+        fail "$ANNOUNCER schedules a notification"
+        while IFS= read -r line; do report "$line"; done <<< "$hits"
+        report 'An announcement is raised when it is due, never queued to fire later.'
+    fi
 fi
 
 if [ "$status" -ne 0 ]; then

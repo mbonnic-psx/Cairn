@@ -1,7 +1,12 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
-  "description": "The window's entire capability set. Cairn's frontend talks to the core through its own commands and nothing else — no filesystem access, no shell, no HTTP, and no notification permission of any kind (FR-023).",
+  "description": "The window's entire capability set. Cairn's frontend talks to the core through its own commands and nothing else — no filesystem access, no shell, no HTTP. The three notification permissions are the narrowest set that can raise one quiet announcement a day (FR-002): send it, ask whether it is allowed, and request permission once. The plugin offers sixteen; the other thirteen are refused, and notification:default is deliberately not used because it grants all sixteen. Refusing batch means no second notice in the same breath. Refusing register-action-types and register-listener means the notice carries no buttons, so it cannot become a route to anything. Refusing get-active, remove-active, cancel and get-pending means Cairn neither inspects nor manages what the system is holding. Refusing the channel verbs leaves nothing to configure. The once-a-day bound is not established here — it is a property of the decision function and its tests (FR-004).",
   "windows": ["main"],
-  "permissions": ["core:default"]
+  "permissions": [
+    "core:default",
+    "notification:allow-notify",
+    "notification:allow-is-permission-granted",
+    "notification:allow-request-permission"
+  ]
 }

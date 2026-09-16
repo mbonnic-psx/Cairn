@@ -29,7 +29,8 @@
     "active": true,
     "targets": "all",
     "resources": [
-      "resources/categories/*.json"
+      "resources/categories/*.json",
+      "resources/quotes/*.json"
     ],
     "shortDescription": "Machine-wide protection with a recovery layer",
     "longDescription": "Cairn protects the sites you have chosen not to visit, across the whole machine. It records that you reached, and nothing else. Everything here is free, local, and reversible.",
