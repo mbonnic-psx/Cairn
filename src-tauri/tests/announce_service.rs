@@ -5,6 +5,22 @@
 //! [`AnnounceService::capability`], and that a build with no window is
 //! honest about having nothing to raise a notification through, rather than
 //! silently pretending to have tried.
+//!
+//! # Why this file is gated to builds without `app`
+//!
+//! With `app` on, all three types hold a live `AppHandle` and the only way to
+//! build one is `new(handle)` — a handle is the one thing these types cannot
+//! invent for themselves, and CI has no running application to take one from.
+//! The unconditional constructors (`Default`, `assuming_daemon`) exist only
+//! without `app` for exactly that reason, so the whole file is scoped to that
+//! configuration rather than each test repeating the condition.
+//!
+//! What this leaves untested is the `app` path of `raise` — the permission
+//! check and the plugin call. That is not reachable from a test at all
+//! without a desktop session, and the seam is shaped so the untested part is
+//! as small as possible: everything that does not need a handle, including
+//! every `capability` answer above, is unconditional and proved here.
+#![cfg(not(feature = "app"))]
 #![allow(clippy::unwrap_used, clippy::expect_used)]
 
 use cairn::platform::{LinuxAnnounce, MacosAnnounce, WindowsAnnounce};
