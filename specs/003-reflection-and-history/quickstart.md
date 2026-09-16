@@ -61,11 +61,13 @@ slice `002` set for its seven checks. Confirmed so far:
 | Guard | Demonstrated by | Result |
 | --- | --- | --- |
 | `check-no-network-deps.sh` | T001 — the notification plugin in the tree | `clean on 3 desktop targets`, reported independently from all three Core runners. **GO** |
-| `check-no-notifications.sh` (old form) | T001 — the same push | Failed with `src-tauri/Cargo.toml declares tauri-plugin-notification`. The rewritten form needs its own planted violation |
+| `check-no-notifications.sh` (old form) | T001 — the same push | Failed with `src-tauri/Cargo.toml declares tauri-plugin-notification`, exactly the violation it existed to catch |
 | `check-no-ambient-counts.mjs` | T002 — ten planted cases | Seven fail and three pass, exactly as specified. Table below |
 | `eslint` import restriction | T003 — nine planted cases | Six fail and three pass. Closed two pre-existing holes: literal specifiers missed deeper nesting, and the allowlist switched the whole rule off |
 | `eslint` notification rules | T004 — 17-case combined matrix | All 17 correct. Caught an exemption T003 had left inherited by two screens |
-| `check-no-notifications.sh` (rewritten) | T005 — 13 planted cases | All 13 correct, including the comment-versus-capability case its first draft got wrong |
+| `check-no-notifications.sh` (rewritten, rules 1–6) | T005 — 13 planted cases | All 13 correct, including the comment-versus-capability case its first draft got wrong |
+| `check-no-notifications.sh` (rule 7) | T008 — four planted cases | All four correct. Detail below |
+| `check-no-notifications.sh` (rule 8) | T008 — throwaway-file demonstration, not a standing case | Logic correct; rule remains inert in the real tree until `src/announce.ts` exists (T035). Detail below |
 
 **T002's ten cases.** Seven must fail:
 
@@ -124,6 +126,76 @@ Then confirm the classification test still holds, since ten commands were added 
 ```sh
 cd src-tauri && cargo test -p cairn --no-default-features ipc_surface
 ```
+
+### T008 — rules 7 and 8, re-run and extended
+
+T006 added two rules to `check-no-notifications.sh` beyond the six T005 shipped, and demonstrated
+only one case against rule 7 in passing. T008's job is to re-run the standing matrix (all four
+checks above still pass; see the limitation noted below) and give rules 7 and 8 the same
+treatment slice `002` gave its seven guards: plant, confirm the failure, restore, confirm the
+control passes.
+
+**Rule 7 — every held permission is one of the three.** Four cases against
+`src-tauri/capabilities/default.json`, three that must fail and one that must pass:
+
+1. `notification:default` substituted for `notification:allow-notify` — the bundle that grants
+   all sixteen. Failed with `src-tauri/capabilities/default.json holds notification:default`.
+2. `notification:allow-batch` added as a fourth permission. Failed with
+   `src-tauri/capabilities/default.json holds notification:allow-batch`.
+3. `notification:allow-cancel` added as a fourth permission. Failed with
+   `src-tauri/capabilities/default.json holds notification:allow-cancel`.
+4. The three permissions exactly as they are now — the control case. Passed:
+   `no-notifications: clean`.
+
+Each failure carried the same two report lines: `Only notify, is-permission-granted, and
+request-permission.` and `notification:default grants all sixteen and must not be used.` The
+file was restored byte-for-byte after each case; the pristine copy's checksum matched before and
+after the sweep, and the control case's pass confirms the working tree ended where it started.
+
+**Rule 8 — nothing is scheduled.** This rule is scoped to `src/announce.ts`, which does not
+exist yet — confirmed directly: `ls src/announce.ts` reports no such file, and the guard's own
+block reads `if [ -f "$ANNOUNCER" ]; then …`. With the file absent, that test is false and the
+whole block is skipped. **The rule cannot fire in the tree as it stands today.** This is not a
+gap to close now — `src/announce.ts` is T035's file, not T008's — but the rule's *logic* can and
+should be checked before then, so a mistake in it is caught here rather than discovered when
+T035 lands and the guard goes live.
+
+Demonstrated with two throwaway copies of `src/announce.ts`, each deleted immediately after its
+case ran, neither ever committed:
+
+1. **Fails.** A throwaway module importing the plugin, referencing `announce_check_in_if_due`
+   (so rule 3 passes and rule 8 is the rule under test), and scheduling a notification two ways
+   — a `Schedule`-typed constant and a `schedule:` option key. Failed with
+   `src/announce.ts schedules a notification`, reporting both the type usage and the option key
+   as separate hits, followed by `An announcement is raised when it is due, never queued to fire
+   later.`
+2. **Passes.** The same module with the `schedule` option removed — it still imports the plugin,
+   still asks `announce_check_in_if_due`, still calls `sendNotification`, but queues nothing.
+   Passed: `no-notifications: clean`.
+
+Both throwaway files were deleted in full after their case ran; `git status` shows no file at
+`src/announce.ts` and no other untracked path introduced by this work. **This is a logic
+demonstration against a file that does not belong to this slice yet, not a standing
+verification** — rule 8 stays inert in the real tree, and unproven against a real violation,
+until T035 creates `src/announce.ts`. T035 owes it the same planted-and-restored treatment this
+section gave rules 1–7, this time for real.
+
+### A standing limitation, not new to T008
+
+`npm run check` as a whole halts at `check:no-network-deps` on a machine with no `cargo` on
+`PATH` — that check needs the Rust toolchain to resolve the dependency graph it inspects. T001
+already resolved it independently, on CI, across all three targets (see the table above), so
+this is a local-machine gap rather than an open guard. Each of the other checks was run
+individually rather than through `npm run check` for this reason: `check:banned-words`,
+`check:ambient-counts`, `check:no-streaks`, `check:free`, `check-no-notifications.sh`, and
+`check-domain-purity.sh` all reported clean; `eslint` reported clean on `src/`. (`eslint` over
+the whole repository also flags `no-undef` on `console`/`process` inside `scripts/*.mjs` — those
+files run under Node rather than the browser globals the frontend config assumes. It predates
+this slice and is unrelated to the notification, ambient-count, and import-restriction rules
+under test here. **It reaches neither `npm run lint` nor CI**: the `lint` script is `eslint src`,
+so the guard scripts are never linted. Worth knowing rather than worth fixing here — the guards
+are shell and `.mjs` run directly by `npm run check`, and their correctness is established by
+planting violations against them, which is what this section does.)
 
 ## Scenario 1 — The evening check-in (US1)
 

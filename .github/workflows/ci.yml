@@ -34,7 +34,7 @@ jobs:
         run: npm run check:free
       # The network guard resolves the real build graph, so it needs cargo and
       # runs in the `core` job below rather than here.
-      - name: No notification capability (FR-023, SC-007)
+      - name: Nothing at the moment of a reach (FR-023), and one quiet announcement with nothing else (Principle V, 003 FR-002/FR-004/FR-005)
         run: npm run check:no-notifications
       - name: Domain code stays pure (platform abstraction)
         run: npm run check:domain-purity
@@ -76,9 +76,26 @@ jobs:
       - name: Clippy
         working-directory: src-tauri
         run: cargo clippy -p cairn --no-default-features --all-targets -- -D warnings
+      # `history` gates the journal and estimate stores (data-model.md) but is
+      # not part of `--no-default-features`, so the lint above never sees that
+      # code. Linting it here, still with no GUI toolchain, catches the same
+      # class of bug the cross-check below catches for the other platforms.
+      - name: Clippy (history)
+        working-directory: src-tauri
+        run: cargo clippy -p cairn --no-default-features --features history --all-targets -- -D warnings
       - name: Domain tests
         working-directory: src-tauri
         run: cargo test -p cairn --no-default-features
+
+      # `--no-default-features` alone never reaches the store: `history` is
+      # excluded, so nothing behind `#[cfg(feature = "history")]` compiles or
+      # runs here. The full `core` job below does include `history`, but only
+      # through the GUI toolchain — and the store must be provable without one,
+      # which is the same reason `history` is a separate feature at all
+      # (Cargo.toml, bundled SQLCipher is a C build).
+      - name: The store is provable with no GUI toolchain (history)
+        working-directory: src-tauri
+        run: cargo test -p cairn --no-default-features --features history
 
       # Platform-conditional code is where cross-platform bugs hide, and waiting
       # for three matrix legs to report them is slow. Checking the other targets
