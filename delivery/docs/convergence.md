@@ -1,4 +1,4 @@
-<!-- convergence: a1f859f53166a4d9 -->
+<!-- convergence: 0c7958a141254f1b -->
 # Where `cairn` stands
 
 > **Experimental.** Brownfield adoption is new and will change shape while real repositories teach it what it got wrong: the files under the delivery directory, the facts `project.json` records and the questions `adopt` asks may change in a MINOR release, and `slipwai migrate` brings each change here with a note saying what to do. Every place this reaches you says so until it stops being true. What surprised you — a detection that was wrong, a gate that went red, a sentence this page should have had — belongs on the public issue tracker.
@@ -19,7 +19,7 @@ first slice and offers the next unplanned row as a method slice beside the produ
 |---|---|---|---|---|---|
 | Path to production | `unknown` | `pipeline-decides` | Owner: v1 has not shipped; no release path exists yet | *not yet* | `confirmed` |
 | Integration | `trunk` | `continuous` | Owner: trunk-based from now on. History: 002 and 003 were feature branches that lived about 20 days; the next branches are short-lived | *not yet* | `confirmed` |
-| Safety net | `tests-exist` | `mutation-measured` | test recorded for cairn, src-tauri | *not yet* | `detected` |
+| Safety net | `tests-pass` | `mutation-measured` | Owner: 'tests-pass', 2026-09-30. make verify is green in the gate with no baseline and nothing quarantined | *not yet* | `confirmed` |
 | Structure | `named` | `typed` | cairn: tool, src-tauri: tool; not under apps/: ., src-tauri | *not yet* | `detected` |
 | Platform | `unknown` | `audited` | no runtime pin, framework version or image the survey can date | *not yet* | `unrecorded` |
 | Constitution | `template` | `in-full` | .specify/memory/constitution.md | *not yet* | `detected` |

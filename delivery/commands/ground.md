@@ -84,7 +84,7 @@ direction, at any point.
 |---|---|---|---|
 | Path to production | `unknown` | `confirmed` | Owner: v1 has not shipped; no release path exists yet |
 | Integration | `trunk` | `confirmed` | Owner: trunk-based from now on. History: 002 and 003 were feature branches that lived about 20 days; the next branches are short-lived |
-| Safety net | `tests-exist` | `detected` | test recorded for cairn, src-tauri |
+| Safety net | `tests-pass` | `confirmed` | Owner: 'tests-pass', 2026-09-30. make verify is green in the gate with no baseline and nothing quarantined |
 | Structure | `named` | `detected` | cairn: tool, src-tauri: tool; not under apps/: ., src-tauri |
 | Platform | `unknown` | `unrecorded` | no runtime pin, framework version or image the survey can date |
 | Constitution | `template` | `detected` | .specify/memory/constitution.md |

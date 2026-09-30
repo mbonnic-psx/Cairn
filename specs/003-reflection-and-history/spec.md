@@ -235,6 +235,25 @@ recording, and does not discard or overwrite what it cannot read.
 - **Ten thousand protected entries and years of history.** The history view stays usable;
   see SC-006.
 
+### Gaps reviewed — slice `write-tonight` (2026-09-30)
+
+Checked against US1 scenarios 4 and 6, the edge cases, and FR-010 through FR-033 as they bear on writing and
+revising tonight's entry. Three states the scenarios did not state, now part of the slice's acceptance:
+
+- **G1 — a save that cannot be kept.** When the write does not go through (the store could not take it, or the
+  key became unavailable after the check-in opened), the text the person typed stays on the screen, untouched,
+  beside the plain sentence Cairn returns. Nothing says it was saved, and nothing is stored. Losing what someone
+  wrote is the one failure a journaling space cannot have.
+- **G2 — clearing an entry to nothing.** Saving empty or whitespace-only text over an existing entry is refused
+  like any empty save (FR-014), and the saved entry stays as it was. Deleting an entry is `theirs` (US4, FR-015's
+  delete), not a side effect of an empty save.
+- **G3 — a day with no reaches.** The check-in reads the same whether today held reaches or none. No congratulation
+  and no badge for zero (FR-032), and the journaling space is offered either way, because the writing is the point.
+
+Already stated, and held by this slice as written: the check-in stays attached to the day it was opened for across
+midnight (edge cases); closing without writing stores nothing (FR-014); the space is not offered when sealed
+(FR-029, `contracts/ui-ipc.md`).
+
 ## Requirements *(mandatory)*
 
 ### Functional Requirements

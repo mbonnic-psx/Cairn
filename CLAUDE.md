@@ -17,7 +17,7 @@ fact, not convenience, decides every trade-off.
 | Document | What it is |
 | --- | --- |
 | `VISION.md` | Intent and voice. The source. Do not edit without being asked. |
-| `.specify/memory/constitution.md` | **Binding rules.** Currently v1.2.0. |
+| `.specify/memory/constitution.md` | **Binding rules.** Currently v1.3.0. |
 | `specs/001-cairn-v1/spec.md` | The v1 PRD — 90 functional requirements, 18 success criteria. |
 | `specs/001-cairn-v1/checklists/requirements.md` | Quality gate + validation history. |
 

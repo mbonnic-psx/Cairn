@@ -166,10 +166,10 @@
     },
     {
       "axis": "safety-net",
-      "rung": "tests-exist",
+      "rung": "tests-pass",
       "target": "mutation-measured",
-      "evidence": "test recorded for cairn, src-tauri",
-      "provenance": "detected",
+      "evidence": "Owner: 'tests-pass', 2026-09-30. make verify is green in the gate with no baseline and nothing quarantined",
+      "provenance": "confirmed",
       "planned": null
     },
     {

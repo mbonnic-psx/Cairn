@@ -1,6 +1,15 @@
 <!--
 SYNC IMPACT REPORT
 ==================
+Version change: 1.2.0 → 1.3.0
+Rationale: MINOR. The safety net reached `tests-pass` (owner, 2026-09-30), the rung at
+which "Acceptance-Driven Development, Tests First" comes into force. It moves from
+Targets to the Delivery Method in full, as the v1.2.0 target said it would. The
+fast-feedback target's marker moves from `tests-exist` to `tests-pass`. No other text
+changes.
+Approved: by the project owner, 2026-09-30, "Approve v1.3.0".
+
+Previous amendment, 1.1.0 → 1.2.0:
 Version change: 1.1.0 → 1.2.0
 Rationale: MINOR. One section added, "Delivery Method", when the Slipwai delivery
 method was adopted around this repository (make verify, /drive). It states, in
@@ -390,6 +399,23 @@ and its audience is the person using Cairn, never a remote party.
   table and in the pull request under a "Complexity / Deviation" heading, naming the
   principle and the reason. Silent deviation is a defect.
 
+<!-- acceptance-driven-testing: Acceptance-driven development, tests written first -->
+### Acceptance-Driven Development, Tests First
+
+In force since the suite reached `tests-pass` (owner, 2026-09-30).
+
+- Every slice MUST have at least one Given/When/Then scenario whose **When** enters
+  through Cairn's own driving port (an IPC command in `ipc/`, or the screen that calls
+  it) and whose **Then** is observable there. A scenario satisfiable by calling an
+  internal function is a unit specification, not a slice acceptance criterion.
+- Each increment MUST be RED-GREEN-REFACTOR: the failing test comes first, and it states
+  the behaviour, not the implementation.
+- A delivery adapter (an IPC command, a helper verb) MUST carry a test covering parse,
+  delegate, and the mapping of every outcome, and that level MUST NOT be where a rule is
+  proved. The rules live in `domain/` and are proved there.
+- A defect MUST be reproduced by a failing test at the level the rule lives before it is
+  fixed.
+
 ### Targets, Not Yet in Force
 
 Each practice below comes into force at the rung of the convergence map
@@ -413,23 +439,15 @@ slice that climbs.
   out remote feature flags: release means a person installs a version, and the only
   toggles are local settings. No slice is planned for it yet.
 
-<!-- journey: fast-feedback at tests-exist -->
+<!-- journey: fast-feedback at tests-pass -->
 **Fast feedback from a deterministic suite.** In force at `fast`.
 
-- Today: the domain, store, enforcement and helper tests run on every change, with
+- Today: the suite is green in the gate with nothing quarantined (`tests-pass`, owner,
+  2026-09-30). The domain, store, enforcement and helper tests run on every change, with
   no GUI toolchain and no network. The tests that need the webview run only in CI's
   `core` job.
-- Next: `tests-pass` once `make verify` is green with nothing quarantined, then a
-  feedback budget measured for it. No slice is planned for it yet.
-
-<!-- journey: acceptance-driven-testing at tests-exist -->
-**Acceptance-driven development, tests first.** In force at `tests-pass`.
-
-- Today: the four mandatory test categories above are covered, and each spec carries
-  acceptance scenarios, but a slice is not yet required to start from one failing
-  scenario.
-- Next: `tests-pass`, the first green `make verify` of this adoption. From then on,
-  every slice starts from a failing acceptance scenario.
+- Next: a feedback budget measured for `make verify`, and held. No slice is planned
+  for it yet.
 
 <!-- journey: strict-typing at named -->
 **Strict typing, with untrusted data parsed at the boundary.** In force at `typed`.
@@ -480,4 +498,4 @@ verify compliance explicitly. Runtime development guidance for agents lives in
 `CLAUDE.md`; it MUST NOT contradict this document, and MUST be updated when this
 document changes.
 
-**Version**: 1.2.0 | **Ratified**: 2026-08-18 | **Last Amended**: 2026-09-30
+**Version**: 1.3.0 | **Ratified**: 2026-08-18 | **Last Amended**: 2026-09-30
