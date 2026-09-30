@@ -14,17 +14,16 @@ to do about data and infrastructure, and the one rule that holds all of it toget
 
 **`leave-it`** — leave the architecture where it is.
 
-- the trigger — "Put Cairn's Rust + Tauri delivery under a verify gate and the slice loop" — names neither a platform, a delivery problem, a change problem, a capability nor a host, so no strategy follows from it; leave the architecture where it is until it does, and take the delivery rungs below, which pay off regardless
+- the trigger — 'Build the rest of Cairn v1 as small, verified slices, with agents doing the work under the same gates as a person.' — names neither a platform, a delivery problem, a change problem, a capability nor a host, so no strategy follows from it; leave the architecture where it is until it does, and take the delivery rungs below, which pay off regardless
 
 Before anything architectural is worth starting, the map says these have to hold:
 
 - a pipeline that deploys on a passing `verify` — the path to production is `unknown`
 - a green suite in the gate — the safety net is `tests-exist`
-- every application's role recorded — the structure is `as-found`
 
 It stops now, as far as the architecture goes.
 
-**Nothing is decided yet.** A recommendation is the factory's reading; the decision is a person's, written as an accepted ADR under `delivery/docs/adr/` (Nygard's five sections, as `0001` shows) carrying one line `Strategy: <leave-it | in-place | modular-monolith | strangler-fig | rewrite>`. `/survey` reads it, the map's Strategy row moves to `decided`, and `/strangle` will not move a capability until that line says `strangler-fig`. *Leave it* is a decision like any other and finishes the axis; rewrite is never recommended here, and an ADR that chooses it says why the other two cannot work. The word `Accepted` is the person's: an agent drafts the ADR at `Proposed`, puts the five strategies and this recommendation to them as a question, and changes the Status only after they have said, of that text, that they accept it.
+**Decided: `leave-it`**, by `delivery/docs/adr/0002-leave-the-architecture-where-it-is.md` — the row on the map reads `done`. A different strategy is a new ADR that supersedes it.
 
 ### The programme
 
@@ -43,7 +42,7 @@ is ticked off by hand: `/survey` derives this again from the tree and the record
 |---|---|---|---|---|
 | 1 | `cairn`: how it starts is not proven — run it once the way the README, container file or CI config says, write what was proven (the command, the port, the seed, the runtime it needs and the ones it cannot run on) in `survey/running.md`, and record the one command that starts it and proves it answers as `commands.smoke` in `project.json` (`null` is a written no, with the reason there); `make smoke` and the gate's smoke job run it from then on | `run` | next, after the build and before any slice changes code that was here, whatever the strategy: a change to an application nothing has started is a change nobody has seen run, and a suite that never builds the context cannot tell a constructor the container can call from one it cannot | `commands.smoke: unrecorded for .` |
 | 2 | `src-tauri`: how it starts is not proven — run it once the way the README, container file or CI config says, write what was proven (the command, the port, the seed, the runtime it needs and the ones it cannot run on) in `survey/running.md`, and record the one command that starts it and proves it answers as `commands.smoke` in `project.json` (`null` is a written no, with the reason there); `make smoke` and the gate's smoke job run it from then on | `run` | next, after the build and before any slice changes code that was here, whatever the strategy: a change to an application nothing has started is a change nobody has seen run, and a suite that never builds the context cannot tell a constructor the container can call from one it cannot | `commands.smoke: unrecorded for src-tauri` |
-| 3 | Runtime (rung 4): no container image is built here — a first `Dockerfile`, and `make verify` grows a step that builds it | `rung` | depends on the strategy — decide it first (`/ground`) | `survey: no Dockerfile or Compose file` |
+| 3 | Runtime (rung 4): no container image is built here — a first `Dockerfile`, and `make verify` grows a step that builds it | `rung` | not scheduled; recorded so it is not forgotten | `survey: no Dockerfile or Compose file` |
 
 ## Three strategies, not two
 

@@ -46,7 +46,7 @@ Write the characterisation tests in the application's own test tool, where its t
 recorded `test` command reaches them:
 
 - `cairn` (`.`, typescript): `npm run test`
-- `src-tauri` (`src-tauri`, rust): `cd src-tauri && cargo test --workspace`
+- `src-tauri` (`src-tauri`, rust): `cd src-tauri && cargo test -p cairn --no-default-features && cargo test -p cairn --no-default-features --features history && cargo test -p cairn-helper`
 
 Approval-style where the output is large. Record actual behaviour, never desired: a test that fails because
 the code is wrong is written to pass, with a comment saying the behaviour is wrong and a question for the

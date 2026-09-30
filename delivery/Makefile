@@ -49,10 +49,10 @@ check-decisions: ## Fail when a decision log or demo log /cruise wrote has lost 
 .PHONY: typecheck lint check-imports check-migrations check-slice-scope check-speckit check-codegraph check-ux-gates check-constitution constitution-requirements
 typecheck: ## Run the native compiler or static type check
 	python3 delivery/scripts/ratchet.py cairn typecheck -- 'npm exec -- tsc --noEmit --skipLibCheck'
-	python3 delivery/scripts/ratchet.py src-tauri typecheck -- 'cd src-tauri && cargo check --workspace --all-targets'
+	python3 delivery/scripts/ratchet.py src-tauri typecheck -- 'cd src-tauri && cargo check -p cairn --no-default-features --features history --all-targets && cargo check -p cairn-helper --all-targets'
 lint: ## Run the native formatting and static-analysis gate
-	python3 delivery/scripts/ratchet.py cairn lint -- 'npm run lint'
-	python3 delivery/scripts/ratchet.py src-tauri lint -- 'cd src-tauri && cargo clippy --workspace --all-targets --message-format=short -- -D warnings && cargo fmt --check'
+	python3 delivery/scripts/ratchet.py cairn lint -- 'npm run lint && npm run check'
+	python3 delivery/scripts/ratchet.py src-tauri lint -- 'cd src-tauri && cargo clippy -p cairn --no-default-features --all-targets --message-format=short -- -D warnings && cargo clippy -p cairn --no-default-features --features history --all-targets --message-format=short -- -D warnings && cargo clippy -p cairn-helper --all-targets --message-format=short -- -D warnings && cargo fmt --all --check'
 
 check-imports: ## Fail when domain code imports an outer architecture layer
 	python3 delivery/scripts/check-imports.py
@@ -75,7 +75,7 @@ constitution-requirements: ## Print the normative text the constitution must cov
 .PHONY: test test-integration test-integration-cairn test-integration-src-tauri adversarial mutation audit
 test: ## Run the complete native test suite
 	python3 delivery/scripts/ratchet.py cairn test -- 'npm run test'
-	python3 delivery/scripts/ratchet.py src-tauri test -- 'cd src-tauri && cargo test --workspace'
+	python3 delivery/scripts/ratchet.py src-tauri test -- 'cd src-tauri && cargo test -p cairn --no-default-features && cargo test -p cairn --no-default-features --features history && cargo test -p cairn-helper'
 test-integration: test-integration-cairn test-integration-src-tauri ## Run native integration tests (an empty integration suite is valid initially)
 test-integration-cairn: ## Run cairn's integration suite
 	$(INTEGRATION_TEST_CAIRN)

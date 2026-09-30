@@ -7,20 +7,22 @@ wrote the method's material under `delivery/` beside the code — nothing of the
 written over, and `project.json` records every fact with where it came from: `detected` from the tree,
 `confirmed` by the person who accepted it, `overridden` by the person who changed it.
 
-**Why:** Put Cairn's Rust + Tauri delivery under a verify gate and the slice loop
+**Why:** Build the rest of Cairn v1 as small, verified slices, with agents doing the work under the same gates as a person.
 
 
 ## What was wrapped
 
-### `.` — `cairn`, an application whose role is not recorded in typescript (node)
+### `.` — `cairn`, a tool in typescript (node)
 
-Provenance: language `detected`, commands `detected`, kind `unrecorded`.
+The interface: every screen a person sees (protection, reaches, reflection), React and TypeScript, running unelevated
+
+Provenance: language `confirmed`, commands `overridden`, kind `overridden`.
 
 | Target | Command |
 |---|---|
 | `install` | `npm ci` |
 | `typecheck` | `npm exec -- tsc --noEmit --skipLibCheck` |
-| `lint` | `npm run lint` |
+| `lint` | `npm run lint && npm run check` |
 | `test` | `npm run test` |
 | `integration` | *none recorded — a written no; the target passes and says so* |
 | `adversarial` | *none recorded — a written no; the target passes and says so* |
@@ -29,16 +31,18 @@ Provenance: language `detected`, commands `detected`, kind `unrecorded`.
 
 `typescript` is a language this factory generates, so `add-service --language typescript` can put a generated service beside the existing one, with every axis and gate a generated service has.
 
-### `src-tauri` — `src-tauri`, an application whose role is not recorded in rust (cargo)
+### `src-tauri` — `src-tauri`, a tool in rust (cargo)
 
-Provenance: language `detected`, commands `detected`, kind `unrecorded`.
+The core and the privileged helper: domain, encrypted stores, the enforcement layers, IPC, and every elevated write with its teardown
+
+Provenance: language `confirmed`, commands `overridden`, kind `overridden`.
 
 | Target | Command |
 |---|---|
 | `install` | `cd src-tauri && cargo fetch --locked` |
-| `typecheck` | `cd src-tauri && cargo check --workspace --all-targets` |
-| `lint` | `cd src-tauri && cargo clippy --workspace --all-targets --message-format=short -- -D warnings && cargo fmt --check` |
-| `test` | `cd src-tauri && cargo test --workspace` |
+| `typecheck` | `cd src-tauri && cargo check -p cairn --no-default-features --features history --all-targets && cargo check -p cairn-helper --all-targets` |
+| `lint` | `cd src-tauri && cargo clippy -p cairn --no-default-features --all-targets --message-format=short -- -D warnings && cargo clippy -p cairn --no-default-features --features history --all-targets --message-format=short -- -D warnings && cargo clippy -p cairn-helper --all-targets --message-format=short -- -D warnings && cargo fmt --all --check` |
+| `test` | `cd src-tauri && cargo test -p cairn --no-default-features && cargo test -p cairn --no-default-features --features history && cargo test -p cairn-helper` |
 | `integration` | *none recorded — a written no; the target passes and says so* |
 | `adversarial` | *none recorded — a written no; the target passes and says so* |
 | `audit` | *none recorded — a written no; the target passes and says so* |
@@ -83,7 +87,7 @@ has a target of its own. The same `verify` runs in CI from `.github/workflows/ve
 
 ## How a change reaches production
 
-**Not recorded** (`unrecorded`): nothing in the tree says how a change reaches production, and nobody has said yet. This is the first Minimum CD fact and the method will not guess it: say it in `project.json` under `release.path` (`pipeline`, `scripted` or `manual`) or with `slipwai adopt --release`, and `/drive` asks before the first slice.
+**Not recorded** (`confirmed`): nothing in the tree says how a change reaches production, and nobody has said yet. This is the first Minimum CD fact and the method will not guess it: say it in `project.json` under `release.path` (`pipeline`, `scripted` or `manual`) or with `slipwai adopt --release`, and `/drive` asks before the first slice.
 
 ## Next
 

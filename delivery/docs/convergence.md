@@ -1,12 +1,12 @@
-<!-- convergence: 5366a36251e32356 -->
+<!-- convergence: a1f859f53166a4d9 -->
 # Where `cairn` stands
 
 > **Experimental.** Brownfield adoption is new and will change shape while real repositories teach it what it got wrong: the files under the delivery directory, the facts `project.json` records and the questions `adopt` asks may change in a MINOR release, and `slipwai migrate` brings each change here with a note saying what to do. Every place this reaches you says so until it stops being true. What surprised you — a detection that was wrong, a gate that went red, a sentence this page should have had — belongs on the public issue tracker.
 
 A generated project starts at the top of every ladder below and the method keeps it there. This repository
 started wherever it was; this page says where that is, axis by axis, and the loop climbs one rung per slice
-until nothing here differs from a generated project — at which point `slipwai converge` makes it one. **2** of
-9 axes are at their target, **4** below it, **3** unrecorded.
+until nothing here differs from a generated project — at which point `slipwai converge` makes it one. **3** of
+9 axes are at their target, **5** below it, **1** unrecorded.
 
 Every row is a fact `project.json` holds under `convergence`, with where it came from: `detected` from the tree,
 `confirmed` or `overridden` by a person, `unrecorded` where nothing has said. Nothing is a default. To move a
@@ -17,15 +17,15 @@ first slice and offers the next unplanned row as a method slice beside the produ
 
 | Axis | Where it stands | Target | Evidence | Planned as | Provenance |
 |---|---|---|---|---|---|
-| Path to production | `unknown` | `pipeline-decides` | release.path in project.json | *not yet* | `unrecorded` |
-| Integration | `unknown` | `continuous` | CI on github, gate .github/workflows/verify-delivery.yml | *not yet* | `unrecorded` |
+| Path to production | `unknown` | `pipeline-decides` | Owner: v1 has not shipped; no release path exists yet | *not yet* | `confirmed` |
+| Integration | `trunk` | `continuous` | Owner: trunk-based from now on. History: 002 and 003 were feature branches that lived about 20 days; the next branches are short-lived | *not yet* | `confirmed` |
 | Safety net | `tests-exist` | `mutation-measured` | test recorded for cairn, src-tauri | *not yet* | `detected` |
-| Structure | `as-found` | `typed` | cairn: application, src-tauri: application; role not established for cairn, src-tauri | *not yet* | `detected` |
+| Structure | `named` | `typed` | cairn: tool, src-tauri: tool; not under apps/: ., src-tauri | *not yet* | `detected` |
 | Platform | `unknown` | `audited` | no runtime pin, framework version or image the survey can date | *not yet* | `unrecorded` |
 | Constitution | `template` | `in-full` | .specify/memory/constitution.md | *not yet* | `detected` |
 | Data | `settled` | `settled` | schema: none | *not yet* | `detected` |
 | Infrastructure | `settled` | `settled` | home: none | *not yet* | `overridden` |
-| Strategy | `recommended` | `done` | why: Put Cairn's Rust + Tauri delivery under a verify gate and the slice loop; recommended: leave-it | *not yet* | `detected` |
+| Strategy | `done` | `done` | ADR delivery/docs/adr/0002-leave-the-architecture-where-it-is.md: leave-it | *not yet* | `detected` |
 
 ## The ladders
 

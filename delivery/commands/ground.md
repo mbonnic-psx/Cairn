@@ -82,15 +82,15 @@ direction, at any point.
 
 | Axis | Stands at | Provenance | Evidence |
 |---|---|---|---|
-| Path to production | `unknown` | `unrecorded` | release.path in project.json |
-| Integration | `unknown` | `unrecorded` | CI on github, gate .github/workflows/verify-delivery.yml |
+| Path to production | `unknown` | `confirmed` | Owner: v1 has not shipped; no release path exists yet |
+| Integration | `trunk` | `confirmed` | Owner: trunk-based from now on. History: 002 and 003 were feature branches that lived about 20 days; the next branches are short-lived |
 | Safety net | `tests-exist` | `detected` | test recorded for cairn, src-tauri |
-| Structure | `as-found` | `detected` | cairn: application, src-tauri: application; role not established for cairn, src-tauri |
+| Structure | `named` | `detected` | cairn: tool, src-tauri: tool; not under apps/: ., src-tauri |
 | Platform | `unknown` | `unrecorded` | no runtime pin, framework version or image the survey can date |
 | Constitution | `template` | `detected` | .specify/memory/constitution.md |
 | Data | `settled` | `detected` | schema: none |
 | Infrastructure | `settled` | `overridden` | home: none |
-| Strategy | `recommended` | `detected` | why: Put Cairn's Rust + Tauri delivery under a verify gate and the slice loop; recommended: leave-it |
+| Strategy | `done` | `detected` | ADR delivery/docs/adr/0002-leave-the-architecture-where-it-is.md: leave-it |
 
 ## The questions
 
@@ -151,8 +151,8 @@ direction, at any point.
 
    The applications that were here:
 
-   - `cairn` at `.`: recorded as an application whose role nobody has established (`application`, `unrecorded`)
-   - `src-tauri` at `src-tauri`: recorded as an application whose role nobody has established (`application`, `unrecorded`)
+   - `cairn` at `.`: recorded as `tool` (overridden)
+   - `src-tauri` at `src-tauri`: recorded as `tool` (overridden)
 
 **Write:** `kind` on the application's record in `deployables`, with `provenance.kind` `confirmed`; the row moves when `/survey` re-reads the record.
 

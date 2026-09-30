@@ -16,14 +16,14 @@
   ],
   "deployables": {
     "cairn": {
-      "kind": "application",
+      "kind": "tool",
       "generated": false,
       "path": ".",
       "language": "typescript",
       "commands": {
         "install": "npm ci",
         "typecheck": "npm exec -- tsc --noEmit --skipLibCheck",
-        "lint": "npm run lint",
+        "lint": "npm run lint && npm run check",
         "test": "npm run test",
         "integration": null,
         "adversarial": null,
@@ -35,24 +35,25 @@
         "version": "",
         "ecosystem": "node"
       },
+      "purpose": "The interface: every screen a person sees (protection, reaches, reflection), React and TypeScript, running unelevated",
       "provenance": {
-        "language": "detected",
-        "commands": "detected",
-        "kind": "unrecorded"
+        "language": "confirmed",
+        "commands": "overridden",
+        "kind": "overridden"
       },
       "eventSourced": false,
       "capabilities": []
     },
     "src-tauri": {
-      "kind": "application",
+      "kind": "tool",
       "generated": false,
       "path": "src-tauri",
       "language": "rust",
       "commands": {
         "install": "cd src-tauri && cargo fetch --locked",
-        "typecheck": "cd src-tauri && cargo check --workspace --all-targets",
-        "lint": "cd src-tauri && cargo clippy --workspace --all-targets --message-format=short -- -D warnings && cargo fmt --check",
-        "test": "cd src-tauri && cargo test --workspace",
+        "typecheck": "cd src-tauri && cargo check -p cairn --no-default-features --features history --all-targets && cargo check -p cairn-helper --all-targets",
+        "lint": "cd src-tauri && cargo clippy -p cairn --no-default-features --all-targets --message-format=short -- -D warnings && cargo clippy -p cairn --no-default-features --features history --all-targets --message-format=short -- -D warnings && cargo clippy -p cairn-helper --all-targets --message-format=short -- -D warnings && cargo fmt --all --check",
+        "test": "cd src-tauri && cargo test -p cairn --no-default-features && cargo test -p cairn --no-default-features --features history && cargo test -p cairn-helper",
         "integration": null,
         "adversarial": null,
         "audit": null,
@@ -63,10 +64,11 @@
         "version": "",
         "ecosystem": "cargo"
       },
+      "purpose": "The core and the privileged helper: domain, encrypted stores, the enforcement layers, IPC, and every elevated write with its teardown",
       "provenance": {
-        "language": "detected",
-        "commands": "detected",
-        "kind": "unrecorded"
+        "language": "confirmed",
+        "commands": "overridden",
+        "kind": "overridden"
       },
       "eventSourced": false,
       "capabilities": []
@@ -77,7 +79,7 @@
     "packages": "packages",
     "delivery": "delivery"
   },
-  "why": "Put Cairn's Rust + Tauri delivery under a verify gate and the slice loop",
+  "why": "Build the rest of Cairn v1 as small, verified slices, with agents doing the work under the same gates as a person.",
   "database": {
     "schema": "none",
     "tools": [],
@@ -99,7 +101,7 @@
   "release": {
     "path": "unknown",
     "evidence": [],
-    "provenance": "unrecorded"
+    "provenance": "confirmed"
   },
   "platform": {
     "snapshot": "2026-09-08",
@@ -111,17 +113,16 @@
     "recommended": "leave-it",
     "trigger": null,
     "because": [
-      "the trigger \u2014 \"Put Cairn's Rust + Tauri delivery under a verify gate and the slice loop\" \u2014 names neither a platform, a delivery problem, a change problem, a capability nor a host, so no strategy follows from it; leave the architecture where it is until it does, and take the delivery rungs below, which pay off regardless"
+      "the trigger \u2014 'Build the rest of Cairn v1 as small, verified slices, with agents doing the work under the same gates as a person.' \u2014 names neither a platform, a delivery problem, a change problem, a capability nor a host, so no strategy follows from it; leave the architecture where it is until it does, and take the delivery rungs below, which pay off regardless"
     ],
     "before": [
       "a pipeline that deploys on a passing `verify` \u2014 the path to production is `unknown`",
-      "a green suite in the gate \u2014 the safety net is `tests-exist`",
-      "every application's role recorded \u2014 the structure is `as-found`"
+      "a green suite in the gate \u2014 the safety net is `tests-exist`"
     ],
     "stop": "now, as far as the architecture goes",
-    "decided": null,
-    "adr": null,
-    "finished": false,
+    "decided": "leave-it",
+    "adr": "delivery/docs/adr/0002-leave-the-architecture-where-it-is.md",
+    "finished": true,
     "programme": [
       {
         "kind": "run",
@@ -138,7 +139,7 @@
       {
         "kind": "rung",
         "step": "Runtime (rung 4): no container image is built here \u2014 a first `Dockerfile`, and `make verify` grows a step that builds it",
-        "pacing": "depends on the strategy \u2014 decide it first (`/ground`)",
+        "pacing": "not scheduled; recorded so it is not forgotten",
         "evidence": "survey: no Dockerfile or Compose file"
       }
     ],
@@ -149,16 +150,16 @@
       "axis": "path-to-production",
       "rung": "unknown",
       "target": "pipeline-decides",
-      "evidence": "release.path in project.json",
-      "provenance": "unrecorded",
+      "evidence": "Owner: v1 has not shipped; no release path exists yet",
+      "provenance": "confirmed",
       "planned": null
     },
     {
       "axis": "integration",
-      "rung": "unknown",
+      "rung": "trunk",
       "target": "continuous",
-      "evidence": "CI on github, gate .github/workflows/verify-delivery.yml",
-      "provenance": "unrecorded",
+      "evidence": "Owner: trunk-based from now on. History: 002 and 003 were feature branches that lived about 20 days; the next branches are short-lived",
+      "provenance": "confirmed",
       "planned": null
     },
     {
@@ -171,9 +172,9 @@
     },
     {
       "axis": "structure",
-      "rung": "as-found",
+      "rung": "named",
       "target": "typed",
-      "evidence": "cairn: application, src-tauri: application; role not established for cairn, src-tauri",
+      "evidence": "cairn: tool, src-tauri: tool; not under apps/: ., src-tauri",
       "provenance": "detected",
       "planned": null
     },
@@ -211,9 +212,9 @@
     },
     {
       "axis": "strategy",
-      "rung": "recommended",
+      "rung": "done",
       "target": "done",
-      "evidence": "why: Put Cairn's Rust + Tauri delivery under a verify gate and the slice loop; recommended: leave-it",
+      "evidence": "ADR delivery/docs/adr/0002-leave-the-architecture-where-it-is.md: leave-it",
       "provenance": "detected",
       "planned": null
     }
