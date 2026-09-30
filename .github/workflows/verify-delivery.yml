@@ -18,3 +18,15 @@ jobs:
           # no pin found in the tree for .; 22 is a default to confirm
           node-version: '22'
       - run: make -f delivery/Makefile verify
+  smoke:
+    # Each application that recorded a `smoke` command, started by it and proved to answer. A suite that never
+    # builds the context cannot see a constructor the container cannot call; this can, which is why it is a job.
+    needs: verify
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          # no pin found in the tree for .; 22 is a default to confirm
+          node-version: '22'
+      - run: make -f delivery/Makefile smoke

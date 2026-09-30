@@ -28,7 +28,8 @@
         "integration": null,
         "adversarial": null,
         "audit": "npm audit --audit-level=critical",
-        "mutation": null
+        "mutation": null,
+        "smoke": "scripts/smoke.sh interface"
       },
       "toolchain": {
         "kind": "node",
@@ -57,7 +58,8 @@
         "integration": null,
         "adversarial": null,
         "audit": null,
-        "mutation": null
+        "mutation": null,
+        "smoke": "scripts/smoke.sh app"
       },
       "toolchain": {
         "kind": "rust",
@@ -124,18 +126,6 @@
     "adr": "delivery/docs/adr/0002-leave-the-architecture-where-it-is.md",
     "finished": true,
     "programme": [
-      {
-        "kind": "run",
-        "step": "`cairn`: how it starts is not proven \u2014 run it once the way the README, container file or CI config says, write what was proven (the command, the port, the seed, the runtime it needs and the ones it cannot run on) in `survey/running.md`, and record the one command that starts it and proves it answers as `commands.smoke` in `project.json` (`null` is a written no, with the reason there); `make smoke` and the gate's smoke job run it from then on",
-        "pacing": "next, after the build and before any slice changes code that was here, whatever the strategy: a change to an application nothing has started is a change nobody has seen run, and a suite that never builds the context cannot tell a constructor the container can call from one it cannot",
-        "evidence": "commands.smoke: unrecorded for ."
-      },
-      {
-        "kind": "run",
-        "step": "`src-tauri`: how it starts is not proven \u2014 run it once the way the README, container file or CI config says, write what was proven (the command, the port, the seed, the runtime it needs and the ones it cannot run on) in `survey/running.md`, and record the one command that starts it and proves it answers as `commands.smoke` in `project.json` (`null` is a written no, with the reason there); `make smoke` and the gate's smoke job run it from then on",
-        "pacing": "next, after the build and before any slice changes code that was here, whatever the strategy: a change to an application nothing has started is a change nobody has seen run, and a suite that never builds the context cannot tell a constructor the container can call from one it cannot",
-        "evidence": "commands.smoke: unrecorded for src-tauri"
-      },
       {
         "kind": "rung",
         "step": "Runtime (rung 4): no container image is built here \u2014 a first `Dockerfile`, and `make verify` grows a step that builds it",

@@ -28,6 +28,7 @@ Provenance: language `confirmed`, commands `overridden`, kind `overridden`.
 | `adversarial` | *none recorded — a written no; the target passes and says so* |
 | `audit` | `npm audit --audit-level=critical` |
 | `mutation` | *none recorded — a written no; the target passes and says so* |
+| `smoke` | `scripts/smoke.sh interface` |
 
 `typescript` is a language this factory generates, so `add-service --language typescript` can put a generated service beside the existing one, with every axis and gate a generated service has.
 
@@ -47,6 +48,7 @@ Provenance: language `confirmed`, commands `overridden`, kind `overridden`.
 | `adversarial` | *none recorded — a written no; the target passes and says so* |
 | `audit` | *none recorded — a written no; the target passes and says so* |
 | `mutation` | *none recorded — a written no; the target passes and says so* |
+| `smoke` | `scripts/smoke.sh app` |
 
 `rust` is a language this factory generates, so `add-service --language rust` can put a generated service beside the existing one, with every axis and gate a generated service has.
 

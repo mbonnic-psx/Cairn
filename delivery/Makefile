@@ -107,5 +107,5 @@ ratchet-tighten: ## Re-record the lint, typecheck and test baselines from the cu
 
 .PHONY: smoke
 smoke: ## Start each application by its recorded smoke command and prove it answers (ci runs it; verify does not)
-	@echo 'cairn: no smoke command is recorded — nobody has proved how it starts (delivery/survey/running.md). /ground asks for the command that starts it and proves it answers, recorded as commands.smoke'
-	@echo 'src-tauri: no smoke command is recorded — nobody has proved how it starts (delivery/survey/running.md). /ground asks for the command that starts it and proves it answers, recorded as commands.smoke'
+	scripts/smoke.sh interface
+	scripts/smoke.sh app

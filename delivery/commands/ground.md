@@ -229,8 +229,8 @@ way since the method arrived, and did it start?
 
    The applications that were here:
 
-   - `cairn` at `.`: no `smoke` recorded — nobody has proved how it starts, and `/drive` refuses to change it until somebody has
-   - `src-tauri` at `src-tauri`: no `smoke` recorded — nobody has proved how it starts, and `/drive` refuses to change it until somebody has
+   - `cairn` at `.`: `smoke` recorded as `scripts/smoke.sh interface` (overridden)
+   - `src-tauri` at `src-tauri`: `smoke` recorded as `scripts/smoke.sh app` (overridden)
 
 **Write:** what was proven, with the date, in `delivery/survey/running.md` — the repository's own file,
 which the `run-the-app` skill points to — including the run that failed and why. Then the one command that starts

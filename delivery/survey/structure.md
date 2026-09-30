@@ -15,10 +15,10 @@ Experimental: see `../docs/adoption.md`.
 
 | Directory | Files | Mostly |
 |---|---|---|
-| `scripts/` | 9 | javascript, shell |
+| `scripts/` | 10 | shell, javascript |
 | `specs/` | 21 | markdown |
 | `src/` | 21 | typescript, css |
-| `src-tauri/` | 128 | json |
+| `src-tauri/` | 132 | json |
 
 ### What it declares it depends on
 
@@ -59,6 +59,7 @@ Not read: not indexed: `./init --extension codegraph` builds the index, then `/s
 | Directory | Files | Mostly |
 |---|---|---|
 | `src-tauri/capabilities/` | 1 | json |
+| `src-tauri/gen/` | 4 | json |
 | `src-tauri/helper/` | 18 | other |
 | `src-tauri/icons/` | 15 | other |
 | `src-tauri/resources/` | 10 | json |
