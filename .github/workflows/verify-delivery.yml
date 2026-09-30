@@ -17,6 +17,8 @@ jobs:
         with:
           # no pin found in the tree for .; 22 is a default to confirm
           node-version: '22'
+      - run: sudo apt-get update -q && sudo apt-get install -y -q libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf libssl-dev libdbus-1-dev pkg-config  # runner.packages
+      - run: make -f delivery/Makefile install
       - run: make -f delivery/Makefile verify
   smoke:
     # Each application that recorded a `smoke` command, started by it and proved to answer. A suite that never
@@ -29,4 +31,6 @@ jobs:
         with:
           # no pin found in the tree for .; 22 is a default to confirm
           node-version: '22'
-      - run: make -f delivery/Makefile smoke
+      - run: sudo apt-get update -q && sudo apt-get install -y -q libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf libssl-dev libdbus-1-dev pkg-config xvfb  # runner.packages
+      - run: make -f delivery/Makefile install
+      - run: xvfb-run -a make -f delivery/Makefile smoke

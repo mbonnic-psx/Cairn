@@ -66,6 +66,18 @@
         "version": "",
         "ecosystem": "cargo"
       },
+      "runner": {
+        "packages": [
+          "libwebkit2gtk-4.1-dev",
+          "libappindicator3-dev",
+          "librsvg2-dev",
+          "patchelf",
+          "libssl-dev",
+          "libdbus-1-dev",
+          "pkg-config"
+        ],
+        "display": true
+      },
       "purpose": "The core and the privileged helper: domain, encrypted stores, the enforcement layers, IPC, and every elevated write with its teardown",
       "provenance": {
         "language": "confirmed",
