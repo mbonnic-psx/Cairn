@@ -12,7 +12,6 @@ use std::path::Path;
 
 use serde::Deserialize;
 
-use crate::domain::quotes::choose;
 use crate::domain::visible::shows_nothing;
 
 /// The bundled file's shape. Its other keys (`id`, `note`) are for whoever
@@ -35,11 +34,6 @@ pub fn bundled_lines(path: &Path) -> Vec<String> {
                 .collect()
         })
         .unwrap_or_default()
-}
-
-/// The line `roll` names from the set at `path`, or nothing.
-pub fn quote(path: &Path, roll: u64) -> Option<String> {
-    choose(&bundled_lines(path), roll).map(str::to_string)
 }
 
 /// A fresh random number for each check-in's line (Q1), the roll the

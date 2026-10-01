@@ -12,7 +12,7 @@
 //!
 //! ```text
 //! AppState { .., shipped_quotes: PathBuf, roll: fn() -> u64 }
-//! AppState::get_quote(&self) -> Option<String>
+//! AppState::get_quote(&self, day: LocalDate) -> Option<String>
 //! AppState::get_quotes_shown(&self) -> Result<bool, Trouble>
 //! AppState::set_quotes_shown(&self, shown: bool) -> Result<bool, Trouble>
 //! Config { .., quotes_hidden: bool }
