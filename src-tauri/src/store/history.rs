@@ -186,6 +186,15 @@ impl OpenHistory {
             })
             .map_err(|_| sealed())?;
 
+        // A replaced or deleted entry leaves no old text in a free page for
+        // anyone with the key to find (FR-015, FR-018a): SQLite overwrites
+        // freed content instead of leaving it where it was.
+        connection
+            .pragma_update(None, "secure_delete", "ON")
+            .map_err(|error| {
+                Trouble::new(format!("Cairn could not prepare your history ({error})."))
+            })?;
+
         connection
             .execute_batch(
                 "CREATE TABLE IF NOT EXISTS reaches (
@@ -534,6 +543,15 @@ impl OpenHistory {
     /// nothing else — no `version`, no `superseded`, no `deleted`.
     pub fn columns_of_journal_entries(&self) -> Result<Vec<String>, Trouble> {
         self.columns_of("journal_entries")
+    }
+
+    /// Whether freed pages are overwritten (`secure_delete`), so a replaced or
+    /// deleted entry keeps no old text. Used by the test that holds it.
+    pub fn erases_freed_pages(&self) -> Result<bool, Trouble> {
+        self.connection
+            .query_row("PRAGMA secure_delete", [], |row| row.get::<_, i64>(0))
+            .map(|on| on == 1)
+            .map_err(|_| unreadable())
     }
 
     /// Used by the test that asserts an estimate carries no site and no

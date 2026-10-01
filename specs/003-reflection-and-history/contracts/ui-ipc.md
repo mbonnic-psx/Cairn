@@ -37,15 +37,21 @@ DayView {
   gaps:           [{ from, to }],
   estimate:       number | null,     // the person's own, for a silent day
   entry:          string | null,     // their writing, if any
-  is_skipped:     bool,              // derived, never stored
-  needs_estimate: bool,              // silent mode was active and no estimate given
+  is_skipped:     bool,              // derived, never stored — NOT SENT YET: added by slice `one-day` (T052)
+  needs_estimate: bool,              // silent mode was active and no estimate given — NOT SENT YET: `one-day`
   coverage_note:  string | null,     // shown when part of the day was unobserved
   sealed:         string | null,     // set when the key is unavailable; see below
 }
 ```
 
-`day` is the local calendar date; `day_start`/`day_end` are its bounds in epoch seconds,
-computed by the interface exactly as `Reaches.tsx` already does (research R3).
+`day` is the local calendar date; `day_start`/`day_end` are its bounds in epoch seconds: that local
+midnight and the next one, computed by the interface (research R3). Not `day_start + 86 400`, which is an
+hour out on a daylight-saving day. `Reaches.tsx` still does that; slice `history` moves every caller onto
+one shared computation.
+
+**Fields are sent once a slice can state them truthfully** (slice `write-tonight`, 2026-10-01). Until then a
+field is absent, never a placeholder: a `false` for `is_skipped` would claim something nothing computed. The
+contract grows additively, so a reader treats an absent field as not yet known.
 
 **The frontend wrapper is named `getDayView`, not `getDay`.** `getDay` is a `Date` method, so
 the ambient-counts guard cannot watch for the shorter name without false-positiving on every

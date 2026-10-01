@@ -284,6 +284,35 @@ fn revising_an_entry_replaces_it_and_leaves_no_trace_of_the_old_text() {
         !contains(&bytes, b"Revised."),
         "and the current text is not there in plain either: it is encrypted"
     );
+
+    // The file is encrypted, so the byte check above holds whether or not an
+    // old version is kept. What proves "no version kept" is inside: one row
+    // for the day, holding only the new text, and freed pages overwritten
+    // rather than left holding the old one for anyone with the key.
+    let history = match History::open(
+        &setup.data,
+        &HistoryKey::Available(Key::from_bytes(A_KEY)),
+    ) {
+        History::Open(history) => history,
+        History::Sealed { because } => panic!("the test's own key opens it: {because}"),
+    };
+    assert_eq!(
+        history.journal_entry_count().unwrap(),
+        1,
+        "one entry for the day, not two versions"
+    );
+    assert_eq!(
+        history
+            .entry_for(today())
+            .unwrap()
+            .map(|entry| entry.text)
+            .as_deref(),
+        Some("Revised.")
+    );
+    assert!(
+        history.erases_freed_pages().unwrap(),
+        "a replaced or deleted entry's old text is overwritten, not left in a free page"
+    );
 }
 
 // --- Scenario 4 (G2): nothing written is not a save -------------------------

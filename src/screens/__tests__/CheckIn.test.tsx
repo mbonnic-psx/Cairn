@@ -222,4 +222,50 @@ describe('the check-in', () => {
     const surfaces = [...screen.queryAllByRole('heading'), space];
     expect(surfaces.some((el) => el.classList.contains('reflective'))).toBe(true);
   });
+
+  it('keeps an entry on the day it was opened for, across midnight', async () => {
+    const user = userEvent.setup();
+    vi.setSystemTime(new Date(2026, 8, 30, 23, 58, 0));
+    mockedGetDayView.mockResolvedValue(withReaches);
+    mockedSave.mockResolvedValue({ ...withReaches, entry: 'Late.' });
+    render(<CheckIn />);
+    const space = await screen.findByRole('textbox');
+
+    vi.setSystemTime(new Date(2026, 9, 1, 0, 1, 0));
+    await user.type(space, 'Late.');
+    await user.click(screen.getByRole('button', { name: /save|keep/i }));
+
+    await waitFor(() => expect(mockedSave).toHaveBeenCalledWith(TODAY, DAY_START, DAY_END, 'Late.'));
+  });
+
+  it('cannot clear a saved entry by saving nothing over it', async () => {
+    const user = userEvent.setup();
+    mockedGetDayView.mockResolvedValue({ ...withReaches, entry: 'Kept from earlier.' });
+    render(<CheckIn />);
+    const space = await screen.findByRole('textbox');
+    expect(space).toHaveValue('Kept from earlier.');
+
+    await user.clear(space);
+    await user.type(space, '   ');
+    const keep = screen.getByRole('button', { name: /save|keep/i });
+    expect(keep).toBeDisabled();
+    await user.click(keep);
+
+    expect(mockedSave).not.toHaveBeenCalled();
+  });
+
+  it('says what happened to a save where a screen reader will hear it', async () => {
+    const user = userEvent.setup();
+    mockedGetDayView.mockResolvedValue(withReaches);
+    mockedSave.mockRejectedValueOnce(REFUSED).mockResolvedValueOnce({ ...withReaches, entry: 'Tonight.' });
+    render(<CheckIn />);
+    await user.type(await screen.findByRole('textbox'), 'Tonight.');
+
+    await user.click(screen.getByRole('button', { name: /save|keep/i }));
+    expect(await screen.findByRole('status')).toHaveTextContent(REFUSED);
+
+    await user.click(screen.getByRole('button', { name: /save|keep/i }));
+    await waitFor(() => expect(screen.getByRole('status')).not.toHaveTextContent(REFUSED));
+    expect(screen.getByRole('status').textContent ?? '').not.toBe('');
+  });
 });

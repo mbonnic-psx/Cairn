@@ -54,6 +54,45 @@ task starts only once the RED task it answers has been seen failing for the reas
   on `main` (PR #6) and none of this slice's. `make smoke` green with the two commands registered. `npm run check`:
   all seven guards clean. 11 Rust scenario tests, 6 surface tests, 9 screen tests.
 
+## Phase 4 — carried from convergence (MEDIUM and below, not this slice's to close)
+
+- [ ] W13 [LOW, for `history`] One shared `localDayBounds()` for every caller that passes bounds. `Reaches.tsx` still
+  uses `start + 86 400`, an hour out on a daylight-saving day, so on such a day it and the check-in can show different
+  reaches for the same "today" (convergence finding 5).
+- [ ] W14 [LOW, every `src/ipc/*` wrapper] Pass on only a command's own `Err` sentence. Turn anything else (a transport
+  or deserialisation error, whose text is outside the voice guard and may say "failed") into one plain sentence in voice
+  (convergence finding 7).
+
 ## Convergence
 
-Not yet run.
+**Pass 1 (2026-10-01): not converged.** No CRITICAL and no HIGH. Each level was accounted for: store, orchestration,
+adapter, screen, contract, tests. Closed in this slice, each with a test seen failing first, or a mutation the old
+tests let through:
+
+- **MEDIUM 1, midnight while open:** `CheckIn.test.tsx`, *keeps an entry on the day it was opened for, across
+  midnight*. It kills the mutation that recomputes the day at save time.
+- **MEDIUM 2, the screen half of G2:** *cannot clear a saved entry by saving nothing over it*. It kills the mutation
+  that drops the empty-text guard.
+- **MEDIUM 3, scenario 3 passing trivially:** `us1_write_tonight.rs` now opens the history and asserts one row for the
+  day, holding only the new text. `secure_delete` is turned on where every history connection opens
+  (`store/history.rs`, `connect`), and the test holds it (`erases_freed_pages`). The test was RED first: no such
+  method existed.
+- **MEDIUM 4, contract drift:** `contracts/ui-ipc.md` marks `is_skipped` and `needs_estimate` as not sent until
+  `one-day`, and replaces "exactly as `Reaches.tsx` does" with local midnight to local midnight.
+- **LOW 6, refusals heard by nobody:** the save outcome sits in one `role="status"` live region. *says what happened to
+  a save where a screen reader will hear it* was RED first.
+- **LOW 5 and LOW 7** carried as W13 and W14 above.
+
+Constitution, per principle, with where it holds:
+- **I:** no control changes protection (`CheckIn.tsx`; test *offers nothing that changes protection*).
+- **II:** no new dependency. The entry lives only in the encrypted history (`ipc/state.rs`, `open_history`), and a
+  sealed key fails closed with nothing written (`fail_closed_journal.rs`).
+- **III:** the coverage note travels with the reaches (`day_view`), and unknown fields are absent, not `false`.
+- **IV:** no system file is touched.
+- **V:** no notification; the check-in is reached by navigation (`App.tsx`, *Tonight*).
+- **VI:** guards clean, and every refusal is checked for voice (`us1_write_tonight.rs`).
+- **VII:** nothing is gated.
+- **Delivery Method:** RED `095064b` before GREEN `febe95b`, with scenarios through `AppState`. FR-015's "retaining no
+  previous text" is now held below the row level too, by `secure_delete`.
+
+**Pass 2:** see below.

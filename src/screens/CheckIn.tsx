@@ -127,10 +127,14 @@ export function CheckIn() {
         <Button onClick={keep} disabled={keeping || draft.trim() === ''}>
           Keep this
         </Button>
-        {kept && <span className="text-sm text-ink-500">Kept for today.</span>}
       </div>
 
-      {note && <p className="reflective mt-4 max-w-prose text-ink-700">{note}</p>}
+      {/* One polite live region for what happened to the save, so a person
+          who cannot see the page hears it too: a refusal heard by nobody is
+          the lost entry G1 exists to prevent. */}
+      <p role="status" aria-live="polite" className="reflective mt-4 max-w-prose text-ink-700">
+        {note ?? (kept ? 'Kept for today.' : '')}
+      </p>
     </Card>
   );
 }
