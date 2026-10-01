@@ -438,3 +438,65 @@ fn every_refusal_and_every_sealed_sentence_is_in_voice() {
     let sealed = get_today(&state).sealed.expect("a sealed history says so");
     assert_in_voice(&sealed);
 }
+
+// --- J4: bounds that cannot be this day -------------------------------------
+
+/// Bounds that cannot belong to `today()` anywhere on earth: inverted, empty,
+/// wider than any day, or starting a day away.
+fn impossible_bounds() -> Vec<(i64, i64)> {
+    vec![
+        (TODAY_END, TODAY_START),
+        (TODAY_START, TODAY_START),
+        (TODAY_START, TODAY_START + 27 * 3600),
+        (TODAY_START - 100 * 86_400, TODAY_END),
+        (TODAY_START - 86_400, TODAY_START),
+        (TODAY_END + 3600, TODAY_END + 25 * 3600),
+    ]
+}
+
+#[test]
+fn bounds_that_cannot_be_the_day_are_refused_and_read_as_no_empty_day() {
+    let setup = setup();
+    let keychain = Keychain::available();
+    seed(&setup.data)
+        .record("example.com", TODAY_START + 3600)
+        .unwrap();
+    let state = app(&setup, &keychain);
+
+    for (start, end) in impossible_bounds() {
+        let view = state.get_day(today(), start, end);
+        let sentence = view
+            .sealed
+            .unwrap_or_else(|| panic!("({start}, {end}) should be refused"));
+        assert_in_voice(&sentence);
+        assert!(view.reaches.is_empty() && view.entry.is_none());
+
+        let refusal = state
+            .save_journal_entry(today(), start, end, "Words.")
+            .expect_err("bounds that are not this day save nothing");
+        assert_in_voice(&refusal);
+    }
+    assert_eq!(get_today(&state).entry, None, "nothing was stored");
+}
+
+#[test]
+fn the_bounds_of_a_short_or_long_day_in_any_zone_are_accepted() {
+    let setup = setup();
+    let keychain = Keychain::available();
+    let state = app(&setup, &keychain);
+
+    for (start, end) in [
+        (TODAY_START, TODAY_START + 23 * 3600),
+        (TODAY_START, TODAY_START + 25 * 3600),
+        // UTC+14, the earliest a day can begin.
+        (TODAY_START - 14 * 3600, TODAY_START + 10 * 3600),
+        // UTC-12, the latest.
+        (TODAY_START + 12 * 3600, TODAY_START + 36 * 3600),
+    ] {
+        let view = state.get_day(today(), start, end);
+        assert_eq!(view.sealed, None, "({start}, {end}) is a real day");
+        state
+            .save_journal_entry(today(), start, end, "Words.")
+            .unwrap();
+    }
+}

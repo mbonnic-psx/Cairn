@@ -692,6 +692,11 @@ impl AppState {
     pub fn get_day(&self, day: LocalDate, day_start: i64, day_end: i64) -> DayView {
         #[cfg(feature = "history")]
         {
+            if let Err(trouble) =
+                crate::reflection::checkin::check_bounds(day, day_start, day_end)
+            {
+                return DayView::sealed(trouble.message);
+            }
             match self.open_history() {
                 Ok(history) => day_view(&history, day, day_start, day_end),
                 Err(sentence) => DayView::sealed(sentence),
@@ -721,6 +726,8 @@ impl AppState {
     ) -> Result<DayView, String> {
         #[cfg(feature = "history")]
         {
+            crate::reflection::checkin::check_bounds(day, day_start, day_end)
+                .map_err(|trouble| trouble.message)?;
             let history = self.open_history()?;
             crate::reflection::journal::save(&history, day, text, (self.now)())
                 .map_err(|trouble| trouble.message)?;

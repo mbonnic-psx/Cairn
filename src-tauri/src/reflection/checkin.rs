@@ -15,6 +15,39 @@ pub struct Day {
     pub estimate: Option<u32>,
 }
 
+/// The longest a local day can be: 25 hours at a clock change, and an hour
+/// of slack for a zone that moves by more than that.
+const LONGEST_DAY: i64 = 26 * 3600;
+
+/// The earliest and latest a day can begin, in seconds from 00:00 UTC on its
+/// date: UTC+14 begins a day 14 hours before UTC does, UTC-12 begins it 12
+/// hours after.
+const EARLIEST_START: i64 = -14 * 3600;
+const LATEST_START: i64 = 12 * 3600;
+
+/// Whether `[day_start, day_end)` could be `day` somewhere on earth (J4).
+///
+/// The core does not know the person's zone, so it holds the interface to
+/// the one rule that is true in every zone, on 23 and 25 hour days alike: the
+/// span is not empty and not longer than 26 hours, and begins within the
+/// hours at which `day` can begin anywhere. Bounds outside that would make
+/// the day show reaches of other days, or an untrue empty one (Principle III).
+pub fn check_bounds(day: LocalDate, day_start: i64, day_end: i64) -> Result<(), Trouble> {
+    let midnight_utc = day.days_since_epoch() * 86_400;
+    let offset = day_start - midnight_utc;
+    let span = day_end - day_start;
+    if span <= 0
+        || span > LONGEST_DAY
+        || !(EARLIEST_START..=LATEST_START).contains(&offset)
+    {
+        return Err(Trouble::new(
+            "Cairn could not tell which day that is just now, so it has shown and \
+             saved nothing. Protection is unaffected.",
+        ));
+    }
+    Ok(())
+}
+
 /// The day between `day_start` and `day_end`, the bounds the interface
 /// computes for `day` (research R3).
 ///
