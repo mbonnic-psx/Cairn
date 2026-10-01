@@ -37,10 +37,10 @@ Rust increments and the screen increments meet in `contracts/ui-ipc.md`'s names,
 
 ## Increment 4 — the line on the check-in
 
-- [ ] Q7 [T027 quote half; scenarios 8, 9, 11, 12] RED: `CheckIn.test.tsx` — one line in serif, asked for once,
+- [x] Q7 [T027 quote half; scenarios 8, 9, 11, 12] RED: `CheckIn.test.tsx` — one line in serif, asked for once,
   the same after a save; shown with nothing returned is no quote and nothing in its place, the space still there;
   the sealed check-in shows the line too; no banned word with a line showing.
-- [ ] Q8 [T034 quote half, T036 quote half] GREEN: `getQuote`, `getQuotesShown`, `setQuotesShown` in
+- [x] Q8 [T034 quote half, T036 quote half] GREEN: `getQuote`, `getQuotesShown`, `setQuotesShown` in
   `src/ipc/journal.ts` (already import-restricted to the check-in); `CheckIn.tsx` asks once at open and keeps the
   line.
 
@@ -72,3 +72,7 @@ Rust increments and the screen increments meet in `contracts/ui-ipc.md`'s names,
   scenario tests failed on their assertions, the pre-slice `config.json` test failed with the file refused, and
   `every_classified_command_is_exposed` failed for the two commands. GREEN 16/16, 11/11, 6/6. `get_quote` gives
   nothing when the configuration cannot be read: unsure whether quotes were hidden, it shows none.
+- Q7–Q8: RED 6 of 6 new screen tests failing (no line rendered; `getQuote` never asked), the 12 write-tonight
+  tests still green with the module fake extended. GREEN 18/18. The line is the check-in's only `figure`, under
+  the heading, serif and italic, with no marks or attribution (T007: the lines are Cairn's own). A second run of
+  the effect under React's development StrictMode is ignored, so the line does not swap under the person.

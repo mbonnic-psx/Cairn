@@ -9,13 +9,24 @@
  * The day is fixed when the check-in opens. Left open across midnight, it stays
  * attached to the day it was opened for rather than becoming tomorrow's.
  *
+ * So is the quote: one line from the set Cairn ships, asked for once when the
+ * check-in opens and kept while it stays open (slice `quote`, Q1). None is a
+ * complete check-in, with nothing in its place (FR-008). It is not about the
+ * day, so it shows on a sealed check-in too.
+ *
  * Nothing here leads to a change in protection (Principle I).
  */
 import { useEffect, useRef, useState } from 'react';
 
 import { Button } from '../components/Button';
 import { Card } from '../components/Card';
-import { getDayView, saveJournalEntry, type DayView } from '../ipc/journal';
+import {
+  getDayView,
+  getQuote,
+  getQuotesShown,
+  saveJournalEntry,
+  type DayView,
+} from '../ipc/journal';
 
 /**
  * Text that shows nothing is empty (G4), here as in the store: the same
@@ -199,6 +210,7 @@ export function CheckIn({ session }: { session?: CheckInSession }) {
   const [view, setView] = useState<DayView>();
   const [loadNote, setLoadNote] = useState<string>();
   const [, tick] = useState(0);
+  const [quote, setQuote] = useState<string | null>(null);
 
   useEffect(() => {
     let current = true;
@@ -231,6 +243,29 @@ export function CheckIn({ session }: { session?: CheckInSession }) {
   const note = saveNote ?? loadNote;
   const draft = typed ?? view?.entry ?? '';
 
+  useEffect(() => {
+    // Asked once per opening: when the check-in opens, or when Tonight opens a
+    // new day (G5). `stale` keeps a second run of this effect (React's
+    // development double-run) from swapping the line under the person.
+    let stale = false;
+    getQuotesShown()
+      .then((shown) => (shown ? getQuote() : null))
+      .then((line) => {
+        if (!stale) setQuote(line);
+      })
+      // A line that cannot be had is no line: nothing to report, nothing in its place.
+      .catch(() => undefined);
+    return () => {
+      stale = true;
+    };
+  }, [opened.day]);
+
+  const line = quote ? (
+    <figure className="mt-6">
+      <p className="reflective max-w-prose text-lg italic text-ink-500">{quote}</p>
+    </figure>
+  ) : null;
+
   if (!view) {
     return (
       <Card>
@@ -245,6 +280,7 @@ export function CheckIn({ session }: { session?: CheckInSession }) {
         <h2 className="reflective text-3xl text-ink-900">
           {ended ? thisDay : 'Tonight'}
         </h2>
+        {line}
         <p className="reflective mt-4 max-w-prose text-lg text-ink-700">{view.sealed}</p>
       </Card>
     );
@@ -253,6 +289,7 @@ export function CheckIn({ session }: { session?: CheckInSession }) {
   return (
     <Card>
       <h2 className="reflective text-3xl text-ink-900">{ended ? thisDay : 'Tonight'}</h2>
+      {line}
 
       {view.reaches.length === 0 ? (
         <p className="reflective mt-4 max-w-prose text-lg text-ink-700">

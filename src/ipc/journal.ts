@@ -34,3 +34,12 @@ export const getDayView = (day: string, dayStart: number, dayEnd: number) =>
 /** Rejects with a plain sentence when the entry could not be kept. Nothing is stored then. */
 export const saveJournalEntry = (day: string, dayStart: number, dayEnd: number, text: string) =>
   invoke<DayView>('save_journal_entry', { day, dayStart, dayEnd, text });
+
+/** A line for the check-in, or null — a complete answer (FR-008). */
+export const getQuote = () => invoke<string | null>('get_quote');
+
+/** Whether the person wants quotes on the check-in. */
+export const getQuotesShown = () => invoke<boolean>('get_quotes_shown');
+
+/** The quiet switch on the check-in. Resolves with the setting as it now stands. */
+export const setQuotesShown = (shown: boolean) => invoke<boolean>('set_quotes_shown', { shown });
