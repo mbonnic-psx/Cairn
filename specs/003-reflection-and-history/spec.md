@@ -276,6 +276,11 @@ Checked against US1 scenario 1 (the optional quote), FR-008, FR-009, research R6
 - **Q1, revised (owner, 2026-10-01, after the demo: "Its a different quote everytime I switch the page").** One
   line holds for the whole day: moving to another screen and back to the check-in keeps it. A fresh line is chosen
   only when Tonight opens a new day (G5) or Cairn is started again. It is still never derived from the date.
+- **Q1, revised again (owner, 2026-10-01: a different line after a restart; "yes" to keeping it).** The line holds
+  for the whole local day, across restarts too: once a line is chosen for a day, Cairn remembers it with that day
+  and shows it again until a new day opens. It is still chosen at random and never derived from the date. What is
+  remembered is a setting, not reach or journal data, so it is readable without the key; a line that is no longer
+  in the bundled set, or a remembered day that is not today, means a fresh line.
 - **Q2 — turning quotes off.** The person can hide quotes with a quiet switch on the check-in
   itself, since there is no settings screen to hold one. Hidden, the check-in shows no quote
   and nothing in its place; it reads as complete (FR-008). The choice is remembered across
