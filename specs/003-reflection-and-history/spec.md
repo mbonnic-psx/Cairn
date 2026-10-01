@@ -249,6 +249,17 @@ revising tonight's entry. Three states the scenarios did not state, now part of 
 - **G3 — a day with no reaches.** The check-in reads the same whether today held reaches or none. No congratulation
   and no badge for zero (FR-032), and the journaling space is offered either way, because the writing is the point.
 
+Two more, from the adversary pass and decided by the owner on 2026-10-01 ("Yes to all three"):
+
+- **G4 — empty means nothing visible.** Text made only of characters that show nothing — whitespace, zero-width
+  and formatting characters, control characters such as NUL, and blank-looking letters such as U+3164 or the
+  braille blank — is empty. It is refused like any empty save (FR-014), and a saved entry stays as it was (G2).
+  The screen and the store agree on what empty is.
+- **G5 — opening Tonight opens today.** Choosing Tonight opens the current local day, unless the space holds
+  writing the person has not saved, which stays attached to the day it was written for. A check-in still open on
+  a day that has ended names that day's date and no longer calls it today, so nothing is filed under a day the
+  screen did not name.
+
 Already stated, and held by this slice as written: the check-in stays attached to the day it was opened for across
 midnight (edge cases); closing without writing stores nothing (FR-014); the space is not offered when sealed
 (FR-029, `contracts/ui-ipc.md`).
