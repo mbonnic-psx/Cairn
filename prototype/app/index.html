@@ -1,0 +1,593 @@
+<title>Cairn Prototype</title>
+<style>
+/* Layout: Cairn's own single window — a quiet header, one card per screen, max 48rem —
+   under a thin prototype bar that is never part of the product. Tokens are Cairn's
+   src/styles/theme.css, light only, as the app is. */
+:root {
+  --sand-50: #faf7f2; --sand-100: #f3ede3; --sand-200: #e6dccd; --sand-300: #d3c4ae; --sand-400: #b3a189;
+  --ink-900: #2f2a24; --ink-700: #4a4239; --ink-500: #6f6558; --ink-400: #8b8073;
+  --moss-600: #5c7052; --moss-500: #6f8462; --moss-100: #e4ebdd;
+  --amber-600: #9a7134; --amber-500: #b38845; --amber-100: #f2e7d2;
+  --clay-600: #8c5f4d; --clay-500: #a5735f; --clay-100: #f0e2da;
+  --proto-bg: #2f2a24; --proto-fg: #f3ede3; --proto-mute: #b3a189;
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", "Helvetica Neue", sans-serif;
+  --font-serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, ui-serif, serif;
+  --ease-gentle: cubic-bezier(0.32, 0.72, 0.24, 1);
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html, body { min-height: 100%; }
+body { margin: 0; background: var(--sand-50); color: var(--ink-700); font-family: var(--font-sans); font-size: 15px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+button, input, select, textarea { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--clay-500); outline-offset: 2px; }
+
+/* The prototype bar — not Cairn. */
+.proto { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 10; background: var(--proto-bg); color: var(--proto-fg); font-size: 13px; }
+.proto-in { max-width: 64rem; margin: 0 auto; padding: 8px 16px; display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; }
+.proto-flag { font-weight: 600; letter-spacing: .02em; }
+.proto-where { color: var(--proto-mute); min-width: 0; flex: 1 1 14rem; }
+.proto-where b { color: var(--proto-fg); font-weight: 500; }
+.proto select, .proto button { background: transparent; border: 1px solid #6f6558; border-radius: 6px; padding: 3px 9px; color: var(--proto-fg); cursor: pointer; }
+.proto select option { color: #2f2a24; background: #faf7f2; }
+.proto button:hover, .proto select:hover { border-color: var(--proto-mute); }
+.proto .accept[aria-pressed="true"] { background: var(--moss-600); border-color: var(--moss-600); }
+.proto label.sw { display: inline-flex; gap: 6px; align-items: center; cursor: pointer; }
+.proto-acc { color: var(--proto-mute); font-size: 12px; }
+
+main { max-width: 48rem; margin: 0 auto; padding: 28px 16px 64px; display: flex; flex-direction: column; gap: 22px; }
+header.app { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 16px; }
+.mark { font-family: var(--font-serif); font-size: 26px; color: var(--ink-900); letter-spacing: .01em; }
+nav.app { display: flex; flex-wrap: wrap; gap: 2px; }
+.btn { border: 0; border-radius: 8px; padding: 9px 18px; font-size: 14px; font-weight: 500; cursor: pointer; transition: background .2s var(--ease-gentle), color .2s var(--ease-gentle); }
+.btn.primary { background: var(--clay-600); color: var(--sand-50); }
+.btn.primary:hover { background: var(--clay-500); }
+.btn.primary:disabled { background: var(--sand-300); color: var(--ink-400); cursor: default; }
+.btn.quiet { background: transparent; color: var(--ink-500); padding: 7px 12px; }
+.btn.quiet:hover { color: var(--ink-900); background: var(--sand-100); }
+.btn.quiet[aria-current="page"] { color: var(--ink-900); background: var(--sand-100); }
+.card { border: 1px solid var(--sand-200); background: rgba(255,255,255,.6); border-radius: 16px; padding: 28px; display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+@media (max-width: 480px) { .card { padding: 20px; } }
+@media (prefers-reduced-motion: no-preference) { .settle { animation: settle 420ms var(--ease-gentle) both; } }
+@keyframes settle { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+h1, h2 { font-family: var(--font-serif); font-weight: 400; color: var(--ink-900); margin: 0; text-wrap: balance; }
+h1 { font-size: 30px; line-height: 1.2; }
+h2 { font-size: 21px; }
+.reflective { font-family: var(--font-serif); line-height: 1.65; letter-spacing: .005em; }
+p { margin: 0; max-width: 65ch; }
+.lead { color: var(--ink-500); }
+.small { font-size: 13px; color: var(--ink-500); }
+.caps { font-size: 12.5px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-400); margin: 4px 0 0; }
+ul.dots { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+ul.dots li { display: grid; grid-template-columns: 6px 1fr; gap: 10px; align-items: baseline; }
+ul.dots li::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--moss-500); transform: translateY(-2px); }
+ul.dots.sand li::before { background: var(--sand-300); }
+ul.dots.amber li::before { background: var(--amber-500); }
+.row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.row.end { justify-content: flex-end; }
+.pill { display: inline-block; border-radius: 999px; padding: 3px 11px; font-size: 11.5px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; }
+.pill.moss { background: var(--moss-100); color: var(--moss-600); }
+.pill.amber { background: var(--amber-100); color: var(--amber-600); }
+.pill.sand { background: var(--sand-100); color: var(--ink-500); }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); gap: 12px; }
+.stat { border-top: 1px solid var(--sand-200); padding-top: 10px; }
+.stat b { display: block; font-family: var(--font-serif); font-size: 22px; font-weight: 400; color: var(--ink-900); font-variant-numeric: tabular-nums; }
+.wait { background: var(--amber-100); border-radius: 12px; padding: 16px 18px; display: flex; flex-direction: column; gap: 8px; }
+.wait b { color: var(--ink-900); font-weight: 500; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr)); gap: 10px; }
+.tile { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; align-items: center; border: 1px solid var(--sand-200); border-radius: 12px; padding: 12px 14px; background: var(--sand-50); cursor: pointer; }
+.tile:has(input:checked) { border-color: var(--moss-500); background: var(--moss-100); }
+.tile input { accent-color: var(--moss-600); width: 16px; height: 16px; grid-row: span 2; }
+.tile .sub { font-size: 12.5px; color: var(--ink-500); }
+.field { display: flex; flex-wrap: wrap; gap: 8px; }
+.input { flex: 1 1 14rem; min-width: 0; border: 1px solid var(--sand-300); border-radius: 8px; padding: 9px 12px; background: var(--sand-50); }
+.note-moss { color: var(--moss-600); }
+.note-amber { color: var(--amber-600); }
+.list { display: flex; flex-direction: column; border-top: 1px solid var(--sand-200); }
+.list > div { display: flex; justify-content: space-between; gap: 12px; padding: 9px 2px; border-bottom: 1px solid var(--sand-200); min-width: 0; }
+.list .tag { font-size: 12.5px; color: var(--ink-400); }
+.time { font-variant-numeric: tabular-nums; color: var(--ink-500); }
+.seg { display: inline-flex; background: var(--sand-100); border-radius: 10px; padding: 3px; gap: 2px; flex-wrap: wrap; }
+.seg button { border: 0; background: transparent; border-radius: 8px; padding: 6px 14px; font-size: 13.5px; color: var(--ink-500); cursor: pointer; }
+.seg button[aria-pressed="true"] { background: #fff; color: var(--ink-900); box-shadow: 0 1px 2px rgba(47,42,36,.08); }
+.bars { display: flex; flex-direction: column; gap: 8px; }
+.bar { display: grid; grid-template-columns: minmax(7rem, 11rem) 1fr 2.5rem; gap: 12px; align-items: center; }
+.bar .track { height: 8px; border-radius: 4px; background: var(--sand-100); overflow: hidden; }
+.bar .fill { height: 100%; background: var(--clay-500); opacity: .55; border-radius: 4px; }
+.bar .n { text-align: right; font-variant-numeric: tabular-nums; color: var(--ink-500); }
+.cols { display: grid; grid-template-columns: repeat(24, 1fr); gap: 3px; align-items: end; height: 120px; }
+.cols.wk { grid-template-columns: repeat(7, 1fr); gap: 10px; }
+.cols div { background: var(--clay-500); opacity: .5; border-radius: 3px 3px 0 0; min-height: 2px; }
+.axis { display: grid; grid-template-columns: repeat(24, 1fr); gap: 3px; font-size: 11px; color: var(--ink-400); font-variant-numeric: tabular-nums; }
+.axis.wk { grid-template-columns: repeat(7, 1fr); gap: 10px; text-align: center; }
+.days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+.day { border: 1px solid var(--sand-200); border-radius: 10px; padding: 7px 6px; background: var(--sand-50); cursor: pointer; text-align: left; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.day:hover { border-color: var(--sand-400); }
+.day .d { font-size: 11.5px; color: var(--ink-400); }
+.day .c { font-family: var(--font-serif); font-size: 17px; color: var(--ink-900); font-variant-numeric: tabular-nums; }
+.day .w { font-size: 11px; color: var(--ink-400); }
+textarea.journal { width: 100%; min-height: 10rem; border: 1px solid var(--sand-300); border-radius: 12px; padding: 14px 16px; background: var(--sand-50); font-family: var(--font-serif); font-size: 17px; line-height: 1.65; resize: vertical; }
+.quote { font-family: var(--font-serif); font-style: italic; color: var(--ink-500); font-size: 17px; }
+.opt { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border: 1px solid var(--sand-200); border-radius: 12px; cursor: pointer; }
+.opt:has(input:checked) { border-color: var(--clay-500); background: var(--clay-100); }
+.opt input { accent-color: var(--clay-600); margin-top: 4px; }
+.setting { display: flex; flex-direction: column; gap: 10px; padding-top: 16px; border-top: 1px solid var(--sand-200); }
+.setting:first-of-type { border-top: 0; padding-top: 0; }
+.toggle { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.toggle input { accent-color: var(--moss-600); width: 18px; height: 18px; flex: none; }
+.steps { display: flex; gap: 6px; font-size: 12.5px; color: var(--ink-400); }
+.steps span[aria-current="step"] { color: var(--ink-900); }
+.foot { color: var(--ink-500); font-size: 13.5px; }
+</style>
+
+<div class="proto" role="region" aria-label="Prototype controls">
+  <div class="proto-in">
+    <span class="proto-flag">Prototype — nothing here is saved or sent</span>
+    <span class="proto-where" id="proto-where"></span>
+    <label class="sw"><input type="checkbox" id="proto-empty"> Start empty</label>
+    <label class="sw">Jump to <select id="proto-jump" aria-label="Jump to a screen"></select></label>
+    <button type="button" id="proto-comment" hidden>Comment on this screen</button>
+    <button type="button" class="accept" id="proto-accept" aria-pressed="false">Accept this screen</button>
+    <span class="proto-acc" id="proto-acc" aria-live="polite"></span>
+  </div>
+</div>
+
+<main id="app"></main>
+
+<script>
+(function () {
+  "use strict";
+
+  // ---------- Screens: route name, what it is, which story it shows ----------
+  var SCREENS = [
+    { id: "choose", name: "Setup · What would you like to protect?", story: "001 US1 · 002 (built)" },
+    { id: "streaks", name: "Setup · Streaks", story: "001 streaks · slice 004 (spec only)" },
+    { id: "disclosure", name: "Setup · Before Cairn changes anything", story: "002 (built)" },
+    { id: "protection", name: "Protection", story: "002 (built)" },
+    { id: "trail", name: "What is protected", story: "002 (built)" },
+    { id: "today", name: "Today", story: "002 · 003 (built)" },
+    { id: "overtime", name: "Today · Over time", story: "003 slices 5a–5e (planned)" },
+    { id: "day", name: "One day", story: "003 slice one-day (spec only)" },
+    { id: "tonight", name: "Tonight", story: "003 write-tonight · quote (on branches)" },
+    { id: "covers", name: "What Cairn covers", story: "002 (built)" },
+    { id: "settings", name: "Settings", story: "001 FR-039 · 002 US4 (spec only)" },
+    { id: "partner", name: "Settings · A partner", story: "001 partner flow (spec only)" },
+    { id: "theirs", name: "Settings · Your history", story: "003 slice theirs (spec only)" },
+    { id: "teardown", name: "This machine is as it was", story: "002 teardown (built, not wired)" }
+  ];
+  var byId = {}; SCREENS.forEach(function (s) { byId[s.id] = s; });
+
+  // ---------- Seeded sample data: four weeks of one person's evenings ----------
+  var CATS = [
+    ["adult", "Adult", 15], ["ai", "AI", 12], ["gambling", "Gambling", 14], ["gaming", "Gaming", 15],
+    ["messenger", "Messenger", 10], ["news", "News", 14], ["shopping", "Shopping", 14], ["social", "Social", 15], ["streaming", "Streaming", 15]
+  ];
+  var TRAIL = {
+    social: ["facebook.com", "instagram.com", "reddit.com", "tiktok.com", "x.com", "twitter.com", "bsky.app", "threads.net", "pinterest.com", "tumblr.com", "snapchat.com", "linkedin.com", "mastodon.social", "vk.com", "weibo.com"],
+    news: ["cnn.com", "nytimes.com", "bbc.co.uk", "theguardian.com", "reuters.com", "apnews.com", "foxnews.com", "washingtonpost.com", "nbcnews.com", "aljazeera.com", "news.google.com", "news.ycombinator.com", "bloomberg.com", "wsj.com"],
+    streaming: ["youtube.com", "netflix.com", "hulu.com", "disneyplus.com", "spotify.com", "max.com", "primevideo.com", "twitch.tv", "crunchyroll.com", "peacocktv.com", "paramountplus.com", "vimeo.com", "dailymotion.com", "soundcloud.com", "pluto.tv"]
+  };
+  var QUOTES = [
+    "The evening arrived the same way it always does, one minute after another.",
+    "Somewhere a porch light is on and no one is thinking about it.",
+    "The moon does not care what day of the week it is.",
+    "Somewhere it is already tomorrow."
+  ];
+  var SITES = [["reddit.com", 9], ["youtube.com", 7], ["x.com", 5], ["instagram.com", 4], ["nytimes.com", 3], ["news.ycombinator.com", 3], ["tiktok.com", 2], ["slowforum.net", 1]];
+  var HOURS = [0,0,0,0,0,0,0,1,2,3,3,2,3,4,6,6,5,3,2,3,4,4,3,1];
+  var ENTRIES = [
+    "Long afternoon. I kept opening a new tab without deciding to. Went for a walk at four and the rest of the day was quieter.",
+    "Better than yesterday. Most of it was in the hour after the meeting, which I did not expect.",
+    "Tired. Reached for things mostly out of boredom. Going to bed earlier.",
+    "Good day. Cooked, called Dad, barely thought about it.",
+    "The news one is the hardest. I tell myself it is staying informed.",
+    "Rough evening. Noticed I reach for it when I feel behind at work."
+  ];
+
+  function rng(seed) { return function () { seed = (seed * 1664525 + 1013904223) % 4294967296; return seed / 4294967296; }; }
+  function pick(r, weights) { var t = 0, i; for (i = 0; i < weights.length; i++) t += weights[i]; var x = r() * t; for (i = 0; i < weights.length; i++) { x -= weights[i]; if (x < 0) return i; } return weights.length - 1; }
+  function dayKey(d) { return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
+  function addDays(d, n) { var x = new Date(d); x.setDate(x.getDate() + n); return x; }
+  var TODAY = new Date(); TODAY.setHours(0, 0, 0, 0);
+  var NOW_H = new Date().getHours();
+
+  function seedHistory() {
+    var r = rng(20261001), days = {}, i;
+    for (i = 27; i >= 0; i--) {
+      var d = addDays(TODAY, -i), k = dayKey(d), n = Math.floor(r() * 11) + (d.getDay() === 0 ? 0 : 2);
+      var reaches = [];
+      for (var j = 0; j < n; j++) {
+        var h = pick(r, HOURS);
+        if (i === 0 && h > NOW_H) h = Math.max(7, NOW_H - Math.floor(r() * 3));
+        reaches.push({ domain: SITES[pick(r, SITES.map(function (s) { return s[1]; }))][0], h: h, m: Math.floor(r() * 60) });
+      }
+      reaches.sort(function (a, b) { return a.h * 60 + a.m - (b.h * 60 + b.m); });
+      days[k] = { reaches: reaches, gap: null, estimate: null, silent: false, entry: null };
+      if (i > 0 && r() < 0.55) days[k].entry = ENTRIES[Math.floor(r() * ENTRIES.length)];
+    }
+    var gapDay = dayKey(addDays(TODAY, -4)); days[gapDay].gap = "about 3 hours";
+    var silentDay = dayKey(addDays(TODAY, -9)); days[silentDay].reaches = []; days[silentDay].silent = true; days[silentDay].estimate = 6;
+    days[dayKey(addDays(TODAY, -2))].entry = null;
+    return days;
+  }
+
+  function fresh(empty) {
+    return {
+      screen: empty ? "choose" : "protection",
+      status: empty ? "off" : "in_force",
+      cats: empty ? {} : { social: true, news: true, streaming: true },
+      edited: { social: true },
+      custom: empty ? [] : ["slowforum.net"],
+      pending: null,
+      mode: "counted",
+      streaks: false,
+      streakDays: 12,
+      waiting: "24 hours",
+      partner: null,
+      schedule: "always",
+      workarounds: false,
+      autostart: true,
+      hideQuotes: false,
+      days: empty ? {} : seedHistory(),
+      kept: {},
+      note: "",
+      customMsg: null,
+      overTab: "site",
+      from: dayKey(addDays(TODAY, -27)), to: dayKey(TODAY),
+      dayView: dayKey(addDays(TODAY, -1)),
+      quote: QUOTES[Math.floor(Math.random() * QUOTES.length)],
+      confirmTheirs: null, theirsDone: false, setupStep: 1, workaroundsAsk: false
+    };
+  }
+  var S = fresh(false);
+
+  // ---------- helpers ----------
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  function hm(r) { return String(r.h).padStart(2, "0") + ":" + String(r.m).padStart(2, "0"); }
+  function on() { return S.status !== "off"; }
+  function trailDomains() {
+    var out = [];
+    Object.keys(S.cats).forEach(function (c) { if (S.cats[c] && TRAIL[c]) TRAIL[c].forEach(function (d) { out.push([d, null]); }); });
+    S.custom.forEach(function (d) { out.push([d, null]); out.push(["www." + d, "added with its root address"]); });
+    return out;
+  }
+  function addrCount() { var n = 0; CATS.forEach(function (c) { if (S.cats[c[0]]) n += c[2]; }); return n + S.custom.length * 2; }
+  function listCount() { return CATS.filter(function (c) { return S.cats[c[0]]; }).length; }
+  function words(k) { var p = k.split("-"); var d = new Date(+p[0], +p[1] - 1, +p[2]); return d.toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" }); }
+  function short(k) { var p = k.split("-"); var d = new Date(+p[0], +p[1] - 1, +p[2]); return d.toLocaleDateString(undefined, { day: "numeric", month: "short" }); }
+  function dow(k) { var p = k.split("-"); return new Date(+p[0], +p[1] - 1, +p[2]).getDay(); }
+  function range() { return Object.keys(S.days).filter(function (k) { return k >= S.from && k <= S.to; }).sort(); }
+
+  // ---------- the app shell ----------
+  function header() {
+    var cur = S.screen;
+    function nav(id, label, show) {
+      if (!show) return "";
+      var here = cur === id || (id === "protection" && /^(choose|streaks|disclosure)$/.test(cur)) || (id === "today" && /^(overtime|day)$/.test(cur)) || (id === "settings" && /^(partner|theirs|teardown)$/.test(cur));
+      return '<button class="btn quiet" data-go="' + id + '"' + (here ? ' aria-current="page"' : "") + ">" + label + "</button>";
+    }
+    return '<header class="app"><span class="mark">Cairn</span><nav class="app" aria-label="Cairn">' +
+      nav(on() ? "protection" : "choose", "Protection", true).replace('data-go="choose"', 'data-go="choose"') +
+      nav("trail", on() ? "What is protected" : "What you chose", on()) +
+      nav("today", "Today", on()) +
+      nav("tonight", "Tonight", true) +
+      nav("covers", "What Cairn covers", true) +
+      nav("settings", "Settings", true) +
+      "</nav></header>";
+  }
+
+  // ---------- screens ----------
+  var R = {};
+
+  R.choose = function () {
+    var tiles = CATS.map(function (c) {
+      var ed = S.edited[c[0]] && S.cats[c[0]] ? " · edited by you" : "";
+      return '<label class="tile"><input type="checkbox" data-cat="' + c[0] + '"' + (S.cats[c[0]] ? " checked" : "") + '><span>' + c[1] + '</span><span class="sub">' + c[2] + " addresses" + ed + "</span></label>";
+    }).join("");
+    var msg = S.customMsg ? '<p class="' + (S.customMsg[0] === "ok" ? "note-moss" : "note-amber") + '" role="status">' + esc(S.customMsg[1]) + "</p>" : "";
+    return steps(1) +
+      '<section class="card settle"><h1>What would you like to protect?</h1><p class="lead">Each of these is a starting list. It becomes yours — add to it, take things out of it, whenever you like.</p><div class="tiles">' + tiles + "</div>" +
+      (S.note ? '<p class="note-amber" role="status">' + esc(S.note) + "</p>" : "") + "</section>" +
+      '<section class="card settle"><h2>Anywhere else?</h2><p class="lead">Type an address and Cairn will protect it, along with its www. form.</p>' +
+      '<form class="field" id="custom-form"><label for="custom" style="position:absolute;left:-9999px">Address to protect</label><input class="input" id="custom" placeholder="example.com" autocomplete="off"><button class="btn primary" type="submit">Protect it</button></form>' + msg +
+      (S.custom.length ? '<p class="small">Yours: ' + S.custom.map(esc).join(", ") + "</p>" : "") + "</section>" +
+      '<div class="row end">' + (on() ? '<button class="btn quiet" data-go="protection">Back to protection</button>' : '<button class="btn primary" data-go="streaks"' + (listCount() || S.custom.length ? "" : " disabled") + ">Turn protection on</button>") + "</div>";
+  };
+
+  function steps(n) {
+    if (on()) return "";
+    var names = ["What to protect", "Streaks", "Before anything changes"];
+    return '<div class="steps" aria-label="Setup">' + names.map(function (x, i) { return "<span" + (i + 1 === n ? ' aria-current="step"' : "") + ">" + (i + 1) + ". " + x + "</span>"; }).join("<span>·</span>") + "</div>";
+  }
+
+  R.streaks = function () {
+    return steps(2) + '<section class="card settle"><h1>Would you like a streak?</h1>' +
+      '<p class="lead reflective">A streak counts the days in a row you have kept to the trail. It helps some people, and it quietly hurts others: a long streak can make a single slip feel like everything, and the number can start to matter more than the work.</p>' +
+      '<p class="lead">Both are good choices. You can change your mind in Settings, and turning it off later simply makes the number go away.</p>' +
+      '<label class="opt"><input type="radio" name="streak" value="off"' + (!S.streaks ? " checked" : "") + '><span><b>No streak</b><br><span class="small">Your reaches, patterns and evenings are all still here. Nothing counts days.</span></span></label>' +
+      '<label class="opt"><input type="radio" name="streak" value="on"' + (S.streaks ? " checked" : "") + '><span><b>Keep a streak</b><br><span class="small">Tonight shows how many days you have been back on the trail.</span></span></label>' +
+      '<div class="row end"><button class="btn quiet" data-go="choose">Back</button><button class="btn primary" data-go="disclosure">Continue</button></div></section>';
+  };
+
+  var IN_FORCE = ["Protected sites are blocked for every application on this machine that uses the system's own address lookup.", "Cairn checks its own work every minute and puts it back if something changes it."];
+  var NOT_COVERED = ["An application that looks up addresses on its own, rather than asking this machine, is not covered in this release. Some browsers can be set to do that.", "A browser that has already loaded a site may keep showing it from its own cache for a short while."];
+  var ADMIN = "Someone with administrator access to this machine can undo what Cairn does. Cairn is a wall to walk away from, not a lock.";
+  function dots(a, cls) { return '<ul class="dots ' + (cls || "") + '">' + a.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + "</ul>"; }
+
+  R.disclosure = function () {
+    return steps(3) + '<section class="card settle"><h1>Before Cairn changes anything</h1><p class="lead">Cairn protects this whole machine, so the changes it makes affect everyone who uses it. It writes only inside its own marked section, and it keeps a copy of what was there first.</p>' +
+      dots(IN_FORCE) + '<p>Cairn will ask once for permission to install a small background component. It is what keeps protection in force without asking you again, and it is removed completely when you remove Cairn.</p>' +
+      '<p class="caps">What this does not cover</p>' + dots(NOT_COVERED, "sand") +
+      '<p class="reflective" style="color:var(--ink-500)">' + ADMIN + "</p>" +
+      '<div class="row end"><button class="btn quiet" data-go="choose">Not yet</button><button class="btn primary" data-act="turn-on">Yes, set this up</button></div></section>';
+  };
+
+  R.protection = function () {
+    if (!on()) return R.choose();
+    var st = S.status === "in_force" ? ["moss", "Protection is on", "Cairn checked the system itself, and what you chose is in force."] : ["amber", "Not confirmed just now", "Cairn could not check the system a moment ago, so it is not showing protection as on. It keeps trying, and it keeps what you chose."];
+    var wait = S.pending ? '<div class="wait" role="status"><b>' + esc(S.pending) + '</b><span>This takes effect in ' + esc(S.waiting === "24 hours" ? "23 hours" : S.waiting) + '. Protection stays on until then.</span><div><button class="btn quiet" data-act="cancel-pending">Keep things as they are</button></div></div>' : "";
+    return '<section class="card settle"><div><span class="pill ' + st[0] + '">' + st[1] + '</span></div><h1>' + st[1] + '</h1><p class="lead">' + st[2] + '</p>' +
+      '<div class="stats"><div class="stat"><span class="small">Addresses in force</span><b>' + addrCount() + '</b></div><div class="stat"><span class="small">Last checked</span><b>just now</b></div></div>' + wait +
+      '<p class="small"><button class="btn quiet" style="padding:4px 8px;margin-left:-8px" data-act="toggle-verify">' + (S.status === "in_force" ? "Show what it looks like when Cairn cannot check" : "Show it confirmed again") + "</button></p></section>";
+  };
+
+  R.trail = function () {
+    var rows = trailDomains().map(function (d) { return "<div><span>" + esc(d[0]) + "</span>" + (d[1] ? '<span class="tag">' + d[1] + "</span>" : "") + "</div>"; }).join("");
+    return '<section class="card settle"><h1>' + (S.status === "in_force" ? "What you are protecting" : "What you have chosen") + '</h1><p class="lead">' + addrCount() + " addresses, across " + listCount() + " lists and whatever you have added yourself.</p>" +
+      (S.status === "not_verified" ? '<p class="note-amber">Cairn has not confirmed this is in force just now. It keeps trying, and it keeps what you chose.</p>' : "") +
+      '<div class="list">' + rows + '</div><p class="foot">Taking something out protects you less, so it waits a day before it takes effect. You can ask for that here, and cancel it at any time in that day.</p>' +
+      '<div class="row"><button class="btn quiet" data-go="choose">Change what is protected</button></div></section>';
+  };
+
+  function todayData() { return S.days[dayKey(TODAY)] || { reaches: [], gap: null }; }
+  function seg(name, opts, cur) { return '<div class="seg" role="group">' + opts.map(function (o) { return '<button data-' + name + '="' + o[0] + '" aria-pressed="' + (o[0] === cur) + '">' + o[1] + "</button>"; }).join("") + "</div>"; }
+
+  R.today = function () {
+    var t = todayData();
+    var body;
+    if (S.mode === "silent") body = '<p class="lead">Cairn is not counting the sites you reach for on this machine yet. Everything you have protected is still protected.</p>';
+    else if (!t.reaches.length) body = '<p class="lead">Nothing here for today.</p>';
+    else body = '<div class="list">' + t.reaches.map(function (r) { return "<div><span>" + esc(r.domain) + '</span><span class="time">' + hm(r) + "</span></div>"; }).join("") + "</div>";
+    return '<section class="card settle"><div class="row" style="justify-content:space-between"><h1>Today</h1>' + seg("view", [["today", "Today"], ["overtime", "Over time"]], "today") + "</div>" + body +
+      '<p class="foot">Cairn counts only while it is running. This is what it saw today.</p></section>';
+  };
+
+  R.overtime = function () {
+    var ks = range(), sites = {}, hours = new Array(24).fill(0), wk = new Array(7).fill(0), total = 0, gaps = [], est = 0;
+    ks.forEach(function (k) {
+      var d = S.days[k]; if (d.gap) gaps.push(k); if (d.estimate != null) est++;
+      d.reaches.forEach(function (r) { sites[r.domain] = (sites[r.domain] || 0) + 1; hours[r.h]++; wk[dow(k)]++; total++; });
+    });
+    var body;
+    if (!total) body = '<p class="lead">Nothing here for these days.</p>';
+    else if (S.overTab === "site") {
+      var arr = Object.keys(sites).map(function (s) { return [s, sites[s]]; }).sort(function (a, b) { return b[1] - a[1]; }), max = arr[0][1];
+      body = '<div class="bars">' + arr.map(function (a) { return '<div class="bar"><span>' + esc(a[0]) + '</span><span class="track"><span class="fill" style="display:block;width:' + Math.round(a[1] / max * 100) + '%"></span></span><span class="n">' + a[1] + "</span></div>"; }).join("") + "</div>";
+    } else if (S.overTab === "hour") {
+      var mh = Math.max.apply(null, hours) || 1;
+      body = '<div class="cols" aria-label="Reaches by hour">' + hours.map(function (n, h) { return '<div title="' + h + ':00 — ' + n + '" style="height:' + Math.round(n / mh * 100) + '%"></div>'; }).join("") + '</div><div class="axis">' + hours.map(function (n, h) { return "<span>" + (h % 6 === 0 ? String(h).padStart(2, "0") : "") + "</span>"; }).join("") + "</div>";
+    } else if (S.overTab === "weekday") {
+      var mw = Math.max.apply(null, wk) || 1, names = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+      body = '<div class="cols wk" aria-label="Reaches by weekday">' + wk.map(function (n, i) { return '<div title="' + names[i] + " — " + n + '" style="height:' + Math.round(n / mw * 100) + '%"></div>'; }).join("") + '</div><div class="axis wk">' + names.map(function (x) { return "<span>" + x + "</span>"; }).join("") + "</div>";
+    } else {
+      body = '<p class="small">Each day, as Cairn saw it. Open one to see it with what you wrote.</p><div class="days">' + ks.map(function (k) {
+        var d = S.days[k], c = d.silent ? (d.estimate != null ? "~" + d.estimate : "—") : d.reaches.length;
+        return '<button class="day" data-day="' + k + '"><span class="d">' + short(k) + '</span><span class="c">' + c + '</span><span class="w">' + (d.entry ? "written" : "&nbsp;") + "</span></button>";
+      }).join("") + "</div>";
+    }
+    var notes = [];
+    if (gaps.length) notes.push("Cairn was not running for part of " + gaps.length + (gaps.length === 1 ? " day" : " days") + " in this range, so anything you reached for then is not here.");
+    if (est && S.overTab !== "days") notes.push("Your own estimate for " + est + (est === 1 ? " day is" : " days are") + " not included here, because an estimate has no site or hour.");
+    return '<section class="card settle"><div class="row" style="justify-content:space-between"><h1>Over time</h1>' + seg("view", [["today", "Today"], ["overtime", "Over time"]], "overtime") + "</div>" +
+      '<div class="row"><label class="small">From <input class="input" style="flex:none;width:auto" type="date" id="from" value="' + S.from + '" max="' + S.to + '"></label><label class="small">To <input class="input" style="flex:none;width:auto" type="date" id="to" value="' + S.to + '" max="' + dayKey(TODAY) + '"></label></div>' +
+      seg("tab", [["site", "By site"], ["hour", "By hour"], ["weekday", "By weekday"], ["days", "Day by day"]], S.overTab) +
+      (notes.length ? '<p class="small">' + notes.join(" ") + "</p>" : "") + body +
+      '<p class="foot">Cairn counts only while it is running. This is what it saw.</p></section>';
+  };
+
+  R.day = function () {
+    var k = S.dayView, d = S.days[k] || { reaches: [], entry: null };
+    var reaches = d.silent
+      ? '<p class="lead">Cairn was not counting this day. ' + (d.estimate != null ? "Your own estimate was about " + d.estimate + ". That number is yours, not something Cairn measured." : "") + "</p>"
+      : (d.reaches.length ? '<div class="list">' + d.reaches.map(function (r) { return "<div><span>" + esc(r.domain) + '</span><span class="time">' + hm(r) + "</span></div>"; }).join("") + "</div>" : '<p class="lead">Nothing here for this day.</p>');
+    var gap = d.gap ? '<p class="small">Cairn was not running for ' + d.gap + " of this day, so anything you reached for then is not here.</p>" : "";
+    var entry = d.entry ? '<p class="caps">What you wrote</p><p class="reflective">' + esc(d.entry) + "</p>" : '<p class="caps">What you wrote</p><p class="small">Nothing written for this day, and nothing to catch up on.</p><div><button class="btn quiet" data-act="write-day">Write about this day</button></div>';
+    return '<section class="card settle"><div class="row" style="justify-content:space-between"><h1>' + words(k) + '</h1><button class="btn quiet" data-go="overtime">Back to over time</button></div>' + reaches + gap + entry + "</section>";
+  };
+
+  R.tonight = function () {
+    var k = dayKey(TODAY), t = todayData(), kept = S.kept[k];
+    var quote = S.hideQuotes ? "" : '<p class="quote">' + esc(S.quote) + "</p>";
+    var list = S.mode === "silent"
+      ? '<label class="small" for="estimate">If you had to guess, about how many times did you reach for something today? This number is yours, not a measurement.</label><input class="input" style="max-width:8rem" id="estimate" type="number" min="0" inputmode="numeric">'
+      : (t.reaches.length ? '<div class="list">' + t.reaches.map(function (r) { return "<div><span>" + esc(r.domain) + '</span><span class="time">' + hm(r) + "</span></div>"; }).join("") + "</div>" : '<p class="lead">Nothing here for today.</p>');
+    var streak = S.streaks && on() ? '<p class="small">Back on the trail for ' + S.streakDays + " days.</p>" : "";
+    return '<section class="card settle"><h1>Tonight</h1>' + quote + streak + '<p class="caps">Today</p>' + list +
+      '<label for="journal" class="reflective" style="color:var(--ink-900);font-size:18px">How the day went</label><textarea class="journal" id="journal">' + esc(kept || "") + "</textarea>" +
+      '<div class="row" style="justify-content:space-between"><span class="small" id="kept" role="status">' + (kept ? "Kept for today." : "") + '</span><button class="btn primary" data-act="keep" id="keep"' + (kept ? "" : " disabled") + ">Keep this</button></div>" +
+      '<div><button class="btn quiet" data-act="quotes">' + (S.hideQuotes ? "Show quotes" : "Hide quotes") + "</button></div></section>";
+  };
+
+  R.covers = function () {
+    return '<section class="card settle"><h1>What Cairn covers</h1>' + dots(IN_FORCE) + '<p class="caps">What it does not cover in this release</p>' + dots(NOT_COVERED, "sand") +
+      '<p class="caps">What is kept, and how</p><p>What Cairn records is encrypted on this machine. That protects it if the drive is copied or the machine is lost. It does not protect it from someone using this machine while it is unlocked.</p>' +
+      '<p class="reflective" style="color:var(--ink-500)">' + ADMIN + "</p></section>";
+  };
+
+  R.settings = function () {
+    var waits = ["5 minutes", "1 hour", "24 hours", "3 days", "7 days"];
+    var ask = S.workaroundsAsk ? '<div class="wait"><b>This turns off Secure DNS in your browsers so they can\'t route around Cairn.</b><span>On this machine that setting is machine-wide: it will affect every user account on this computer.</span><div class="row"><button class="btn quiet" data-act="wa-no">Not now</button><button class="btn primary" data-act="wa-yes">Turn it on</button></div></div>' : "";
+    return '<section class="card settle"><h1>Settings</h1>' +
+      '<div class="setting"><h2>Protection</h2>' + (on()
+        ? (S.pending ? '<p class="small">' + esc(S.pending) + " is waiting. You can keep things as they are from Protection.</p>" : '<p class="small">Turning protection off waits ' + S.waiting + " first. Protection stays on until then.</p>") + '<div><button class="btn quiet" data-act="request-off"' + (S.pending ? " disabled" : "") + ">Turn protection off</button></div>"
+        : '<p class="small">Protection is off.</p><div><button class="btn quiet" data-go="choose">Set it up</button></div>') + "</div>" +
+      '<div class="setting"><h2>How long a change waits</h2><p class="small">Anything that protects you less waits this long first. A longer wait applies at once; a shorter one waits out the current period.</p><select class="input" style="max-width:12rem" id="waiting">' + waits.map(function (w) { return "<option" + (w === S.waiting ? " selected" : "") + ">" + w + "</option>"; }).join("") + "</select></div>" +
+      '<div class="setting"><h2>A partner</h2>' + (S.partner ? '<p class="small">' + esc(S.partner) + " approves changes that protect you less.</p>" : '<p class="small">Someone you trust can approve changes that protect you less, and see a summary you choose to share.</p>') + '<div><button class="btn quiet" data-go="partner">' + (S.partner ? "Manage your partner" : "Add a partner") + "</button></div></div>" +
+      '<div class="setting"><h2>When protection is active</h2><label class="opt"><input type="radio" name="sched" value="always"' + (S.schedule === "always" ? " checked" : "") + '><span>All the time</span></label><label class="opt"><input type="radio" name="sched" value="windows"' + (S.schedule === "windows" ? " checked" : "") + '><span>On a schedule<br><span class="small">Weekdays 09:00–17:00 and every evening 20:00–23:30. Ending a window early waits like any other change.</span></span></label></div>' +
+      '<div class="setting"><h2>Counting reaches</h2><label class="opt"><input type="radio" name="mode" value="counted"' + (S.mode === "counted" ? " checked" : "") + '><span>Counted<br><span class="small">Cairn notes the site and the time, and nothing else. Nothing is shown to the site.</span></span></label><label class="opt"><input type="radio" name="mode" value="silent"' + (S.mode === "silent" ? " checked" : "") + '><span>Silent<br><span class="small">Pure blocking, nothing noted. Tonight asks you to estimate instead.</span></span></label></div>' +
+      '<div class="setting"><div class="toggle"><span><h2>Prevent browser workarounds</h2><span class="small">Stops browsers from looking up protected sites on their own.</span></span><input type="checkbox" id="wa"' + (S.workarounds ? " checked" : "") + ' aria-label="Prevent browser workarounds"></div>' + ask + "</div>" +
+      '<div class="setting"><div class="toggle"><span><h2>Streaks</h2><span class="small">Off is a real choice. Turning it off just makes the number go away.</span></span><input type="checkbox" id="streak-t"' + (S.streaks ? " checked" : "") + ' aria-label="Streaks"></div></div>' +
+      '<div class="setting"><div class="toggle"><span><h2>Start with this machine</h2><span class="small">Cairn opens quietly in the tray when you sign in.</span></span><input type="checkbox" id="auto"' + (S.autostart ? " checked" : "") + ' aria-label="Start with this machine"></div></div>' +
+      '<div class="setting"><h2>Your history</h2><p class="small">It is yours. Delete a day, a range, or all of it.</p><div><button class="btn quiet" data-go="theirs">Your history</button></div></div>' +
+      '<div class="setting"><h2>Remove Cairn\'s changes</h2><p class="small">Undo everything Cairn wrote to this machine and check each change.</p><div><button class="btn quiet" data-act="teardown">Remove Cairn\'s changes</button></div></div>' +
+      "</section>";
+  };
+
+  R.partner = function () {
+    if (S.partner) return '<section class="card settle"><h1>' + esc(S.partner) + ' is your partner</h1><p class="lead">They approve changes that protect you less by typing the passphrase they chose. Cairn never shows it again.</p><p class="caps">Share a summary</p><p class="small">Choose a period, and whether to include what you wrote. The file is not encrypted, so share it the way you would share a letter.</p><div class="row"><select class="input" style="max-width:12rem" id="share-period"><option>Last 7 days</option><option>Last 4 weeks</option></select><label class="small"><input type="checkbox" id="share-journal"> Include what I wrote</label><button class="btn primary" data-act="share">Make the summary</button></div><p class="small" id="share-msg" role="status"></p><div><button class="btn quiet" data-act="partner-remove">Remove your partner</button> <button class="btn quiet" data-go="settings">Back to settings</button></div></section>';
+    return '<section class="card settle"><h1>Add a partner</h1><p class="lead">Someone you trust. They will approve changes that protect you less, and you can share a summary with them when you choose.</p>' +
+      '<form id="partner-form" style="display:flex;flex-direction:column;gap:10px"><label class="small" for="pname">Their name, as you would say it</label><input class="input" id="pname" placeholder="Sam" autocomplete="off"><label class="small" for="ppass">A passphrase they type, on this machine, while you look away</label><input class="input" id="ppass" type="password" autocomplete="off"><p class="small">Cairn never shows it again, and there is no hint or reset. If it is forgotten, removing the partner waits like any other change.</p><div class="row end"><button class="btn quiet" type="button" data-go="settings">Not now</button><button class="btn primary" type="submit">Add them</button></div></form></section>';
+  };
+
+  R.theirs = function () {
+    if (S.theirsDone) return '<section class="card settle"><h1>Your history</h1><p class="lead">Done.</p><div><button class="btn quiet" data-go="settings">Back to settings</button></div></section>';
+    if (S.confirmTheirs) return '<section class="card settle"><h1>' + esc(S.confirmTheirs) + '</h1><p class="lead">This removes it from this machine.</p><div class="row end"><button class="btn quiet" data-act="theirs-cancel">Keep it</button><button class="btn primary" data-act="theirs-yes">Delete</button></div></section>';
+    return '<section class="card settle"><h1>Your history</h1><p class="lead">It is yours, to keep or to clear. You can also change or delete anything you wrote from that day.</p>' +
+      '<div class="setting"><h2>A day</h2><div class="row"><input class="input" style="flex:none;width:auto" type="date" id="del-day" value="' + dayKey(addDays(TODAY, -1)) + '" max="' + dayKey(TODAY) + '"><button class="btn quiet" data-act="del" data-what="Delete this day?">Delete this day</button></div></div>' +
+      '<div class="setting"><h2>A range</h2><div class="row"><input class="input" style="flex:none;width:auto" type="date" value="' + dayKey(addDays(TODAY, -13)) + '"><input class="input" style="flex:none;width:auto" type="date" value="' + dayKey(addDays(TODAY, -7)) + '"><button class="btn quiet" data-act="del" data-what="Delete these days?">Delete these days</button></div></div>' +
+      '<div class="setting"><h2>All of it</h2><div><button class="btn quiet" data-act="del" data-what="Delete all of your history?">Delete all of it</button></div></div>' +
+      '<div><button class="btn quiet" data-go="settings">Back to settings</button></div></section>';
+  };
+
+  R.teardown = function () {
+    return '<section class="card settle"><h1>This machine is as it was</h1><p class="lead">Cairn checked each change it had made and undid it. What Cairn did not write is untouched.</p>' +
+      dots(["The system's list of site addresses is exactly as it was before Cairn.", "The background component has been removed."]) +
+      '<div class="row"><button class="btn quiet" data-act="restart">Start over</button></div></section>';
+  };
+
+  // ---------- render + events ----------
+  var app = document.getElementById("app");
+  function render() {
+    var fn = R[S.screen] || R.protection;
+    app.innerHTML = header() + fn();
+    var s = byId[S.screen] || byId.protection;
+    document.getElementById("proto-where").innerHTML = "<b>" + esc(s.name) + "</b> · " + esc(s.story);
+    document.getElementById("proto-jump").value = S.screen;
+    paintAccept();
+  }
+  function go(id) { S.screen = id; S.note = ""; if (id !== "choose") S.customMsg = null; render(); window.scrollTo(0, 0); }
+
+  var jump = document.getElementById("proto-jump");
+  jump.innerHTML = SCREENS.map(function (s) { return '<option value="' + s.id + '">' + esc(s.name) + "</option>"; }).join("");
+  jump.addEventListener("change", function () { go(jump.value); });
+  document.getElementById("proto-empty").addEventListener("change", function (e) { var q = S.quote; S = fresh(e.target.checked); S.quote = q; render(); });
+
+  app.addEventListener("click", function (e) {
+    var t = e.target.closest("[data-go],[data-act],[data-view],[data-tab],[data-day]");
+    if (!t || t.disabled) return;
+    if (t.dataset.go) return go(t.dataset.go);
+    if (t.dataset.view) return go(t.dataset.view);
+    if (t.dataset.tab) { S.overTab = t.dataset.tab; return render(); }
+    if (t.dataset.day) { S.dayView = t.dataset.day; return go("day"); }
+    var a = t.dataset.act;
+    if (a === "turn-on") { S.status = "in_force"; return go("protection"); }
+    if (a === "cancel-pending") { S.pending = null; return render(); }
+    if (a === "toggle-verify") { S.status = S.status === "in_force" ? "not_verified" : "in_force"; return render(); }
+    if (a === "request-off") { S.pending = "Turn protection off"; return go("protection"); }
+    if (a === "keep") { var v = document.getElementById("journal").value; if (!v.trim()) return; S.kept[dayKey(TODAY)] = v; return render(); }
+    if (a === "quotes") { S.hideQuotes = !S.hideQuotes; return render(); }
+    if (a === "write-day") { S.dayView = S.dayView; return go("tonight"); }
+    if (a === "wa-yes") { S.workarounds = true; S.workaroundsAsk = false; return render(); }
+    if (a === "wa-no") { S.workarounds = false; S.workaroundsAsk = false; return render(); }
+    if (a === "partner-remove") { S.pending = "Remove your partner"; S.partner = null; return go("protection"); }
+    if (a === "share") { document.getElementById("share-msg").textContent = "In Cairn, this would ask where to save the file. In the prototype, nothing is made."; return; }
+    if (a === "del") { S.confirmTheirs = t.dataset.what; return render(); }
+    if (a === "theirs-cancel") { S.confirmTheirs = null; return render(); }
+    if (a === "theirs-yes") { S.confirmTheirs = null; S.theirsDone = true; if (/all/.test(t.closest("section").textContent)) S.days = {}; return render(); }
+    if (a === "teardown") { S.status = "off"; S.pending = null; return go("teardown"); }
+    if (a === "restart") { var q = S.quote; S = fresh(true); S.quote = q; document.getElementById("proto-empty").checked = true; return render(); }
+  });
+
+  app.addEventListener("change", function (e) {
+    var t = e.target;
+    if (t.dataset.cat) {
+      var c = t.dataset.cat;
+      if (!t.checked && S.status === "in_force") {
+        t.checked = true; S.note = "Switch the " + CATS.filter(function (x) { return x[0] === c; })[0][1] + " list off: this takes effect in 23 hours, and protection stays on until then.";
+        S.pending = "Switch the " + CATS.filter(function (x) { return x[0] === c; })[0][1] + " list off";
+      } else { S.cats[c] = t.checked; S.note = ""; }
+      return render();
+    }
+    if (t.name === "streak") { S.streaks = t.value === "on"; return; }
+    if (t.name === "mode") { S.mode = t.value; return render(); }
+    if (t.name === "sched") { S.schedule = t.value; return; }
+    if (t.id === "waiting") { S.waiting = t.value; return render(); }
+    if (t.id === "wa") { if (t.checked) { t.checked = false; S.workaroundsAsk = true; } else { S.workarounds = false; } return render(); }
+    if (t.id === "streak-t") { S.streaks = t.checked; return; }
+    if (t.id === "auto") { S.autostart = t.checked; return; }
+    if (t.id === "from") { S.from = t.value; return render(); }
+    if (t.id === "to") { S.to = t.value; return render(); }
+  });
+
+  app.addEventListener("input", function (e) {
+    if (e.target.id === "journal") { var b = document.getElementById("keep"); b.disabled = !e.target.value.trim(); document.getElementById("kept").textContent = ""; }
+  });
+
+  app.addEventListener("submit", function (e) {
+    e.preventDefault();
+    if (e.target.id === "custom-form") {
+      var raw = document.getElementById("custom").value.trim(), d = raw.toLowerCase().replace(/^[a-z]+:\/\//, "").split(/[/:?#]/)[0].replace(/^www\./, "");
+      if (!raw) S.customMsg = ["no", "Type an address to protect, like example.com."];
+      else if (d === "localhost") S.customMsg = ["no", "Cairn keeps localhost working — the machine and Cairn itself use it to reach things on this computer. Try the address of a site instead."];
+      else if (d.indexOf("*") >= 0) S.customMsg = ["no", "Cairn protects one address at a time, so * will not work here. Add the addresses you want protected individually."];
+      else if (/^[\d.]+$/.test(d)) S.customMsg = ["no", "That is a numeric address rather than a site name. Cairn protects names like example.com."];
+      else if (d.indexOf(".") < 0) S.customMsg = ["no", d + " looks like a single word rather than a web address. Try example.com."];
+      else {
+        if (S.custom.indexOf(d) < 0) S.custom.push(d);
+        S.customMsg = ["ok", (on() ? "Protected: " : "Added — Cairn will protect these once protection is on: ") + d + ", www." + d];
+      }
+      return render();
+    }
+    if (e.target.id === "partner-form") { var n = document.getElementById("pname").value.trim(); if (!n || !document.getElementById("ppass").value) return; S.partner = n; return render(); }
+  });
+
+  // ---------- the prototype's own record: who accepted which screen ----------
+  var accepts = {}, db = null, user = null, comments = null, myId = null, names = {}, canWrite = null;
+  var accBtn = document.getElementById("proto-accept"), accLine = document.getElementById("proto-acc"), cmtBtn = document.getElementById("proto-comment");
+  function paintAccept() {
+    var a = accepts[S.screen];
+    accBtn.setAttribute("aria-pressed", a ? "true" : "false");
+    accBtn.textContent = a ? "Accepted" : "Accept this screen";
+    var viewOnly = canWrite === false;
+    accLine.textContent = a ? "by " + (names[a.by] || "someone") + ", " + new Date(a.at).toLocaleDateString(undefined, { day: "numeric", month: "short" })
+      : viewOnly ? "You can view this page but not accept screens. Ask the person who shared it for access that can use the page."
+      : (db ? "" : "Accepting is recorded only when this page is opened on claude.ai.");
+    accBtn.disabled = !db || viewOnly;
+  }
+  async function resolveNames() {
+    if (!user) return;
+    var ids = Object.keys(accepts).map(function (k) { return accepts[k].by; }).filter(Boolean);
+    if (!ids.length) return;
+    try { var ps = await user.profiles(ids); ids.forEach(function (id) { names[id] = (ps[id] && ps[id].name) || "someone"; }); } catch (_) {}
+    paintAccept();
+  }
+  accBtn.addEventListener("click", async function () {
+    if (!db || !myId) return;
+    var ref = db.doc("accepts/" + S.screen);
+    try {
+      if (accepts[S.screen]) await ref.delete();
+      else await ref.set({ by: myId, at: new Date().toISOString(), screen: S.screen });
+    } catch (_) { accLine.textContent = "That was not recorded. Accepting needs access that can use this page; ask the person who shared it."; }
+  });
+  cmtBtn.addEventListener("click", async function () {
+    if (!comments) return;
+    try { await comments.openComposer({ element: app.querySelector("section.card") || app }); } catch (_) { cmtBtn.hidden = true; }
+  });
+
+  render();
+
+  (async function () {
+    if (!window.claude || !window.claude.use) return;
+    try { comments = await window.claude.use("comments"); if (comments) cmtBtn.hidden = false; } catch (_) {}
+    try { user = await window.claude.use("user"); if (user) { myId = await user.id(); canWrite = await user.can("data.write"); } } catch (_) {}
+    try {
+      db = await window.claude.use("db");
+      if (db) db.collection("accepts").onSnapshot(function (snap) {
+        accepts = {};
+        snap.docs.forEach(function (d) { var v = d.data(); if (v) accepts[d.id] = v; });
+        paintAccept(); resolveNames();
+      });
+    } catch (_) { db = null; }
+    paintAccept();
+  })();
+})();
+</script>
