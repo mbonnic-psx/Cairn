@@ -103,7 +103,7 @@ pub fn apply_reduction(
 
     if !is_eligible(&pending, trusted_now) {
         return Err(Trouble::new(format!(
-            "That change has {} to wait. Protection stays on until then.",
+            "That change has {} to wait. Until then, nothing changes.",
             plain_duration(remaining_seconds(&pending, trusted_now))
         )));
     }
@@ -140,8 +140,8 @@ pub fn nothing_in_force(
 pub fn apply_at_once(config: &mut Config, kind: PendingKind) -> Result<(), Trouble> {
     if config.intent == ProtectionIntent::On {
         return Err(Trouble::new(
-            "Protection is on, so taking something out waits a day. Nothing has \
-             changed.",
+            "You turned protection on, so taking something out waits a day. \
+             Nothing has changed.",
         ));
     }
     if kind == PendingKind::TurnOffProtection {

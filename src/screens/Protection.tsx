@@ -109,7 +109,7 @@ function Waiting({
       <p className="reflective mt-2 text-ink-700">
         {pending.eligible_now
           ? 'This is ready to take effect.'
-          : `This takes effect in ${pending.time_remaining}. Protection stays on until then.`}
+          : `This takes effect in ${pending.time_remaining}. Until then, nothing changes.`}
       </p>
       <Button
         tone="quiet"

@@ -80,7 +80,7 @@ describe('unticking a list during setup', () => {
     await userEvent.click(await screen.findByRole('checkbox', { name: /streaming/i }));
 
     const sentence = await screen.findByText(
-      'Switch the Streaming list off: this takes effect in 24 hours, and protection stays on until then.',
+      'Switch the Streaming list off: this takes effect in 24 hours, and until then nothing changes.',
     );
     expect(sentence).toBeInTheDocument();
     // Still protected, so still ticked.

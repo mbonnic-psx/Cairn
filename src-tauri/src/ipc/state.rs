@@ -309,7 +309,7 @@ impl AppState {
         let config = self.config.load()?;
         if config.intent == ProtectionIntent::On {
             return Err(Trouble::new(
-                "Protection is on, so Cairn is keeping what it needs to keep it on. \
+                "You turned protection on, so Cairn is keeping what it needs for that. \
                  Ask to turn protection off on the protection screen — it takes a day — \
                  and you can delete everything after that.",
             ));
@@ -534,8 +534,7 @@ impl AppState {
         Counting::Unavailable {
             because:
                 "This build of Cairn does not keep a history, so it is not counting \
-                      the sites you reach for. Everything you have protected is still \
-                      protected."
+                      the sites you reach for. That does not change what Cairn protects."
                     .into(),
         }
     }
@@ -646,8 +645,16 @@ impl AppState {
     }
 
     /// What is true about coverage on this machine, in this release.
+    ///
+    /// Shown before anything is in force, so nothing here may say that
+    /// anything *is* protected or *stays* protected — that is a read of the
+    /// machine, and this makes none (Principle III). It says what Cairn does and
+    /// what it cannot do here, and where the background component cannot run,
+    /// it does not promise the repair only that component performs.
     pub fn get_disclosures(&self) -> Disclosures {
-        let helper = match self.elevation.helper_status() {
+        let status = self.elevation.helper_status();
+        let can_repair = !matches!(status, HelperStatus::Unsupported { .. });
+        let helper = match status {
             HelperStatus::Installed { .. } => {
                 "Cairn runs a small background component so it can keep protection in \
                  force and put it back if something changes it. It is installed once, \
@@ -659,21 +666,29 @@ impl AppState {
                  again, and it is removed completely when you remove Cairn."
             }
             HelperStatus::Unsupported { .. } => {
-                "On this machine Cairn cannot run its background component, so it \
-                 cannot put protection back on its own if something changes it. What \
-                 you have protected stays protected."
+                "On this machine Cairn cannot run its background component yet. That \
+                 component is what puts protection in force and repairs it if something \
+                 changes it, so until it can run here, Cairn cannot do either on its own."
             }
         };
 
-        Disclosures {
-            in_force: vec![
-                "Protected sites are blocked for every application on this machine \
-                 that uses the system's own address lookup."
-                    .into(),
+        let mut in_force = vec![
+            "Protected sites are blocked for every application on \
+                                 this machine that uses the system's own address lookup."
+                .to_string(),
+        ];
+        // The background component is what checks and repairs. Where it cannot
+        // run, saying Cairn puts things back would be a promise nothing keeps.
+        if can_repair {
+            in_force.push(
                 "Cairn checks its own work every minute and puts it back if something \
                  changes it."
                     .into(),
-            ],
+            );
+        }
+
+        Disclosures {
+            in_force,
             not_covered: vec![
                 // FR-009a, verbatim in substance: name it, do not imply coverage.
                 "An application that looks up addresses on its own, rather than \
