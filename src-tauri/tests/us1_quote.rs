@@ -217,6 +217,23 @@ fn blank_lines_are_never_shown() {
 }
 
 #[test]
+fn lines_that_show_nothing_are_never_shown() {
+    // A2 (G4): zero-width space, braille blank, Hangul filler show nothing.
+    let machine = a_machine();
+    let path = machine.directory.path().join("invisible.json");
+    std::fs::write(
+        &path,
+        r#"{ "quotes": ["\u200b", "\u2800", "\u3164", "The window is open.", "\u200b\u2800"] }"#,
+    )
+    .unwrap();
+
+    for roll in [|| 0, || 1, || 2, || 3, || 4] {
+        let state = cairn(&machine, path.clone(), roll, || AN_EVENING, true);
+        assert_eq!(state.get_quote().as_deref(), Some("The window is open."));
+    }
+}
+
+#[test]
 fn an_unreadable_set_is_no_quote() {
     let machine = a_machine();
     let path = machine.directory.path().join("broken.json");

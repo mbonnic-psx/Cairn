@@ -13,6 +13,7 @@ use std::path::Path;
 use serde::Deserialize;
 
 use crate::domain::quotes::choose;
+use crate::domain::visible::shows_nothing;
 
 /// The bundled file's shape. Its other keys (`id`, `note`) are for whoever
 /// edits the set, and are tolerated rather than read.
@@ -30,7 +31,7 @@ pub fn bundled_lines(path: &Path) -> Vec<String> {
         .map(|set| {
             set.quotes
                 .into_iter()
-                .filter(|line| !line.trim().is_empty())
+                .filter(|line| !shows_nothing(line))
                 .collect()
         })
         .unwrap_or_default()
