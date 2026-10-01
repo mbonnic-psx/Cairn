@@ -32,3 +32,12 @@ Findings (triaged by the host; J1 and T1 re-run by the host and reproduced):
 | L1 | LOW | duplicate of J3 | — | Zero-width space saved as an entry, from the screen side |
 
 Held: no plaintext anywhere on disk (marker scan, no side files, `secure_delete` on); an unreadable or wrong-key store is never rewritten (random, zeroed, truncated, plaintext-SQLite, wrong key, one corrupt page); `LocalDate` parsing is strict; day bounds right on 23 h, 25 h, 23.5 h and a day with no midnight; a save after midnight goes to the day opened; a reach at 23:59 and at 00:01 fall in their own days; double-click saves once; closing without writing stores nothing.
+
+## quote · abfa7ee · 2026-10-01
+
+| Trigger | Status | Evidence |
+|---|---|---|
+| driving adapter (HTTP route, CLI command, queue consumer) | widened | `src-tauri/src/ipc/commands.rs`: `get_quote`, `get_quotes_shown`, `set_quotes_shown` |
+| driven adapter or the provider types behind one | widened | `src-tauri/src/store/config.rs`: the hide-quotes setting; `src-tauri/resources/quotes/quotes.json` read from disk |
+| authorisation decision (who can reach one that already exists) | not present | single local user; the switch changes no protection (`tests/ipc_surface.rs` classifies it) |
+| concurrency, idempotency, ordering, retention, or time | widened | `src/screens/CheckIn.tsx`: a line kept per opening, a fresh one when Tonight opens a new day (G5) |
