@@ -16,6 +16,10 @@ import { join, extname } from 'node:path';
 const SCAN = [
   { dir: 'src', exts: ['.ts', '.tsx', '.css'] },
   { dir: 'src-tauri/src', exts: ['.rs'] },
+  // Shipped content, not code: the evening quotes and the category lists are
+  // text a person reads, and a quote that counts days is the same chain as a
+  // screen that does (research R6; adversary A1, slice quote).
+  { dir: 'src-tauri/resources', exts: ['.json'] },
 ];
 
 const FORBIDDEN = [
