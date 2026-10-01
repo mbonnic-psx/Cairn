@@ -264,6 +264,26 @@ Already stated, and held by this slice as written: the check-in stays attached t
 midnight (edge cases); closing without writing stores nothing (FR-014); the space is not offered when sealed
 (FR-029, `contracts/ui-ipc.md`).
 
+### Gaps reviewed — slice `quote` (2026-10-01)
+
+Checked against US1 scenario 1 (the optional quote), FR-008, FR-009, research R6 and the
+`get_quote` contract. Two states the artifacts did not settle, decided by the owner:
+
+- **Q1 — which line shows.** A line is chosen at random from the bundled set each time the
+  check-in opens, and stays the same while that check-in stays open; reopening may show
+  another. It is never tied to the date (R6 rejects that: it gives a reason to come back for
+  the quote, and repeats every year).
+- **Q2 — turning quotes off.** The person can hide quotes with a quiet switch on the check-in
+  itself, since there is no settings screen to hold one. Hidden, the check-in shows no quote
+  and nothing in its place; it reads as complete (FR-008). The choice is remembered across
+  restarts, can be turned back on the same way, and is a setting, not reach or journal data,
+  so it is readable without the key.
+
+Already stated, and held by this slice as written: quotes are bundled and never fetched
+(FR-009); a check-in without one is complete (FR-008); every line passes R6's rules and the
+banned-words check. A quote shows the same whether today held reaches or none, and whether
+the journal is sealed, because it is not about the day.
+
 ## Requirements *(mandatory)*
 
 ### Functional Requirements
