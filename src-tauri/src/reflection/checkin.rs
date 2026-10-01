@@ -19,9 +19,9 @@ pub struct Day {
 /// of slack for a zone that moves by more than that.
 const LONGEST_DAY: i64 = 26 * 3600;
 
-/// The earliest and latest a day can begin, in seconds from 00:00 UTC on its
-/// date: UTC+14 begins a day 14 hours before UTC does, UTC-12 begins it 12
-/// hours after.
+/// The earliest and latest local midnight can fall, in seconds from 00:00 UTC
+/// on the date: in UTC+14 it comes 14 hours before UTC's, in UTC-12 it comes
+/// 12 hours after.
 const EARLIEST_START: i64 = -14 * 3600;
 const LATEST_START: i64 = 12 * 3600;
 
