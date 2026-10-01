@@ -5,17 +5,19 @@ before that mode exists in the factory. It is throwaway: production is still bui
 prototype code is ever imported by `src/` or `src-tauri/`.
 
 - **Link:** https://claude.ai/artifact/PyXanw1aHwLPY5EUFrrasg (private; share it from the page's Share menu)
-- **Source:** `prototype/003-reflection-and-history/index.html`
+- **Source:** `prototype/app/index.html` — one prototype for the whole app, across specs 001, 002 and 003
 - **Built from:** `main` at `5e27e06`, plus `slice/write-tonight`, `slice/quote` and `slice/history-by-site` (plan) for
   Tonight, the quote and Over time, and spec 001 and `VISION.md` for the screens no slice has reached yet
 - **Seeded with:** sample data only. Social, News and Streaming lists on, one custom site (`slowforum.net`), protection
   on, 28 days of reaches, journal entries on about half the days, one day with a 3-hour gap, and one silent day with
   an estimate of 6. "Start empty" on the banner switches to a first run with nothing set up.
 - **Accepting a screen:** use the "Accept this screen" button on the bar. It is recorded with who accepted and when.
+  It needs access that can use the page: share the link with product people at that level, not view-only. A view-only
+  viewer sees why the button is unavailable.
 
 ## Screens
 
-| Route | Screen | Shows | State |
+| Route | Screen | Feature · story | State |
 |---|---|---|---|
 | `choose` | Setup · What would you like to protect? | 001 US1 · 002 (built) | draft |
 | `streaks` | Setup · Streaks | 001 streaks · slice 004 (spec only) | draft |
@@ -36,5 +38,5 @@ Not prototyped: the evening notice and evening settings (withdrawn 2026-10-01), 
 
 ## Reactions
 
-None yet. Each comment on the link becomes a gap in the spec it concerns, answered in that feature's `decisions.md`,
+None yet. Each comment on a screen becomes a gap in the feature that screen shows, answered in that feature's `decisions.md`,
 and the prototype is republished to the same link.

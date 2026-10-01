@@ -541,14 +541,17 @@ textarea.journal { width: 100%; min-height: 10rem; border: 1px solid var(--sand-
   });
 
   // ---------- the prototype's own record: who accepted which screen ----------
-  var accepts = {}, db = null, user = null, comments = null, myId = null, names = {};
+  var accepts = {}, db = null, user = null, comments = null, myId = null, names = {}, canWrite = null;
   var accBtn = document.getElementById("proto-accept"), accLine = document.getElementById("proto-acc"), cmtBtn = document.getElementById("proto-comment");
   function paintAccept() {
     var a = accepts[S.screen];
     accBtn.setAttribute("aria-pressed", a ? "true" : "false");
     accBtn.textContent = a ? "Accepted" : "Accept this screen";
-    accLine.textContent = a ? "by " + (names[a.by] || "someone") + ", " + new Date(a.at).toLocaleDateString(undefined, { day: "numeric", month: "short" }) : (db ? "" : "Accepting is recorded only when this page is opened on claude.ai.");
-    accBtn.disabled = !db;
+    var viewOnly = canWrite === false;
+    accLine.textContent = a ? "by " + (names[a.by] || "someone") + ", " + new Date(a.at).toLocaleDateString(undefined, { day: "numeric", month: "short" })
+      : viewOnly ? "You can view this page but not accept screens. Ask the person who shared it for access that can use the page."
+      : (db ? "" : "Accepting is recorded only when this page is opened on claude.ai.");
+    accBtn.disabled = !db || viewOnly;
   }
   async function resolveNames() {
     if (!user) return;
@@ -563,7 +566,7 @@ textarea.journal { width: 100%; min-height: 10rem; border: 1px solid var(--sand-
     try {
       if (accepts[S.screen]) await ref.delete();
       else await ref.set({ by: myId, at: new Date().toISOString(), screen: S.screen });
-    } catch (_) { accLine.textContent = "That was not recorded. You may need edit access to accept screens."; }
+    } catch (_) { accLine.textContent = "That was not recorded. Accepting needs access that can use this page; ask the person who shared it."; }
   });
   cmtBtn.addEventListener("click", async function () {
     if (!comments) return;
@@ -575,7 +578,7 @@ textarea.journal { width: 100%; min-height: 10rem; border: 1px solid var(--sand-
   (async function () {
     if (!window.claude || !window.claude.use) return;
     try { comments = await window.claude.use("comments"); if (comments) cmtBtn.hidden = false; } catch (_) {}
-    try { user = await window.claude.use("user"); if (user) myId = await user.id(); } catch (_) {}
+    try { user = await window.claude.use("user"); if (user) { myId = await user.id(); canWrite = await user.can("data.write"); } } catch (_) {}
     try {
       db = await window.claude.use("db");
       if (db) db.collection("accepts").onSnapshot(function (snap) {
