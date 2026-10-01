@@ -127,7 +127,13 @@ export default function App() {
           {/* Reachable at any time (FR-010), and by navigation only: nothing
               here says there is something to write, or that anything was
               written (FR-033). */}
-          <Button tone="quiet" onClick={() => setStep('checkin')}>
+          <Button
+            tone="quiet"
+            onClick={() => {
+              checkIn.open();
+              setStep('checkin');
+            }}
+          >
             Tonight
           </Button>
           <Button tone="quiet" onClick={() => setStep('limits')}>

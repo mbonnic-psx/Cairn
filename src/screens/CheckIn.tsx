@@ -49,7 +49,7 @@ export function showsNothing(text: string): boolean {
   return NOTHING_VISIBLE.test(text);
 }
 
-interface Today {
+export interface Today {
   day: string;
   start: number;
   end: number;
@@ -68,8 +68,46 @@ function today(): Today {
   };
 }
 
+const WEEKDAYS = [
+  'Sunday',
+  'Monday',
+  'Tuesday',
+  'Wednesday',
+  'Thursday',
+  'Friday',
+  'Saturday',
+];
+const MONTHS = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
+];
+
+/** "Wednesday 30 September": a date, in plain words, for a day that has ended (G5). */
+function dateInWords(day: string): string {
+  const [year, month, date] = day.split('-').map(Number);
+  const at = new Date(year, month - 1, date);
+  return `${WEEKDAYS[at.getDay()]} ${at.getDate()} ${MONTHS[at.getMonth()]}`;
+}
+
 /** What the check-in has in hand, kept by whoever holds the hook. */
 export interface CheckInSession {
+  /** The day this check-in is attached to. */
+  opened: Today;
+  /**
+   * Choosing Tonight. Opens the current local day, unless the space holds
+   * writing that has not been kept, which stays on the day it was written for.
+   */
+  open: () => void;
   /** What is in the space; undefined until the person types, so the saved entry shows. */
   draft: string | undefined;
   /** The core's sentence for a save that was not kept, shown beside the text. */
@@ -86,6 +124,9 @@ export interface CheckInSession {
  * away (G1). Nothing here is shown anywhere but the check-in itself (FR-033).
  */
 export function useCheckInSession(): CheckInSession {
+  const [opened, setOpened] = useState(today);
+  // Choosing Tonight reads the clock again, even where nothing else changes.
+  const [, setLooked] = useState(0);
   const [draft, setDraft] = useState<string>();
   const [note, setNote] = useState<string>();
   const [kept, setKept] = useState(false);
@@ -95,6 +136,20 @@ export function useCheckInSession(): CheckInSession {
   latest.current = draft;
 
   return {
+    opened,
+    open() {
+      const unsaved =
+        latest.current !== undefined && !kept && !showsNothing(latest.current);
+      setLooked((n) => n + 1);
+      const now = today();
+      if (unsaved || now.day === opened.day) return;
+      // A new day: nothing of the old one comes with it.
+      setOpened(now);
+      setDraft(undefined);
+      latest.current = undefined;
+      setNote(undefined);
+      setKept(false);
+    },
     draft,
     note,
     kept,
@@ -132,16 +187,46 @@ export function useCheckInSession(): CheckInSession {
 
 export function CheckIn({ session }: { session?: CheckInSession }) {
   const own = useCheckInSession();
-  const { draft: typed, note: saveNote, kept, keeping, type, keep } = session ?? own;
-  const [opened] = useState(today);
+  const {
+    opened,
+    draft: typed,
+    note: saveNote,
+    kept,
+    keeping,
+    type,
+    keep,
+  } = session ?? own;
   const [view, setView] = useState<DayView>();
   const [loadNote, setLoadNote] = useState<string>();
+  const [, tick] = useState(0);
 
   useEffect(() => {
+    let current = true;
+    setView(undefined);
+    setLoadNote(undefined);
     getDayView(opened.day, opened.start, opened.end)
-      .then(setView)
-      .catch((problem: unknown) => setLoadNote(String(problem)));
+      .then((loaded) => current && setView(loaded))
+      .catch((problem: unknown) => current && setLoadNote(String(problem)));
+    return () => {
+      current = false;
+    };
   }, [opened]);
+
+  // When the day ends under an open check-in, the screen stops calling it today.
+  useEffect(() => {
+    const left = opened.end * 1000 - Date.now();
+    if (left <= 0) return;
+    const timer = setTimeout(() => {
+      tick((n) => n + 1);
+    }, left);
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [opened]);
+
+  // A date, not a judgement: once the day has ended it is named, not "today".
+  const ended = Date.now() >= opened.end * 1000;
+  const thisDay = ended ? dateInWords(opened.day) : 'today';
 
   const note = saveNote ?? loadNote;
   const draft = typed ?? view?.entry ?? '';
@@ -157,7 +242,9 @@ export function CheckIn({ session }: { session?: CheckInSession }) {
   if (view.sealed) {
     return (
       <Card>
-        <h2 className="reflective text-3xl text-ink-900">Tonight</h2>
+        <h2 className="reflective text-3xl text-ink-900">
+          {ended ? thisDay : 'Tonight'}
+        </h2>
         <p className="reflective mt-4 max-w-prose text-lg text-ink-700">{view.sealed}</p>
       </Card>
     );
@@ -165,11 +252,11 @@ export function CheckIn({ session }: { session?: CheckInSession }) {
 
   return (
     <Card>
-      <h2 className="reflective text-3xl text-ink-900">Tonight</h2>
+      <h2 className="reflective text-3xl text-ink-900">{ended ? thisDay : 'Tonight'}</h2>
 
       {view.reaches.length === 0 ? (
         <p className="reflective mt-4 max-w-prose text-lg text-ink-700">
-          Nothing here for today.
+          Nothing here for {thisDay}.
         </p>
       ) : (
         <ul className="mt-8 divide-y divide-sand-200">
@@ -217,7 +304,7 @@ export function CheckIn({ session }: { session?: CheckInSession }) {
         aria-live="polite"
         className="reflective mt-4 max-w-prose text-ink-700"
       >
-        {note ?? (kept ? 'Kept for today.' : '')}
+        {note ?? (kept ? `Kept for ${thisDay}.` : '')}
       </p>
     </Card>
   );
