@@ -1,0 +1,36 @@
+name: verify delivery
+# Written by slipwai adopt (experimental). Runs the delivery gate — the recorded commands of the applications
+# that were here, and the method's own checks — from the Makefile under delivery/. The repository's
+# own CI is untouched; this is one more workflow beside it.
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          # no pin found in the tree for .; 22 is a default to confirm
+          node-version: '22'
+      - run: sudo apt-get update -q && sudo apt-get install -y -q libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf libssl-dev libdbus-1-dev pkg-config  # runner.packages
+      - run: make -f delivery/Makefile install
+      - run: make -f delivery/Makefile verify
+  smoke:
+    # Each application that recorded a `smoke` command, started by it and proved to answer. A suite that never
+    # builds the context cannot see a constructor the container cannot call; this can, which is why it is a job.
+    needs: verify
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          # no pin found in the tree for .; 22 is a default to confirm
+          node-version: '22'
+      - run: sudo apt-get update -q && sudo apt-get install -y -q libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf libssl-dev libdbus-1-dev pkg-config xvfb  # runner.packages
+      - run: make -f delivery/Makefile install
+      - run: xvfb-run -a make -f delivery/Makefile smoke

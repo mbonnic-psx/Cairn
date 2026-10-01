@@ -1,7 +1,45 @@
 <!--
 SYNC IMPACT REPORT
 ==================
-Version change: 1.0.0 → 1.1.0
+Version change: 1.2.0 → 1.3.0
+Rationale: MINOR. The safety net reached `tests-pass` (owner, 2026-09-30), the rung at
+which "Acceptance-Driven Development, Tests First" comes into force. It moves from
+Targets to the Delivery Method in full, as the v1.2.0 target said it would. The
+fast-feedback target's marker moves from `tests-exist` to `tests-pass`. No other text
+changes.
+Approved: by the project owner, 2026-09-30, "Approve v1.3.0".
+
+Previous amendment, 1.1.0 → 1.2.0:
+Version change: 1.1.0 → 1.2.0
+Rationale: MINOR. One section added, "Delivery Method", when the Slipwai delivery
+method was adopted around this repository (make verify, /drive). It states, in
+Cairn's terms, the delivery practices that method's constitution gate holds. Where
+a practice would reach past Principles I–VII (remote alerting, a hosted release
+channel), the section says so and the principle wins. Principles I–VII and the
+Enforcement Architecture Constraints are unchanged, so no NON-NEGOTIABLE principle
+is amended.
+
+Modified principles: none
+Added sections:
+  - Delivery Method: trunk-based integration (in force); agent-generated change;
+    local-only observability and audit; security and privacy; versioning and
+    compatibility; pull-request gates; and five practices written as targets not
+    yet in force, each with what holds today (one path to production, build once,
+    fast feedback, acceptance-driven testing, the typed domain and its boundary).
+Removed sections: none
+
+Templates requiring review:
+  - .specify/templates/plan-template.md — no edit required; the Constitution
+    Check reads this document at runtime and now also covers the Delivery Method.
+
+Downstream artifacts updated:
+  - CLAUDE.md — the constitution version it names.
+
+Approved: by the project owner, 2026-09-30, "Approve as written".
+
+Follow-up TODOs: none
+
+Previous amendment, 1.0.0 → 1.1.0:
 Rationale: MINOR. Two amendments arising from the /speckit-clarify session on
 specs/001-cairn-v1. Principle I gains a clarification (the acknowledged uninstall
 exception); Principle II gains materially new guidance (encryption at rest). A new
@@ -263,6 +301,179 @@ not a pricing decision.
   slip, layer 1 alone ships a working product; no other v1 capability may take a
   hard dependency on them.
 
+## Delivery Method
+
+How a change is made and reaches trunk. This section came with the delivery method
+adopted around this repository (`make verify`, `/drive`), and states that method's
+practices in Cairn's terms. Where one of them would reach past Principles I–VII, the
+principle wins, and the practice below says so.
+
+<!-- trunk-based-integration: Continuous integration on trunk, in small batches -->
+### Continuous Integration on Trunk (NON-NEGOTIABLE)
+
+- Every change MUST integrate to trunk (`main`) at least once per day. Work that has
+  not reached trunk is unintegrated, however often a build ran against its branch.
+- Where branches are used they MUST be cut from trunk, MUST re-integrate to trunk,
+  and MUST live less than a day. Long-lived per-feature branches MUST NOT exist; a
+  feature larger than a day ships as slices behind whatever keeps it unreachable
+  until it is whole.
+- Trunk MUST be releasable at every commit, and a red trunk stops the line: while
+  the build is failing, the only permitted work is restoring it.
+- A work item MUST be codeable, testable, reviewable and integrable within two days,
+  or it is split before it is started.
+- Fixes MUST travel forward through trunk. Cherry-picking onto a release branch MUST
+  NOT be the route to a release.
+
+<!-- agent-change-same-bar: Agent-generated change meets the same bar -->
+### Agent-Generated Change Meets the Same Bar (NON-NEGOTIABLE)
+
+- Agent-generated change MUST pass the same pipeline and the same gates as a
+  person's: `make verify`, the seven constitutional guards, and the two guard tests.
+  There is no fast lane.
+- Humans own intent. An agent MUST NOT edit this constitution, `VISION.md`, or a
+  specification's requirements except when a person has asked for that edit.
+- When a request would break a principle, or falls outside its constraints, an agent
+  MUST stop and ask rather than proceed by guessing.
+- An agent works one acceptance scenario at a time, and each MUST end at a green
+  commit.
+
+<!-- observability-and-audit: Observability and auditability -->
+### Observability and Audit, On the Device Only
+
+Principle II forbids telemetry, so Cairn's observability never leaves the machine,
+and its audience is the person using Cairn, never a remote party.
+
+- A diagnostic log, where Cairn writes one, MUST be structured, MUST stay on the
+  device, and MUST carry a correlation identifier linking a request from the
+  interface to the helper verb it caused and the inventory entry that verb wrote.
+- Journal content, paths, query strings and other personally identifying data MUST
+  NOT be written to any log. A log records no more than Principle II lets Cairn
+  record at all.
+- The inventory of rules, keys and files Cairn created (Principle IV) is the audit
+  trail of every privileged change. It MUST be retained on the device and readable
+  without restoring a backup.
+- A problem is detected by verification, never by a remote alert. Protection whose
+  verified state is not what Cairn intended MUST be reported where the person looks
+  for it, in Cairn's own status (Principle III). Detection MUST NOT produce
+  interruptions that the one daily reflection notification (Principle V) does not
+  already allow.
+
+<!-- security-and-privacy: Security, privacy, and compliance -->
+### Security and Privacy
+
+- Sensitive payloads (journal entries, reach history, and the domains a person
+  blocks) MUST NOT be logged, and MUST NOT be sent anywhere (Principle II).
+- Secrets MUST come from the platform credential store. The encryption key never
+  sits in a file, in configuration, or in the repository, and a committed secret is
+  a build-breaking defect.
+- Authorisation MUST be enforced by the privileged helper itself on every request.
+  The interface is not trusted to have checked, and a request outside the helper's
+  fixed set of verbs is refused.
+- A person's journal and reach history MUST be erasable, by deletion from inside
+  Cairn and by uninstall, without leaving readable data behind.
+- Dependencies MUST be scanned in CI, and a known-exploitable critical finding blocks
+  release. Scanning is a development-time check and never a runtime network call.
+
+<!-- versioning-and-compatibility: Versioning and breaking changes -->
+### Versioning and Compatibility
+
+- Released builds MUST be versioned MAJOR.MINOR.PATCH.
+- The helper's verb protocol and the interface's IPC contract are APIs. A breaking
+  change to either MUST ship as a new version, and the prior version MUST keep
+  working until an upgrade has replaced both sides.
+- Stored contracts (configuration, the encrypted stores, the inventory) MUST change
+  additively, and readers MUST tolerate unknown fields.
+- An upgrade MUST be backward compatible with everything the previous release
+  wrote. Data Cairn cannot read MUST NOT be discarded or overwritten (Principle II).
+
+<!-- quality-gates: Pull-request gates, review, and recorded deviation -->
+### Pull-Request Gates
+
+- Every pull request MUST pass `make verify` and CI, including the seven
+  constitutional guards and the two guard tests.
+- A pull request MUST NOT be merged while the pipeline is red, and MUST NOT be merged
+  by disabling or weakening a gate.
+- A pull request SHOULD change fewer than 200 lines; beyond that a reviewer's defect
+  detection falls off.
+- A deviation from a principle MUST be recorded in the plan's Complexity Tracking
+  table and in the pull request under a "Complexity / Deviation" heading, naming the
+  principle and the reason. Silent deviation is a defect.
+
+<!-- acceptance-driven-testing: Acceptance-driven development, tests written first -->
+### Acceptance-Driven Development, Tests First
+
+In force since the suite reached `tests-pass` (owner, 2026-09-30).
+
+- Every slice MUST have at least one Given/When/Then scenario whose **When** enters
+  through Cairn's own driving port (an IPC command in `ipc/`, or the screen that calls
+  it) and whose **Then** is observable there. A scenario satisfiable by calling an
+  internal function is a unit specification, not a slice acceptance criterion.
+- Each increment MUST be RED-GREEN-REFACTOR: the failing test comes first, and it states
+  the behaviour, not the implementation.
+- A delivery adapter (an IPC command, a helper verb) MUST carry a test covering parse,
+  delegate, and the mapping of every outcome, and that level MUST NOT be where a rule is
+  proved. The rules live in `domain/` and are proved there.
+- A defect MUST be reproduced by a failing test at the level the rule lives before it is
+  fixed.
+
+### Targets, Not Yet in Force
+
+Each practice below comes into force at the rung of the convergence map
+(`delivery/docs/convergence.md`) that its marker names. Until then, what holds today
+is written under it and binds as written, and the map's *planned* column names the
+slice that climbs.
+
+<!-- journey: one-path-to-production at unknown -->
+**One path to production, and the pipeline decides.** In force at `one-path`.
+
+- Today: v1 has not shipped, so there is no path to a person's machine yet, and no
+  installer is built by CI.
+- Next: one release workflow that builds, signs and publishes every platform's
+  installer from trunk, and no other route. No slice is planned for it yet.
+
+<!-- journey: build-once-deploy-is-not-release at unknown -->
+**Build once, and deploy is not release.** In force at `pipeline-decides`.
+
+- Today: there is no release artifact to build once.
+- Next: the installer CI builds is the one that ships, unchanged. Principle II rules
+  out remote feature flags: release means a person installs a version, and the only
+  toggles are local settings. No slice is planned for it yet.
+
+<!-- journey: fast-feedback at tests-pass -->
+**Fast feedback from a deterministic suite.** In force at `fast`.
+
+- Today: the suite is green in the gate with nothing quarantined (`tests-pass`, owner,
+  2026-09-30). The domain, store, enforcement and helper tests run on every change, with
+  no GUI toolchain and no network. The tests that need the webview run only in CI's
+  `core` job.
+- Next: a feedback budget measured for `make verify`, and held. No slice is planned
+  for it yet.
+
+<!-- journey: strict-typing at named -->
+**Strict typing, with untrusted data parsed at the boundary.** In force at `typed`.
+
+- Today: TypeScript runs in strict mode, with no `@ts-ignore` and no `any` in `src/`.
+  Rust is checked by `cargo check` and clippy with warnings denied. Both type checks
+  run in the gate.
+- Next: the structure rungs between `named` and `typed`. No slice is planned yet.
+
+<!-- journey: ubiquitous-language-and-domain-types at named -->
+**Ubiquitous language and domain types.** In force at `typed`.
+
+- Today: the vocabulary is agreed and enforced where a person reads it (Principle VI
+  and its guard), and domain normalization is pure and centrally implemented.
+- Next: the same terms in the types, so that a domain entry is parsed once at the
+  edge rather than re-checked. No slice is planned yet.
+
+<!-- journey: hexagonal-boundary at named -->
+**The domain isolated from infrastructure.** In force at `hexagonal`.
+
+- Today: `domain/` is held pure by `check-domain-purity.sh`, and platform behavior
+  sits behind the services named in Platform abstraction. Nothing yet holds the
+  import direction of the other modules.
+- Next: declare the layers so that the method's import check holds them. No slice is
+  planned yet.
+
 ## Governance
 
 This constitution supersedes ad-hoc practice and convenience. It binds all specs,
@@ -287,4 +498,4 @@ verify compliance explicitly. Runtime development guidance for agents lives in
 `CLAUDE.md`; it MUST NOT contradict this document, and MUST be updated when this
 document changes.
 
-**Version**: 1.1.0 | **Ratified**: 2026-08-18 | **Last Amended**: 2026-08-18
+**Version**: 1.3.0 | **Ratified**: 2026-08-18 | **Last Amended**: 2026-09-30

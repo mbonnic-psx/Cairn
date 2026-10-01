@@ -17,7 +17,7 @@ fact, not convenience, decides every trade-off.
 | Document | What it is |
 | --- | --- |
 | `VISION.md` | Intent and voice. The source. Do not edit without being asked. |
-| `.specify/memory/constitution.md` | **Binding rules.** Currently v1.1.0. |
+| `.specify/memory/constitution.md` | **Binding rules.** Currently v1.3.0. |
 | `specs/001-cairn-v1/spec.md` | The v1 PRD — 90 functional requirements, 18 success criteria. |
 | `specs/001-cairn-v1/checklists/requirements.md` | Quality gate + validation history. |
 
@@ -190,3 +190,8 @@ checkpoint; nothing else may take a hard dependency on them.
 ## Git
 
 Repository: `mbonnic-psx/Cairn`, default branch `main`. Commit only when asked.
+
+<!-- slipwai:agents-import:begin -->
+<!-- Maintained by scripts/agents/project.py. Write repository guidance in AGENTS.md, not here. -->
+@AGENTS.md
+<!-- slipwai:agents-import:end -->
