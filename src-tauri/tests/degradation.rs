@@ -23,8 +23,8 @@ fn protected() -> Vec<Domain> {
 fn taken() -> Counting {
     Counting::Unavailable {
         because: "Something else on this machine is already using port 443, so Cairn is \
-                  not counting the sites you reach for. Everything you have protected is \
-                  still protected."
+                  not counting the sites you reach for. That does not change what Cairn \
+                  protects."
             .into(),
     }
 }
@@ -83,7 +83,9 @@ fn the_explanation_says_protection_is_untouched() {
     let reason = settled.fallback_reason.unwrap();
 
     assert!(
-        reason.to_lowercase().contains("still protected"),
+        reason
+            .to_lowercase()
+            .contains("does not change what cairn protects"),
         "the sentence has to answer the real question: {reason}"
     );
     // One sentence, as FR-027 asks.

@@ -10,7 +10,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { Protection } from '../Protection';
 import { Teardown } from '../Teardown';
-import type { PendingChange, ProtectionState, TeardownReport } from '../../ipc';
+import { waitingSentence, type PendingChange, type ProtectionState, type TeardownReport } from '../../ipc';
 
 vi.mock('../../ipc', async () => {
   const actual = await vi.importActual<typeof import('../../ipc')>('../../ipc');
@@ -32,11 +32,23 @@ const pending: PendingChange = {
 };
 
 describe('a change that is waiting', () => {
-  it('says protection stays on until it takes effect', () => {
+  it('says nothing changes until it takes effect', () => {
     render(<Protection state={state} pending={pending} />);
 
-    expect(screen.getByText(/protection stays on until then/i)).toBeInTheDocument();
+    expect(screen.getByText(/until then, nothing changes/i)).toBeInTheDocument();
     expect(screen.getAllByText(/protection is on/i).length).toBeGreaterThan(0);
+  });
+
+  it('does not say protection is on when Cairn could not check it', () => {
+    // Principle III: the waiting sentence is about the change, not the
+    // machine. Only the status, read back from the machine, says whether
+    // protection is on.
+    const unchecked: ProtectionState = { ...state, status: 'not_verified', verified_at: null };
+    render(<Protection state={unchecked} pending={pending} />);
+    const text = (document.body.textContent ?? '').toLowerCase();
+
+    expect(text).not.toMatch(/protection (stays|is) on|still protected|stays protected/);
+    expect(waitingSentence(pending).toLowerCase()).not.toMatch(/protection stays on/);
   });
 
   it('shows a phrase, never a countdown', () => {

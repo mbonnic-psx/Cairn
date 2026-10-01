@@ -37,7 +37,7 @@ fn main() {
     };
 
     // First run copies the shipped lists into the person's own data. A machine
-    // that cannot do that is still protected; the interface says so.
+    // that cannot do that has nothing changed on it; the interface says so.
     let _ = state.ensure_seeded();
 
     // A change that served its day takes effect because time passed, not

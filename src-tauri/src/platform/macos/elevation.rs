@@ -22,9 +22,13 @@ use crate::services::{ElevationService, HelperStatus, Outcome, Removal, Trouble}
 #[derive(Default)]
 pub struct MacosElevation;
 
-const NOT_YET: &str = "On this Mac, Cairn cannot yet keep protection in force on its own \
-                       between restarts. Everything else works, and what is protected stays \
-                       protected.";
+/// What cannot happen here, and nothing about what is in force: that is a read
+/// of the machine, and this code makes none (Principle III). Every privileged
+/// write goes through the helper, so without it Cairn cannot put protection in
+/// force here on its own either — "everything else works" would not be true.
+const NOT_YET: &str = "On this Mac, Cairn cannot yet install its background component, \
+                       and that component is what puts protection in force and keeps it \
+                       there.";
 
 impl ElevationService for MacosElevation {
     fn helper_status(&self) -> HelperStatus {
@@ -40,5 +44,24 @@ impl ElevationService for MacosElevation {
     fn uninstall_helper(&self) -> Outcome<Removal> {
         // Nothing was installed, so nothing is left behind.
         Ok(Removal::clean())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn it_says_what_cannot_happen_here_and_nothing_about_what_is_in_force() {
+        let lowered = NOT_YET.to_lowercase();
+        for claim in [
+            "stays protected",
+            "still protected",
+            "is protected",
+            "everything else works",
+        ] {
+            assert!(!lowered.contains(claim), "{claim:?} in: {NOT_YET}");
+        }
+        assert!(lowered.contains("cannot"), "{NOT_YET}");
     }
 }

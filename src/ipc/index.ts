@@ -99,7 +99,7 @@ export interface TeardownReport {
  * The single reduction path (FR-047).
  *
  * There is no command here that turns protection off now. Asking returns a
- * change that waits a day, and protection stays fully on for all of it.
+ * change that waits a day, and asking changes nothing on the machine.
  */
 export const requestProtectionOff = () => invoke<PendingChange>('request_protection_off');
 
@@ -114,7 +114,7 @@ export const removeCustomEntry = (domain: string) =>
 export function waitingSentence(pending: PendingChange): string {
   return pending.eligible_now
     ? `${pending.what}: this is ready to take effect.`
-    : `${pending.what}: this takes effect in ${pending.time_remaining}, and protection stays on until then.`;
+    : `${pending.what}: this takes effect in ${pending.time_remaining}, and until then nothing changes.`;
 }
 
 export const getPendingChange = () => invoke<PendingChange | null>('get_pending_change');
