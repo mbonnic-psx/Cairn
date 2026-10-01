@@ -102,3 +102,8 @@ specs/cruise-checkpoint.md
 .vibe/skills/
 .zcode/skills/
 # slipwai:delivery:end
+
+# Mutation testing scratch
+.stryker-tmp/
+reports/mutation/
+src-tauri/mutants.out*/

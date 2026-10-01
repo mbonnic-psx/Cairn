@@ -28,7 +28,7 @@
         "integration": null,
         "adversarial": null,
         "audit": "npm audit --audit-level=critical",
-        "mutation": null,
+        "mutation": "npx stryker run",
         "smoke": "scripts/smoke.sh interface"
       },
       "toolchain": {
@@ -58,7 +58,7 @@
         "integration": null,
         "adversarial": null,
         "audit": null,
-        "mutation": null,
+        "mutation": "cd src-tauri && cargo mutants -p cairn --no-default-features --features history",
         "smoke": "scripts/smoke.sh app"
       },
       "toolchain": {

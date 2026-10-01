@@ -85,8 +85,8 @@ adversarial: ## Re-run tests named or tagged adversarial
 	@echo 'cairn: no adversarial command recorded in project.json (.)'
 	@echo 'src-tauri: no adversarial command recorded in project.json (src-tauri)'
 mutation: ## Run native mutation testing, or explain the missing project decision
-	@echo 'cairn: no mutation command recorded in project.json (.)'
-	@echo 'src-tauri: no mutation command recorded in project.json (src-tauri)'
+	npx stryker run
+	cd src-tauri && cargo mutants -p cairn --no-default-features --features history
 audit: ## Run the ecosystem-native dependency vulnerability audit
 	npm audit --audit-level=critical
 	@echo 'src-tauri: no audit command recorded in project.json (src-tauri)'
