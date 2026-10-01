@@ -76,9 +76,13 @@ pub trait HelperChannel: Send + Sync {
     }
 }
 
-/// Said when this build cannot take the handover. It names what is still true,
-/// because that is the part that matters to the person reading it.
-pub const NOT_COUNTING_HERE: &str = "Cairn is not counting the sites you reach for on this machine yet. Everything you have protected is still protected.";
+/// Said when this build cannot take the handover.
+///
+/// The second sentence answers the question the person actually has, and it
+/// answers it about counting — the one thing this code knows. Whether anything
+/// is in force is a read of the machine, and only the protection screen, which
+/// makes that read, says so (Principle III).
+pub const NOT_COUNTING_HERE: &str = "Cairn is not counting the sites you reach for on this machine yet. That does not change what Cairn protects.";
 
 /// The socket the helper listens on, inside its own root-owned directory.
 #[cfg(unix)]

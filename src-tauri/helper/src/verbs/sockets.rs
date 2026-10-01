@@ -59,8 +59,8 @@ pub fn bind_counting_sockets(ports: &[u16]) -> Response {
                 return Response::CountingSockets(CountingSockets::Conflict {
                     reason: format!(
                         "Something else on this machine is already using port {port}, so \
-                         Cairn is not counting the sites you reach for. Everything you \
-                         have protected is still protected."
+                         Cairn is not counting the sites you reach for. That does not \
+                         change what Cairn protects."
                     ),
                 });
             }
@@ -106,5 +106,38 @@ pub fn held_descriptors() -> Vec<std::os::fd::RawFd> {
             .iter()
             .map(|listener| listener.as_raw_fd())
             .collect(),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    #![allow(clippy::unwrap_used, clippy::expect_used)]
+
+    use super::*;
+
+    #[test]
+    fn a_taken_port_says_what_it_does_not_change_not_what_is_protected() {
+        // Given something else already holds the port. The helper knows
+        // nothing here about what is in force on the machine, so the sentence
+        // may speak only for the port.
+        let other = TcpListener::bind((Ipv4Addr::LOCALHOST, 0)).unwrap();
+        let port = other.local_addr().unwrap().port();
+
+        let response = bind_counting_sockets(&[port]);
+
+        let Response::CountingSockets(CountingSockets::Conflict { reason }) = response
+        else {
+            panic!("a held port is a conflict: {response:?}");
+        };
+        let lowered = reason.to_lowercase();
+        assert!(!lowered.contains("still protected"), "{reason}");
+        assert!(!lowered.contains("is protected"), "{reason}");
+        assert!(
+            lowered.contains("does not change what cairn protects"),
+            "{reason}"
+        );
+        // One sentence of why, one of what it means (FR-027).
+        assert_eq!(reason.matches(". ").count(), 1, "{reason}");
+        assert!(held().lock().unwrap().is_empty(), "nothing is half-held");
     }
 }
