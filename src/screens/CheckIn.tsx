@@ -11,7 +11,7 @@
  *
  * Nothing here leads to a change in protection (Principle I).
  */
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { Button } from '../components/Button';
 import { Card } from '../components/Card';
@@ -43,6 +43,9 @@ export function CheckIn() {
   const [note, setNote] = useState<string>();
   const [kept, setKept] = useState(false);
   const [keeping, setKeeping] = useState(false);
+  // The space as it is now, for a save that returns after more was typed.
+  const latest = useRef(draft);
+  latest.current = draft;
 
   useEffect(() => {
     getDayView(opened.day, opened.start, opened.end)
@@ -54,14 +57,20 @@ export function CheckIn() {
   }, [opened]);
 
   async function keep() {
+    const sent = draft;
     setKeeping(true);
     setKept(false);
     setNote(undefined);
     try {
-      const after = await saveJournalEntry(opened.day, opened.start, opened.end, draft);
+      const after = await saveJournalEntry(opened.day, opened.start, opened.end, sent);
       setView(after);
-      setDraft(after.entry ?? draft);
-      setKept(true);
+      // Whatever is in the space now stays. Only when it is still what was
+      // sent does the screen say so; anything typed since is not yet kept,
+      // and the screen makes no claim either way.
+      if (latest.current === sent) {
+        setDraft(after.entry ?? sent);
+        setKept(true);
+      }
     } catch (problem) {
       // What they typed stays exactly where it is (G1).
       setNote(String(problem));
