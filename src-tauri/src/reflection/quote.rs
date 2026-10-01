@@ -40,3 +40,18 @@ pub fn bundled_lines(path: &Path) -> Vec<String> {
 pub fn quote(path: &Path, roll: u64) -> Option<String> {
     choose(&bundled_lines(path), roll).map(str::to_string)
 }
+
+/// A fresh random number for each check-in's line (Q1), the roll the
+/// application supplies to `AppState`. A quote is not a secret, so a machine
+/// whose random source will not answer falls back to the clock's nanoseconds,
+/// which still differ per opening.
+pub fn fresh_roll() -> u64 {
+    use std::time::{SystemTime, UNIX_EPOCH};
+
+    getrandom::u64().unwrap_or_else(|_| {
+        SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .map(|elapsed| u64::from(elapsed.subsec_nanos()))
+            .unwrap_or_default()
+    })
+}

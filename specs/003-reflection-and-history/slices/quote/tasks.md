@@ -89,3 +89,19 @@ Rust increments and the screen increments meet in `contracts/ui-ipc.md`'s names,
   deployable, as it did for `write-tonight`) and `check-agents` (the harness projection is not generated in this
   worktree). `make smoke` could not run: port 1420 is held by a `write-tonight` `npm run tauri dev` in another
   terminal, which was left running.
+
+## Phase 3b — from convergence pass 1
+
+- [x] Q13 [HIGH, F1, every wrapper] RED on a planted mismatch, then GREEN: `ipc_surface.rs` holds every
+  `invoke('<name>', { keys })` in `src/ipc/*.ts` to a `#[tauri::command] pub fn <name>` in `commands.rs` whose
+  parameters, apart from `state`, are exactly those keys (camelCase to snake_case). Sweep: all 20 commands.
+- [x] Q14 [HIGH, F2, every command and every value `main.rs` supplies] RED on a planted omission, then GREEN:
+  `ipc_surface.rs` holds `main.rs`'s `generate_handler!` to exactly the exposed commands; the roll moves into the
+  library (`reflection::quote::fresh_roll`) with a test that it varies, and `main.rs` only names it.
+- Q13: the guard was seen failing on two planted violations — `set_quotes_shown` renamed with its key changed,
+  and `get_day` called without `dayEnd` — and passing on the real tree. Swept: all 20 `invoke` calls across
+  `src/ipc/index.ts`, `reaches.ts` and `journal.ts`; none of the 17 earlier ones was out of step.
+- Q14: `every_exposed_command_is_registered_with_the_window` failed with `get_quotes_shown` removed from
+  `generate_handler!`; the roll test failed against a stub returning 0, then passed with `fresh_roll` in
+  `reflection/quote.rs`; `the_application_supplies_the_tested_roll_and_the_bundled_set` failed with `roll: || 0`
+  planted in `main.rs`. Swept: all 20 registrations, and the two values this slice has `main.rs` supply.

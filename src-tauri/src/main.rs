@@ -35,7 +35,7 @@ fn main() {
             own_hostname: hostname(),
         },
         now: now_seconds,
-        roll,
+        roll: cairn::reflection::quote::fresh_roll,
     };
 
     // First run copies the shipped lists into the person's own data. A machine
@@ -86,18 +86,6 @@ fn now_seconds() -> i64 {
         .duration_since(UNIX_EPOCH)
         .map(|elapsed| elapsed.as_secs() as i64)
         .unwrap_or_default()
-}
-
-/// A fresh random number for each check-in's line (slice `quote`, Q1). A
-/// quote is not a secret, so a machine whose random source will not answer
-/// falls back to the clock's nanoseconds, which still differ per opening.
-fn roll() -> u64 {
-    getrandom::u64().unwrap_or_else(|_| {
-        SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .map(|elapsed| u64::from(elapsed.subsec_nanos()))
-            .unwrap_or_default()
-    })
 }
 
 #[cfg(unix)]

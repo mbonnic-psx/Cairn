@@ -395,3 +395,15 @@ fn a_configuration_cairn_cannot_read_is_never_overwritten() {
     assert_eq!(state.get_quote(), None);
     assert_eq!(std::fs::read(store.path()).unwrap(), unreadable);
 }
+
+// The roll the application supplies (convergence F2): a fresh one each time,
+// so reopening can bring another line.
+
+#[test]
+fn the_application_roll_is_fresh_each_time() {
+    use std::collections::HashSet;
+    let rolls: HashSet<u64> = (0..16)
+        .map(|_| cairn::reflection::quote::fresh_roll())
+        .collect();
+    assert!(rolls.len() > 1, "sixteen rolls, one value: {rolls:?}");
+}
