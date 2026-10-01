@@ -54,7 +54,7 @@ Rust increments and the screen increments meet in `contracts/ui-ipc.md`'s names,
 
 ## Phase 3 — Hold it
 
-- [ ] Q11 The gate in the slice brief, `make -f delivery/Makefile verify`, and `make smoke` (`main.rs` changed).
+- [x] Q11 The gate in the slice brief, `make -f delivery/Makefile verify`, and `make smoke` (`main.rs` changed).
 - [ ] Q12 After the merge, on `main` (the feature's `tasks.md` and `delivery/survey/pinned.md` are the host's;
   `check-slice-scope` refuses them on this branch): tick T031 in `../../tasks.md`; note T027, T032, T033 as the
   quote half done; add the pin row `plan.md` *Pin* hands back.
@@ -80,3 +80,12 @@ Rust increments and the screen increments meet in `contracts/ui-ipc.md`'s names,
   before the switch exists, by design, and holds the GREEN to it. GREEN 25/25. The switch is the quiet `Button`
   tone, sans, at the foot of the check-in and of the sealed check-in. A refusal goes to the `role="status"` region,
   which the sealed check-in now has as well. Shown again in the same opening, the line is the one it had.
+- Q11 (2026-10-01): `npm run check` all seven guards clean; `npm run lint` clean; `npm test` 51/51 in 6 files;
+  `npm run build` clean. `cargo test -p cairn --no-default-features` 205 passed, with `--features history` 251,
+  `cargo test -p cairn-helper` 22; both clippy configurations and `cargo fmt --check` clean;
+  `cargo build --features app` with zero warnings. `make verify` green apart from two failures that were there at
+  the slice's start, before its first commit: `check-slice-scope` (the branch still carries the adoption and
+  `write-tonight` commits not yet on `main`, and the checker places the interface's `src/` outside every
+  deployable, as it did for `write-tonight`) and `check-agents` (the harness projection is not generated in this
+  worktree). `make smoke` could not run: port 1420 is held by a `write-tonight` `npm run tauri dev` in another
+  terminal, which was left running.
