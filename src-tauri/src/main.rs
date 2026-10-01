@@ -69,6 +69,8 @@ fn main() {
             commands::cancel_pending_change,
             commands::get_pending_change,
             commands::delete_all_data,
+            commands::get_day,
+            commands::save_journal_entry,
         ])
         .run(tauri::generate_context!())
         .expect("Cairn could not open its window");

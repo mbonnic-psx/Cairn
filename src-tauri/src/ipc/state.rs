@@ -9,6 +9,7 @@ use std::path::PathBuf;
 use serde::{Deserialize, Serialize};
 
 use crate::counting::availability::Counting;
+use crate::domain::dates::LocalDate;
 use crate::domain::entries::{CategoryId, Domain, ReachMode, Trail};
 use crate::domain::gate::{PendingChange, PendingKind, TrustedClock};
 use crate::domain::normalize::{Rejection, ReservedNames};
@@ -97,6 +98,47 @@ pub struct TodaysReaches {
     /// and the sentence says so (FR-036).
     pub sealed: Option<String>,
 }
+
+/// One day, whole, as the check-in shows it (`contracts/ui-ipc.md`, `get_day`).
+///
+/// It carries only what this build can state truthfully. `is_skipped` and
+/// `needs_estimate` join it when the single-day screen derives them (T052);
+/// until then their absence says nothing was computed, where a `false` would
+/// claim it had been.
+#[derive(Clone, PartialEq, Eq, Debug, Serialize, Deserialize)]
+pub struct DayView {
+    pub reaches: Vec<ReachView>,
+    pub gaps: Vec<Gap>,
+    /// Shown beside the reaches when part of the day was not observed (FR-030).
+    pub coverage_note: Option<String>,
+    /// What the person wrote for this day, if anything. Never when it was
+    /// written (FR-026a).
+    pub entry: Option<String>,
+    /// The person's own estimate for a silent day.
+    pub estimate: Option<u32>,
+    /// Present when the history could not be opened or read. Then nothing
+    /// else is, and the interface shows this sentence and offers no space to
+    /// write (FR-029).
+    pub sealed: Option<String>,
+}
+
+impl DayView {
+    fn sealed(sentence: String) -> Self {
+        DayView {
+            reaches: Vec::new(),
+            gaps: Vec::new(),
+            coverage_note: None,
+            entry: None,
+            estimate: None,
+            sealed: Some(sentence),
+        }
+    }
+}
+
+/// What a build without the history says wherever a day would be.
+#[cfg(not(feature = "history"))]
+const NO_HISTORY: &str =
+    "This build of Cairn does not keep a history. Protection is unaffected.";
 
 /// Everything the interface talks to.
 pub struct AppState {
@@ -645,6 +687,67 @@ impl AppState {
         }
     }
 
+    /// One day, whole: its reaches, what Cairn did not see, and what the
+    /// person wrote (the check-in, and later the single-day screen; FR-033).
+    pub fn get_day(&self, day: LocalDate, day_start: i64, day_end: i64) -> DayView {
+        #[cfg(feature = "history")]
+        {
+            match self.open_history() {
+                Ok(history) => day_view(&history, day, day_start, day_end),
+                Err(sentence) => DayView::sealed(sentence),
+            }
+        }
+
+        #[cfg(not(feature = "history"))]
+        {
+            let _ = (day, day_start, day_end);
+            DayView::sealed(NO_HISTORY.into())
+        }
+    }
+
+    /// Save what the person wrote for `day`, and return the day as it now
+    /// stands.
+    ///
+    /// Refuses outright when the history is sealed, with the sentence that
+    /// says why, and writes nothing (FR-029). The interface does not offer the
+    /// space in that state, so this is the second line of defence: it is what
+    /// holds when the key goes between reading the day and saving to it.
+    pub fn save_journal_entry(
+        &self,
+        day: LocalDate,
+        day_start: i64,
+        day_end: i64,
+        text: &str,
+    ) -> Result<DayView, String> {
+        #[cfg(feature = "history")]
+        {
+            let history = self.open_history()?;
+            crate::reflection::journal::save(&history, day, text, (self.now)())
+                .map_err(|trouble| trouble.message)?;
+            Ok(day_view(&history, day, day_start, day_end))
+        }
+
+        #[cfg(not(feature = "history"))]
+        {
+            let _ = (day, day_start, day_end, text);
+            Err(NO_HISTORY.into())
+        }
+    }
+
+    /// The history, or the sentence that says why it cannot be opened.
+    #[cfg(feature = "history")]
+    fn open_history(&self) -> Result<crate::store::history::OpenHistory, String> {
+        use crate::store::history::History;
+        use crate::store::key::HistoryKey;
+
+        let key = HistoryKey::obtain(self.credentials.as_ref());
+        let explained = key.explanation();
+        match History::open(&self.data_directory, &key) {
+            History::Open(history) => Ok(history),
+            History::Sealed { because } => Err(explained.unwrap_or(because)),
+        }
+    }
+
     /// What is true about coverage on this machine, in this release.
     pub fn get_disclosures(&self) -> Disclosures {
         let helper = match self.elevation.helper_status() {
@@ -748,5 +851,36 @@ fn what_it_would_do(kind: &PendingKind) -> String {
         PendingKind::DisableCategory { category } => {
             format!("Switch the {} list off", category.label())
         }
+    }
+}
+
+/// A day from an open history, as the interface shows it. A read that does
+/// not go through is the sealed sentence, never an empty day.
+#[cfg(feature = "history")]
+fn day_view(
+    history: &crate::store::history::OpenHistory,
+    day: LocalDate,
+    day_start: i64,
+    day_end: i64,
+) -> DayView {
+    use crate::store::gaps::coverage_note;
+
+    match crate::reflection::checkin::assemble(history, day, day_start, day_end) {
+        Ok(assembled) => DayView {
+            reaches: assembled
+                .reaches
+                .into_iter()
+                .map(|reach| ReachView {
+                    domain: reach.domain,
+                    at: reach.at,
+                })
+                .collect(),
+            coverage_note: coverage_note(&assembled.gaps),
+            gaps: assembled.gaps,
+            entry: assembled.entry,
+            estimate: assembled.estimate,
+            sealed: None,
+        },
+        Err(trouble) => DayView::sealed(trouble.message),
     }
 }

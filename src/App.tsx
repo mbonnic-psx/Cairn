@@ -7,6 +7,7 @@
 import { useEffect, useState } from 'react';
 
 import { Button } from './components/Button';
+import { CheckIn } from './screens/CheckIn';
 import { Disclosure } from './screens/Disclosure';
 import { Limits } from './screens/Limits';
 import { Protection } from './screens/Protection';
@@ -28,7 +29,7 @@ import {
   type Trail as TrailData,
 } from './ipc';
 
-type Step = 'choosing' | 'disclosure' | 'protected' | 'trail' | 'limits' | 'reaches';
+type Step = 'choosing' | 'disclosure' | 'protected' | 'trail' | 'limits' | 'reaches' | 'checkin';
 
 export default function App() {
   const [step, setStep] = useState<Step>('choosing');
@@ -100,6 +101,12 @@ export default function App() {
               Today
             </Button>
           )}
+          {/* Reachable at any time (FR-010), and by navigation only: nothing
+              here says there is something to write, or that anything was
+              written (FR-033). */}
+          <Button tone="quiet" onClick={() => setStep('checkin')}>
+            Tonight
+          </Button>
           <Button tone="quiet" onClick={() => setStep('limits')}>
             What Cairn covers
           </Button>
@@ -130,6 +137,8 @@ export default function App() {
         {step === 'trail' && trail && <Trail trail={trail} status={state?.status} />}
 
         {step === 'reaches' && <Reaches />}
+
+        {step === 'checkin' && <CheckIn />}
 
         {step === 'limits' && disclosures && <Limits disclosures={disclosures} />}
       </div>

@@ -12,8 +12,9 @@
  *     class (serif), as Reaches.tsx does.
  *
  * The screen fixes the day when it opens: it computes today's date as
- * YYYY-MM-DD and its bounds in epoch seconds the way Reaches.tsx does (local
- * midnight, plus 86 400), and passes that same date to every call.
+ * YYYY-MM-DD and its bounds in epoch seconds, from this local midnight to the
+ * next one (not + 86 400, which is an hour out on a daylight-saving day), and
+ * passes that same date to every call.
  */
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -34,7 +35,8 @@ const mockedSave = vi.mocked(saveJournalEntry);
 const NOW = new Date(2026, 8, 30, 20, 0, 0);
 const TODAY = '2026-09-30';
 const DAY_START = Math.round(new Date(2026, 8, 30, 0, 0, 0).getTime() / 1000);
-const DAY_END = DAY_START + 86_400;
+// The next local midnight: the same as +86 400 on this date, and right on a 23- or 25-hour day too.
+const DAY_END = Math.round(new Date(2026, 9, 1, 0, 0, 0).getTime() / 1000);
 
 const COVERAGE_NOTE =
   'Cairn was not running for about 1 hour(s) of today, so anything you reached for then is not here. This is what Cairn saw, not everything that happened.';
