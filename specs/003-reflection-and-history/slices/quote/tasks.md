@@ -105,3 +105,74 @@ Rust increments and the screen increments meet in `contracts/ui-ipc.md`'s names,
   `generate_handler!`; the roll test failed against a stub returning 0, then passed with `fresh_roll` in
   `reflection/quote.rs`; `the_application_supplies_the_tested_roll_and_the_bundled_set` failed with `roll: || 0`
   planted in `main.rs`. Swept: all 20 registrations, and the two values this slice has `main.rs` supply.
+
+## Phase 4 — carried from convergence (MEDIUM and below)
+
+- [ ] Q15 [MEDIUM, F3, every shipped resource; a question for the owner] `main.rs` finds `resources/quotes` and
+  `resources/categories` beside the executable. That holds in `tauri dev` and on Windows. Installed Linux and
+  macOS bundles may keep resources elsewhere (`/usr/lib/<product>/`, `Contents/Resources`), and there the quote
+  would be silently absent. This is *assumed*, not read from Tauri's documentation or a bundle. Recommendation:
+  resolve every shipped resource through Tauri's resource directory, and verify it against a real bundle on each
+  platform. `shipped_categories` predates this slice and has the same pattern.
+- [ ] Q16 [MEDIUM, pass 2 M-1, every `AppState` field `main.rs` sets from a helper] The supplied-values test
+  checks that the quotes path text appears in `main.rs`, but not that `shipped_quotes` is set to it.
+  `shipped_quotes: shipped_categories(),` passes every test (re-run by the host: 9/9 green). GREEN: hold each
+  field-to-helper link (`shipped_categories`, `shipped_quotes`, `roll`, `now`, `own_hostname`).
+- [ ] Q17 [LOW, pass 2 L1 and L2, every file in `src/ipc/`] The wrapper parser reads three named files and only
+  `invoke<…>('…'`. A call written `invoke('x')`, or with double quotes, or in a new file, would be skipped or
+  misread, and only the `>= 20` floor would notice. GREEN: count every `invoke(`/`invoke<` token per file against
+  the calls parsed, reject a name that is not single-quoted, and list exactly the files in `src/ipc/*.ts`.
+- [ ] Q18 [LOW, F4] While the day is loading, or when it cannot be read, the check-in shows neither the line nor
+  the switch, where every other state shows both. Recommendation: leave it as it is, and say so in the plan.
+- [ ] Q19 [LOW, F5, every command's `map_err`] The `Err` → sentence mapping is not tested at command level for
+  any of the 14 commands that map one. It is the same convention as W14 in `write-tonight`.
+
+## Convergence
+
+**Pass 1 (2026-10-01): not converged.** No CRITICAL. Two HIGH, both on the delivery adapter, both closed in this
+slice and each seen failing on a planted violation (Q13, Q14):
+
+- **F1, the join across the IPC boundary:** a wrapper in `src/ipc/*.ts` could name a command or a key wrongly
+  and pass every test. Now `ipc_surface.rs` (`every_interface_call_names_a_command_and_its_arguments`) holds all
+  20 calls to their commands' exact parameters. Swept: the 17 earlier commands were all in step.
+- **F2, `main.rs`:** registration and the roll were untested. `every_exposed_command_is_registered_with_the_window`
+  now holds `generate_handler!` to exactly the 20 exposed commands. The roll is `reflection::quote::fresh_roll`,
+  which `us1_quote.rs` proves varies, and `main.rs` is held to naming it.
+- F3 (MEDIUM), F4 and F5 (LOW) were carried as Q15, Q18 and Q19.
+
+Each level, as pass 1 accounted for it:
+- domain: clean, mutation-checked;
+- use case: clean, with two mutations of `get_quote` and `set_quotes_shown` killed;
+- delivery adapter: F1, F2, F3, F5;
+- screen: clean apart from F4, with the serif mutation killed;
+- published contract: the prose matches Rust and TypeScript.
+
+Constitution, per principle, with where it holds:
+- **I:** `set_quotes_shown` touches only `quotes_hidden` (`src-tauri/src/ipc/state.rs`, `set_quotes_shown`), held
+  by `us1_quote.rs` `the_switch_leaves_protection_as_it_was` across the whole `Config`. All three commands are
+  `Reads` in `ipc_surface.rs`. The switch's label carries no protection words (`CheckIn.test.tsx`).
+- **II:** the set is read from disk only (`src-tauri/src/reflection/quote.rs`, `bundled_lines`). No new
+  dependency. Data Cairn cannot read is never overwritten: `set_quotes_shown` returns at `load()?` before any
+  save, held byte-identical by `a_configuration_cairn_cannot_read_is_never_overwritten`.
+- **III:** no set means no line and no placeholder. When Cairn cannot tell whether quotes were hidden, it shows
+  neither the line nor the switch (`state.rs` `get_quote`, `unwrap_or(false)`; `CheckIn.tsx`).
+- **IV:** no system file is touched.
+- **V:** no notification; the quote is asked for only when the check-in opens.
+- **VI:** serif line (`CheckIn.tsx`, the `figure`), sans switch, the seven guards clean.
+- **VII:** nothing is gated.
+- **Versioning and Compatibility:** `quotes_hidden` is `#[serde(default)]` (`src-tauri/src/store/config.rs`), held
+  by `stores.rs` `a_configuration_from_before_quotes_could_be_hidden_shows_them`. The contract grew additively.
+- **Delivery Method:** RED before GREEN for each increment, recorded in *Done notes* with failure counts. Each
+  commit carries its test and its code together, so the RED is attested here rather than visible in history. The
+  delivery-adapter MUST (parse, delegate, outcome) is now met for parse and registration. Outcome mapping at the
+  command level is Q19.
+
+**Pass 2 (2026-10-01): converged.** The confirming pass re-ran pass 1's mutations against `3ace17d`:
+- a key renamed, a command renamed, a handler deleted, and `roll: || 0` each now fail a test;
+- one more mutation survived: `shipped_quotes: shipped_categories()`. The host re-ran it and it was still green
+  (Q16, MEDIUM);
+- two LOW holes in the new wrapper parser (Q17).
+
+There was no new CRITICAL or HIGH. The loop stops here, at its bound of two passes, and the slice goes to its
+demo. Not run here: `make smoke`, because port 1420 is held by another terminal's dev server, and the post-converge
+`/gaps` as a separate delegate. The two passes' level-by-level findings are what traced the diff.
