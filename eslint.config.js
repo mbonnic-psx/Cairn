@@ -3,8 +3,21 @@ import tseslint from 'typescript-eslint';
 import reactHooks from 'eslint-plugin-react-hooks';
 
 /**
- * Rules here are not style. Two of them are constitutional controls that a code
- * review would otherwise have to catch by eye every time.
+ * FR-023, Principle V: Cairn interrupts no one, ever — not at a reach, not at a
+ * repair, and not in the evening either; the check-in waits to be opened. The
+ * notification plugin is therefore importable from nowhere, and this pattern is
+ * declared once so that every block re-declaring `no-restricted-imports` below
+ * carries it. A block that forgot it would be a module that can notify.
+ */
+const noNotificationPlugin = {
+  group: ['@tauri-apps/plugin-notification', '**/plugin-notification'],
+  message:
+    'Cairn raises no notification of any kind, ever (FR-023, Principle V). Nothing may import the notification plugin.',
+};
+
+/**
+ * Rules here are not style. Three of them are constitutional controls that a
+ * code review would otherwise have to catch by eye every time.
  */
 export default tseslint.config(
   { ignores: ['dist', 'node_modules', 'src-tauri/target'] },
@@ -24,6 +37,13 @@ export default tseslint.config(
         { name: 'fetch', message: 'Cairn makes no outbound calls (Principle II).' },
         { name: 'XMLHttpRequest', message: 'Cairn makes no outbound calls (Principle II).' },
         { name: 'WebSocket', message: 'Cairn makes no outbound calls (Principle II).' },
+        // FR-023, Principle V: every browser notification route starts here —
+        // the constructor, `Notification.permission`, and
+        // `Notification.requestPermission` alike.
+        {
+          name: 'Notification',
+          message: 'Cairn raises no notification of any kind, ever (FR-023, Principle V).',
+        },
       ],
 
       // FR-030a, FR-033: reaches and journal entries are visible only on the
@@ -49,44 +69,37 @@ export default tseslint.config(
               message:
                 'Only the check-in and a single day may read journal entries (FR-033). Nothing else may put what someone wrote in front of them unasked.',
             },
-            {
-              group: ['@tauri-apps/plugin-notification', '**/plugin-notification'],
-              message:
-                'Only src/announce.ts may raise the one daily announcement (FR-002, FR-005). A second module that can notify is a second thing that can interrupt someone.',
-            },
+            noNotificationPlugin,
           ],
         },
       ],
 
-      // Principle V: exactly one quiet announcement a day, and nothing else,
-      // ever. Slice 002 could say "no notifications at all" because it had no
-      // way to send one. That sentence stops being true here, so the rule has
-      // to say the narrower thing precisely instead of the broad thing loosely.
-      //
-      // Every selector below stays forbidden **everywhere, src/announce.ts
-      // included**. None of them is how Cairn announces: the announcement goes
-      // through the Tauri plugin, which is import-restricted to that one file
-      // above. The browser routes are not narrowed for anybody, because each
-      // one asks the person for a permission Cairn has no use for and each is
-      // reachable without the single-per-day decision that makes the
-      // announcement legitimate.
+      // FR-023, Principle V: no notification of any kind, ever. These stay
+      // forbidden everywhere — no file is exempt, tests included, because no
+      // file has a reason to notify. The globals rule above already refuses
+      // `Notification`; these name the routes in the words a reader will
+      // search for, and catch `window.Notification` and service-worker
+      // notifications, which do not go through the bare global.
       'no-restricted-syntax': [
         'error',
         {
           selector: "NewExpression[callee.name='Notification']",
-          message:
-            'The browser notification constructor is never how Cairn notifies. The one daily announcement goes through the plugin, from src/announce.ts alone (FR-002).',
+          message: 'Cairn raises no notification of any kind, ever (FR-023, Principle V).',
+        },
+        {
+          selector: "MemberExpression[property.name='Notification']",
+          message: 'Cairn raises no notification of any kind, ever (FR-023, Principle V).',
         },
         {
           selector:
             "MemberExpression[object.name='Notification'][property.name='requestPermission']",
           message:
-            'Cairn never asks for the browser notification permission. The one daily announcement goes through the plugin (FR-002).',
+            'Cairn never asks for the notification permission. It has nothing to send (FR-023).',
         },
         {
           selector: "CallExpression[callee.property.name='showNotification']",
           message:
-            'A service-worker notification bypasses the once-a-day decision entirely (FR-004). There is one announcement path and it is src/announce.ts.',
+            'A service-worker notification is still a notification. Cairn raises none (FR-023, Principle V).',
         },
       ],
     },
@@ -99,9 +112,14 @@ export default tseslint.config(
   // This block exists because the glob above found what the old literal paths
   // could not see: Reaches.test.tsx imports at '../../ipc/reaches', two levels
   // deep, and had been slipping past the restriction silently.
+  //
+  // Exempt from the reach and journal restrictions, never from the
+  // notification one: a test has no more reason to notify than a screen.
   {
     files: ['**/__tests__/**', '**/*.test.{ts,tsx}', '**/*.spec.{ts,tsx}'],
-    rules: { 'no-restricted-imports': 'off' },
+    rules: {
+      'no-restricted-imports': ['error', { patterns: [noNotificationPlugin] }],
+    },
   },
 
   // The screens allowed to read reaches — and still barred from journal
@@ -124,34 +142,7 @@ export default tseslint.config(
               message:
                 'Only the check-in and a single day may read journal entries (FR-033). Reaches and patterns are not the place for what someone wrote.',
             },
-          ],
-        },
-      ],
-    },
-  },
-
-  // The one module permitted to raise the announcement. It may import the
-  // plugin — and, per the lesson from the allowlists above, it stays barred
-  // from reaches and journal entries, which it has no business touching. It
-  // decides nothing and renders nothing; it asks the core whether an
-  // announcement is due and passes on the answer.
-  {
-    files: ['src/announce.ts'],
-    rules: {
-      'no-restricted-imports': [
-        'error',
-        {
-          patterns: [
-            {
-              group: ['**/ipc/reaches'],
-              message:
-                'The announcement carries no reach data. It says a check-in is ready and nothing about what is in it (FR-002).',
-            },
-            {
-              group: ['**/ipc/journal'],
-              message:
-                'The announcement carries nothing the person wrote (FR-033).',
-            },
+            noNotificationPlugin,
           ],
         },
       ],
@@ -159,8 +150,8 @@ export default tseslint.config(
   },
 
   // The two screens that legitimately hold both reaches and journal entries —
-  // and are still barred from the notification plugin, which is announce.ts's
-  // alone.
+  // and are still barred from the notification plugin, like everything else.
+  // The check-in waits to be opened; it never announces itself (FR-023).
   //
   // This block was written as `'no-restricted-imports': 'off'` one task ago,
   // with a comment warning that a third restricted module would have to be
@@ -174,13 +165,7 @@ export default tseslint.config(
       'no-restricted-imports': [
         'error',
         {
-          patterns: [
-            {
-              group: ['@tauri-apps/plugin-notification', '**/plugin-notification'],
-              message:
-                'Only src/announce.ts may raise the one daily announcement (FR-002, FR-005). A screen that can notify is a screen that can interrupt someone.',
-            },
-          ],
+          patterns: [noNotificationPlugin],
         },
       ],
     },

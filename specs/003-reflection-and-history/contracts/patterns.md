@@ -1,5 +1,13 @@
 # Contract — The pure pattern and announcement arithmetic
 
+> **Revised 2026-10-01 — the announcement is withdrawn.** The owner decided Cairn raises no
+> notification of any kind, the check-in included (spec Clarifications 2026-10-01; constitution
+> v1.4.0). Everything below about the announcement, the evening hour, the announcement switch,
+> `last_announced_day`, the notification plugin and the rewritten notification guard is kept as
+> the record of what was planned and validated, and no longer describes Cairn. The plugin, its
+> permissions, the announce seam and the decision function were removed, and
+> `check-no-notifications.sh` forbids notification capability entirely again.
+
 **Feature**: `003-reflection-and-history` | **Date**: 2026-08-27
 
 Two new modules live in `domain/`, which `check-domain-purity.sh` keeps free of I/O and

@@ -59,12 +59,22 @@ to estimate. Honest history has to carry both without apology and without preten
   as any other day. Same reasoning as the deletion answer — a missed day must not become a
   debt, and an invitation to fill it in is how a debt would first appear.
 
+### Session 2026-10-01
+
+- Q: Should Cairn announce the check-in at all? → A: No (the owner: "I dont want the app to
+  ask the user to check in ever. It is supposed to be a website blocker and then left and not
+  come back"). Cairn raises no notification of any kind. The check-in stays, and is reachable
+  only when the person opens the app. The chosen evening hour, the announcement, its
+  off-switch, and the `evening-notice` and `evening-settings` slices are withdrawn. Numbered
+  requirements and scenarios are kept in place and marked withdrawn, so references to the
+  others still hold. Constitution v1.4.0 records the rule.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - The evening check-in (Priority: P1)
 
-Once a day, in the evening, the person sits down with Cairn. One quiet notification at the
-hour they chose says the check-in is ready. Opening it shows what they reached for today, a
+When the person chooses to, usually in the evening, they open Cairn and sit down with the
+check-in. Nothing tells them it is there; it waits. Opening it shows what they reached for today, a
 space to write about how the day went and what was going on, and perhaps a quote. It does
 not ask them to explain themselves, it does not score the day, and it never calls the day a
 failure.
@@ -75,27 +85,22 @@ Nothing else in the day interrupts them. Not at a reach, not at a repair, not at
 blocker with a good conscience. It depends on reach data existing but delivers value on a
 day with zero reaches, because the writing is the point.
 
-**Independent Test**: Set the evening hour, let it arrive, confirm exactly one notification
-appears. Open the check-in, review today's reaches, write an entry, save. Reopen it later
+**Independent Test**: Leave Cairn running through a day and confirm nothing is ever raised.
+Open the check-in, review today's reaches, write an entry, save. Reopen it later
 the same evening and the entry is intact and editable.
 
 **Acceptance Scenarios**:
 
-1. **Given** the chosen evening hour arrives, **When** the check-in becomes available,
-   **Then** exactly one quiet notification announces it, and opening it presents today's
-   reaches, a journaling space, and an optional quote — with nothing having interrupted the
-   person earlier in the day.
-2. **Given** the notification is dismissed or ignored, **When** the rest of the evening
-   passes, **Then** it is never repeated, re-sent, or escalated, and the check-in stays
+1. **Given** the person opens Cairn, **When** they go to the check-in, **Then** it presents
+   today's reaches, a journaling space, and an optional quote — with nothing having
+   interrupted them at any point in the day.
+2. **Given** Cairn is running and the person never opens the check-in, **When** the day
+   passes, **Then** nothing announces, reminds, or invites them, and the check-in stays
    available to be opened from the app.
-3. **Given** the notification is turned off in settings, **When** the evening hour arrives,
-   **Then** nothing is announced and the check-in is still there when the person opens the
-   app.
+3. *Withdrawn 2026-10-01 — there is no notification to turn off.*
 4. **Given** a check-in is open, **When** the person writes and saves an entry, **Then** it
    is stored against that day and can be reopened and revised.
-5. **Given** the machine was off at the chosen hour, **When** the person next opens Cairn
-   the same evening, **Then** the check-in is available un-announced, and no notification
-   arrives late or out of hours.
+5. *Withdrawn 2026-10-01 — there is no chosen hour, and nothing is ever announced.*
 6. **Given** any check-in, **When** its text is reviewed, **Then** no user-facing string
    contains *failed*, *denied*, *violation*, *relapsed*, *forbidden*, or *you lost*.
 
@@ -206,14 +211,8 @@ recording, and does not discard or overwrite what it cannot read.
 
 ### Edge Cases
 
-- **The evening hour arrives while the machine is asleep or off.** The check-in is available
-  when the person next opens Cairn that evening. No notification fires late, and none fires
-  the next morning for yesterday.
-- **The evening hour is changed to one that has already passed today.** The change applies
-  from the next day; it does not fire an immediate announcement.
 - **The clock moves** — a timezone change, daylight saving, or the person setting it. A
-  reach keeps the hour it was recorded at; a day boundary is the local day. Moving the clock
-  never fires a second announcement for a day already announced.
+  reach keeps the hour it was recorded at; a day boundary is the local day.
 - **Two days meet at midnight while the check-in is open.** The open check-in stays attached
   to the day it was opened for; it does not silently become tomorrow's.
 - **The person writes nothing and closes the check-in.** That is not a skipped day and not a
@@ -258,23 +257,16 @@ midnight (edge cases); closing without writing stores nothing (FR-014); the spac
 
 ### Functional Requirements
 
-**The one daily announcement**
+**No announcement** *(revised 2026-10-01; see Clarifications)*
 
-- **FR-001**: System MUST make the daily check-in available once per day at an hour the
-  person chooses. *(v1: FR-029)*
-- **FR-002**: System MUST announce the check-in with a single quiet notification at that
-  hour, at most once per day, dismissible without consequence. *(v1: FR-029a)*
-- **FR-003**: Users MUST be able to turn that notification off in settings, and the check-in
-  MUST remain reachable without it. *(v1: FR-029b)*
-- **FR-004**: System MUST NOT re-announce, escalate, or repeat the notification for a
-  check-in the person did not open. *(v1: FR-029c)*
-- **FR-005**: System MUST NEVER prompt for reflection, journaling, or justification outside
-  that single daily announcement. *(v1: FR-030)*
-- **FR-006**: System MUST NOT announce a check-in outside the chosen hour, MUST NOT announce
-  a past day's check-in, and MUST NOT announce anything if the hour passed while the machine
-  was unavailable. *(slice)*
-- **FR-007**: System MUST default the evening hour to a stated evening default, so the
-  feature behaves correctly before the person has chosen. *(slice)*
+- **FR-001**: System MUST NOT announce the check-in, and MUST NOT raise a notification of any
+  kind. *(v1: FR-029a, revised)*
+- **FR-002**–**FR-004**: *Withdrawn 2026-10-01* — the single notification, its off-switch,
+  and its no-repeat rule.
+- **FR-005**: System MUST NEVER prompt for reflection, journaling, or justification.
+  *(v1: FR-030)*
+- **FR-006**–**FR-007**: *Withdrawn 2026-10-01* — the announcement's timing, and the default
+  evening hour it needed.
 
 **The check-in**
 
@@ -283,7 +275,7 @@ midnight (edge cases); closing without writing stores nothing (FR-014); the spac
 - **FR-009**: System MUST draw any quote from content shipped with the application, and MUST
   NOT fetch a quote. *(slice)*
 - **FR-010**: Users MUST be able to reach the check-in at any time from the application,
-  independently of the announcement. *(slice)*
+  *(slice)*
 - **FR-011**: System MUST treat a skipped check-in as skipped, with no penalty and no guilt
   language. *(v1: FR-033)*
 - **FR-012**: System MUST ask the person to estimate their reaches in the check-in whenever
@@ -380,22 +372,17 @@ midnight (edge cases); closing without writing stores nothing (FR-014); the spac
 - **Pattern View**: A derived summary of reaches over a chosen range — by site, by hour of
   day, by day of week, and as movement across the range. Derived on demand, never a stored
   score.
-- **Announcement**: The single quiet notice that a day's check-in is ready. At most one per
-  day, never repeated, turn-off-able.
 
 ## Success Criteria *(mandatory)*
 
 ### Measurable Outcomes
 
-- **SC-001**: Across a 7-day observation, the person receives exactly one check-in
-  announcement per day on days the machine is available at the chosen hour, and zero at any
-  other time — verified by a full count of every notice raised.
-- **SC-002**: An announcement that is ignored produces zero further notices for that day, in
-  100% of trials.
-- **SC-003**: With the announcement turned off, zero notices are raised over a 7-day
-  observation, and the check-in is reachable on all 7 days.
-- **SC-004**: Zero prompts for reflection, journaling, or justification appear outside the
-  single daily announcement, verified by a full screen-by-screen sweep with reaches recorded
+- **SC-001**: Across a 7-day observation with Cairn running, zero notifications are raised,
+  and the check-in is reachable from the app on all 7 days — verified by a full count of
+  every notice raised.
+- **SC-002**–**SC-003**: *Withdrawn 2026-10-01* — they measured the announcement.
+- **SC-004**: Zero prompts for reflection, journaling, or justification appear anywhere,
+  verified by a full screen-by-screen sweep with reaches recorded
   and protection active.
 - **SC-005**: A person with four weeks of history can answer "which site, which hour, which
   day of week do I reach for most" in under 60 seconds, without documentation.
@@ -430,9 +417,6 @@ midnight (edge cases); closing without writing stores nothing (FR-014); the spac
 
 ## Assumptions
 
-- **The evening hour default is stated rather than inferred.** The person chooses it, but a
-  default is needed for the interval before they do. An evening hour is assumed, not a
-  morning one, because the ritual is explicitly end-of-day.
 - **Quotes ship with the application.** No network is available and none may be added, so
   the quote pool is bundled content. "Optional" is read as *the person may turn quotes off*,
   and also as *a check-in without one is still complete*.
@@ -457,14 +441,10 @@ midnight (edge cases); closing without writing stores nothing (FR-014); the spac
 - **Slice `002` (machine-wide protection).** This slice consumes the reach history, the
   coverage gaps, the reach mode, and the encryption key that slice produced. It adds to that
   storage boundary and MUST NOT create a second one.
-- **The standing check that forbids all notifications must be deliberately rewritten, not
-  weakened.** Slice `002` guaranteed silence by declining the capability to notify at all,
-  and its automated check fails the build if that capability appears anywhere. This slice is
-  the one Principle V always intended to change, because the single daily notice needs the
-  capability that was previously absent. The guarantee therefore has to move from *the
-  capability does not exist* to *it is exercised at most once a day, at the chosen hour,
-  never at a reach and never at a repair* — which is a matter of proof rather than of
-  absence, and the replacement MUST be as hard to pass accidentally as what it replaces.
+- **The standing check that forbids all notifications stays absolute.** Slice `002`
+  guaranteed silence by declining the capability to notify at all. This slice once planned to
+  rewrite that check for a single daily notice; with the notice withdrawn (2026-10-01), the
+  capability is removed again and the check forbids it everywhere, as it did in slice `002`.
 - **The standing check that forbids streak surfaces stays absolute for this slice** and MUST
   continue to pass unchanged. Streaks are slice `004`.
 - **An unresolved question inherited from slice `002` touches this work.** Whether every

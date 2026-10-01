@@ -1,5 +1,13 @@
 # Phase 0 — Research: The evening check-in and honest history
 
+> **Revised 2026-10-01 — the announcement is withdrawn.** The owner decided Cairn raises no
+> notification of any kind, the check-in included (spec Clarifications 2026-10-01; constitution
+> v1.4.0). Everything below about the announcement, the evening hour, the announcement switch,
+> `last_announced_day`, the notification plugin and the rewritten notification guard is kept as
+> the record of what was planned and validated, and no longer describes Cairn. The plugin, its
+> permissions, the announce seam and the decision function were removed, and
+> `check-no-notifications.sh` forbids notification capability entirely again.
+
 **Feature**: `003-reflection-and-history` | **Date**: 2026-08-27
 
 Seven questions had to be settled before design. Two are go/no-go items that cannot be
@@ -10,6 +18,8 @@ nothing, and that rule applies here.
 ---
 
 ## R1 — Can Cairn raise a notification without admitting anything network-capable?
+
+*Withdrawn 2026-10-01 — see the note at the top.*
 
 **Status: RESOLVED — GO.** Measured 2026-08-27 (task T001).
 
@@ -68,6 +78,8 @@ it is right to.
 
 ## R2 — How is "at most once per local day" made true rather than merely intended?
 
+*Withdrawn 2026-10-01 — see the note at the top.*
+
 **Decision**: a pure function in `domain/checkin.rs` decides. It takes the start of the
 person's local day, the chosen hour, the current instant, and the day Cairn last announced
 for. It returns whether an announcement is due. Rust records the answer durably before the
@@ -102,6 +114,8 @@ the hour the person chose. Storing only a timestamp of the last announcement and
 ---
 
 ## R3 — Where does the announcement fire from, and how does Rust know the local hour?
+
+*Withdrawn 2026-10-01 — see the note at the top.*
 
 **Decision**: the interface supplies the local frame; Rust owns the decision and the record.
 The frontend already computes the start of the local day for the Reaches screen. It passes

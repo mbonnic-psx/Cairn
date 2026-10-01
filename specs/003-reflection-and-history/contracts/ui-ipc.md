@@ -92,32 +92,11 @@ a check-in without a quote is not degraded (FR-008).
 Served only to the check-in. The single-day history screen does not ask for one; a quote
 belongs to the ritual, not to the record.
 
-### `get_check_in_settings() -> { evening_hour, announce }`
+## The announcement — withdrawn
 
-## The announcement
-
-### `announce_check_in_if_due(day_start, now) -> Announcement | null`
-
-Returns an announcement **at most once per local day**, and durably records that it did
-before returning it (research R2).
-
-```
-Announcement { title, body }
-```
-
-This is the guarantee the rewritten notification guard leans on, so the contract states it as
-a testable property rather than a description:
-
-> Called any number of times with any interleaving of `day_start` and `now`, this returns
-> non-null at most once for each distinct local day, and never before the chosen hour has
-> arrived on that day.
-
-The interface raises the notification when it receives one and has no other path to raising
-one. It never decides whether an announcement is due, and it must not cache the answer.
-
-**Returns null**, without exception, when: the announcement is switched off; the hour has not
-yet come today; an announcement has already been recorded for this local day; or the hour
-passed while Cairn was not running — an announcement is never issued late (FR-006).
+*Withdrawn 2026-10-01* (spec Clarifications, constitution v1.4.0). Cairn raises no notification
+of any kind, so `announce_check_in_if_due`, `get_check_in_settings`, `set_evening_hour` and
+`set_announce_check_in` are not part of this contract and must not be added.
 
 ## Writes
 
@@ -151,13 +130,6 @@ three granularities FR-018 requires: a day, a range, or everything.
 **Returns nothing at all**, and this is deliberate. A count of what was removed would be a
 report of what was lost, which FR-018b forbids. The command has no useful return value and is
 specified as having none so that nobody adds one helpfully.
-
-### `set_evening_hour(hour) -> settings` and `set_announce_check_in(on) -> settings`
-
-`hour` is 0–23 and refused otherwise. Changing the hour to one already past today applies from
-tomorrow and raises nothing now.
-
-Switching the announcement off never affects whether the check-in can be opened (FR-003).
 
 ## What this contract deliberately does not contain
 

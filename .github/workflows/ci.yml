@@ -34,7 +34,7 @@ jobs:
         run: npm run check:free
       # The network guard resolves the real build graph, so it needs cargo and
       # runs in the `core` job below rather than here.
-      - name: Nothing at the moment of a reach (FR-023), and one quiet announcement with nothing else (Principle V, 003 FR-002/FR-004/FR-005)
+      - name: No notification of any kind, ever (FR-023, Principle V)
         run: npm run check:no-notifications
       - name: Domain code stays pure (platform abstraction)
         run: npm run check:domain-purity

@@ -23,6 +23,10 @@
 - Q: Should the gate stay mandatory, or become a mode the person opts into like an ordinary blocker with a separate locked mode? → A: The gate stays mandatory. There is no ungated mode and no "none" option, because a wall that is switched on is unlocked at exactly the moment it is needed. What changes instead is the floor of the range, below. Principle I is unamended.
 - Q: How short may the waiting period be? → A: 5 minutes, revised down from the 1 hour agreed on 2026-08-18 (superseding that answer's lower bound; the 7-day upper bound and 24-hour default are unchanged). The floor is not an escape hatch, because FR-040b makes any decrease wait out the currently configured period — reaching a 5-minute setting from the 24-hour default itself takes 24 hours, so no impulse can arrive at it. The intent is that someone who finds always-on gating too heavy has a gentler setting to move toward rather than an off switch to reach for.
 
+### Session 2026-10-01
+
+- Q: Should Cairn announce the check-in at all? → A: No. Cairn raises no notification of any kind, the evening check-in included. It is a blocker that is set and then left; the check-in waits in the app for whenever the person chooses to open it, and nothing invites them to. This supersedes the 2026-08-18 answer (one quiet notification at the chosen hour), and removes the chosen evening hour with it.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Set the trail and be protected (Priority: P1)
@@ -111,13 +115,12 @@ and the entry is intact and editable.
 
 **Acceptance Scenarios**:
 
-1. **Given** the person's chosen evening hour arrives, **When** the check-in becomes
-   available, **Then** exactly one quiet notification announces it, and opening it
+1. **Given** the person opens Cairn, **When** they go to the check-in, **Then** it
    presents today's reaches, a journaling space, and an optional quote — with nothing
-   having interrupted them earlier in the day.
-2. **Given** the notification is dismissed or ignored, **When** the rest of the
-   evening passes, **Then** it is never repeated or escalated, and the check-in stays
-   available to be opened.
+   having interrupted them at any point in the day.
+2. **Given** the person never opens the check-in, **When** the day passes, **Then**
+   nothing announces, reminds, or invites them, and the check-in stays available to be
+   opened.
 3. **Given** a check-in is open, **When** the person writes and saves an entry,
    **Then** it is stored against today's date and can be revised until the day
    closes.
@@ -366,8 +369,9 @@ active before the person opens anything, with Cairn present in the tray.
   the stated time and ordinary browsing is not noticeably slowed.
 - **The person adds an invalid or unreachable entry** — it is rejected with a plain
   explanation rather than accepted and silently ignored.
-- **The evening hour passes while the machine is off** — the check-in is available
-  the next time Cairn runs, presented as the day it belongs to.
+- **The person does not open Cairn for a day or more** — nothing reaches out to them;
+  each day's check-in is there the next time they choose to open it, presented as the
+  day it belongs to.
 - **A day with zero reaches** — the check-in still opens and treats zero as a fact,
   not an achievement to celebrate or a streak to protect.
 - **Two protected categories contain the same domain** — it is protected once and
@@ -460,16 +464,12 @@ active before the person opens anything, with Cairn present in the tray.
 
 **Evening check-in and journal**
 
-- **FR-029**: System MUST make the daily check-in available once per day at an hour
-  the person chooses.
-- **FR-029a**: System MUST announce the check-in with a single quiet notification at
-  that hour, at most once per day, dismissible without consequence.
-- **FR-029b**: Users MUST be able to turn that notification off in settings, and the
-  check-in MUST remain reachable without it.
-- **FR-029c**: System MUST NOT re-announce, escalate, or repeat the notification for
-  a check-in the person did not open.
-- **FR-030**: System MUST NEVER prompt for reflection, journaling, or justification
-  outside that single daily announcement.
+- **FR-029**: System MUST make the daily check-in reachable from the application at
+  any time.
+- **FR-029a**: System MUST NOT announce the check-in, and MUST NOT raise a notification
+  of any kind. *(Revised 2026-10-01: replaces the single evening notification; FR-029b
+  and FR-029c, its off-switch and its no-repeat rule, are withdrawn with it.)*
+- **FR-030**: System MUST NEVER prompt for reflection, journaling, or justification.
 - **FR-031**: System MUST present, in the check-in, today's reaches, a free-form
   journaling space, and an optional quote.
 - **FR-032**: Users MUST be able to save, revise, and delete their own journal
@@ -676,10 +676,8 @@ active before the person opens anything, with Cairn present in the tray.
   over a 100-attempt test.
 - **SC-009**: Cairn displays nothing to the person at the moment of a reach in 100% of
   reaches.
-- **SC-010**: Over a 30-day period Cairn produces at most one notification per day —
-  the evening check-in announcement — and zero other unsolicited prompts, including
-  zero at the moment of any reach. With the announcement turned off, the count is
-  zero.
+- **SC-010**: Over a 30-day period Cairn produces zero notifications and zero
+  unsolicited prompts, including zero at the moment of any reach.
 - **SC-011**: No pending gated change applies before its gate is satisfied, in 100% of
   attempts, including across app restarts, machine restarts, and system clock changes.
 - **SC-012**: With streaks off, zero streak counters, day-counts, or chain imagery

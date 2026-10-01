@@ -54,11 +54,14 @@ fn a_first_run_is_not_a_problem() {
 }
 
 #[test]
-fn a_slice_002_configuration_loads_unchanged() {
-    // T020: a file written before this slice existed has none of
-    // `evening_hour`, `announce_check_in`, or `last_announced_day`. It must
-    // still load — with the stated defaults, never an error — so upgrading
-    // asks a person nothing (data-model.md, FR-007).
+fn a_configuration_from_the_announcement_era_still_loads() {
+    // An earlier build of slice 003 wrote three keys for an evening announcement
+    // that Cairn no longer raises — it interrupts no one, ever (FR-023,
+    // Principle V). A file that still carries them must load as though they
+    // were never there: an upgrade must not cost a person their trail, their
+    // pending change, or their trusted clock over a setting that went away.
+    // This is also the tripwire for `deny_unknown_fields`, which would turn
+    // that file into an error.
     let directory = tempfile::tempdir().unwrap();
     let store = ConfigStore::at(directory.path());
 
@@ -71,33 +74,27 @@ fn a_slice_002_configuration_loads_unchanged() {
         ..Config::default()
     };
 
-    // Take a config exactly as slice 002's writer would have produced it, by
-    // serializing today's `Config` and then deleting the three keys 002 could
-    // never have written. That is what a real upgrade file looks like.
     let mut value = serde_json::to_value(&expected).unwrap();
     let object = value.as_object_mut().unwrap();
-    assert!(
-        object.remove("evening_hour").is_some(),
-        "the fixture setup is wrong: the field is not there to remove"
-    );
-    assert!(
-        object.remove("announce_check_in").is_some(),
-        "the fixture setup is wrong: the field is not there to remove"
-    );
-    assert!(
-        object.remove("last_announced_day").is_some(),
-        "the fixture setup is wrong: the field is not there to remove"
+    object.insert("evening_hour".into(), serde_json::Value::from(21));
+    object.insert("announce_check_in".into(), serde_json::Value::Bool(true));
+    object.insert(
+        "last_announced_day".into(),
+        serde_json::Value::from("2026-09-30"),
     );
     std::fs::write(store.path(), serde_json::to_vec_pretty(&value).unwrap()).unwrap();
 
     let loaded = store.load().unwrap();
-
-    // `expected` already carries the stated defaults for all three fields,
-    // since it was built with `..Config::default()` and never overrode them.
     assert_eq!(loaded, expected);
-    assert_eq!(loaded.evening_hour, 21);
-    assert!(loaded.announce_check_in);
-    assert_eq!(loaded.last_announced_day, None);
+
+    // And the next save leaves the retired keys behind.
+    store.save(&loaded).unwrap();
+    let rewritten: serde_json::Value =
+        serde_json::from_str(&std::fs::read_to_string(store.path()).unwrap()).unwrap();
+    let rewritten = rewritten.as_object().unwrap();
+    assert!(!rewritten.contains_key("evening_hour"));
+    assert!(!rewritten.contains_key("announce_check_in"));
+    assert!(!rewritten.contains_key("last_announced_day"));
 }
 
 #[test]
