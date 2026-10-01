@@ -2,7 +2,7 @@
 
 use crate::domain::dates::LocalDate;
 use crate::services::Trouble;
-use crate::store::gaps::Gap;
+use crate::store::gaps::{clipped, Gap};
 use crate::store::history::{OpenHistory, Reach};
 
 /// What the history holds for one local day: what was reached for, what
@@ -61,7 +61,7 @@ pub fn assemble(
     day_end: i64,
 ) -> Result<Day, Trouble> {
     let reaches = history.between(day_start, day_end)?;
-    let gaps = history
+    let gaps: Vec<Gap> = history
         .gaps_between(day_start, day_end)?
         .into_iter()
         .map(|gap| Gap {
@@ -69,6 +69,7 @@ pub fn assemble(
             to: gap.to,
         })
         .collect();
+    let gaps = clipped(&gaps, day_start, day_end);
     let entry = history.entry_for(day)?.map(|entry| entry.text);
     let estimate = history.estimate_for(day)?.map(|estimate| estimate.count);
 

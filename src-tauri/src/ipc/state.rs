@@ -627,7 +627,7 @@ impl AppState {
     pub fn list_todays_reaches(&self, day_start: i64, day_end: i64) -> TodaysReaches {
         #[cfg(feature = "history")]
         {
-            use crate::store::gaps::coverage_note;
+            use crate::store::gaps::{clipped, coverage_note};
             use crate::store::history::History;
             use crate::store::key::HistoryKey;
 
@@ -654,6 +654,7 @@ impl AppState {
                             to: gap.to,
                         })
                         .collect::<Vec<_>>();
+                    let gaps = clipped(&gaps, day_start, day_end);
 
                     TodaysReaches {
                         coverage_note: coverage_note(&gaps),

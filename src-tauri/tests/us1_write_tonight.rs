@@ -500,3 +500,49 @@ fn the_bounds_of_a_short_or_long_day_in_any_zone_are_accepted() {
             .unwrap();
     }
 }
+
+// --- T4: only the part of a gap inside the day is the day's -----------------
+
+fn gap_around_midnight(data: &Path, from: i64, to: i64) {
+    seed(data).record_gap(&CoverageGap { from, to }).unwrap();
+}
+
+#[test]
+fn an_overnight_gap_counts_only_the_hours_inside_the_day() {
+    let setup = setup();
+    gap_around_midnight(&setup.data, TODAY_START - 4 * 3600, TODAY_START + 8 * 3600);
+    let state = app(&setup, &Keychain::available());
+
+    let day = get_today(&state);
+    let note = day
+        .coverage_note
+        .expect("8 hours of the day were unwatched");
+    assert!(note.contains("about 8 hour"), "{note}");
+    assert_eq!(
+        day.gaps,
+        vec![Gap {
+            from: TODAY_START,
+            to: TODAY_START + 8 * 3600
+        }]
+    );
+
+    let reaches = state.list_todays_reaches(TODAY_START, TODAY_END);
+    let note = reaches.coverage_note.expect("the Today screen says so too");
+    assert!(note.contains("about 8 hour"), "{note}");
+    assert_eq!(reaches.gaps, day.gaps);
+}
+
+#[test]
+fn a_gap_that_ended_exactly_when_the_day_began_raises_no_note() {
+    let setup = setup();
+    gap_around_midnight(&setup.data, TODAY_START - 6 * 3600, TODAY_START);
+    let state = app(&setup, &Keychain::available());
+
+    let day = get_today(&state);
+    assert_eq!(day.coverage_note, None);
+    assert!(day.gaps.is_empty());
+
+    let reaches = state.list_todays_reaches(TODAY_START, TODAY_END);
+    assert_eq!(reaches.coverage_note, None);
+    assert!(reaches.gaps.is_empty());
+}

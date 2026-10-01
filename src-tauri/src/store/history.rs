@@ -39,12 +39,13 @@ pub const HISTORY_FILE: &str = "history.db";
 const REACHES_IN_RANGE: &str = "at >= ?1 AND at < ?2";
 
 /// `coverage_gaps` overlapping `[from, to)` at all, not merely contained by
-/// it — the same predicate [`OpenHistory::gaps_between`] reads with. Reused
+/// it, and strictly: a gap that ended exactly at `from` has no time inside the
+/// range (T4) — the same predicate [`OpenHistory::gaps_between`] reads with. Reused
 /// by [`OpenHistory::delete_reach_history`] to select which gaps to *clip*
 /// (never to delete outright): a gap this predicate matches is one the range
 /// touches, but only the portion actually inside `[from, to)` is data about
 /// the period the person chose to remove — the rest survives, trimmed.
-const GAPS_OVERLAPPING_RANGE: &str = "to_at >= ?1 AND from_at < ?2";
+const GAPS_OVERLAPPING_RANGE: &str = "to_at > ?1 AND from_at < ?2";
 
 /// `journal_entries.day` / `reach_estimates.day` inside `[from, to)`. `day`
 /// is stored as zero-padded `YYYY-MM-DD` text (`LocalDate`'s `Display`), so
