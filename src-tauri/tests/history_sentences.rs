@@ -102,3 +102,43 @@ fn a_data_directory_that_cannot_be_made_gives_a_plain_sentence() {
 
     assert_plain(&sentence, &[root.path(), &data]);
 }
+
+// --- J5: busy is not a wrong key -------------------------------------------
+
+#[test]
+fn a_history_held_by_another_connection_is_busy_not_a_wrong_key() {
+    let root = tempfile::tempdir().unwrap();
+    let data = root.path().join("cairn-data");
+    let History::Open(open) = History::open(&data, &key()) else {
+        panic!("a fresh directory should open");
+    };
+    drop(open);
+
+    // Another connection, with the right key, holds the file exclusively.
+    let holder = rusqlite::Connection::open(data.join(HISTORY_FILE)).unwrap();
+    let hex: String = A_KEY.iter().map(|b| format!("{b:02x}")).collect();
+    holder
+        .pragma_update(None, "key", format!("x'{hex}'"))
+        .unwrap();
+    holder.execute_batch("BEGIN EXCLUSIVE").unwrap();
+
+    let sentence = because(History::open(&data, &key()));
+    assert_plain(&sentence, &[root.path(), &data]);
+    let lower = sentence.to_lowercase();
+    assert!(
+        !lower.contains("key") && !lower.contains("sealed"),
+        "{sentence:?} reads as a wrong key"
+    );
+    assert!(
+        lower.contains("just now"),
+        "{sentence:?} should say it may pass"
+    );
+
+    // Nothing was withheld for good: once the holder lets go, it opens.
+    holder.execute_batch("ROLLBACK").unwrap();
+    drop(holder);
+    assert!(
+        matches!(History::open(&data, &key()), History::Open(_)),
+        "the history should open once nothing holds it"
+    );
+}

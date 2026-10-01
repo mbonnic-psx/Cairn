@@ -180,7 +180,16 @@ impl OpenHistory {
             .query_row("SELECT count(*) FROM sqlite_master", [], |row| {
                 row.get::<_, i64>(0)
             })
-            .map_err(|_| sealed())?;
+            .map_err(|error| {
+                // Held by another connection is not a wrong key: saying so
+                // would withhold the writing space for a reason that is not
+                // true (J5, Principle III).
+                if is_busy(&error) {
+                    cannot_open()
+                } else {
+                    sealed()
+                }
+            })?;
 
         // A replaced or deleted entry leaves no old text in a free page for
         // anyone with the key to find (FR-015, FR-018a): SQLite overwrites
@@ -604,6 +613,13 @@ fn sealed() -> Trouble {
     Trouble::new(
         "Cairn could not open your history with the key it has, so your entries stay \
          sealed and exactly as they are. Protection is unaffected.",
+    )
+}
+
+fn is_busy(error: &rusqlite::Error) -> bool {
+    matches!(
+        error.sqlite_error_code(),
+        Some(rusqlite::ErrorCode::DatabaseBusy | rusqlite::ErrorCode::DatabaseLocked)
     )
 }
 
