@@ -285,3 +285,45 @@ mod system_hosts {
         assert_plain(&said, directory.path());
     }
 }
+
+mod helper_answers {
+    use super::*;
+    use std::io::{Read as _, Write as _};
+    use std::os::unix::net::UnixListener;
+
+    use cairn::helper::{HelperChannel, InstalledHelper};
+    use cairn::protocol::Request;
+
+    /// A stand-in for the helper that answers every request with bytes that
+    /// are not an answer.
+    fn a_helper_that_answers_nonsense(socket: &Path) {
+        let listener = UnixListener::bind(socket).unwrap();
+        std::thread::spawn(move || {
+            if let Ok((mut stream, _)) = listener.accept() {
+                let mut length = [0u8; 4];
+                stream.read_exact(&mut length).unwrap();
+                let mut request = vec![0u8; u32::from_be_bytes(length) as usize];
+                stream.read_exact(&mut request).unwrap();
+
+                let nonsense = b"{ this is not an answer";
+                let _ = stream.write_all(&(nonsense.len() as u32).to_be_bytes());
+                let _ = stream.write_all(nonsense);
+                let _ = stream.flush();
+            }
+        });
+    }
+
+    #[test]
+    fn an_answer_that_cannot_be_understood_is_explained_plainly() {
+        let directory = tempfile::tempdir().unwrap();
+        let socket = directory.path().join("helper.sock");
+        a_helper_that_answers_nonsense(&socket);
+
+        let said = InstalledHelper::at(&socket)
+            .ask(Request::Ping)
+            .unwrap_err()
+            .message;
+        assert_plain(&said, directory.path());
+        assert!(said.contains("cannot confirm"), "{said}");
+    }
+}
