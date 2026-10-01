@@ -1,0 +1,62 @@
+# Tasks — slice `quote`
+
+Numbered `Q`, and each names the feature task it carries out (`../../tasks.md`) or the gaps review decision it
+holds (`../../spec.md`, *Gaps reviewed — slice `quote`*). One increment per pair: the RED task is written and seen
+failing for the reason it states, then the GREEN task makes it pass, then the increment is committed. Scenario
+numbers are `plan.md`'s.
+
+No task here is `[P]`: each increment starts from the green, committed suite the one before it left, and the
+Rust increments and the screen increments meet in `contracts/ui-ipc.md`'s names, which the earlier ones settle.
+
+## Increment 1 — the choice (domain)
+
+- [ ] Q1 [T031, Q1] RED: `src-tauri/tests/quote_choice.rs` — `domain::quotes::choose(lines, roll)`: no lines is
+  nothing; roll *k* is line *k mod n*; every line is reachable; a huge roll does not overflow.
+- [ ] Q2 [T031] GREEN: `src-tauri/src/domain/quotes.rs`, pure (`check-domain-purity.sh`).
+
+## Increment 2 — `get_quote` through the driving port
+
+- [ ] Q3 [T031, T032, T033; scenarios 1–3, 6 (quote half)] RED: `src-tauri/tests/us1_quote.rs` against
+  `AppState` over the real bundled `resources/quotes/quotes.json`: roll *k* gives line *k*; two rolls differ on
+  one date and one roll is the same on two dates; a missing, an empty, and a malformed set each give nothing; the
+  key unavailable changes nothing. `ipc_surface.rs` `CLASSIFIED` 17 → 18 with `get_quote`, `Effect::Reads`.
+- [ ] Q4 [T031, T032] GREEN: `reflection/quote.rs` (read the set, drop blank lines, choose), `reflection` built
+  without `history`; `AppState.shipped_quotes` and `AppState.roll`; `AppState::get_quote`; the command; `main.rs`
+  supplies the path beside the app and `getrandom::u64()`, and registers the handler. Every `AppState` literal in
+  the test tree gains the two fields.
+
+## Increment 3 — the switch, remembered
+
+- [ ] Q5 [Q2; scenarios 4–7] RED: in `us1_quote.rs` — shown by default; hidden means `get_quote` is nothing;
+  remembered by a fresh `AppState`; shown again brings a line back; works with the key unavailable; leaves trail,
+  intent, pending change and trusted clock unchanged; refused with the file byte-identical when `config.json` is
+  unreadable. In `stores.rs` — a `config.json` written before this slice loads with quotes shown and all it held.
+  `CLASSIFIED` 18 → 20 with `get_quotes_shown` and `set_quotes_shown`, `Effect::Reads`.
+- [ ] Q6 [Q2] GREEN: `Config.quotes_hidden` (`#[serde(default)]`); `AppState::get_quotes_shown`,
+  `AppState::set_quotes_shown`; `get_quote` returns nothing when hidden; the two commands; `main.rs` registers them.
+
+## Increment 4 — the line on the check-in
+
+- [ ] Q7 [T027 quote half; scenarios 8, 9, 11, 12] RED: `CheckIn.test.tsx` — one line in serif, asked for once,
+  the same after a save; shown with nothing returned is no quote and nothing in its place, the space still there;
+  the sealed check-in shows the line too; no banned word with a line showing.
+- [ ] Q8 [T034 quote half, T036 quote half] GREEN: `getQuote`, `getQuotesShown`, `setQuotesShown` in
+  `src/ipc/journal.ts` (already import-restricted to the check-in); `CheckIn.tsx` asks once at open and keeps the
+  line.
+
+## Increment 5 — the quiet switch on the check-in
+
+- [ ] Q9 [Q2; scenario 10] RED: `CheckIn.test.tsx` — *Hide quotes* removes the line, leaves nothing in its place
+  and becomes *Show quotes*; *Show quotes* brings a line back; opened hidden asks for no quote and offers *Show
+  quotes*; a switch that cannot be kept leaves the line and says so in the status region; the switch is on the
+  sealed check-in; its label names what it does and no protection change.
+- [ ] Q10 [Q2] GREEN: the switch in `CheckIn.tsx`, small, sans, at the foot of the check-in.
+
+## Phase 3 — Hold it
+
+- [ ] Q11 The gate in the slice brief, `make -f delivery/Makefile verify`, and `make smoke` (`main.rs` changed).
+- [ ] Q12 After the merge, on `main` (the feature's `tasks.md` and `delivery/survey/pinned.md` are the host's;
+  `check-slice-scope` refuses them on this branch): tick T031 in `../../tasks.md`; note T027, T032, T033 as the
+  quote half done; add the pin row `plan.md` *Pin* hands back.
+
+## Done notes

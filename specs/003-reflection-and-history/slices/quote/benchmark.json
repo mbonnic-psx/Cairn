@@ -1,0 +1,120 @@
+{
+  "_comment": "What each stage of /drive cost this slice and how well it did, one entry per stage run, appended by scripts/agents/benchmark.py at the stage's start and end. Tokens come from the harness's own transcript or are null with the reason; signals are what the stage reported. `make benchmark` reads every record. docs/agent-harnesses.md says what the numbers can and cannot be compared with.",
+  "feature": "003-reflection-and-history",
+  "slice": "quote",
+  "from": "cfa22e6c18c849521677e581560d97a09548ad52",
+  "stages": [
+    {
+      "stage": "plan",
+      "started": "2026-10-01T16:24:08Z",
+      "planned": "plan: strong → host model — `strong` maps to the host model",
+      "tasks": {
+        "start": {
+          "open": 49,
+          "done": 24
+        },
+        "end": {
+          "open": 49,
+          "done": 24
+        }
+      },
+      "ended": "2026-10-01T16:25:39Z",
+      "seconds": 91,
+      "span": {
+        "from": {
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/8d31015f-5528-46f5-a0d8-283ae71215c8.jsonl": 1549927,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/8d31015f-5528-46f5-a0d8-283ae71215c8/subagents/agent-a4c64d91c4dcf478f.jsonl": 758057,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/8d31015f-5528-46f5-a0d8-283ae71215c8/subagents/agent-a71828c93bfbe49b1.jsonl": 598473,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/8d31015f-5528-46f5-a0d8-283ae71215c8/subagents/agent-ae48de181186f44b2.jsonl": 808535
+        },
+        "to": {
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/8d31015f-5528-46f5-a0d8-283ae71215c8.jsonl": 1549927,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/8d31015f-5528-46f5-a0d8-283ae71215c8/subagents/agent-a4c64d91c4dcf478f.jsonl": 758057,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/8d31015f-5528-46f5-a0d8-283ae71215c8/subagents/agent-a71828c93bfbe49b1.jsonl": 704657,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/8d31015f-5528-46f5-a0d8-283ae71215c8/subagents/agent-ae48de181186f44b2.jsonl": 921729
+        }
+      },
+      "usage": {
+        "source": "claude",
+        "session": "8d31015f-5528-46f5-a0d8-283ae71215c8",
+        "read": "message.usage on each assistant line, once per requestId",
+        "host": {},
+        "subagents": {
+          "claude-opus-5-5": {
+            "input": 26,
+            "output": 782,
+            "cache_read": 1444502,
+            "cache_creation": 29384
+          }
+        },
+        "agents": [
+          "general-purpose"
+        ]
+      },
+      "ran": [
+        "claude-opus-5-5"
+      ],
+      "agents": [
+        "general-purpose"
+      ],
+      "delegated": true,
+      "signals": {}
+    },
+    {
+      "stage": "tasks",
+      "started": "2026-10-01T16:25:40Z",
+      "planned": "tasks: fast → sonnet — Claude Code: the Agent tool's `model` parameter, set per call",
+      "tasks": {
+        "start": {
+          "open": 49,
+          "done": 24
+        },
+        "end": {
+          "open": 12,
+          "done": 0
+        }
+      },
+      "ended": "2026-10-01T16:26:05Z",
+      "seconds": 25,
+      "span": {
+        "from": {
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/8d31015f-5528-46f5-a0d8-283ae71215c8.jsonl": 1549927,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/8d31015f-5528-46f5-a0d8-283ae71215c8/subagents/agent-a4c64d91c4dcf478f.jsonl": 758057,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/8d31015f-5528-46f5-a0d8-283ae71215c8/subagents/agent-a71828c93bfbe49b1.jsonl": 704657,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/8d31015f-5528-46f5-a0d8-283ae71215c8/subagents/agent-ae48de181186f44b2.jsonl": 921729
+        },
+        "to": {
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/8d31015f-5528-46f5-a0d8-283ae71215c8.jsonl": 1549927,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/8d31015f-5528-46f5-a0d8-283ae71215c8/subagents/agent-a4c64d91c4dcf478f.jsonl": 758057,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/8d31015f-5528-46f5-a0d8-283ae71215c8/subagents/agent-a71828c93bfbe49b1.jsonl": 723015,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/8d31015f-5528-46f5-a0d8-283ae71215c8/subagents/agent-ae48de181186f44b2.jsonl": 948459
+        }
+      },
+      "usage": {
+        "source": "claude",
+        "session": "8d31015f-5528-46f5-a0d8-283ae71215c8",
+        "read": "message.usage on each assistant line, once per requestId",
+        "host": {},
+        "subagents": {
+          "claude-opus-5-5": {
+            "input": 6,
+            "output": 17,
+            "cache_read": 367262,
+            "cache_creation": 4974
+          }
+        },
+        "agents": [
+          "general-purpose"
+        ]
+      },
+      "ran": [
+        "claude-opus-5-5"
+      ],
+      "agents": [
+        "general-purpose"
+      ],
+      "delegated": true,
+      "signals": {}
+    }
+  ]
+}
