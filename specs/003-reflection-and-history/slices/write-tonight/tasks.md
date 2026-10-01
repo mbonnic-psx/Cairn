@@ -63,6 +63,12 @@ task starts only once the RED task it answers has been seen failing for the reas
   or deserialisation error, whose text is outside the voice guard and may say "failed") into one plain sentence in voice
   (convergence finding 7).
 
+- [ ] W15 [LOW] A day that cannot be loaded says so in a plain `<p>`, outside any live region (`CheckIn.tsx`, the
+  loading path). Put it in the same `role="status"` region (convergence pass 2).
+- [ ] W16 [LOW] If `secure_delete` cannot be set, the history seals, as a schema error already does
+  (`store/history.rs`, `connect`). That matches the existing fail-closed rule, and it has no realistic trigger on
+  SQLCipher. Recorded, not changed (convergence pass 2).
+
 ## Convergence
 
 **Pass 1 (2026-10-01): not converged.** No CRITICAL and no HIGH. Each level was accounted for: store, orchestration,
@@ -95,4 +101,8 @@ Constitution, per principle, with where it holds:
 - **Delivery Method:** RED `095064b` before GREEN `febe95b`, with scenarios through `AppState`. FR-015's "retaining no
   previous text" is now held below the row level too, by `secure_delete`.
 
-**Pass 2:** see below.
+**Pass 2 (2026-10-01): converged.** The confirming pass re-ran each pass-1 mutation against `6ecaff3`. Recompute at
+save, drop the empty-text guard, `secure_delete` off, and remove the live region: each now fails a test. `connect` is
+the only way a history connection opens. The contract matches `DayView` in Rust and TypeScript. `us1_write_tonight`
+8/8, `fail_closed_journal` 3/3, `journal_store` 19/19, `CheckIn.test.tsx` 12/12. Two new LOWs, carried as W15 and W16.
+The loop stops here, at its bound of two passes, and the slice goes to its demo.
