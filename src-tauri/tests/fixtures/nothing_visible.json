@@ -1,0 +1,43 @@
+{
+  "_about": "One list of cases for both sides of G4 (spec.md, Gaps reviewed - slice write-tonight): src-tauri/tests/nothing_visible.rs reads it, and so does src/screens/__tests__/NothingVisible.test.tsx. Add a case here and both languages must agree on it.",
+  "nothing": [
+    ["empty", ""],
+    ["spaces, newline, tab", "   \n\t  \n"],
+    ["zero width space U+200B", "​"],
+    ["zero width non-joiner U+200C", "‌"],
+    ["zero width joiner U+200D", "‍"],
+    ["word joiner U+2060", "⁠"],
+    ["byte order mark U+FEFF", "﻿"],
+    ["mongolian vowel separator U+180E", "᠎"],
+    ["soft hyphen U+00AD", "­"],
+    ["combining grapheme joiner U+034F", "͏"],
+    ["variation selector U+FE0F", "️"],
+    ["left-to-right mark U+200E", "‎"],
+    ["right-to-left mark U+200F", "‏"],
+    ["tag space U+E0020", "󠀠"],
+    ["hangul filler U+3164", "ㅤ"],
+    ["halfwidth hangul filler U+FFA0", "ﾠ"],
+    ["braille blank U+2800", "⠀"],
+    ["hangul choseong filler U+115F", "ᅟ"],
+    ["hangul jungseong filler U+1160", "ᅠ"],
+    ["no-break space U+00A0", " "],
+    ["ideographic space U+3000", "　"],
+    ["line separator U+2028", " "],
+    ["NUL", "\u0000"],
+    ["NUL and space", "\u0000 \u0000"],
+    ["delete U+007F", "\u007f"],
+    ["mixed invisibles", " ​ㅤ⠀\n\u0000﻿"]
+  ],
+  "something": [
+    ["plain word", "x"],
+    ["zero width space between letters", "a​b"],
+    ["zero width space around text", "​kept​"],
+    ["joiner inside an emoji sequence", "👨‍👩"],
+    ["variation selector after a heart", "❤️"],
+    ["NUL inside text", "a\u0000b"],
+    ["braille blank beside a letter", "⠀z"],
+    ["hangul filler beside a letter", "zㅤ"],
+    ["a visible braille dot", "⠁"],
+    ["a full stop", "."]
+  ]
+}

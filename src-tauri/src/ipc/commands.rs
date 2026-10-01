@@ -8,13 +8,16 @@
 
 use tauri::State;
 
+use crate::domain::dates::LocalDate;
 use crate::domain::entries::{CategoryId, Domain, ReachMode, Trail};
 use crate::domain::normalize::Rejection;
 use crate::enforcement::state::ProtectionState;
 
 use crate::store::config::ReachModeSetting;
 
-use super::state::{AppState, CategoryPreset, Disclosures, PendingView, TodaysReaches};
+use super::state::{
+    AppState, CategoryPreset, DayView, Disclosures, PendingView, TodaysReaches,
+};
 
 #[tauri::command]
 pub fn get_protection_state(
@@ -156,6 +159,30 @@ pub fn list_todays_reaches(
     day_end: i64,
 ) -> TodaysReaches {
     state.list_todays_reaches(day_start, day_end)
+}
+
+/// One day, whole. **The check-in and the single-day screen are the only
+/// callers** (FR-033): an ESLint rule restricts `src/ipc/journal.ts`.
+#[tauri::command]
+pub fn get_day(
+    state: State<'_, AppState>,
+    day: LocalDate,
+    day_start: i64,
+    day_end: i64,
+) -> DayView {
+    state.get_day(day, day_start, day_end)
+}
+
+/// The Err is a sentence shown to the person exactly as written.
+#[tauri::command]
+pub fn save_journal_entry(
+    state: State<'_, AppState>,
+    day: LocalDate,
+    day_start: i64,
+    day_end: i64,
+    text: String,
+) -> Result<DayView, String> {
+    state.save_journal_entry(day, day_start, day_end, &text)
 }
 
 #[tauri::command]

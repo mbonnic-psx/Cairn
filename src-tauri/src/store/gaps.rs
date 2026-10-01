@@ -54,6 +54,19 @@ pub fn overlapping(gaps: &[Gap], from: i64, to: i64) -> Vec<Gap> {
         .collect()
 }
 
+/// Each gap cut down to the part inside `[from, to)`, those with nothing left
+/// dropped. A gap that began the night before is only the day's for the hours
+/// that fall in it, and that is the span a day may be told about (T4).
+pub fn clipped(gaps: &[Gap], from: i64, to: i64) -> Vec<Gap> {
+    gaps.iter()
+        .map(|gap| Gap {
+            from: gap.from.max(from),
+            to: gap.to.min(to),
+        })
+        .filter(|gap| gap.to > gap.from)
+        .collect()
+}
+
 /// What is said above a day's reaches when part of that day was not observed.
 ///
 /// It states the limit rather than apologising for it, and it never guesses at

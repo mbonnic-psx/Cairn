@@ -7,6 +7,7 @@
 import { useEffect, useState } from 'react';
 
 import { Button } from './components/Button';
+import { CheckIn, useCheckInSession } from './screens/CheckIn';
 import { Disclosure } from './screens/Disclosure';
 import { Limits } from './screens/Limits';
 import { Protection } from './screens/Protection';
@@ -28,7 +29,7 @@ import {
   type Trail as TrailData,
 } from './ipc';
 
-type Step = 'choosing' | 'disclosure' | 'protected' | 'trail' | 'limits' | 'reaches';
+type Step = 'choosing' | 'disclosure' | 'protected' | 'trail' | 'limits' | 'reaches' | 'checkin';
 
 export default function App() {
   const [step, setStep] = useState<Step>('choosing');
@@ -37,6 +38,8 @@ export default function App() {
   const [disclosures, setDisclosures] = useState<Disclosures>();
   const [state, setState] = useState<ProtectionState>();
   const [note, setNote] = useState<string>();
+  // Held here so the check-in's text survives a walk round the header.
+  const checkIn = useCheckInSession();
 
   useEffect(() => {
     listCategories().then(setCategories).catch(() => undefined);
@@ -48,6 +51,11 @@ export default function App() {
       })
       .catch(() => undefined);
   }, []);
+
+  // Once protection is on, its own items stay in the header on every screen,
+  // so the header does not change shape as a person moves around it (owner,
+  // 2026-10-01). Before then there is nothing to show under them.
+  const protectionOn = state !== undefined && state.status !== 'off';
 
   async function toggle(id: CategoryPreset['id'], on: boolean) {
     try {
@@ -81,7 +89,23 @@ export default function App() {
       <header className="mx-auto mb-10 flex max-w-3xl items-baseline justify-between">
         <h1 className="reflective text-2xl text-ink-900">Cairn</h1>
         <nav className="flex gap-1 text-sm">
-          {step === 'protected' && (
+          {/* Always in the header, so it never changes shape (owner,
+              2026-10-01): to choosing what to protect before protection is
+              on, and to the protection screen once it is. Marked as the
+              current page while one of those is showing. */}
+          <Button
+            tone="quiet"
+            aria-current={
+              step === 'choosing' || step === 'disclosure' || step === 'protected'
+                ? 'page'
+                : undefined
+            }
+            className="aria-[current=page]:text-ink-900"
+            onClick={() => setStep(protectionOn ? 'protected' : 'choosing')}
+          >
+            Protection
+          </Button>
+          {protectionOn && (
             <Button
               tone="quiet"
               onClick={async () => {
@@ -92,7 +116,7 @@ export default function App() {
               {trailTitle(state?.status)}
             </Button>
           )}
-          {step === 'protected' && (
+          {protectionOn && (
             // Deliberate navigation, and nothing anywhere that draws someone
             // here: no count, no badge, no hint that there is something new to
             // look at (FR-030a, FR-030b).
@@ -100,6 +124,18 @@ export default function App() {
               Today
             </Button>
           )}
+          {/* Reachable at any time (FR-010), and by navigation only: nothing
+              here says there is something to write, or that anything was
+              written (FR-033). */}
+          <Button
+            tone="quiet"
+            onClick={() => {
+              checkIn.open();
+              setStep('checkin');
+            }}
+          >
+            Tonight
+          </Button>
           <Button tone="quiet" onClick={() => setStep('limits')}>
             What Cairn covers
           </Button>
@@ -130,6 +166,8 @@ export default function App() {
         {step === 'trail' && trail && <Trail trail={trail} status={state?.status} />}
 
         {step === 'reaches' && <Reaches />}
+
+        {step === 'checkin' && <CheckIn session={checkIn} />}
 
         {step === 'limits' && disclosures && <Limits disclosures={disclosures} />}
       </div>

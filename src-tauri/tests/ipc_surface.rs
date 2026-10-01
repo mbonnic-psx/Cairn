@@ -13,7 +13,7 @@
 ///
 /// Adding a command without adding it here fails this test — which is the
 /// point.
-const CLASSIFIED: [(&str, Effect); 15] = [
+const CLASSIFIED: [(&str, Effect); 17] = [
     // Reads. They change nothing.
     ("get_protection_state", Effect::Reads),
     ("get_trail", Effect::Reads),
@@ -25,6 +25,11 @@ const CLASSIFIED: [(&str, Effect); 15] = [
     // blocks exactly the same addresses (FR-028).
     ("set_reach_mode", Effect::Reads),
     ("list_todays_reaches", Effect::Reads),
+    // The check-in. Reading a day and writing about it touch the history, never
+    // what is protected, and nothing in either leads to a protection change
+    // (Principle I).
+    ("get_day", Effect::Reads),
+    ("save_journal_entry", Effect::Reads),
     // Increases. Immediate, and never gated (FR-048).
     ("add_custom_entry", Effect::Increases),
     ("turn_protection_on", Effect::Increases),
@@ -87,6 +92,19 @@ fn every_exposed_command_is_classified() {
             CLASSIFIED.iter().any(|(known, _)| known == name),
             "{name} is exposed to the interface but not classified here. What does it \
              do to protection?"
+        );
+    }
+}
+
+#[test]
+fn every_classified_command_is_exposed() {
+    // The other direction. A classification for a command that is not there
+    // is a claim about the surface that the surface does not make good on.
+    let exposed = exposed_commands();
+    for (name, _) in &CLASSIFIED {
+        assert!(
+            exposed.iter().any(|found| found == name),
+            "{name} is classified here but not exposed to the interface"
         );
     }
 }

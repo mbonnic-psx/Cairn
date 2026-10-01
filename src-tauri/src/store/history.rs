@@ -25,6 +25,7 @@ use std::path::{Path, PathBuf};
 use rusqlite::{Connection, OptionalExtension};
 
 use crate::domain::dates::LocalDate;
+use crate::domain::visible::shows_nothing;
 use crate::services::{Key, Trouble};
 
 use super::key::HistoryKey;
@@ -39,12 +40,13 @@ pub const HISTORY_FILE: &str = "history.db";
 const REACHES_IN_RANGE: &str = "at >= ?1 AND at < ?2";
 
 /// `coverage_gaps` overlapping `[from, to)` at all, not merely contained by
-/// it — the same predicate [`OpenHistory::gaps_between`] reads with. Reused
+/// it, and strictly: a gap that ended exactly at `from` has no time inside the
+/// range (T4) — the same predicate [`OpenHistory::gaps_between`] reads with. Reused
 /// by [`OpenHistory::delete_reach_history`] to select which gaps to *clip*
 /// (never to delete outright): a gap this predicate matches is one the range
 /// touches, but only the portion actually inside `[from, to)` is data about
 /// the period the person chose to remove — the rest survives, trimmed.
-const GAPS_OVERLAPPING_RANGE: &str = "to_at >= ?1 AND from_at < ?2";
+const GAPS_OVERLAPPING_RANGE: &str = "to_at > ?1 AND from_at < ?2";
 
 /// `journal_entries.day` / `reach_estimates.day` inside `[from, to)`. `day`
 /// is stored as zero-padded `YYYY-MM-DD` text (`LocalDate`'s `Display`), so
@@ -159,14 +161,10 @@ pub struct OpenHistory {
 impl OpenHistory {
     fn connect(path: &Path, key: &Key) -> Result<Self, Trouble> {
         if let Some(directory) = path.parent() {
-            std::fs::create_dir_all(directory).map_err(|error| {
-                Trouble::new(format!("Cairn could not open your history ({error})."))
-            })?;
+            std::fs::create_dir_all(directory).map_err(|_| cannot_open())?;
         }
 
-        let connection = Connection::open(path).map_err(|error| {
-            Trouble::new(format!("Cairn could not open your history ({error})."))
-        })?;
+        let connection = Connection::open(path).map_err(|_| cannot_open())?;
 
         // The key goes in before anything else touches the file.
         let hex: String = key
@@ -184,7 +182,23 @@ impl OpenHistory {
             .query_row("SELECT count(*) FROM sqlite_master", [], |row| {
                 row.get::<_, i64>(0)
             })
-            .map_err(|_| sealed())?;
+            .map_err(|error| {
+                // Held by another connection is not a wrong key: saying so
+                // would withhold the writing space for a reason that is not
+                // true (J5, Principle III).
+                if is_busy(&error) {
+                    cannot_open()
+                } else {
+                    sealed()
+                }
+            })?;
+
+        // A replaced or deleted entry leaves no old text in a free page for
+        // anyone with the key to find (FR-015, FR-018a): SQLite overwrites
+        // freed content instead of leaving it where it was.
+        connection
+            .pragma_update(None, "secure_delete", "ON")
+            .map_err(|_| cannot_prepare())?;
 
         connection
             .execute_batch(
@@ -207,9 +221,7 @@ impl OpenHistory {
                      count INTEGER NOT NULL
                  );",
             )
-            .map_err(|error| {
-                Trouble::new(format!("Cairn could not prepare your history ({error})."))
-            })?;
+            .map_err(|_| cannot_prepare())?;
 
         Ok(OpenHistory {
             connection,
@@ -303,7 +315,8 @@ impl OpenHistory {
         )
     }
 
-    /// Refuses empty or whitespace-only text and stores nothing (FR-014).
+    /// Refuses text that shows nothing (G4: empty, whitespace, zero-width and
+    /// the like) and stores nothing (FR-014), so a kept entry stays.
     /// Otherwise replaces whatever entry `day` already had — no version kept,
     /// no trace of the old text (data-model.md).
     pub fn save_entry(
@@ -312,7 +325,7 @@ impl OpenHistory {
         text: &str,
         written_at: i64,
     ) -> Result<(), Trouble> {
-        if text.trim().is_empty() {
+        if shows_nothing(text) {
             return Err(Trouble::new("An empty entry is not saved."));
         }
 
@@ -536,6 +549,15 @@ impl OpenHistory {
         self.columns_of("journal_entries")
     }
 
+    /// Whether freed pages are overwritten (`secure_delete`), so a replaced or
+    /// deleted entry keeps no old text. Used by the test that holds it.
+    pub fn erases_freed_pages(&self) -> Result<bool, Trouble> {
+        self.connection
+            .query_row("PRAGMA secure_delete", [], |row| row.get::<_, i64>(0))
+            .map(|on| on == 1)
+            .map_err(|_| unreadable())
+    }
+
     /// Used by the test that asserts an estimate carries no site and no
     /// hour.
     pub fn columns_of_reach_estimates(&self) -> Result<Vec<String>, Trouble> {
@@ -594,6 +616,30 @@ fn sealed() -> Trouble {
     Trouble::new(
         "Cairn could not open your history with the key it has, so your entries stay \
          sealed and exactly as they are. Protection is unaffected.",
+    )
+}
+
+fn is_busy(error: &rusqlite::Error) -> bool {
+    matches!(
+        error.sqlite_error_code(),
+        Some(rusqlite::ErrorCode::DatabaseBusy | rusqlite::ErrorCode::DatabaseLocked)
+    )
+}
+
+/// The history file or its folder could not be reached. The system's own
+/// words, and the path, stay out of it: the person is told what is true and
+/// what is still working (J1, J2).
+fn cannot_open() -> Trouble {
+    Trouble::new(
+        "Cairn could not open your history just now, so nothing is written or \
+         read there. Protection is unaffected.",
+    )
+}
+
+fn cannot_prepare() -> Trouble {
+    Trouble::new(
+        "Cairn could not get your history ready just now, so nothing is written or \
+         read there. Protection is unaffected.",
     )
 }
 
