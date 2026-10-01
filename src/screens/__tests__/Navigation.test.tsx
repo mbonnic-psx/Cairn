@@ -2,7 +2,8 @@
  * Getting back.
  *
  * "Tonight" and "What Cairn covers" are always in the header, so a person can
- * reach them from anywhere. The way back has to be there too: before
+ * reach them from anywhere. "Protection" is always there too, so the header
+ * does not change shape from screen to screen (owner, 2026-10-01). Before
  * protection is on it returns to choosing what to protect, and once it is on
  * it returns to the protection screen. Reported in the write-tonight demo
  * (2026-10-01): from the check-in there was no way back at all.
@@ -68,11 +69,15 @@ describe('the way back', () => {
     expect(await screen.findByRole('heading', { name: title })).toBeInTheDocument();
   });
 
-  it('is not offered where it would lead nowhere new', async () => {
+  it('stays in the header on the screen it leads to, marked as the current one', async () => {
     vi.mocked(ipc.getProtectionState).mockResolvedValue(state('off'));
     render(<App />);
 
     await screen.findByText('What would you like to protect?');
-    expect(screen.queryByRole('button', { name: 'Protection' })).toBeNull();
+    const here = screen.getByRole('button', { name: 'Protection' });
+    expect(here).toHaveAttribute('aria-current', 'page');
+
+    await userEvent.click(screen.getByRole('button', { name: 'What Cairn covers' }));
+    expect(screen.getByRole('button', { name: 'Protection' })).not.toHaveAttribute('aria-current');
   });
 });

@@ -82,6 +82,22 @@ export default function App() {
       <header className="mx-auto mb-10 flex max-w-3xl items-baseline justify-between">
         <h1 className="reflective text-2xl text-ink-900">Cairn</h1>
         <nav className="flex gap-1 text-sm">
+          {/* Always in the header, so it never changes shape (owner,
+              2026-10-01): to choosing what to protect before protection is
+              on, and to the protection screen once it is. Marked as the
+              current page while one of those is showing. */}
+          <Button
+            tone="quiet"
+            aria-current={
+              step === 'choosing' || step === 'disclosure' || step === 'protected'
+                ? 'page'
+                : undefined
+            }
+            className="aria-[current=page]:text-ink-900"
+            onClick={() => setStep(state && state.status !== 'off' ? 'protected' : 'choosing')}
+          >
+            Protection
+          </Button>
           {step === 'protected' && (
             <Button
               tone="quiet"
@@ -99,18 +115,6 @@ export default function App() {
             // look at (FR-030a, FR-030b).
             <Button tone="quiet" onClick={() => setStep('reaches')}>
               Today
-            </Button>
-          )}
-          {/* The way back from every screen the header leads to: to choosing
-              what to protect before protection is on, and to the protection
-              screen once it is. Without it the check-in was a room with no
-              door, and so were the trail and today's reaches. */}
-          {step !== 'choosing' && step !== 'disclosure' && step !== 'protected' && (
-            <Button
-              tone="quiet"
-              onClick={() => setStep(state && state.status !== 'off' ? 'protected' : 'choosing')}
-            >
-              Protection
             </Button>
           )}
           {/* Reachable at any time (FR-010), and by navigation only: nothing
