@@ -64,6 +64,8 @@ function sessionFor(year: number, month: number, date: number): CheckInSession {
     note: undefined,
     kept: false,
     keeping: false,
+    quote: undefined,
+    holdQuote: () => undefined,
     type: () => undefined,
     keep: () => Promise.resolve(undefined),
   };

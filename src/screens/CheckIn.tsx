@@ -19,7 +19,7 @@
  *
  * Nothing here leads to a change in protection (Principle I).
  */
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { Button } from '../components/Button';
 import { Card } from '../components/Card';
@@ -129,6 +129,14 @@ export interface CheckInSession {
   note: string | undefined;
   kept: boolean;
   keeping: boolean;
+  /**
+   * The day's one line (Q1): asked for once per opened day and kept while the
+   * person walks round the header. Undefined until asked; a line of `null` is
+   * the answer "none to be had", also kept.
+   */
+  quote: { day: string; line: string | null } | undefined;
+  /** Keeps the line asked for `day`; ignored once Tonight has opened another day. */
+  holdQuote: (day: string, line: string | null) => void;
   type: (text: string) => void;
   keep: (when: Today, shown: string) => Promise<DayView | undefined>;
 }
@@ -149,6 +157,13 @@ export function useCheckInSession(): CheckInSession {
   // The space as it is now, for a save that returns after more was typed.
   const latest = useRef<string>();
   latest.current = draft;
+  const [quote, setQuote] = useState<{ day: string; line: string | null }>();
+  // The day now open, for a line that arrives after Tonight opened another.
+  const openDay = useRef(opened.day);
+  openDay.current = opened.day;
+  const holdQuote = useCallback((day: string, line: string | null) => {
+    if (day === openDay.current) setQuote({ day, line });
+  }, []);
 
   return {
     opened,
@@ -160,6 +175,8 @@ export function useCheckInSession(): CheckInSession {
       if (unsaved || now.day === opened.day) return;
       // A new day: nothing of the old one comes with it.
       setOpened(now);
+      openDay.current = now.day;
+      setQuote(undefined);
       setDraft(undefined);
       latest.current = undefined;
       setNote(undefined);
@@ -169,6 +186,8 @@ export function useCheckInSession(): CheckInSession {
     note,
     kept,
     keeping,
+    quote,
+    holdQuote,
     type(text) {
       latest.current = text;
       setDraft(text);
@@ -208,13 +227,18 @@ export function CheckIn({ session }: { session?: CheckInSession }) {
     note: saveNote,
     kept,
     keeping,
+    quote: held,
+    holdQuote,
     type,
     keep,
   } = session ?? own;
   const [view, setView] = useState<DayView>();
   const [loadNote, setLoadNote] = useState<string>();
   const [, tick] = useState(0);
-  const [quote, setQuote] = useState<string | null>(null);
+  // Whether this day's line has been asked for, readable from the effects.
+  const heldDay = useRef<string>();
+  heldDay.current = held?.day;
+  const quote = held?.day === opened.day ? held.line : null;
   // Why the quotes switch did not take, if it did not; the save's own sentence comes first.
   const [switchNote, setSwitchNote] = useState<string>();
   /** Unknown until the setting is read; then the person's choice. */
@@ -256,20 +280,22 @@ export function CheckIn({ session }: { session?: CheckInSession }) {
     // new day (G5). `stale` keeps a second run of this effect (React's
     // development double-run) from swapping the line under the person.
     let stale = false;
+    const day = opened.day;
     getQuotesShown()
       .then((shown) => {
         if (!stale) setShown(shown);
-        return shown ? getQuote() : null;
-      })
-      .then((line) => {
-        if (!stale) setQuote(line);
+        // The day's line is asked for once; coming back to it keeps it (Q1).
+        if (!shown || heldDay.current === day) return undefined;
+        return getQuote().then((line) => {
+          if (!stale) holdQuote(day, line);
+        });
       })
       // A line that cannot be had is no line: nothing to report, nothing in its place.
       .catch(() => undefined);
     return () => {
       stale = true;
     };
-  }, [opened.day]);
+  }, [opened.day, holdQuote]);
 
   async function switchQuotes(shown: boolean) {
     setSwitchNote(undefined);
@@ -284,8 +310,8 @@ export function CheckIn({ session }: { session?: CheckInSession }) {
     setShown(now);
     // Shown again in the same opening, it is the same line (Q1). Opened hidden,
     // this is the one time a line is asked for; none to be had is none shown.
-    if (now && quote === null) {
-      setQuote(await getQuote().catch(() => null));
+    if (now && heldDay.current !== opened.day) {
+      holdQuote(opened.day, await getQuote().catch(() => null));
     }
   }
 
