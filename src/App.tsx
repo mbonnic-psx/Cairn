@@ -21,6 +21,7 @@ import {
   listCategories,
   setCategoryEnabled,
   turnProtectionOn,
+  waitingSentence,
   type CategoryPreset,
   type Disclosures,
   type ProtectionState,
@@ -50,12 +51,15 @@ export default function App() {
 
   async function toggle(id: CategoryPreset['id'], on: boolean) {
     try {
-      await setCategoryEnabled(id, on);
-      setNote(undefined);
+      // Unticking comes off at once before anything is in force, and waits a
+      // day once something is. When it waits, the box stays ticked — it is
+      // still protected — and the screen says why rather than snapping back
+      // without a word.
+      const pending = await setCategoryEnabled(id, on);
+      setNote(pending ? waitingSentence(pending) : undefined);
       setCategories(await listCategories());
     } catch (problem) {
-      // Switching a category off waits a day; the core says so in a sentence
-      // meant to be read.
+      // The core's sentences are meant to be read as written.
       setNote(String(problem));
     }
   }

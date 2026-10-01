@@ -3,7 +3,9 @@
  *
  * The nine categories, named for what a person recognises rather than for any
  * mechanism (FR-001, FR-051). Turning one on protects more and happens at once.
- * Turning one off protects less, and Cairn says plainly that it waits.
+ * Turning one off before protection is on also happens at once — nothing is
+ * protected yet, so nothing is weakened. Once something is in force it waits,
+ * and Cairn says so plainly.
  */
 import { Card } from '../../components/Card';
 import type { CategoryPreset } from '../../ipc';

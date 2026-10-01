@@ -31,6 +31,12 @@ const CLASSIFIED: [(&str, Effect); 15] = [
     ("cancel_pending_change", Effect::Increases),
     // Reductions. Each returns a change that waits; none acts now (FR-047).
     ("request_protection_off", Effect::AsksAndWaits),
+    // These two wait whenever anything is in force. With nothing in force —
+    // protection meant to be off and Cairn's section verified absent from the
+    // machine — there is no protection for them to reduce, so they edit the
+    // list at once and touch nothing on the machine (owner's decision,
+    // 2026-10-01; `tests/us1_setup_changes.rs` proves both halves). That one
+    // exception is held to a single guarded path by the test below.
     ("remove_custom_entry", Effect::AsksAndWaits),
     ("set_category_enabled", Effect::AsksAndWaits),
     // Refuses while protection is on, so it cannot be an off-switch by another
@@ -155,4 +161,37 @@ fn nothing_in_the_interface_offers_an_in_moment_way_through() {
             "the interface must never carry {forbidden}"
         );
     }
+}
+
+#[test]
+fn a_list_edit_skips_the_wait_only_when_nothing_is_in_force() {
+    // The at-once path for list edits exists in one place, behind one check,
+    // and turning protection off is never routed through it. A second caller,
+    // or a caller without the check, is a way round the wait.
+    let state = include_str!("../src/ipc/state.rs");
+
+    assert_eq!(
+        state.matches("reduce::apply_at_once(").count(),
+        1,
+        "one at-once path, no more"
+    );
+    assert_eq!(
+        state.matches("reduce::nothing_in_force(").count(),
+        1,
+        "and one check guarding it"
+    );
+
+    let guard = state.find("reduce::nothing_in_force(").unwrap();
+    let at_once = state.find("reduce::apply_at_once(").unwrap();
+    assert!(guard < at_once, "the check comes before the edit");
+
+    let off = state
+        .split("pub fn request_protection_off")
+        .nth(1)
+        .and_then(|rest| rest.split("\n    }").next())
+        .expect("request_protection_off exists");
+    assert!(
+        off.contains("self.request_reduction(") && !off.contains("self.reduce("),
+        "turning protection off always waits: {off}"
+    );
 }

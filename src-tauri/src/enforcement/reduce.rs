@@ -16,6 +16,11 @@
 //! 3. **Cancelling is always available** (FR-047c), and costs nothing.
 //!
 //! Increases never come through here (FR-048).
+//!
+//! One exception, and it is not a way round the wait: with nothing in force —
+//! protection meant to be off, and Cairn's section not on the machine — there
+//! is no wall to weaken, so a list edit applies at once ([`apply_at_once`]).
+//! Turning protection off is never part of it.
 
 use uuid::Uuid;
 
@@ -103,7 +108,63 @@ pub fn apply_reduction(
         )));
     }
 
-    match &pending.kind {
+    take_effect(config, &pending.kind);
+    config.pending_change = None;
+    Ok(pending.kind)
+}
+
+/// Whether there is a wall up for a reduction to weaken.
+///
+/// Nothing is in force only when protection is meant to be off *and* the
+/// machine agrees: Cairn's section is not there. `section_on_machine` is what
+/// a read of the machine found, or `None` if it could not be read. A teardown
+/// that left residue, or a file that cannot be read, is treated as a wall
+/// that is up — the gate errs towards waiting, never towards skipping it.
+pub fn nothing_in_force(
+    intent: ProtectionIntent,
+    section_on_machine: Option<bool>,
+) -> bool {
+    intent == ProtectionIntent::Off && section_on_machine == Some(false)
+}
+
+/// Take something off the list at once, because nothing is in force.
+///
+/// Before protection is turned on there is no wall, so editing the list
+/// weakens nothing and there is nothing to wait for (owner's decision,
+/// 2026-10-01). The caller establishes that from the machine with
+/// [`nothing_in_force`]; this refuses outright while protection is meant to be
+/// on, and never turns protection off — that waits, always.
+///
+/// If the same change was already waiting, it is settled here rather than left
+/// to land a day later on a list that may have been changed again since.
+pub fn apply_at_once(config: &mut Config, kind: PendingKind) -> Result<(), Trouble> {
+    if config.intent == ProtectionIntent::On {
+        return Err(Trouble::new(
+            "Protection is on, so taking something out waits a day. Nothing has \
+             changed.",
+        ));
+    }
+    if kind == PendingKind::TurnOffProtection {
+        return Err(Trouble::new(
+            "Turning protection off waits a day. Nothing has changed.",
+        ));
+    }
+
+    take_effect(config, &kind);
+    if config
+        .pending_change
+        .as_ref()
+        .is_some_and(|pending| pending.kind == kind)
+    {
+        config.pending_change = None;
+    }
+    Ok(())
+}
+
+/// What a reduction does to the configuration. Nothing here touches the
+/// machine; putting the result into force is the caller's job.
+fn take_effect(config: &mut Config, kind: &PendingKind) {
+    match kind {
         PendingKind::TurnOffProtection => {
             config.intent = ProtectionIntent::Off;
             config.trail.entries.clear();
@@ -117,9 +178,6 @@ pub fn apply_reduction(
             config.trail.enabled_categories.remove(category);
         }
     }
-
-    config.pending_change = None;
-    Ok(pending.kind)
 }
 
 /// Remove what the person typed, and nothing another source still needs
