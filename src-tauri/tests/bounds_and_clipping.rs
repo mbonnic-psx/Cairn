@@ -3,6 +3,7 @@
 //! `check_bounds` takes a span of up to 26 hours, and `clipped` keeps only
 //! the part of a gap that has length inside the day. Both survived a `>` to
 //! `>=` mutant until these held the edge itself.
+#![cfg(feature = "history")]
 #![allow(clippy::unwrap_used, clippy::expect_used)]
 
 use cairn::domain::dates::LocalDate;
