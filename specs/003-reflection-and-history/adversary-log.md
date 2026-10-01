@@ -49,11 +49,11 @@ Findings (triaged by the host):
 
 | # | Severity | Triage | State | Finding |
 |---|---|---|---|---|
-| A1 | LOW | confirmed | open | No guard holds the bundled lines to R6: `check-no-streaks.mjs` does not scan `src-tauri/resources`, so a streak or "stay strong" line ships green. The guard is the host's (`scripts/`), not the slice's |
+| A1 | LOW | confirmed | open — owner approved extending the guard on `main` (2026-10-01) | No guard holds the bundled lines to R6: `check-no-streaks.mjs` does not scan `src-tauri/resources`, so a streak or "stay strong" line ships green. The guard is the host's (`scripts/`), not the slice's |
 | A2 | LOW | confirmed | open | A bundled line that shows nothing (U+200B, U+2800, U+3164) passes `trim().is_empty()` and renders as an empty quote; `domain::visible::shows_nothing` (G4) is not used |
 | A3 | LOW | confirmed | open | Double-clicking "Show quotes" while the save is in flight asks twice and swaps the line while the check-in stays open (Q1) |
 | A4 | LOW | confirmed | open | A line asked for on the old day lands after Tonight opened a new day, replacing the new day's line (Q1, G5) |
 | A5 | LOW | confirmed | open | The switch's failure note shows any rejection verbatim (`Error: …`); it is hidden behind a save refusal, and not cleared on a new day |
-| A6 | LOW | confirmed | open | A FIFO in place of the quotes file blocks `get_quote` (a sync command), which would freeze the window. Needs write access to the install's resources, i.e. admin |
+| A6 | LOW | confirmed | deferred — the owner (matthew-volaris), 2026-10-01: agreed to leave it after the explanation that it needs administrator access, which can already switch Cairn off (README) | A FIFO in place of the quotes file blocks `get_quote` (a sync command), which would freeze the window. Needs write access to the install's resources, i.e. admin |
 
 Held: missing, empty and pre-slice config read as shown; a malformed setting makes the config unreadable and shows neither line nor switch (fail closed); a save never loses trail, pending change or trusted clock, and a half-way save leaves the old file; hostile quotes files (empty, non-strings, invalid UTF-8, a directory, missing, 100k lines, a 50 MB line) give no line or a line, never a panic; the roll is never the date; the quote is only reachable from `CheckIn.tsx`; the shipped 24 lines pass the banned-words check and read clean against R6.
