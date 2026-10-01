@@ -20,7 +20,7 @@
 //! DayView { reaches: Vec<ReachView>, gaps: Vec<Gap>, coverage_note: Option<String>,
 //!           entry: Option<String>, estimate: Option<u32>, sealed: Option<String> }
 //! AppState::get_day(&self, day: LocalDate, day_start: i64, day_end: i64) -> DayView
-//! AppState::save_journal_entry(&self, day: LocalDate, text: &str) -> Result<DayView, String>
+//! AppState::save_journal_entry(&self, day: LocalDate, day_start: i64, day_end: i64, text: &str) -> Result<DayView, String>
 //! ```
 #![cfg(feature = "history")]
 #![allow(clippy::unwrap_used, clippy::expect_used)]
@@ -245,7 +245,7 @@ fn a_saved_entry_comes_back_in_the_answer_and_after_a_restart() {
     let keychain = Keychain::available();
 
     let saved = app(&setup, &keychain)
-        .save_journal_entry(today(), "A long day.")
+        .save_journal_entry(today(), TODAY_START, TODAY_END, "A long day.")
         .unwrap();
     assert_eq!(saved.entry.as_deref(), Some("A long day."));
 
@@ -261,9 +261,16 @@ fn revising_an_entry_replaces_it_and_leaves_no_trace_of_the_old_text() {
     let state = app(&setup, &Keychain::available());
 
     state
-        .save_journal_entry(today(), "The first words, kept nowhere.")
+        .save_journal_entry(
+            today(),
+            TODAY_START,
+            TODAY_END,
+            "The first words, kept nowhere.",
+        )
         .unwrap();
-    state.save_journal_entry(today(), "Revised.").unwrap();
+    state
+        .save_journal_entry(today(), TODAY_START, TODAY_END, "Revised.")
+        .unwrap();
 
     assert_eq!(get_today(&state).entry.as_deref(), Some("Revised."));
 
@@ -285,10 +292,12 @@ fn revising_an_entry_replaces_it_and_leaves_no_trace_of_the_old_text() {
 fn saving_only_whitespace_is_refused_plainly_and_the_saved_entry_stays() {
     let setup = setup();
     let state = app(&setup, &Keychain::available());
-    state.save_journal_entry(today(), "A long day.").unwrap();
+    state
+        .save_journal_entry(today(), TODAY_START, TODAY_END, "A long day.")
+        .unwrap();
 
     let refused = state
-        .save_journal_entry(today(), "   ")
+        .save_journal_entry(today(), TODAY_START, TODAY_END, "   ")
         .expect_err("whitespace is not an entry");
     assert_in_voice(&refused);
 
@@ -308,7 +317,12 @@ fn a_save_arriving_after_the_key_went_is_refused_and_nothing_is_stored() {
 
     keychain.set_available(false);
     let refused = state
-        .save_journal_entry(today(), "Written while the keychain locked.")
+        .save_journal_entry(
+            today(),
+            TODAY_START,
+            TODAY_END,
+            "Written while the keychain locked.",
+        )
         .expect_err("a sealed history takes nothing");
     assert_in_voice(&refused);
 
@@ -329,7 +343,12 @@ fn a_day_with_no_reaches_offers_the_space_and_saves_the_same_way() {
     assert_eq!(day.entry, None);
 
     let saved = state
-        .save_journal_entry(today(), "Nothing reached for. Still a day.")
+        .save_journal_entry(
+            today(),
+            TODAY_START,
+            TODAY_END,
+            "Nothing reached for. Still a day.",
+        )
         .unwrap();
     assert_eq!(
         saved.entry.as_deref(),
@@ -351,7 +370,12 @@ fn an_entry_written_for_yesterday_is_not_todays() {
     let state = app(&setup, &Keychain::available());
 
     state
-        .save_journal_entry(yesterday(), "Yesterday's words.")
+        .save_journal_entry(
+            yesterday(),
+            TODAY_START - 86_400,
+            TODAY_START,
+            "Yesterday's words.",
+        )
         .unwrap();
 
     assert_eq!(get_today(&state).entry, None);
@@ -365,13 +389,21 @@ fn every_refusal_and_every_sealed_sentence_is_in_voice() {
     let keychain = Keychain::available();
     let state = app(&setup, &keychain);
 
-    assert_in_voice(&state.save_journal_entry(today(), "").unwrap_err());
-    assert_in_voice(&state.save_journal_entry(today(), " \n\t ").unwrap_err());
+    assert_in_voice(
+        &state
+            .save_journal_entry(today(), TODAY_START, TODAY_END, "")
+            .unwrap_err(),
+    );
+    assert_in_voice(
+        &state
+            .save_journal_entry(today(), TODAY_START, TODAY_END, " \n\t ")
+            .unwrap_err(),
+    );
 
     keychain.set_available(false);
     assert_in_voice(
         &state
-            .save_journal_entry(today(), "While sealed.")
+            .save_journal_entry(today(), TODAY_START, TODAY_END, "While sealed.")
             .unwrap_err(),
     );
     let sealed = get_today(&state).sealed.expect("a sealed history says so");

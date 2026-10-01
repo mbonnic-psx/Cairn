@@ -100,7 +100,12 @@ of any kind, so `announce_check_in_if_due`, `get_check_in_settings`, `set_evenin
 
 ## Writes
 
-### `save_journal_entry(day, text) -> DayView`
+### `save_journal_entry(day, day_start, day_end, text) -> DayView`
+
+**Takes the day's bounds, like `get_day`** (amended in slice `write-tonight`, 2026-09-30). The `DayView` it
+returns is the whole day, and its reaches can only be read between bounds the interface computes (research R3).
+Without them, the answer would carry an empty reach list that reads as *nothing reached for today*, which would
+be untrue. `delete_journal_entry` and `save_reach_estimate` take the same two bounds when their slices add them.
 
 **Refuses when the key is unavailable**, returning the plain sentence rather than accepting
 text it cannot keep (research R5). The interface must not offer the journaling space in that

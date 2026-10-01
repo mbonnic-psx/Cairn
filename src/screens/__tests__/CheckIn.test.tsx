@@ -121,7 +121,7 @@ describe('the check-in', () => {
     await user.type(await screen.findByRole('textbox'), 'A long day.');
     await user.click(screen.getByRole('button', { name: /save|keep/i }));
 
-    expect(mockedSave).toHaveBeenCalledWith(TODAY, 'A long day.');
+    expect(mockedSave).toHaveBeenCalledWith(TODAY, DAY_START, DAY_END, 'A long day.');
     await waitFor(() => {
       const shown =
         screen.queryByDisplayValue('A long day.') ?? screen.queryByText('A long day.');

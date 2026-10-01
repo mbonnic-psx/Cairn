@@ -124,7 +124,12 @@ fn with_no_key_a_save_is_refused_and_no_database_is_created() {
 
     let _ = state.get_day(today(), TODAY_START, TODAY_END);
     let refused = state
-        .save_journal_entry(today(), "Words with nowhere safe to go.")
+        .save_journal_entry(
+            today(),
+            TODAY_START,
+            TODAY_END,
+            "Words with nowhere safe to go.",
+        )
         .expect_err("a sealed history takes nothing");
     assert!(!refused.trim().is_empty(), "the refusal is a sentence");
 
@@ -145,7 +150,12 @@ fn with_no_key_a_history_already_there_is_left_byte_for_byte() {
 
     assert_sealed_and_empty(&state.get_day(today(), TODAY_START, TODAY_END));
     let refused = state
-        .save_journal_entry(today(), "Words with nowhere safe to go.")
+        .save_journal_entry(
+            today(),
+            TODAY_START,
+            TODAY_END,
+            "Words with nowhere safe to go.",
+        )
         .expect_err("a sealed history takes nothing");
     assert!(!refused.trim().is_empty(), "the refusal is a sentence");
 
