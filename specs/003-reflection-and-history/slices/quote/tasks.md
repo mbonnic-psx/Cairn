@@ -46,11 +46,11 @@ Rust increments and the screen increments meet in `contracts/ui-ipc.md`'s names,
 
 ## Increment 5 — the quiet switch on the check-in
 
-- [ ] Q9 [Q2; scenario 10] RED: `CheckIn.test.tsx` — *Hide quotes* removes the line, leaves nothing in its place
+- [x] Q9 [Q2; scenario 10] RED: `CheckIn.test.tsx` — *Hide quotes* removes the line, leaves nothing in its place
   and becomes *Show quotes*; *Show quotes* brings a line back; opened hidden asks for no quote and offers *Show
   quotes*; a switch that cannot be kept leaves the line and says so in the status region; the switch is on the
   sealed check-in; its label names what it does and no protection change.
-- [ ] Q10 [Q2] GREEN: the switch in `CheckIn.tsx`, small, sans, at the foot of the check-in.
+- [x] Q10 [Q2] GREEN: the switch in `CheckIn.tsx`, small, sans, at the foot of the check-in.
 
 ## Phase 3 — Hold it
 
@@ -76,3 +76,7 @@ Rust increments and the screen increments meet in `contracts/ui-ipc.md`'s names,
   tests still green with the module fake extended. GREEN 18/18. The line is the check-in's only `figure`, under
   the heading, serif and italic, with no marks or attribution (T007: the lines are Cairn's own). A second run of
   the effect under React's development StrictMode is ignored, so the line does not swap under the person.
+- Q9–Q10: RED 6 of 7 new screen tests failing (no switch to find); *offers no switch when Cairn cannot tell* passes
+  before the switch exists, by design, and holds the GREEN to it. GREEN 25/25. The switch is the quiet `Button`
+  tone, sans, at the foot of the check-in and of the sealed check-in. A refusal goes to the `role="status"` region,
+  which the sealed check-in now has as well. Shown again in the same opening, the line is the one it had.

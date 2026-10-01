@@ -12,7 +12,10 @@
  * So is the quote: one line from the set Cairn ships, asked for once when the
  * check-in opens and kept while it stays open (slice `quote`, Q1). None is a
  * complete check-in, with nothing in its place (FR-008). It is not about the
- * day, so it shows on a sealed check-in too.
+ * day, so it shows on a sealed check-in too. A quiet switch at the foot of the
+ * check-in hides quotes, remembered across restarts (Q2); hidden, nothing
+ * stands where the line was. When Cairn cannot tell whether they were hidden,
+ * it shows neither the line nor the switch rather than guess.
  *
  * Nothing here leads to a change in protection (Principle I).
  */
@@ -25,6 +28,7 @@ import {
   getQuote,
   getQuotesShown,
   saveJournalEntry,
+  setQuotesShown,
   type DayView,
 } from '../ipc/journal';
 
@@ -211,6 +215,8 @@ export function CheckIn({ session }: { session?: CheckInSession }) {
   const [loadNote, setLoadNote] = useState<string>();
   const [, tick] = useState(0);
   const [quote, setQuote] = useState<string | null>(null);
+  /** Unknown until the setting is read; then the person's choice. */
+  const [quotesShown, setShown] = useState<boolean>();
 
   useEffect(() => {
     let current = true;
@@ -249,7 +255,10 @@ export function CheckIn({ session }: { session?: CheckInSession }) {
     // development double-run) from swapping the line under the person.
     let stale = false;
     getQuotesShown()
-      .then((shown) => (shown ? getQuote() : null))
+      .then((shown) => {
+        if (!stale) setShown(shown);
+        return shown ? getQuote() : null;
+      })
       .then((line) => {
         if (!stale) setQuote(line);
       })
@@ -260,7 +269,34 @@ export function CheckIn({ session }: { session?: CheckInSession }) {
     };
   }, [opened.day]);
 
-  const line = quote ? (
+  async function switchQuotes(shown: boolean) {
+    setNote(undefined);
+    let now: boolean;
+    try {
+      now = await setQuotesShown(shown);
+    } catch (problem) {
+      // The line stays as it was, and the person hears why.
+      setNote(String(problem));
+      return;
+    }
+    setShown(now);
+    // Shown again in the same opening, it is the same line (Q1). Opened hidden,
+    // this is the one time a line is asked for; none to be had is none shown.
+    if (now && quote === null) {
+      setQuote(await getQuote().catch(() => null));
+    }
+  }
+
+  const quoteSwitch =
+    quotesShown === undefined ? null : (
+      <div className="mt-10">
+        <Button tone="quiet" className="px-0" onClick={() => switchQuotes(!quotesShown)}>
+          {quotesShown ? 'Hide quotes' : 'Show quotes'}
+        </Button>
+      </div>
+    );
+
+  const line = quotesShown && quote ? (
     <figure className="mt-6">
       <p className="reflective max-w-prose text-lg italic text-ink-500">{quote}</p>
     </figure>
@@ -282,6 +318,10 @@ export function CheckIn({ session }: { session?: CheckInSession }) {
         </h2>
         {line}
         <p className="reflective mt-4 max-w-prose text-lg text-ink-700">{view.sealed}</p>
+        {quoteSwitch}
+        <p role="status" aria-live="polite" className="reflective mt-4 max-w-prose text-ink-700">
+          {note ?? ''}
+        </p>
       </Card>
     );
   }
@@ -343,6 +383,8 @@ export function CheckIn({ session }: { session?: CheckInSession }) {
       >
         {note ?? (kept ? `Kept for ${thisDay}.` : '')}
       </p>
+
+      {quoteSwitch}
     </Card>
   );
 }
