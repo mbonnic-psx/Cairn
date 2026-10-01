@@ -1,0 +1,104 @@
+//! The sentences the person reads when the history cannot be opened.
+//!
+//! Adversary J1/J2/J5 (write-tonight): the sentence is Cairn's own words. It
+//! never carries the operating system's or SQLite's text, a path, or an error
+//! code, and a store that is merely busy is not reported as a wrong key.
+#![cfg(feature = "history")]
+#![allow(clippy::unwrap_used, clippy::expect_used)]
+
+use std::os::unix::fs::PermissionsExt;
+use std::path::Path;
+
+use cairn::services::Key;
+use cairn::store::history::{History, HISTORY_FILE};
+use cairn::store::key::HistoryKey;
+
+const A_KEY: [u8; 32] = [7u8; 32];
+
+fn key() -> HistoryKey {
+    HistoryKey::Available(Key::from_bytes(A_KEY))
+}
+
+fn because(history: History) -> String {
+    match history {
+        History::Sealed { because } => because,
+        History::Open(_) => panic!("the history should not have opened"),
+    }
+}
+
+fn assert_plain(sentence: &str, hide: &[&Path]) {
+    assert!(!sentence.trim().is_empty());
+    let lower = sentence.to_lowercase();
+    for banned in [
+        "failed",
+        "fail",
+        "denied",
+        "violation",
+        "relapse",
+        "forbidden",
+        "you lost",
+        "os error",
+        "unable to open",
+        "sqlite",
+        "errno",
+        HISTORY_FILE,
+    ] {
+        assert!(!lower.contains(banned), "{sentence:?} carries {banned:?}");
+    }
+    for path in hide {
+        assert!(
+            !sentence.contains(&*path.to_string_lossy()),
+            "{sentence:?} carries a path"
+        );
+    }
+    assert!(
+        !sentence.contains('/') && !sentence.contains('\\'),
+        "{sentence:?} carries a path separator"
+    );
+}
+
+fn restore(path: &Path) {
+    let _ = std::fs::set_permissions(path, std::fs::Permissions::from_mode(0o700));
+}
+
+#[test]
+fn a_directory_that_cannot_be_written_gives_a_plain_sentence() {
+    let root = tempfile::tempdir().unwrap();
+    let data = root.path().join("cairn-data");
+    std::fs::create_dir_all(&data).unwrap();
+    std::fs::set_permissions(&data, std::fs::Permissions::from_mode(0o500)).unwrap();
+
+    let sentence = because(History::open(&data, &key()));
+    restore(&data);
+
+    assert_plain(&sentence, &[root.path(), &data]);
+}
+
+#[test]
+fn a_history_file_that_cannot_be_read_gives_a_plain_sentence() {
+    let root = tempfile::tempdir().unwrap();
+    let data = root.path().join("cairn-data");
+    let History::Open(open) = History::open(&data, &key()) else {
+        panic!("a fresh directory should open");
+    };
+    drop(open);
+    let file = data.join(HISTORY_FILE);
+    std::fs::set_permissions(&file, std::fs::Permissions::from_mode(0o000)).unwrap();
+
+    let sentence = because(History::open(&data, &key()));
+    restore(&file);
+
+    assert_plain(&sentence, &[root.path(), &data]);
+}
+
+#[test]
+fn a_data_directory_that_cannot_be_made_gives_a_plain_sentence() {
+    let root = tempfile::tempdir().unwrap();
+    let blocker = root.path().join("not-a-directory");
+    std::fs::write(&blocker, b"x").unwrap();
+    let data = blocker.join("cairn-data");
+
+    let sentence = because(History::open(&data, &key()));
+
+    assert_plain(&sentence, &[root.path(), &data]);
+}

@@ -159,14 +159,10 @@ pub struct OpenHistory {
 impl OpenHistory {
     fn connect(path: &Path, key: &Key) -> Result<Self, Trouble> {
         if let Some(directory) = path.parent() {
-            std::fs::create_dir_all(directory).map_err(|error| {
-                Trouble::new(format!("Cairn could not open your history ({error})."))
-            })?;
+            std::fs::create_dir_all(directory).map_err(|_| cannot_open())?;
         }
 
-        let connection = Connection::open(path).map_err(|error| {
-            Trouble::new(format!("Cairn could not open your history ({error})."))
-        })?;
+        let connection = Connection::open(path).map_err(|_| cannot_open())?;
 
         // The key goes in before anything else touches the file.
         let hex: String = key
@@ -191,9 +187,7 @@ impl OpenHistory {
         // freed content instead of leaving it where it was.
         connection
             .pragma_update(None, "secure_delete", "ON")
-            .map_err(|error| {
-                Trouble::new(format!("Cairn could not prepare your history ({error})."))
-            })?;
+            .map_err(|_| cannot_prepare())?;
 
         connection
             .execute_batch(
@@ -216,9 +210,7 @@ impl OpenHistory {
                      count INTEGER NOT NULL
                  );",
             )
-            .map_err(|error| {
-                Trouble::new(format!("Cairn could not prepare your history ({error})."))
-            })?;
+            .map_err(|_| cannot_prepare())?;
 
         Ok(OpenHistory {
             connection,
@@ -612,6 +604,23 @@ fn sealed() -> Trouble {
     Trouble::new(
         "Cairn could not open your history with the key it has, so your entries stay \
          sealed and exactly as they are. Protection is unaffected.",
+    )
+}
+
+/// The history file or its folder could not be reached. The system's own
+/// words, and the path, stay out of it: the person is told what is true and
+/// what is still working (J1, J2).
+fn cannot_open() -> Trouble {
+    Trouble::new(
+        "Cairn could not open your history just now, so nothing is written or \
+         read there. Protection is unaffected.",
+    )
+}
+
+fn cannot_prepare() -> Trouble {
+    Trouble::new(
+        "Cairn could not get your history ready just now, so nothing is written or \
+         read there. Protection is unaffected.",
     )
 }
 
