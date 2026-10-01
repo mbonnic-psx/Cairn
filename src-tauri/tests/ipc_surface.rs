@@ -13,7 +13,7 @@
 ///
 /// Adding a command without adding it here fails this test — which is the
 /// point.
-const CLASSIFIED: [(&str, Effect); 17] = [
+const CLASSIFIED: [(&str, Effect); 18] = [
     // Reads. They change nothing.
     ("get_protection_state", Effect::Reads),
     ("get_trail", Effect::Reads),
@@ -30,6 +30,9 @@ const CLASSIFIED: [(&str, Effect); 17] = [
     // (Principle I).
     ("get_day", Effect::Reads),
     ("save_journal_entry", Effect::Reads),
+    // The quote on the check-in. A line of bundled text, read; it says nothing
+    // about the day and leads nowhere (slice `quote`).
+    ("get_quote", Effect::Reads),
     // Increases. Immediate, and never gated (FR-048).
     ("add_custom_entry", Effect::Increases),
     ("turn_protection_on", Effect::Increases),

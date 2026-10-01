@@ -87,11 +87,13 @@ fn setup(intent: ProtectionIntent) -> Setup {
         credentials: Box::new(keychain.clone()),
         categories: CategoryStore::at(&data),
         shipped_categories: shipped,
+        shipped_quotes: PathBuf::from("no-quotes-here.json"),
         hosts: Box::new(SystemHosts::at(directory.path().join("hosts"))),
         helper: Box::new(NoHelper),
         elevation: Box::new(NoElevation),
         reserved: ReservedNames::default(),
         now: || 1_700_000_000,
+        roll: || 0,
     };
 
     Setup {

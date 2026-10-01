@@ -185,6 +185,13 @@ pub fn save_journal_entry(
     state.save_journal_entry(day, day_start, day_end, &text)
 }
 
+/// A line for the check-in, or nothing. **The check-in is the only caller**:
+/// the wrapper lives in `src/ipc/journal.ts`, which an ESLint rule restricts.
+#[tauri::command]
+pub fn get_quote(state: State<'_, AppState>) -> Option<String> {
+    state.get_quote()
+}
+
 #[tauri::command]
 pub fn get_disclosures(state: State<'_, AppState>) -> Disclosures {
     state.get_disclosures()

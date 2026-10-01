@@ -16,11 +16,11 @@ Rust increments and the screen increments meet in `contracts/ui-ipc.md`'s names,
 
 ## Increment 2 — `get_quote` through the driving port
 
-- [ ] Q3 [T031, T032, T033; scenarios 1–3, 6 (quote half)] RED: `src-tauri/tests/us1_quote.rs` against
+- [x] Q3 [T031, T032, T033; scenarios 1–3, 6 (quote half)] RED: `src-tauri/tests/us1_quote.rs` against
   `AppState` over the real bundled `resources/quotes/quotes.json`: roll *k* gives line *k*; two rolls differ on
   one date and one roll is the same on two dates; a missing, an empty, and a malformed set each give nothing; the
   key unavailable changes nothing. `ipc_surface.rs` `CLASSIFIED` 17 → 18 with `get_quote`, `Effect::Reads`.
-- [ ] Q4 [T031, T032] GREEN: `reflection/quote.rs` (read the set, drop blank lines, choose), `reflection` built
+- [x] Q4 [T031, T032] GREEN: `reflection/quote.rs` (read the set, drop blank lines, choose), `reflection` built
   without `history`; `AppState.shipped_quotes` and `AppState.roll`; `AppState::get_quote`; the command; `main.rs`
   supplies the path beside the app and `getrandom::u64()`, and registers the handler. Every `AppState` literal in
   the test tree gains the two fields.
@@ -62,3 +62,8 @@ Rust increments and the screen increments meet in `contracts/ui-ipc.md`'s names,
 ## Done notes
 - Q1–Q2: RED first as a build error (no `domain::quotes`), then against a stub returning nothing: 3 of 4 failed
   on their assertions (`no_lines_is_no_quote` passes on the stub by design). GREEN 4/4; domain purity clean.
+- Q3–Q4: RED first as a build error (no `shipped_quotes`, `roll`, `get_quote`), then against a stub returning
+  nothing: 7 of 10 scenario tests failed on their assertions (the three *no quote* cases pass on the stub by
+  design) and `every_classified_command_is_exposed` failed for `get_quote`. GREEN 10/10 and 6/6. The quote reads
+  through `reflection::quote`, which is now built without `history`; the other two `reflection` modules still
+  are not. `cargo build --features app` clean.

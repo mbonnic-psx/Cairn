@@ -130,11 +130,13 @@ fn app(setup: &Setup, keychain: &Keychain) -> AppState {
         credentials: Box::new(keychain.clone()),
         categories: CategoryStore::at(&setup.data),
         shipped_categories: shipped,
+        shipped_quotes: PathBuf::from("no-quotes-here.json"),
         hosts: Box::new(SystemHosts::at(setup.directory.path().join("hosts"))),
         helper: Box::new(NoHelper),
         elevation: Box::new(NoElevation),
         reserved: ReservedNames::default(),
         now: || TODAY_START + 20 * 3600,
+        roll: || 0,
     }
 }
 

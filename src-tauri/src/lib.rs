@@ -14,7 +14,6 @@ pub mod helper;
 pub mod ipc;
 pub mod platform;
 pub mod protocol;
-#[cfg(feature = "history")]
 pub mod reflection;
 pub mod services;
 pub mod store;

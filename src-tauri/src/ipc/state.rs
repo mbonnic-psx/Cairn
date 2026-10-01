@@ -148,12 +148,18 @@ pub struct AppState {
     pub credentials: Box<dyn crate::services::CredentialStore>,
     pub categories: CategoryStore,
     pub shipped_categories: PathBuf,
+    /// The set of lines Cairn ships for the check-in, beside the application.
+    /// Read, never written, and never copied into the person's data.
+    pub shipped_quotes: PathBuf,
     pub hosts: Box<dyn HostsService>,
     pub helper: Box<dyn HelperChannel>,
     pub elevation: Box<dyn ElevationService>,
     pub reserved: ReservedNames,
     /// Supplied rather than read, so the same journey can be replayed in a test.
     pub now: fn() -> i64,
+    /// A fresh random number on each call, supplied for the same reason: a
+    /// test chooses the line (slice `quote`, Q1).
+    pub roll: fn() -> u64,
 }
 
 impl AppState {
@@ -753,6 +759,15 @@ impl AppState {
             History::Open(history) => Ok(history),
             History::Sealed { because } => Err(explained.unwrap_or(because)),
         }
+    }
+
+    /// A line for the check-in, or nothing, which is a complete answer
+    /// (FR-008).
+    ///
+    /// A fresh roll on every call: the check-in asks once when it opens and
+    /// keeps the line while it stays open (Q1).
+    pub fn get_quote(&self) -> Option<String> {
+        crate::reflection::quote::quote(&self.shipped_quotes, (self.roll)())
     }
 
     /// What is true about coverage on this machine, in this release.

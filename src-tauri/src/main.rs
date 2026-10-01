@@ -27,6 +27,7 @@ fn main() {
         credentials: Box::new(cairn::platform::PlatformCredentials),
         categories: CategoryStore::at(&data),
         shipped_categories: shipped_categories(),
+        shipped_quotes: shipped_quotes(),
         hosts: Box::new(SystemHosts::default()),
         helper: helper_channel(),
         elevation: Box::new(PlatformElevation::default()),
@@ -34,6 +35,7 @@ fn main() {
             own_hostname: hostname(),
         },
         now: now_seconds,
+        roll,
     };
 
     // First run copies the shipped lists into the person's own data. A machine
@@ -71,6 +73,7 @@ fn main() {
             commands::delete_all_data,
             commands::get_day,
             commands::save_journal_entry,
+            commands::get_quote,
         ])
         .run(tauri::generate_context!())
         .expect("Cairn could not open its window");
@@ -81,6 +84,18 @@ fn now_seconds() -> i64 {
         .duration_since(UNIX_EPOCH)
         .map(|elapsed| elapsed.as_secs() as i64)
         .unwrap_or_default()
+}
+
+/// A fresh random number for each check-in's line (slice `quote`, Q1). A
+/// quote is not a secret, so a machine whose random source will not answer
+/// falls back to the clock's nanoseconds, which still differ per opening.
+fn roll() -> u64 {
+    getrandom::u64().unwrap_or_else(|_| {
+        SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .map(|elapsed| u64::from(elapsed.subsec_nanos()))
+            .unwrap_or_default()
+    })
 }
 
 #[cfg(unix)]
@@ -109,6 +124,15 @@ fn shipped_categories() -> PathBuf {
         .and_then(|exe| exe.parent().map(std::path::Path::to_path_buf))
         .unwrap_or_else(|| PathBuf::from("."))
         .join("resources/categories")
+}
+
+/// The lines Cairn ships for the check-in, beside the application.
+fn shipped_quotes() -> PathBuf {
+    std::env::current_exe()
+        .ok()
+        .and_then(|exe| exe.parent().map(std::path::Path::to_path_buf))
+        .unwrap_or_else(|| PathBuf::from("."))
+        .join("resources/quotes/quotes.json")
 }
 
 /// This machine's own name, so protecting it can be refused (FR-007).
