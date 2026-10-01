@@ -27,12 +27,12 @@ Rust increments and the screen increments meet in `contracts/ui-ipc.md`'s names,
 
 ## Increment 3 — the switch, remembered
 
-- [ ] Q5 [Q2; scenarios 4–7] RED: in `us1_quote.rs` — shown by default; hidden means `get_quote` is nothing;
+- [x] Q5 [Q2; scenarios 4–7] RED: in `us1_quote.rs` — shown by default; hidden means `get_quote` is nothing;
   remembered by a fresh `AppState`; shown again brings a line back; works with the key unavailable; leaves trail,
   intent, pending change and trusted clock unchanged; refused with the file byte-identical when `config.json` is
   unreadable. In `stores.rs` — a `config.json` written before this slice loads with quotes shown and all it held.
   `CLASSIFIED` 18 → 20 with `get_quotes_shown` and `set_quotes_shown`, `Effect::Reads`.
-- [ ] Q6 [Q2] GREEN: `Config.quotes_hidden` (`#[serde(default)]`); `AppState::get_quotes_shown`,
+- [x] Q6 [Q2] GREEN: `Config.quotes_hidden` (`#[serde(default)]`); `AppState::get_quotes_shown`,
   `AppState::set_quotes_shown`; `get_quote` returns nothing when hidden; the two commands; `main.rs` registers them.
 
 ## Increment 4 — the line on the check-in
@@ -67,3 +67,8 @@ Rust increments and the screen increments meet in `contracts/ui-ipc.md`'s names,
   design) and `every_classified_command_is_exposed` failed for `get_quote`. GREEN 10/10 and 6/6. The quote reads
   through `reflection::quote`, which is now built without `history`; the other two `reflection` modules still
   are not. `cargo build --features app` clean.
+- Q5–Q6: RED first as a build error (no `quotes_hidden`, `get_quotes_shown`, `set_quotes_shown`), then against
+  stubs (a field with no `serde(default)`, a getter answering `true`, a setter that kept nothing): 5 of 16
+  scenario tests failed on their assertions, the pre-slice `config.json` test failed with the file refused, and
+  `every_classified_command_is_exposed` failed for the two commands. GREEN 16/16, 11/11, 6/6. `get_quote` gives
+  nothing when the configuration cannot be read: unsure whether quotes were hidden, it shows none.

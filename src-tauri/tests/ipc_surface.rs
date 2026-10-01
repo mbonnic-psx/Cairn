@@ -13,7 +13,7 @@
 ///
 /// Adding a command without adding it here fails this test — which is the
 /// point.
-const CLASSIFIED: [(&str, Effect); 18] = [
+const CLASSIFIED: [(&str, Effect); 20] = [
     // Reads. They change nothing.
     ("get_protection_state", Effect::Reads),
     ("get_trail", Effect::Reads),
@@ -33,6 +33,11 @@ const CLASSIFIED: [(&str, Effect); 18] = [
     // The quote on the check-in. A line of bundled text, read; it says nothing
     // about the day and leads nowhere (slice `quote`).
     ("get_quote", Effect::Reads),
+    // The quiet switch beside it. A setting about the check-in, kept in the
+    // configuration; it leaves the trail, the intent, any pending change and
+    // the trusted clock as they were (`us1_quote.rs`).
+    ("get_quotes_shown", Effect::Reads),
+    ("set_quotes_shown", Effect::Reads),
     // Increases. Immediate, and never gated (FR-048).
     ("add_custom_entry", Effect::Increases),
     ("turn_protection_on", Effect::Increases),

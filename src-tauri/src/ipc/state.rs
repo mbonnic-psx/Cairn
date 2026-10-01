@@ -766,8 +766,34 @@ impl AppState {
     ///
     /// A fresh roll on every call: the check-in asks once when it opens and
     /// keeps the line while it stays open (Q1).
+    ///
+    /// Nothing when the person has hidden quotes, and nothing when their
+    /// configuration cannot be read: unsure whether they hid them, Cairn shows
+    /// none rather than guess.
     pub fn get_quote(&self) -> Option<String> {
+        if !self.get_quotes_shown().unwrap_or(false) {
+            return None;
+        }
         crate::reflection::quote::quote(&self.shipped_quotes, (self.roll)())
+    }
+
+    /// Whether the person wants a quote on the check-in. Shown until they say
+    /// otherwise (Q2).
+    pub fn get_quotes_shown(&self) -> Result<bool, Trouble> {
+        Ok(!self.config.load()?.quotes_hidden)
+    }
+
+    /// The quiet switch on the check-in, either way, remembered. It touches
+    /// that one setting and nothing about protection. A configuration that
+    /// cannot be read is refused before anything is written, so it is never
+    /// overwritten.
+    pub fn set_quotes_shown(&self, shown: bool) -> Result<bool, Trouble> {
+        let mut config = self.config.load()?;
+        if config.quotes_hidden == shown {
+            config.quotes_hidden = !shown;
+            self.config.save(&config)?;
+        }
+        Ok(!config.quotes_hidden)
     }
 
     /// What is true about coverage on this machine, in this release.

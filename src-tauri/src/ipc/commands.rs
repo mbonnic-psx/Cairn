@@ -192,6 +192,20 @@ pub fn get_quote(state: State<'_, AppState>) -> Option<String> {
     state.get_quote()
 }
 
+/// Whether quotes are shown on the check-in. A setting, readable without the key.
+#[tauri::command]
+pub fn get_quotes_shown(state: State<'_, AppState>) -> Result<bool, String> {
+    state.get_quotes_shown().map_err(|trouble| trouble.message)
+}
+
+/// The quiet switch on the check-in. Changes nothing about protection.
+#[tauri::command]
+pub fn set_quotes_shown(state: State<'_, AppState>, shown: bool) -> Result<bool, String> {
+    state
+        .set_quotes_shown(shown)
+        .map_err(|trouble| trouble.message)
+}
+
 #[tauri::command]
 pub fn get_disclosures(state: State<'_, AppState>) -> Disclosures {
     state.get_disclosures()

@@ -13,6 +13,9 @@
 //! ```text
 //! AppState { .., shipped_quotes: PathBuf, roll: fn() -> u64 }
 //! AppState::get_quote(&self) -> Option<String>
+//! AppState::get_quotes_shown(&self) -> Result<bool, Trouble>
+//! AppState::set_quotes_shown(&self, shown: bool) -> Result<bool, Trouble>
+//! Config { .., quotes_hidden: bool }
 //! ```
 #![allow(clippy::unwrap_used, clippy::expect_used)]
 
@@ -251,4 +254,144 @@ fn every_bundled_line_can_come_up_as_written() {
         .map(|_| state.get_quote().unwrap())
         .collect();
     assert_eq!(shown, lines);
+}
+
+// Scenario 4 — shown until the person says otherwise.
+
+#[test]
+fn quotes_are_shown_until_the_person_hides_them() {
+    let machine = a_machine();
+    let state = cairn(&machine, bundled(), || 0, || AN_EVENING, true);
+
+    assert!(state.get_quotes_shown().unwrap());
+    assert!(state.get_quote().is_some());
+}
+
+// Scenario 5 — hidden is no quote, remembered, and undone the same way (Q2).
+
+#[test]
+fn hidden_quotes_are_no_quote_and_stay_hidden_after_a_restart() {
+    let machine = a_machine();
+    let state = cairn(&machine, bundled(), || 0, || AN_EVENING, true);
+
+    assert!(!state.set_quotes_shown(false).unwrap());
+    assert!(!state.get_quotes_shown().unwrap());
+    assert_eq!(state.get_quote(), None);
+
+    // Cairn closed and opened again, over the same data.
+    let restarted = cairn(&machine, bundled(), || 3, || THE_NEXT_EVENING, true);
+    assert!(!restarted.get_quotes_shown().unwrap());
+    assert_eq!(restarted.get_quote(), None);
+
+    assert!(restarted.set_quotes_shown(true).unwrap());
+    assert!(restarted.get_quotes_shown().unwrap());
+    assert_eq!(restarted.get_quote(), Some(bundled_lines()[3].clone()));
+}
+
+#[test]
+fn hiding_twice_or_showing_twice_is_harmless() {
+    let machine = a_machine();
+    let state = cairn(&machine, bundled(), || 0, || AN_EVENING, true);
+
+    assert!(state.set_quotes_shown(true).unwrap());
+    assert!(state.set_quotes_shown(true).unwrap());
+    assert!(!state.set_quotes_shown(false).unwrap());
+    assert!(!state.set_quotes_shown(false).unwrap());
+    assert!(!state.get_quotes_shown().unwrap());
+}
+
+// Scenario 6, the switch's half — a setting, readable without the key.
+
+#[test]
+fn the_switch_works_with_the_key_unavailable() {
+    let machine = a_machine();
+    let sealed = cairn(&machine, bundled(), || 0, || AN_EVENING, false);
+
+    assert!(sealed.get_quotes_shown().unwrap());
+    assert!(!sealed.set_quotes_shown(false).unwrap());
+    assert_eq!(sealed.get_quote(), None);
+    assert!(sealed.set_quotes_shown(true).unwrap());
+    assert!(sealed.get_quote().is_some());
+}
+
+// Scenario 7 — the switch changes no protection, and never overwrites what
+// Cairn cannot read.
+
+#[test]
+fn the_switch_leaves_protection_as_it_was() {
+    use cairn::domain::entries::{CategoryId, ProtectedEntry, SourceRef, Trail};
+    use cairn::domain::gate::{PendingChange, PendingKind, TrustedClock};
+    use cairn::domain::normalize::normalize;
+    use cairn::store::config::{Config, ProtectionIntent};
+
+    let machine = a_machine();
+    let mut trail = Trail::default();
+    for domain in normalize("example.com", &ReservedNames::default()).unwrap() {
+        trail.insert(ProtectedEntry::new(
+            domain,
+            SourceRef::Category(CategoryId::Social),
+        ));
+    }
+    trail.enabled_categories.insert(CategoryId::Social);
+    let clock = TrustedClock::started(AN_EVENING, 0);
+    let before = Config {
+        trail,
+        intent: ProtectionIntent::On,
+        pending_change: Some(PendingChange::request(
+            PendingKind::TurnOffProtection,
+            &clock,
+            AN_EVENING,
+        )),
+        trusted_clock: clock,
+        seeded: true,
+        ..Config::default()
+    };
+    let store = ConfigStore::at(&machine.data);
+    store.save(&before).unwrap();
+
+    let state = cairn(&machine, bundled(), || 0, || AN_EVENING, true);
+    state.set_quotes_shown(false).unwrap();
+    assert_eq!(
+        store.load().unwrap(),
+        Config {
+            quotes_hidden: true,
+            ..before.clone()
+        }
+    );
+
+    state.set_quotes_shown(true).unwrap();
+    assert_eq!(store.load().unwrap(), before);
+}
+
+#[test]
+fn a_configuration_cairn_cannot_read_is_never_overwritten() {
+    let machine = a_machine();
+    let store = ConfigStore::at(&machine.data);
+    let unreadable = b"{ this was written by something else".to_vec();
+    std::fs::write(store.path(), &unreadable).unwrap();
+
+    let state = cairn(&machine, bundled(), || 0, || AN_EVENING, true);
+
+    for shown in [false, true] {
+        let refusal = state.set_quotes_shown(shown).unwrap_err();
+        assert!(!refusal.message.is_empty());
+        for word in [
+            "failed",
+            "denied",
+            "violation",
+            "relapsed",
+            "forbidden",
+            "you lost",
+        ] {
+            assert!(
+                !refusal.message.to_lowercase().contains(word),
+                "{:?} says {word:?}",
+                refusal.message
+            );
+        }
+    }
+    assert!(state.get_quotes_shown().is_err());
+    // Unsure whether they hid quotes, Cairn shows none rather than guess.
+    assert_eq!(state.get_quote(), None);
+    assert_eq!(std::fs::read(store.path()).unwrap(), unreadable);
 }

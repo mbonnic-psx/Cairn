@@ -74,6 +74,12 @@ pub struct Config {
     /// own editable data (FR-002).
     #[serde(default)]
     pub seeded: bool,
+    /// True once the person has hidden quotes on the check-in (slice `quote`,
+    /// Q2). Stored this way round so a file from before the switch, which has
+    /// no such key, means quotes are shown. A setting, not a record of
+    /// anything, so it is readable with no key.
+    #[serde(default)]
+    pub quotes_hidden: bool,
 }
 
 /// Reads and writes [`Config`] in the person's own user-data directory.

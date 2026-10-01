@@ -74,6 +74,8 @@ fn main() {
             commands::get_day,
             commands::save_journal_entry,
             commands::get_quote,
+            commands::get_quotes_shown,
+            commands::set_quotes_shown,
         ])
         .run(tauri::generate_context!())
         .expect("Cairn could not open its window");
