@@ -101,6 +101,18 @@ export default function App() {
               Today
             </Button>
           )}
+          {/* The way back from every screen the header leads to: to choosing
+              what to protect before protection is on, and to the protection
+              screen once it is. Without it the check-in was a room with no
+              door, and so were the trail and today's reaches. */}
+          {step !== 'choosing' && step !== 'disclosure' && step !== 'protected' && (
+            <Button
+              tone="quiet"
+              onClick={() => setStep(state && state.status !== 'off' ? 'protected' : 'choosing')}
+            >
+              Protection
+            </Button>
+          )}
           {/* Reachable at any time (FR-010), and by navigation only: nothing
               here says there is something to write, or that anything was
               written (FR-033). */}
