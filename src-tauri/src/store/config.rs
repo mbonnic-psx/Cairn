@@ -95,25 +95,35 @@ impl ConfigStore {
     /// A missing file is not a problem: it is a first run.
     pub fn load(&self) -> Result<Config, Trouble> {
         match std::fs::read(&self.path) {
-            Ok(bytes) => serde_json::from_slice(&bytes).map_err(|error| {
-                Trouble::new(format!(
-                    "Cairn could not read its settings ({error}). Your protection is \
-                     unaffected."
-                ))
+            // Sentences Cairn wrote, never the system's or the parser's own
+            // words: those can carry a banned word or a path with the
+            // person's name in it, and they arrive too late for any check.
+            Ok(bytes) => serde_json::from_slice(&bytes).map_err(|_| {
+                Trouble::new(
+                    "Cairn could not make sense of its settings, so it has left them \
+                     exactly as they are. Your protection is unaffected.",
+                )
             }),
-            Err(error) if error.kind() == std::io::ErrorKind::NotFound => Ok(Config::default()),
-            Err(error) => Err(Trouble::new(format!(
-                "Cairn could not open its settings ({error}). Your protection is unaffected."
-            ))),
+            Err(error) if error.kind() == std::io::ErrorKind::NotFound => {
+                Ok(Config::default())
+            }
+            Err(_) => Err(Trouble::new(
+                "Cairn could not open its settings. Your protection is unaffected.",
+            )),
         }
     }
 
     pub fn save(&self, config: &Config) -> Result<(), Trouble> {
-        let bytes = serde_json::to_vec_pretty(config).map_err(|error| {
-            Trouble::new(format!("Cairn could not write its settings ({error})."))
-        })?;
-        super::write_atomically(&self.path, &bytes).map_err(|error| {
-            Trouble::new(format!("Cairn could not save its settings ({error})."))
-        })
+        let bytes = serde_json::to_vec_pretty(config).map_err(|_| not_saved())?;
+        super::write_atomically(&self.path, &bytes).map_err(|_| not_saved())
     }
+}
+
+/// The settings on disk are the ones that were there before: the write goes to a
+/// neighbour and is renamed over only once it is whole.
+fn not_saved() -> Trouble {
+    Trouble::new(
+        "Cairn could not save its settings, so that change has not been kept. Your \
+         protection is unaffected.",
+    )
 }
