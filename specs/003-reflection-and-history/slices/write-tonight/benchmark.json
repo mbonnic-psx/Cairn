@@ -411,5 +411,13 @@
         "mutation_score": "interface 96.96% (Stryker, scoped); core 22/24 viable"
       }
     }
-  ]
+  ],
+  "shape": {
+    "tasks": 16,
+    "files": 49,
+    "added": 5816,
+    "removed": 604,
+    "from": "992ea488f59a554ba3fe36ebd7d9676836fd4be9",
+    "to": "849ccde4dc97a74946cccd8fd6d9351de88ba85b"
+  }
 }
