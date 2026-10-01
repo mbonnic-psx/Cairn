@@ -28,6 +28,7 @@ Approved by the owner on 2026-09-30 ("Approve, start write-tonight").
 | 5b | `history-by-hour` | See the same range by hour of the day | US2 scenario 1 (by hour); FR-019, FR-023 | 5a |
 | 5c | `history-by-weekday` | See the same range by day of the week | US2 scenario 1 (by day of week); FR-019 | 5a |
 | 5d | `history-movement` | See how the number of reaches moved across the range | US2 scenario 2; FR-020 | 5a |
+| 5e | `first-counted` | Know from when Cairn has been counting, so a range or a day that reaches back before it says so rather than reading as quiet | FR-022, FR-022a, FR-024; H5 | 5a |
 | 6 | `one-day` | Open any single day, whole, with its gaps, and give an estimate for a silent day | US3; split again when reached | 1 |
 | 7 | `theirs` | Revise, delete and erase entries and history, with nothing left behind | US4; split again when reached | 1 |
 
@@ -44,7 +45,7 @@ write-tonight ──┬── quote
 
 - `write-tonight`: depends_on none
 - `quote`, `history-by-site`, `one-day`, `theirs`: depends_on write-tonight
-- `history-by-hour`, `history-by-weekday`, `history-movement`: depends_on history-by-site (they share its range and screen)
+- `history-by-hour`, `history-by-weekday`, `history-movement`, `first-counted`: depends_on history-by-site (they share its range and screen)
 
 Once `write-tonight` is done, `quote`, `history-by-site`, `one-day` and `theirs` are ready together.
 They share the `DayView` and journal contracts in `contracts/ui-ipc.md`, and each touches a different screen or

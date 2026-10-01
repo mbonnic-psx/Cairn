@@ -308,6 +308,12 @@ keeps reach numbers on the reaches screen alone. Decided by the owner:
 - **H4 — what Cairn did not see.** Any period in the range Cairn was not counting is stated above the list, as
   the check-in states it for a day (FR-022, FR-022a); day-level estimates are not counted in it (FR-023).
 
+- **H5 — time Cairn never recorded.** The range states the gaps Cairn recorded, and the standing sentence that
+  Cairn counts only while it is running, as Today and the check-in do. Time before Cairn first counted, while
+  protection was off, or while the person chose silence is not recorded as a gap, and this slice does not invent
+  it. A later slice, `first-counted`, records when Cairn first counted, so every count can state the time before
+  it (owner, 2026-10-01: "1. yes").
+
 Already stated, and held by this slice as written: a range with no reaches reads as a quiet range (FR-024); no
 streak, day count or chain (scenario 5); everything is available with no journal entry ever written (scenario 3).
 
