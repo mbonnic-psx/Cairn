@@ -6,6 +6,7 @@
 #![cfg(feature = "history")]
 #![allow(clippy::unwrap_used, clippy::expect_used)]
 
+#[cfg(unix)]
 use std::os::unix::fs::PermissionsExt;
 use std::path::Path;
 
@@ -57,10 +58,13 @@ fn assert_plain(sentence: &str, hide: &[&Path]) {
     );
 }
 
+#[cfg(unix)]
 fn restore(path: &Path) {
     let _ = std::fs::set_permissions(path, std::fs::Permissions::from_mode(0o700));
 }
 
+// Unix permissions plant the state; Windows has no mode bits to set.
+#[cfg(unix)]
 #[test]
 fn a_directory_that_cannot_be_written_gives_a_plain_sentence() {
     let root = tempfile::tempdir().unwrap();
@@ -74,6 +78,8 @@ fn a_directory_that_cannot_be_written_gives_a_plain_sentence() {
     assert_plain(&sentence, &[root.path(), &data]);
 }
 
+// Unix permissions plant the state; Windows has no mode bits to set.
+#[cfg(unix)]
 #[test]
 fn a_history_file_that_cannot_be_read_gives_a_plain_sentence() {
     let root = tempfile::tempdir().unwrap();
