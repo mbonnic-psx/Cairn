@@ -5,12 +5,21 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
+import type { ProtectionState, ProtectionStatus } from '../../ipc';
 import { CustomEntry } from '../Setup/CustomEntry';
+
+/** A read-back of the machine, as the core would answer it. */
+const readBack = (status: ProtectionStatus): ProtectionState => ({
+  status,
+  since: null,
+  verified_at: null,
+  entry_count_verified: 0,
+});
 
 describe('adding an address', () => {
   it('shows what was actually protected, not what was typed', async () => {
     const add = vi.fn().mockResolvedValue(['example.com', 'www.example.com']);
-    render(<CustomEntry add={add} />);
+    render(<CustomEntry add={add} check={async () => readBack('off')} />);
 
     await userEvent.type(screen.getByLabelText(/address/i), 'HTTPS://Example.com:8443/x');
     await userEvent.click(screen.getByRole('button', { name: /protect it/i }));
@@ -52,5 +61,60 @@ describe('adding an address', () => {
 
     expect(screen.getByRole('button', { name: /protect it/i })).toBeDisabled();
     expect(add).not.toHaveBeenCalled();
+  });
+});
+
+/**
+ * Principle III: what the screen says about an address is what the machine
+ * shows, read back after it was added — never what Cairn meant to do.
+ */
+describe('what adding an address claims', () => {
+  async function addExample(status: ProtectionStatus | 'unreadable') {
+    const add = vi.fn().mockResolvedValue(['example.com', 'www.example.com']);
+    const check = vi.fn(async () => {
+      if (status === 'unreadable') throw 'Cairn could not read the system just now.';
+      return readBack(status);
+    });
+    render(<CustomEntry add={add} check={check} />);
+
+    await userEvent.type(screen.getByLabelText(/address/i), 'example.com');
+    await userEvent.click(screen.getByRole('button', { name: /protect it/i }));
+    await screen.findByText(/example\.com, www\.example\.com/);
+    return check;
+  }
+
+  it('does not say protected before protection is on', async () => {
+    await addExample('off');
+
+    const line = screen.getByText(/example\.com, www\.example\.com/);
+    expect(line).not.toHaveTextContent(/protected/i);
+    expect(line).toHaveTextContent(/added/i);
+    expect(line).toHaveTextContent(/once protection is on/i);
+  });
+
+  it('does not say protected when the machine could not be checked', async () => {
+    await addExample('not_verified');
+
+    const line = screen.getByText(/example\.com, www\.example\.com/);
+    expect(line).not.toHaveTextContent(/^protected/i);
+    expect(line).toHaveTextContent(/added/i);
+    expect(line).toHaveTextContent(/not confirmed/i);
+  });
+
+  it('does not say protected when the read-back itself does not come back', async () => {
+    await addExample('unreadable');
+
+    const line = screen.getByText(/example\.com, www\.example\.com/);
+    expect(line).not.toHaveTextContent(/^protected/i);
+    expect(line).toHaveTextContent(/not confirmed/i);
+  });
+
+  it('says protected only once the machine shows it in force', async () => {
+    const check = await addExample('in_force');
+
+    expect(check).toHaveBeenCalled();
+    expect(screen.getByText(/example\.com, www\.example\.com/)).toHaveTextContent(
+      /^Protected: example\.com, www\.example\.com$/,
+    );
   });
 });
