@@ -68,8 +68,13 @@ export const listCategories = () => invoke<CategoryPreset[]>('list_categories');
 export const getDisclosures = () => invoke<Disclosures>('get_disclosures');
 export const turnProtectionOn = () => invoke<ProtectionState>('turn_protection_on');
 
+/**
+ * Ticking applies at once. Unticking waits a day while anything is in force,
+ * and the change that waits comes back; before protection is on there is
+ * nothing to weaken, so it applies at once and the answer is `null`.
+ */
 export const setCategoryEnabled = (id: CategoryId, on: boolean) =>
-  invoke<void>('set_category_enabled', { id, on });
+  invoke<PendingChange | null>('set_category_enabled', { id, on });
 
 export const addCustomEntry = (input: string) =>
   invoke<string[]>('add_custom_entry', { input });
@@ -98,8 +103,19 @@ export interface TeardownReport {
  */
 export const requestProtectionOff = () => invoke<PendingChange>('request_protection_off');
 
+/** Waits like any reduction, or applies at once (`null`) while nothing is in force. */
 export const removeCustomEntry = (domain: string) =>
-  invoke<PendingChange>('remove_custom_entry', { domain });
+  invoke<PendingChange | null>('remove_custom_entry', { domain });
+
+/**
+ * A change that has to wait, in one plain sentence — the same words the
+ * protection screen uses for it, and never a countdown.
+ */
+export function waitingSentence(pending: PendingChange): string {
+  return pending.eligible_now
+    ? `${pending.what}: this is ready to take effect.`
+    : `${pending.what}: this takes effect in ${pending.time_remaining}, and protection stays on until then.`;
+}
 
 export const getPendingChange = () => invoke<PendingChange | null>('get_pending_change');
 

@@ -150,17 +150,16 @@ impl AppState {
     /// Turning a category on protects more, so it applies at once (FR-048).
     ///
     /// Turning one off protects less, so it becomes a pending change and waits
-    /// (FR-047). The same command handles both, and the answer says which
-    /// happened.
+    /// (FR-047) — unless nothing is in force yet, in which case there is no
+    /// wall to weaken and it comes off at once (see [`Self::reduce`]). The
+    /// same command handles every case, and the answer says which happened.
     pub fn set_category_enabled(
         &self,
         id: CategoryId,
         on: bool,
     ) -> Result<Option<PendingView>, Trouble> {
         if !on {
-            return self
-                .request_reduction(PendingKind::DisableCategory { category: id })
-                .map(Some);
+            return self.reduce(PendingKind::DisableCategory { category: id });
         }
 
         let mut config = self.config.load()?;
@@ -183,6 +182,8 @@ impl AppState {
     /// Every way of protecting less arrives here: turning protection off,
     /// removing an address, switching a category off. Nothing on the machine
     /// changes — protection stays fully in force for the whole wait (FR-047b).
+    /// The only list edits that do not are the ones made while nothing is in
+    /// force at all ([`Self::reduce`]).
     pub fn request_reduction(&self, kind: PendingKind) -> Result<PendingView, Trouble> {
         let mut config = self.config.load()?;
         let clock = self.trusted_clock()?;
@@ -211,11 +212,35 @@ impl AppState {
         self.request_reduction(PendingKind::TurnOffProtection)
     }
 
-    /// Removing an address someone added. A reduction — never immediate.
-    pub fn remove_custom_entry(&self, domain: Domain) -> Result<PendingView, Trouble> {
-        self.request_reduction(PendingKind::RemoveEntries {
+    /// Removing an address someone added. A reduction: it waits while
+    /// anything is in force, and applies at once while nothing is.
+    pub fn remove_custom_entry(
+        &self,
+        domain: Domain,
+    ) -> Result<Option<PendingView>, Trouble> {
+        self.reduce(PendingKind::RemoveEntries {
             domains: vec![domain],
         })
+    }
+
+    /// A list edit that protects less.
+    ///
+    /// With a wall up it waits, through the one reduction path. With nothing
+    /// in force — protection meant to be off, *and* Cairn's section not on the
+    /// machine — there is nothing to weaken, so it applies to the list at once
+    /// and nothing on the machine is touched: no helper request, no write.
+    /// A section left behind, or a file that cannot be read, means it waits.
+    fn reduce(&self, kind: PendingKind) -> Result<Option<PendingView>, Trouble> {
+        let mut config = self.config.load()?;
+        let on_machine = self.hosts.section_present().ok();
+
+        if !reduce::nothing_in_force(config.intent, on_machine) {
+            return self.request_reduction(kind).map(Some);
+        }
+
+        reduce::apply_at_once(&mut config, kind)?;
+        self.config.save(&config)?;
+        Ok(None)
     }
 
     /// Always available, for the whole wait (FR-047c).

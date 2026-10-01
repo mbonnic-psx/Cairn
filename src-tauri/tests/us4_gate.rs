@@ -363,3 +363,114 @@ fn asking_for_something_different_while_one_waits_is_refused_and_says_which() {
         "and the one that was waiting is untouched"
     );
 }
+
+// --- Before there is a wall --------------------------------------------------
+//
+// The wait slows down weakening a wall that is up. With nothing in force there
+// is nothing to weaken, so taking something off the list applies at once
+// (owner's decision, 2026-10-01). "Nothing in force" is what the machine says,
+// not only what was intended.
+
+fn a_config_before_protection_is_on() -> Config {
+    Config {
+        intent: ProtectionIntent::Off,
+        ..a_config()
+    }
+}
+
+#[test]
+fn nothing_is_in_force_only_when_intended_off_and_the_machine_agrees() {
+    assert!(reduce::nothing_in_force(ProtectionIntent::Off, Some(false)));
+
+    // Cairn's section is still there — a teardown that left residue.
+    assert!(!reduce::nothing_in_force(ProtectionIntent::Off, Some(true)));
+    // The machine could not be read, so it cannot vouch for anything.
+    assert!(!reduce::nothing_in_force(ProtectionIntent::Off, None));
+    // Protection is on, whatever the file says this instant.
+    assert!(!reduce::nothing_in_force(ProtectionIntent::On, Some(false)));
+    assert!(!reduce::nothing_in_force(ProtectionIntent::On, Some(true)));
+}
+
+#[test]
+fn with_nothing_in_force_a_category_comes_off_at_once() {
+    let mut config = a_config_before_protection_is_on();
+
+    reduce::apply_at_once(
+        &mut config,
+        PendingKind::DisableCategory {
+            category: CategoryId::Social,
+        },
+    )
+    .unwrap();
+
+    assert!(config.trail.entries.is_empty());
+    assert!(config.trail.enabled_categories.is_empty());
+    assert!(config.pending_change.is_none(), "nothing waits");
+}
+
+#[test]
+fn applying_at_once_is_refused_while_protection_is_on() {
+    let mut config = a_config();
+    let before = config.clone();
+
+    let refused = reduce::apply_at_once(
+        &mut config,
+        PendingKind::DisableCategory {
+            category: CategoryId::Social,
+        },
+    );
+
+    assert!(refused.is_err());
+    assert_eq!(config, before, "nothing changed");
+}
+
+#[test]
+fn turning_protection_off_is_never_applied_at_once() {
+    // Untouched by the decision: it waits, always, through `request`.
+    let mut config = a_config_before_protection_is_on();
+    let before = config.clone();
+
+    assert!(reduce::apply_at_once(&mut config, PendingKind::TurnOffProtection).is_err());
+    assert_eq!(config, before);
+}
+
+#[test]
+fn applying_at_once_settles_the_same_change_if_it_was_left_waiting() {
+    let mut config = a_config_before_protection_is_on();
+    let kind = PendingKind::DisableCategory {
+        category: CategoryId::Social,
+    };
+    reduce::request(&mut config, kind.clone(), &clock(0), 1_700_000_000).unwrap();
+
+    reduce::apply_at_once(&mut config, kind).unwrap();
+
+    assert!(
+        config.pending_change.is_none(),
+        "it was done, so it is not left to land a day later"
+    );
+}
+
+#[test]
+fn applying_at_once_leaves_a_different_waiting_change_alone() {
+    let mut config = a_config_before_protection_is_on();
+    reduce::request(
+        &mut config,
+        PendingKind::TurnOffProtection,
+        &clock(0),
+        1_700_000_000,
+    )
+    .unwrap();
+
+    reduce::apply_at_once(
+        &mut config,
+        PendingKind::DisableCategory {
+            category: CategoryId::Social,
+        },
+    )
+    .unwrap();
+
+    assert_eq!(
+        config.pending_change.unwrap().kind,
+        PendingKind::TurnOffProtection
+    );
+}

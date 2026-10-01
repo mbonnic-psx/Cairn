@@ -39,7 +39,8 @@ pub fn list_categories(
 
 /// Enabling protects more and applies at once. Disabling protects less, so it
 /// goes through the waiting period instead — this command says so rather than
-/// doing it (FR-047, FR-048).
+/// doing it (FR-047, FR-048). Before anything is in force there is no wall to
+/// weaken, and disabling applies at once; the answer is then `None`.
 #[tauri::command]
 pub fn set_category_enabled(
     state: State<'_, AppState>,
@@ -60,12 +61,13 @@ pub fn request_protection_off(state: State<'_, AppState>) -> Result<PendingView,
         .map_err(|trouble| trouble.message)
 }
 
-/// Removing an address is a reduction, so it waits like the rest.
+/// Removing an address is a reduction, so it waits like the rest — unless
+/// nothing is in force yet, when it applies at once and the answer is `None`.
 #[tauri::command]
 pub fn remove_custom_entry(
     state: State<'_, AppState>,
     domain: Domain,
-) -> Result<PendingView, String> {
+) -> Result<Option<PendingView>, String> {
     state
         .remove_custom_entry(domain)
         .map_err(|trouble| trouble.message)
