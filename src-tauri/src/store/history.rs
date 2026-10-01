@@ -25,6 +25,7 @@ use std::path::{Path, PathBuf};
 use rusqlite::{Connection, OptionalExtension};
 
 use crate::domain::dates::LocalDate;
+use crate::domain::visible::shows_nothing;
 use crate::services::{Key, Trouble};
 
 use super::key::HistoryKey;
@@ -314,7 +315,8 @@ impl OpenHistory {
         )
     }
 
-    /// Refuses empty or whitespace-only text and stores nothing (FR-014).
+    /// Refuses text that shows nothing (G4: empty, whitespace, zero-width and
+    /// the like) and stores nothing (FR-014), so a kept entry stays.
     /// Otherwise replaces whatever entry `day` already had — no version kept,
     /// no trace of the old text (data-model.md).
     pub fn save_entry(
@@ -323,7 +325,7 @@ impl OpenHistory {
         text: &str,
         written_at: i64,
     ) -> Result<(), Trouble> {
-        if text.trim().is_empty() {
+        if shows_nothing(text) {
             return Err(Trouble::new("An empty entry is not saved."));
         }
 

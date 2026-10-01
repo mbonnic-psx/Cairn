@@ -17,6 +17,38 @@ import { Button } from '../components/Button';
 import { Card } from '../components/Card';
 import { getDayView, saveJournalEntry, type DayView } from '../ipc/journal';
 
+/**
+ * Text that shows nothing is empty (G4), here as in the store: the same
+ * definition as `shows_nothing` in `src-tauri/src/domain/visible.rs`, and both
+ * are tested against `src-tauri/tests/fixtures/nothing_visible.json`.
+ *
+ * Every character is White_Space (PropList.txt), a control (Cc), a
+ * Default_Ignorable_Code_Point (DerivedCoreProperties.txt, Unicode 15) or one
+ * of the blank-looking letters. Ranges are written out rather than taken from
+ * `\p{...}` so the answer does not move with the browser's Unicode version.
+ */
+// The class holds combining and joining characters on purpose: they are what it names.
+const NOTHING_VISIBLE = new RegExp(
+  // eslint-disable-next-line no-misleading-character-class
+  '^[' +
+    // White_Space
+    '\\u0009-\\u000D\\u0020\\u0085\\u00A0\\u1680\\u2000-\\u200A\\u2028\\u2029\\u202F\\u205F\\u3000' +
+    // Cc: C0 and C1 controls, NUL included
+    '\\u0000-\\u001F\\u007F-\\u009F' +
+    // Default_Ignorable_Code_Point
+    '\\u00AD\\u034F\\u061C\\u115F\\u1160\\u17B4\\u17B5\\u180B-\\u180F\\u200B-\\u200F' +
+    '\\u202A-\\u202E\\u2060-\\u206F\\u3164\\uFE00-\\uFE0F\\uFEFF\\uFFA0\\uFFF0-\\uFFF8' +
+    '\\u{1BCA0}-\\u{1BCA3}\\u{1D173}-\\u{1D17A}\\u{E0000}-\\u{E0FFF}' +
+    // Blank-looking letters: the braille blank (the Hangul fillers are above)
+    '\\u2800' +
+    ']*$',
+  'u',
+);
+
+export function showsNothing(text: string): boolean {
+  return NOTHING_VISIBLE.test(text);
+}
+
 interface Today {
   day: string;
   start: number;
@@ -171,7 +203,7 @@ export function CheckIn({ session }: { session?: CheckInSession }) {
       <div className="mt-4 flex items-center gap-4">
         <Button
           onClick={() => keep(opened, draft).then((after) => after && setView(after))}
-          disabled={keeping || draft.trim() === ''}
+          disabled={keeping || showsNothing(draft)}
         >
           Keep this
         </Button>

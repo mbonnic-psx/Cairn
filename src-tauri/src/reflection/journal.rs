@@ -6,7 +6,7 @@ use crate::store::history::OpenHistory;
 
 /// Save `text` as the entry for `day`, replacing any entry it had.
 ///
-/// Refuses empty or whitespace-only text, which stores nothing and leaves an
+/// Refuses text that shows nothing (G4), which stores nothing and leaves an
 /// entry already there as it was (FR-014; the store proves it). There is no
 /// way to call this with a sealed history: it takes an open one.
 pub fn save(

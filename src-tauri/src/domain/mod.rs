@@ -25,3 +25,4 @@ pub mod normalize;
 pub mod patterns;
 pub mod sni;
 pub mod splice;
+pub mod visible;
