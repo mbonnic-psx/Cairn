@@ -36,53 +36,88 @@ function today(): Today {
   };
 }
 
-export function CheckIn() {
-  const [opened] = useState(today);
-  const [view, setView] = useState<DayView>();
-  const [draft, setDraft] = useState('');
+/** What the check-in has in hand, kept by whoever holds the hook. */
+export interface CheckInSession {
+  /** What is in the space; undefined until the person types, so the saved entry shows. */
+  draft: string | undefined;
+  /** The core's sentence for a save that was not kept, shown beside the text. */
+  note: string | undefined;
+  kept: boolean;
+  keeping: boolean;
+  type: (text: string) => void;
+  keep: (when: Today, shown: string) => Promise<DayView | undefined>;
+}
+
+/**
+ * The draft and the outcome of a save, held above the screen so that walking
+ * round the header neither loses the text nor a refusal that arrived while
+ * away (G1). Nothing here is shown anywhere but the check-in itself (FR-033).
+ */
+export function useCheckInSession(): CheckInSession {
+  const [draft, setDraft] = useState<string>();
   const [note, setNote] = useState<string>();
   const [kept, setKept] = useState(false);
   const [keeping, setKeeping] = useState(false);
   // The space as it is now, for a save that returns after more was typed.
-  const latest = useRef(draft);
+  const latest = useRef<string>();
   latest.current = draft;
+
+  return {
+    draft,
+    note,
+    kept,
+    keeping,
+    type(text) {
+      latest.current = text;
+      setDraft(text);
+      setKept(false);
+    },
+    async keep(when, shown) {
+      const sent = latest.current ?? shown;
+      setKeeping(true);
+      setKept(false);
+      setNote(undefined);
+      try {
+        const after = await saveJournalEntry(when.day, when.start, when.end, sent);
+        // Whatever is in the space now stays. Only when it is still what was
+        // sent does the screen say so; anything typed since is not yet kept,
+        // and the screen makes no claim either way.
+        if ((latest.current ?? shown) === sent) {
+          setDraft(after.entry ?? sent);
+          setKept(true);
+        }
+        return after;
+      } catch (problem) {
+        // What they typed stays exactly where it is (G1).
+        setNote(String(problem));
+        return undefined;
+      } finally {
+        setKeeping(false);
+      }
+    },
+  };
+}
+
+export function CheckIn({ session }: { session?: CheckInSession }) {
+  const own = useCheckInSession();
+  const { draft: typed, note: saveNote, kept, keeping, type, keep } = session ?? own;
+  const [opened] = useState(today);
+  const [view, setView] = useState<DayView>();
+  const [loadNote, setLoadNote] = useState<string>();
 
   useEffect(() => {
     getDayView(opened.day, opened.start, opened.end)
-      .then((found) => {
-        setView(found);
-        setDraft(found.entry ?? '');
-      })
-      .catch((problem: unknown) => setNote(String(problem)));
+      .then(setView)
+      .catch((problem: unknown) => setLoadNote(String(problem)));
   }, [opened]);
 
-  async function keep() {
-    const sent = draft;
-    setKeeping(true);
-    setKept(false);
-    setNote(undefined);
-    try {
-      const after = await saveJournalEntry(opened.day, opened.start, opened.end, sent);
-      setView(after);
-      // Whatever is in the space now stays. Only when it is still what was
-      // sent does the screen say so; anything typed since is not yet kept,
-      // and the screen makes no claim either way.
-      if (latest.current === sent) {
-        setDraft(after.entry ?? sent);
-        setKept(true);
-      }
-    } catch (problem) {
-      // What they typed stays exactly where it is (G1).
-      setNote(String(problem));
-    } finally {
-      setKeeping(false);
-    }
-  }
+  const note = saveNote ?? loadNote;
+  const draft = typed ?? view?.entry ?? '';
 
   if (!view) {
     return (
       <Card>
-        <p className="text-ink-400">{note ?? 'Looking…'}</p>
+        <p className="text-ink-400">{loadNote ?? 'Looking…'}</p>
       </Card>
     );
   }
@@ -101,7 +136,9 @@ export function CheckIn() {
       <h2 className="reflective text-3xl text-ink-900">Tonight</h2>
 
       {view.reaches.length === 0 ? (
-        <p className="reflective mt-4 max-w-prose text-lg text-ink-700">Nothing here for today.</p>
+        <p className="reflective mt-4 max-w-prose text-lg text-ink-700">
+          Nothing here for today.
+        </p>
       ) : (
         <ul className="mt-8 divide-y divide-sand-200">
           {view.reaches.map((reach, index) => (
@@ -126,14 +163,16 @@ export function CheckIn() {
           className="reflective mt-3 block min-h-48 w-full rounded-lg border border-sand-200 bg-sand-50 p-4 text-lg leading-relaxed text-ink-900 focus:border-clay-500 focus:outline-none"
           value={draft}
           onChange={(event) => {
-            setDraft(event.target.value);
-            setKept(false);
+            type(event.target.value);
           }}
         />
       </label>
 
       <div className="mt-4 flex items-center gap-4">
-        <Button onClick={keep} disabled={keeping || draft.trim() === ''}>
+        <Button
+          onClick={() => keep(opened, draft).then((after) => after && setView(after))}
+          disabled={keeping || draft.trim() === ''}
+        >
           Keep this
         </Button>
       </div>
@@ -141,7 +180,11 @@ export function CheckIn() {
       {/* One polite live region for what happened to the save, so a person
           who cannot see the page hears it too: a refusal heard by nobody is
           the lost entry G1 exists to prevent. */}
-      <p role="status" aria-live="polite" className="reflective mt-4 max-w-prose text-ink-700">
+      <p
+        role="status"
+        aria-live="polite"
+        className="reflective mt-4 max-w-prose text-ink-700"
+      >
         {note ?? (kept ? 'Kept for today.' : '')}
       </p>
     </Card>

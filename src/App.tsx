@@ -7,7 +7,7 @@
 import { useEffect, useState } from 'react';
 
 import { Button } from './components/Button';
-import { CheckIn } from './screens/CheckIn';
+import { CheckIn, useCheckInSession } from './screens/CheckIn';
 import { Disclosure } from './screens/Disclosure';
 import { Limits } from './screens/Limits';
 import { Protection } from './screens/Protection';
@@ -38,6 +38,8 @@ export default function App() {
   const [disclosures, setDisclosures] = useState<Disclosures>();
   const [state, setState] = useState<ProtectionState>();
   const [note, setNote] = useState<string>();
+  // Held here so the check-in's text survives a walk round the header.
+  const checkIn = useCheckInSession();
 
   useEffect(() => {
     listCategories().then(setCategories).catch(() => undefined);
@@ -159,7 +161,7 @@ export default function App() {
 
         {step === 'reaches' && <Reaches />}
 
-        {step === 'checkin' && <CheckIn />}
+        {step === 'checkin' && <CheckIn session={checkIn} />}
 
         {step === 'limits' && disclosures && <Limits disclosures={disclosures} />}
       </div>
