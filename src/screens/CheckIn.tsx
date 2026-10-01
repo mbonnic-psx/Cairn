@@ -215,6 +215,8 @@ export function CheckIn({ session }: { session?: CheckInSession }) {
   const [loadNote, setLoadNote] = useState<string>();
   const [, tick] = useState(0);
   const [quote, setQuote] = useState<string | null>(null);
+  // Why the quotes switch did not take, if it did not; the save's own sentence comes first.
+  const [switchNote, setSwitchNote] = useState<string>();
   /** Unknown until the setting is read; then the person's choice. */
   const [quotesShown, setShown] = useState<boolean>();
 
@@ -246,7 +248,7 @@ export function CheckIn({ session }: { session?: CheckInSession }) {
   const ended = Date.now() >= opened.end * 1000;
   const thisDay = ended ? dateInWords(opened.day) : 'today';
 
-  const note = saveNote ?? loadNote;
+  const note = saveNote ?? loadNote ?? switchNote;
   const draft = typed ?? view?.entry ?? '';
 
   useEffect(() => {
@@ -270,13 +272,13 @@ export function CheckIn({ session }: { session?: CheckInSession }) {
   }, [opened.day]);
 
   async function switchQuotes(shown: boolean) {
-    setNote(undefined);
+    setSwitchNote(undefined);
     let now: boolean;
     try {
       now = await setQuotesShown(shown);
     } catch (problem) {
       // The line stays as it was, and the person hears why.
-      setNote(String(problem));
+      setSwitchNote(String(problem));
       return;
     }
     setShown(now);
@@ -296,11 +298,12 @@ export function CheckIn({ session }: { session?: CheckInSession }) {
       </div>
     );
 
-  const line = quotesShown && quote ? (
-    <figure className="mt-6">
-      <p className="reflective max-w-prose text-lg italic text-ink-500">{quote}</p>
-    </figure>
-  ) : null;
+  const line =
+    quotesShown && quote ? (
+      <figure className="mt-6">
+        <p className="reflective max-w-prose text-lg italic text-ink-500">{quote}</p>
+      </figure>
+    ) : null;
 
   if (!view) {
     return (
@@ -319,7 +322,11 @@ export function CheckIn({ session }: { session?: CheckInSession }) {
         {line}
         <p className="reflective mt-4 max-w-prose text-lg text-ink-700">{view.sealed}</p>
         {quoteSwitch}
-        <p role="status" aria-live="polite" className="reflective mt-4 max-w-prose text-ink-700">
+        <p
+          role="status"
+          aria-live="polite"
+          className="reflective mt-4 max-w-prose text-ink-700"
+        >
           {note ?? ''}
         </p>
       </Card>
