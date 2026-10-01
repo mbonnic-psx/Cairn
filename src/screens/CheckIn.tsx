@@ -240,7 +240,7 @@ export function CheckIn({ session }: { session?: CheckInSession }) {
   const heldDay = useRef<string>();
   heldDay.current = held?.day;
   const quote = held?.day === opened.day ? held.line : null;
-  // Why the quotes switch did not take, if it did not; the save's own sentence comes first.
+  // Why the quotes switch did not take, if it did not; said beside the save's own sentence.
   const [switchNote, setSwitchNote] = useState<string>();
   /** Unknown until the setting is read; then the person's choice. */
   const [quotesShown, setShown] = useState<boolean>();
@@ -256,6 +256,11 @@ export function CheckIn({ session }: { session?: CheckInSession }) {
       current = false;
     };
   }, [opened]);
+
+  // A note about the switch belongs to the day it was made on.
+  useEffect(() => {
+    setSwitchNote(undefined);
+  }, [opened.day]);
 
   // When the day ends under an open check-in, the screen stops calling it today.
   useEffect(() => {
@@ -273,7 +278,10 @@ export function CheckIn({ session }: { session?: CheckInSession }) {
   const ended = Date.now() >= opened.end * 1000;
   const thisDay = ended ? dateInWords(opened.day) : 'today';
 
-  const note = saveNote ?? loadNote ?? switchNote;
+  // Everything the person should hear, together: a refusal of the switch does
+  // not hide a refusal of the save, nor the other way round.
+  const heard = [saveNote ?? loadNote, switchNote].filter((n) => n !== undefined);
+  const note = heard.length > 0 ? heard.join(' ') : undefined;
   const draft = typed ?? view?.entry ?? '';
 
   useEffect(() => {
@@ -308,7 +316,11 @@ export function CheckIn({ session }: { session?: CheckInSession }) {
       now = await setQuotesShown(shown);
     } catch (problem) {
       // The line stays as it was, and the person hears why.
-      setSwitchNote(String(problem));
+      setSwitchNote(
+        typeof problem === 'string'
+          ? problem
+          : 'Cairn could not change that just now. The quotes are as they were.',
+      );
       return;
     } finally {
       switching.current = false;

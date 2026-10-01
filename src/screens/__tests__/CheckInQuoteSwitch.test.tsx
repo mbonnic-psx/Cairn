@@ -6,7 +6,13 @@ import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 
 import { CheckIn } from '../CheckIn';
-import { getDayView, getQuote, getQuotesShown, setQuotesShown, type DayView } from '../../ipc/journal';
+import {
+  getDayView,
+  getQuote,
+  getQuotesShown,
+  setQuotesShown,
+  type DayView,
+} from '../../ipc/journal';
 
 vi.mock('../../ipc/journal', () => ({
   getDayView: vi.fn(),
@@ -43,7 +49,9 @@ it('asks once when Show quotes is pressed twice while the save is in flight', as
         release = resolve;
       }),
   );
-  vi.mocked(getQuote).mockResolvedValueOnce('FIRST LINE').mockResolvedValueOnce('SECOND LINE');
+  vi.mocked(getQuote)
+    .mockResolvedValueOnce('FIRST LINE')
+    .mockResolvedValueOnce('SECOND LINE');
   const user = userEvent.setup();
   render(<CheckIn />);
   await user.dblClick(await screen.findByRole('button', { name: 'Show quotes' }));
