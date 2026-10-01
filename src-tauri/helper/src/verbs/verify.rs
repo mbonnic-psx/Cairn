@@ -21,7 +21,7 @@ use crate::machine::Machine;
 pub fn verify_hosts_section(machine: &Machine, expected: &[Domain]) -> Response {
     let current = match machine.read(cairn::store::inventory::Target::SystemHosts) {
         Ok(bytes) => bytes,
-        Err(error) => return super::unreachable(error),
+        Err(_) => return super::unreachable(),
     };
 
     let found = match section_domains(&current) {

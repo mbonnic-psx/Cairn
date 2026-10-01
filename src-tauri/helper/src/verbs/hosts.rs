@@ -76,7 +76,7 @@ pub fn apply_hosts_section(
 
     let original = match machine.read(TARGET) {
         Ok(bytes) => bytes,
-        Err(error) => return unreachable(error),
+        Err(_) => return unreachable(),
     };
 
     let ending = detect_line_ending_outside(&original);
@@ -101,15 +101,22 @@ pub fn apply_hosts_section(
         }
     }
 
-    if let Err(error) = machine.write(TARGET, &spliced.bytes) {
-        return unreachable(error);
+    // The write is atomic: when it does not happen, the file is as it was.
+    if machine.write(TARGET, &spliced.bytes).is_err() {
+        return unreachable();
     }
 
-    // Verified, not intended.
-    let after = match machine.read(TARGET) {
-        Ok(bytes) => bytes,
-        Err(error) => return unreachable(error),
-    };
+    // Verified, not intended. The write did happen, so this is not a case of
+    // nothing having changed.
+    let after =
+        match machine.read(TARGET) {
+            Ok(bytes) => bytes,
+            Err(_) => return trouble(
+                TroubleKind::Unreachable,
+                "Cairn wrote your protected sites but could not read the file back to \
+                 confirm them. Protection is shown as not confirmed until it can.",
+            ),
+        };
     let found = match section_domains(&after) {
         Ok(found) => found,
         Err(problem) => return section_unreadable(problem),
@@ -149,7 +156,7 @@ pub fn remove_hosts_section(machine: &Machine) -> Response {
 
     let current = match machine.read(TARGET) {
         Ok(bytes) => bytes,
-        Err(error) => return unreachable(error),
+        Err(_) => return unreachable(),
     };
 
     let separator_added = inventory.separator_added(TARGET);
@@ -158,15 +165,21 @@ pub fn remove_hosts_section(machine: &Machine) -> Response {
         Err(problem) => return section_unreadable(problem),
     };
 
-    if let Err(error) = machine.write(TARGET, &without) {
-        return unreachable(error);
+    if machine.write(TARGET, &without).is_err() {
+        return unreachable();
     }
 
-    // Report what is actually there now.
-    let after = match machine.read(TARGET) {
-        Ok(bytes) => bytes,
-        Err(error) => return unreachable(error),
-    };
+    // Report what is actually there now. The write did happen, so this is not
+    // a case of nothing having changed.
+    let after =
+        match machine.read(TARGET) {
+            Ok(bytes) => bytes,
+            Err(_) => return trouble(
+                TroubleKind::Unreachable,
+                "Cairn took its section out of the system's list of site addresses but \
+                 could not read the file back to confirm it is gone.",
+            ),
+        };
     let still_present = matches!(splice::find_section(&after), Ok(Some(_)));
 
     let mut residue = Vec::new();
