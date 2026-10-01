@@ -236,6 +236,7 @@ export function CheckIn({ session }: { session?: CheckInSession }) {
   const [loadNote, setLoadNote] = useState<string>();
   const [, tick] = useState(0);
   // Whether this day's line has been asked for, readable from the effects.
+  const switching = useRef(false);
   const heldDay = useRef<string>();
   heldDay.current = held?.day;
   const quote = held?.day === opened.day ? held.line : null;
@@ -298,6 +299,9 @@ export function CheckIn({ session }: { session?: CheckInSession }) {
   }, [opened.day, holdQuote]);
 
   async function switchQuotes(shown: boolean) {
+    // One request at a time: a second press while the first is out is not asked.
+    if (switching.current) return;
+    switching.current = true;
     setSwitchNote(undefined);
     let now: boolean;
     try {
@@ -306,6 +310,8 @@ export function CheckIn({ session }: { session?: CheckInSession }) {
       // The line stays as it was, and the person hears why.
       setSwitchNote(String(problem));
       return;
+    } finally {
+      switching.current = false;
     }
     setShown(now);
     // Shown again in the same opening, it is the same line (Q1). Opened hidden,
