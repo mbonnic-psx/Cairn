@@ -165,3 +165,91 @@ mod inventory {
         assert_plain(&said, directory.path());
     }
 }
+
+mod category_lists {
+    use super::*;
+    use cairn::domain::entries::CategoryId;
+    use cairn::enforcement::seed::{seed_missing_lists, CategoryList, CategoryStore};
+
+    fn a_list() -> CategoryList {
+        CategoryList {
+            id: "social".into(),
+            label: "Social".into(),
+            domains: vec!["example.com".into()],
+            edited: false,
+        }
+    }
+
+    #[test]
+    fn a_list_that_is_not_json_is_explained_plainly() {
+        let directory = tempfile::tempdir().unwrap();
+        let store = CategoryStore::at(directory.path());
+        let path = store.path_for(CategoryId::Social);
+        std::fs::create_dir_all(path.parent().unwrap()).unwrap();
+        std::fs::write(&path, b"{ not a list").unwrap();
+
+        let said = store.load(CategoryId::Social).unwrap_err().message;
+        assert_plain(&said, directory.path());
+        assert!(said.contains("Your protection is unaffected"), "{said}");
+    }
+
+    #[test]
+    fn a_list_that_cannot_be_opened_is_explained_plainly() {
+        if !permissions_hold() {
+            return;
+        }
+        let directory = tempfile::tempdir().unwrap();
+        let store = CategoryStore::at(directory.path());
+        store.save(CategoryId::Social, &a_list()).unwrap();
+        let path = store.path_for(CategoryId::Social);
+        lock(&path, 0o000);
+
+        let said = store.load(CategoryId::Social).unwrap_err().message;
+        lock(&path, 0o600);
+        assert_plain(&said, directory.path());
+        assert!(said.contains("Your protection is unaffected"), "{said}");
+    }
+
+    #[test]
+    fn a_list_that_cannot_be_saved_is_explained_plainly() {
+        let directory = tempfile::tempdir().unwrap();
+        // A file where the lists' own directory belongs.
+        std::fs::write(directory.path().join("categories"), b"").unwrap();
+        let store = CategoryStore::at(directory.path());
+
+        let said = store
+            .save(CategoryId::Social, &a_list())
+            .unwrap_err()
+            .message;
+        assert_plain(&said, directory.path());
+    }
+
+    #[test]
+    fn a_missing_starting_list_is_explained_plainly() {
+        let directory = tempfile::tempdir().unwrap();
+        let shipped = directory.path().join("shipped");
+        std::fs::create_dir_all(&shipped).unwrap();
+        let store = CategoryStore::at(&directory.path().join("data"));
+
+        let said = seed_missing_lists(&shipped, &store).unwrap_err().message;
+        assert_plain(&said, directory.path());
+    }
+
+    #[test]
+    fn a_starting_list_that_is_not_json_is_explained_plainly() {
+        let directory = tempfile::tempdir().unwrap();
+        let shipped = directory.path().join("shipped");
+        std::fs::create_dir_all(&shipped).unwrap();
+        for category in CategoryId::ALL {
+            std::fs::write(
+                shipped.join(format!("{}.json", category.slug())),
+                b"{ not a seed",
+            )
+            .unwrap();
+        }
+        let store = CategoryStore::at(&directory.path().join("data"));
+
+        let said = seed_missing_lists(&shipped, &store).unwrap_err().message;
+        assert_plain(&said, directory.path());
+    }
+}
