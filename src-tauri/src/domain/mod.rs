@@ -23,6 +23,7 @@ pub mod entries;
 pub mod gate;
 pub mod normalize;
 pub mod patterns;
+pub mod quotes;
 pub mod sni;
 pub mod splice;
 pub mod visible;

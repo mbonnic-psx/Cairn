@@ -10,9 +10,9 @@ Rust increments and the screen increments meet in `contracts/ui-ipc.md`'s names,
 
 ## Increment 1 — the choice (domain)
 
-- [ ] Q1 [T031, Q1] RED: `src-tauri/tests/quote_choice.rs` — `domain::quotes::choose(lines, roll)`: no lines is
+- [x] Q1 [T031, Q1] RED: `src-tauri/tests/quote_choice.rs` — `domain::quotes::choose(lines, roll)`: no lines is
   nothing; roll *k* is line *k mod n*; every line is reachable; a huge roll does not overflow.
-- [ ] Q2 [T031] GREEN: `src-tauri/src/domain/quotes.rs`, pure (`check-domain-purity.sh`).
+- [x] Q2 [T031] GREEN: `src-tauri/src/domain/quotes.rs`, pure (`check-domain-purity.sh`).
 
 ## Increment 2 — `get_quote` through the driving port
 
@@ -60,3 +60,5 @@ Rust increments and the screen increments meet in `contracts/ui-ipc.md`'s names,
   quote half done; add the pin row `plan.md` *Pin* hands back.
 
 ## Done notes
+- Q1–Q2: RED first as a build error (no `domain::quotes`), then against a stub returning nothing: 3 of 4 failed
+  on their assertions (`no_lines_is_no_quote` passes on the stub by design). GREEN 4/4; domain purity clean.
