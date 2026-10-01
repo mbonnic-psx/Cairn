@@ -8,22 +8,38 @@
  * When an address cannot be taken, the sentence that comes back is shown
  * exactly as written. It says what to try instead, and it never suggests the
  * person did something wrong (FR-050).
+ *
+ * Adding an address puts it on the list; it does not, by itself, block it.
+ * So after adding, the screen reads the machine back and says "Protected" only
+ * when that read-back shows protection in force. Before protection is on, or
+ * when the machine could not be checked, it says the address was added —
+ * never that it is protected (Principle III).
  */
 import { useState, type FormEvent } from 'react';
 
 import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
-import { addCustomEntry, type Rejection } from '../../ipc';
+import {
+  addCustomEntry,
+  getProtectionState,
+  type ProtectionState,
+  type ProtectionStatus,
+  type Rejection,
+} from '../../ipc';
 
 export function CustomEntry({
   onAdded,
   add = addCustomEntry,
+  check = getProtectionState,
 }: {
   onAdded?: (domains: string[]) => void;
   add?: (input: string) => Promise<string[]>;
+  /** Reads the machine back after an address is added. */
+  check?: () => Promise<ProtectionState>;
 }) {
   const [input, setInput] = useState('');
   const [added, setAdded] = useState<string[]>([]);
+  const [status, setStatus] = useState<ProtectionStatus>('not_verified');
   const [reason, setReason] = useState<string>();
 
   async function submit(event: FormEvent) {
@@ -32,6 +48,7 @@ export function CustomEntry({
 
     try {
       const domains = await add(input);
+      setStatus(await verifiedStatus(check));
       setAdded(domains);
       setReason(undefined);
       setInput('');
@@ -67,7 +84,7 @@ export function CustomEntry({
 
       {added.length > 0 && (
         <p className="mt-4 text-moss-600">
-          Protected: {added.join(', ')}
+          {addedSentence(status, added)}
         </p>
       )}
 
@@ -78,6 +95,28 @@ export function CustomEntry({
       )}
     </Card>
   );
+}
+
+/** What the machine shows now. A read-back that does not come back is not confirmation. */
+async function verifiedStatus(check: () => Promise<ProtectionState>): Promise<ProtectionStatus> {
+  try {
+    return (await check()).status;
+  } catch {
+    return 'not_verified';
+  }
+}
+
+/** "Protected" only from a read-back that shows it in force. */
+function addedSentence(status: ProtectionStatus, domains: string[]): string {
+  const list = domains.join(', ');
+  switch (status) {
+    case 'in_force':
+      return `Protected: ${list}`;
+    case 'off':
+      return `Added — Cairn will protect these once protection is on: ${list}`;
+    case 'not_verified':
+      return `Added to your list, though Cairn has not confirmed it is in force just now: ${list}`;
+  }
 }
 
 /** A rejection carries its own sentence; anything else gets a plain one. */

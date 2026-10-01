@@ -1,21 +1,38 @@
 /**
- * Everything that is protected, and where each entry came from.
+ * Everything that was chosen, and where each entry came from.
  *
  * Reviewing is free. Removing is not: taking something out protects you less,
  * so it goes through the waiting period, and this screen says so rather than
  * offering a button that would do it now (FR-046, FR-047).
+ *
+ * The list is what the person chose. It is called protected only while the
+ * machine shows it in force (Principle III).
  */
 import { Card } from '../components/Card';
-import type { Trail as TrailData } from '../ipc';
+import type { ProtectionStatus, Trail as TrailData } from '../ipc';
 
-export function Trail({ trail }: { trail: TrailData }) {
+/** The way to this screen, named for what is verified. */
+export function trailTitle(status: ProtectionStatus | undefined): string {
+  return status === 'in_force' ? 'What is protected' : 'What you chose';
+}
+
+export function Trail({ trail, status }: { trail: TrailData; status?: ProtectionStatus }) {
+  const inForce = status === 'in_force';
   return (
     <Card>
-      <h2 className="reflective text-3xl text-ink-900">What you are protecting</h2>
+      <h2 className="reflective text-3xl text-ink-900">
+        {inForce ? 'What you are protecting' : 'What you have chosen'}
+      </h2>
       <p className="reflective mt-3 max-w-prose text-lg text-ink-700">
         {trail.entries.length} addresses, across {trail.enabled_categories.length} lists
         and whatever you have added yourself.
       </p>
+      {status === 'not_verified' && (
+        <p className="mt-3 max-w-prose text-amber-600">
+          Cairn has not confirmed this is in force just now. It keeps trying, and it keeps
+          what you chose.
+        </p>
+      )}
 
       <ul className="mt-8 divide-y divide-sand-200">
         {trail.entries.map((entry) => (

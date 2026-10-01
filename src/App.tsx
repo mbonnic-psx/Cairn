@@ -13,7 +13,7 @@ import { Protection } from './screens/Protection';
 import { Reaches } from './screens/Reaches';
 import { Categories } from './screens/Setup/Categories';
 import { CustomEntry } from './screens/Setup/CustomEntry';
-import { Trail } from './screens/Trail';
+import { Trail, trailTitle } from './screens/Trail';
 import {
   getDisclosures,
   getProtectionState,
@@ -89,7 +89,7 @@ export default function App() {
                 setStep('trail');
               }}
             >
-              What is protected
+              {trailTitle(state?.status)}
             </Button>
           )}
           {step === 'protected' && (
@@ -127,7 +127,7 @@ export default function App() {
 
         {step === 'protected' && <Protection state={state} />}
 
-        {step === 'trail' && trail && <Trail trail={trail} />}
+        {step === 'trail' && trail && <Trail trail={trail} status={state?.status} />}
 
         {step === 'reaches' && <Reaches />}
 
