@@ -55,7 +55,7 @@ sha2.workspace = true
 thiserror.workspace = true
 uuid.workspace = true
 
-tauri = { version = "2", optional = true }
+tauri = { version = "2", optional = true , features = [] }
 rusqlite = { version = "0.32", features = ["bundled-sqlcipher-vendored-openssl"], optional = true }
 # The Linux backend is the pure-Rust Secret Service client rather than the one
 # that links libdbus: fewer system dependencies for a tool people install to
