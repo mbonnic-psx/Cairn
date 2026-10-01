@@ -80,4 +80,26 @@ describe('the way back', () => {
     await userEvent.click(screen.getByRole('button', { name: 'What Cairn covers' }));
     expect(screen.getByRole('button', { name: 'Protection' })).not.toHaveAttribute('aria-current');
   });
+
+  it('keeps the protected-only items in the header on every screen once protection is on', async () => {
+    vi.mocked(ipc.getProtectionState).mockResolvedValue(state('in_force'));
+    render(<App />);
+
+    await screen.findByRole('heading', { name: ipc.protectionWords.in_force.title });
+    await userEvent.click(screen.getByRole('button', { name: 'What Cairn covers' }));
+
+    expect(screen.getByRole('button', { name: 'What is protected' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Today' })).toBeInTheDocument();
+  });
+
+  it('offers no protected-only items before protection is on', async () => {
+    vi.mocked(ipc.getProtectionState).mockResolvedValue(state('off'));
+    render(<App />);
+
+    await screen.findByText('What would you like to protect?');
+    await userEvent.click(screen.getByRole('button', { name: 'What Cairn covers' }));
+
+    expect(screen.queryByRole('button', { name: 'What is protected' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Today' })).toBeNull();
+  });
 });

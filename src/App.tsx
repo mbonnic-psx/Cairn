@@ -50,6 +50,11 @@ export default function App() {
       .catch(() => undefined);
   }, []);
 
+  // Once protection is on, its own items stay in the header on every screen,
+  // so the header does not change shape as a person moves around it (owner,
+  // 2026-10-01). Before then there is nothing to show under them.
+  const protectionOn = state !== undefined && state.status !== 'off';
+
   async function toggle(id: CategoryPreset['id'], on: boolean) {
     try {
       // Unticking comes off at once before anything is in force, and waits a
@@ -94,11 +99,11 @@ export default function App() {
                 : undefined
             }
             className="aria-[current=page]:text-ink-900"
-            onClick={() => setStep(state && state.status !== 'off' ? 'protected' : 'choosing')}
+            onClick={() => setStep(protectionOn ? 'protected' : 'choosing')}
           >
             Protection
           </Button>
-          {step === 'protected' && (
+          {protectionOn && (
             <Button
               tone="quiet"
               onClick={async () => {
@@ -109,7 +114,7 @@ export default function App() {
               {trailTitle(state?.status)}
             </Button>
           )}
-          {step === 'protected' && (
+          {protectionOn && (
             // Deliberate navigation, and nothing anywhere that draws someone
             // here: no count, no badge, no hint that there is something new to
             // look at (FR-030a, FR-030b).
