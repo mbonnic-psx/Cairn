@@ -161,19 +161,22 @@ impl InventoryStore {
 
     pub fn load(&self) -> Result<ChangeInventory, Trouble> {
         match std::fs::read(&self.path) {
-            Ok(bytes) => serde_json::from_slice(&bytes).map_err(|error| {
-                Trouble::new(format!(
-                    "Cairn could not read its record of what it has changed on this \
-                     machine ({error}). Nothing has been undone."
-                ))
+            // Sentences Cairn wrote, never the system's or the parser's own
+            // words. This one also travels back from the helper.
+            Ok(bytes) => serde_json::from_slice(&bytes).map_err(|_| {
+                Trouble::new(
+                    "Cairn could not make sense of its record of what it has changed on \
+                     this machine, so it has left that record exactly as it is. Nothing \
+                     has been undone.",
+                )
             }),
             Err(error) if error.kind() == std::io::ErrorKind::NotFound => {
                 Ok(ChangeInventory::default())
             }
-            Err(error) => Err(Trouble::new(format!(
-                "Cairn could not open its record of what it has changed on this machine \
-                 ({error}). Nothing has been undone."
-            ))),
+            Err(_) => Err(Trouble::new(
+                "Cairn could not open its record of what it has changed on this machine. \
+                 Nothing has been undone.",
+            )),
         }
     }
 
@@ -189,16 +192,8 @@ impl InventoryStore {
     }
 
     pub fn save(&self, inventory: &ChangeInventory) -> Result<(), Trouble> {
-        let bytes = serde_json::to_vec_pretty(inventory).map_err(|error| {
-            Trouble::new(format!(
-                "Cairn could not write its record of changes ({error})."
-            ))
-        })?;
-        super::write_atomically(&self.path, &bytes).map_err(|error| {
-            Trouble::new(format!(
-                "Cairn could not save its record of changes ({error})."
-            ))
-        })
+        let bytes = serde_json::to_vec_pretty(inventory).map_err(|_| not_saved())?;
+        super::write_atomically(&self.path, &bytes).map_err(|_| not_saved())
     }
 
     /// Remove one recorded change from the inventory once it has actually been
@@ -215,4 +210,13 @@ pub fn sha256_hex(bytes: &[u8]) -> String {
     use sha2::{Digest, Sha256};
     let digest = Sha256::digest(bytes);
     digest.iter().map(|byte| format!("{byte:02x}")).collect()
+}
+
+/// The record on disk is the one that was there before: the write goes to a
+/// neighbour and is renamed over only once it is whole.
+fn not_saved() -> Trouble {
+    Trouble::new(
+        "Cairn could not save its record of what it has changed on this machine, so \
+         the record it already had is kept as it was.",
+    )
 }

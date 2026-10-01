@@ -38,12 +38,14 @@ pub(crate) fn trouble(kind: TroubleKind, message: impl Into<String>) -> Response
 }
 
 /// The sentence shown when Cairn could not reach a system file at all.
-pub(crate) fn unreachable(error: impl std::fmt::Display) -> Response {
+///
+/// It is Cairn's sentence and never the system's: an io error's own words can
+/// carry a banned word or a path, and they would travel to the window as
+/// written.
+pub(crate) fn unreachable() -> Response {
     trouble(
         TroubleKind::Unreachable,
-        format!(
-            "Cairn could not open the system's list of site addresses ({error}). \
-             Nothing on this machine has been changed."
-        ),
+        "Cairn could not open the system's list of site addresses. Nothing on this \
+         machine has been changed.",
     )
 }

@@ -28,11 +28,11 @@ pub fn write_backup_once(machine: &Machine, target: Target) -> Response {
                 written: false,
                 sha256: sha256_hex(&existing),
             },
-            Err(error) => trouble(
+            Err(_) => trouble(
                 TroubleKind::Unreachable,
                 format!(
-                    "Cairn has a record of an earlier copy of {} but cannot read it \
-                     ({error}). Nothing has been changed.",
+                    "Cairn has a record of an earlier copy of {} but cannot read it. \
+                     Nothing has been changed.",
                     target.label()
                 ),
             ),
@@ -41,17 +41,17 @@ pub fn write_backup_once(machine: &Machine, target: Target) -> Response {
 
     let original = match machine.read(target) {
         Ok(bytes) => bytes,
-        Err(error) => return unreachable(error),
+        Err(_) => return unreachable(),
     };
     let sha256 = sha256_hex(&original);
 
     if let Some(directory) = backup_path.parent() {
-        if let Err(error) = std::fs::create_dir_all(directory) {
-            return unreachable(error);
+        if std::fs::create_dir_all(directory).is_err() {
+            return no_copy_kept(target);
         }
     }
-    if let Err(error) = std::fs::write(&backup_path, &original) {
-        return unreachable(error);
+    if std::fs::write(&backup_path, &original).is_err() {
+        return no_copy_kept(target);
     }
 
     if let Err(problem) = store.record(Change::BackupWritten {
@@ -91,7 +91,7 @@ pub fn remove_backup(machine: &Machine, target: Target) -> Response {
 
     let current = match machine.read(target) {
         Ok(bytes) => bytes,
-        Err(error) => return unreachable(error),
+        Err(_) => return unreachable(),
     };
 
     let restored_sha256_match = match &recorded {
@@ -119,4 +119,17 @@ pub fn remove_backup(machine: &Machine, target: Target) -> Response {
         removed,
         restored_sha256_match,
     }
+}
+
+/// The original was read but Cairn's copy of it could not be kept. Nothing is
+/// modified without that copy (invariant 1), so nothing was.
+fn no_copy_kept(target: Target) -> Response {
+    trouble(
+        TroubleKind::Unreachable,
+        format!(
+            "Cairn could not keep its copy of {} as it is now, so it has not gone on \
+             to change anything. Nothing on this machine has been changed.",
+            target.label()
+        ),
+    )
 }

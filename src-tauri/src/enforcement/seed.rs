@@ -70,37 +70,28 @@ impl CategoryStore {
 
     pub fn load(&self, category: CategoryId) -> Result<Option<CategoryList>, Trouble> {
         match std::fs::read(self.path_for(category)) {
-            Ok(bytes) => serde_json::from_slice(&bytes).map(Some).map_err(|error| {
+            // Sentences Cairn wrote, never the system's or the parser's own
+            // words: those can carry a banned word or a path with the
+            // person's name in it.
+            Ok(bytes) => serde_json::from_slice(&bytes).map(Some).map_err(|_| {
                 Trouble::new(format!(
-                    "Cairn could not read your {} list ({error}). Your protection is \
-                     unaffected.",
+                    "Cairn could not make sense of your {} list, so it has left it \
+                     exactly as it is. Your protection is unaffected.",
                     category.label()
                 ))
             }),
             Err(error) if error.kind() == std::io::ErrorKind::NotFound => Ok(None),
-            Err(error) => Err(Trouble::new(format!(
-                "Cairn could not open your {} list ({error}). Your protection is \
-                 unaffected.",
+            Err(_) => Err(Trouble::new(format!(
+                "Cairn could not open your {} list. Your protection is unaffected.",
                 category.label()
             ))),
         }
     }
 
     pub fn save(&self, category: CategoryId, list: &CategoryList) -> Result<(), Trouble> {
-        let bytes = serde_json::to_vec_pretty(list).map_err(|error| {
-            Trouble::new(format!(
-                "Cairn could not write your {} list ({error}).",
-                category.label()
-            ))
-        })?;
-        crate::store::write_atomically(&self.path_for(category), &bytes).map_err(
-            |error| {
-                Trouble::new(format!(
-                    "Cairn could not save your {} list ({error}).",
-                    category.label()
-                ))
-            },
-        )
+        let bytes = serde_json::to_vec_pretty(list).map_err(|_| not_saved(category))?;
+        crate::store::write_atomically(&self.path_for(category), &bytes)
+            .map_err(|_| not_saved(category))
     }
 }
 
@@ -120,22 +111,31 @@ pub fn seed_missing_lists(
         }
 
         let seed_path = shipped.join(format!("{}.json", category.slug()));
-        let bytes = std::fs::read(&seed_path).map_err(|error| {
-            Trouble::new(format!(
-                "Cairn could not read its own starting list for {} ({error}).",
-                category.label()
-            ))
-        })?;
-        let seed: CategorySeed = serde_json::from_slice(&bytes).map_err(|error| {
-            Trouble::new(format!(
-                "Cairn could not read its own starting list for {} ({error}).",
-                category.label()
-            ))
-        })?;
+        let bytes = std::fs::read(&seed_path).map_err(|_| no_starting_list(category))?;
+        let seed: CategorySeed =
+            serde_json::from_slice(&bytes).map_err(|_| no_starting_list(category))?;
 
         store.save(category, &CategoryList::from_seed(seed))?;
         copied.push(category);
     }
 
     Ok(copied)
+}
+
+/// Saving a list is only ever copying a starting list in, before anything from
+/// it is protected — so nothing in force depends on it.
+fn not_saved(category: CategoryId) -> Trouble {
+    Trouble::new(format!(
+        "Cairn could not keep its own copy of your {} list, so that list is not \
+         ready yet. Your protection is unaffected.",
+        category.label()
+    ))
+}
+
+fn no_starting_list(category: CategoryId) -> Trouble {
+    Trouble::new(format!(
+        "Cairn could not read its own starting list for {}, so that list is not \
+         ready yet. Try reinstalling Cairn. Your protection is unaffected.",
+        category.label()
+    ))
 }

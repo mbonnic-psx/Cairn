@@ -126,8 +126,12 @@ impl InstalledHelper {
         let _ = stream.set_read_timeout(Some(ANSWER_TIMEOUT));
         let _ = stream.set_write_timeout(Some(ANSWER_TIMEOUT));
 
-        let payload = serde_json::to_vec(&request).map_err(|error| {
-            Trouble::new(format!("Cairn could not form that request ({error})."))
+        // Sentences Cairn wrote, never the parser's own words.
+        let payload = serde_json::to_vec(&request).map_err(|_| {
+            Trouble::new(
+                "Cairn could not prepare that request, so it was not sent. Nothing on \
+                 this machine has been changed.",
+            )
         })?;
         stream
             .write_all(&(payload.len() as u32).to_be_bytes())
@@ -144,10 +148,13 @@ impl InstalledHelper {
             .read_exact(&mut answer)
             .map_err(|_| not_reachable())?;
 
-        let response = serde_json::from_slice(&answer).map_err(|error| {
-            Trouble::new(format!(
-                "Cairn could not read the answer from its background component ({error})."
-            ))
+        // The request did reach the helper, so whether it did anything is not
+        // known — and not claimed either way.
+        let response = serde_json::from_slice(&answer).map_err(|_| {
+            Trouble::new(
+                "Cairn could not understand the answer from its background component, \
+                 so it cannot confirm what that request did.",
+            )
         })?;
         Ok((stream, response))
     }
