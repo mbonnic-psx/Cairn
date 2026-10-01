@@ -253,3 +253,35 @@ mod category_lists {
         assert_plain(&said, directory.path());
     }
 }
+
+mod system_hosts {
+    use super::*;
+    use cairn::platform::hosts::SystemHosts;
+    use cairn::services::HostsService;
+
+    #[test]
+    fn a_hosts_file_that_cannot_be_read_is_explained_plainly() {
+        if !permissions_hold() {
+            return;
+        }
+        let directory = tempfile::tempdir().unwrap();
+        let path = directory.path().join("hosts");
+        std::fs::write(&path, b"127.0.0.1 localhost\n").unwrap();
+        lock(&path, 0o000);
+
+        let said = SystemHosts::at(&path).verify(&[]).unwrap_err().message;
+        lock(&path, 0o600);
+        assert_plain(&said, directory.path());
+        assert!(said.contains("cannot confirm"), "{said}");
+    }
+
+    #[test]
+    fn a_directory_where_the_hosts_file_belongs_is_explained_plainly() {
+        let directory = tempfile::tempdir().unwrap();
+        let path = directory.path().join("hosts");
+        std::fs::create_dir_all(&path).unwrap();
+
+        let said = SystemHosts::at(&path).read_raw().unwrap_err().message;
+        assert_plain(&said, directory.path());
+    }
+}

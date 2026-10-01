@@ -47,9 +47,13 @@ impl HostsService for SystemHosts {
         match std::fs::read(&self.path) {
             Ok(bytes) => Ok(bytes),
             Err(error) if error.kind() == std::io::ErrorKind::NotFound => Ok(Vec::new()),
-            Err(error) => Err(Trouble::new(format!(
-                "Cairn could not read the system's list of site addresses ({error})."
-            ))),
+            // Cairn's own sentence, never the system's: that can carry a banned
+            // word, and it arrives too late for any check to see it.
+            Err(_) => Err(Trouble::new(
+                "Cairn could not read the system's list of site addresses, so it cannot \
+                 confirm right now what is protected. Nothing on this machine has been \
+                 changed.",
+            )),
         }
     }
 

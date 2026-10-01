@@ -64,9 +64,11 @@ impl CredentialStore for PlatformCredentials {
             .map_err(|unavailable| Trouble::new(unavailable.message()))?;
         match entry.delete_credential() {
             Ok(()) | Err(keyring::Error::NoEntry) => Ok(()),
-            Err(error) => Err(Trouble::new(format!(
-                "Cairn could not remove the key it kept for your history ({error})."
-            ))),
+            // Cairn's own sentence, never the credential store's.
+            Err(_) => Err(Trouble::new(
+                "Cairn could not remove the key it kept for your history, so it is still \
+                 kept on this machine.",
+            )),
         }
     }
 }

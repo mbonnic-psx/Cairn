@@ -128,11 +128,12 @@ fn run_elevated(script: &str) -> Outcome<()> {
     let output = Command::new("pkexec")
         .args(["/bin/sh", "-c", script])
         .output()
-        .map_err(|error| {
-            Trouble::new(format!(
-                "Cairn could not ask for permission to change this machine ({error}). \
-                 Nothing has been changed."
-            ))
+        // Cairn's own sentence, never the system's.
+        .map_err(|_| {
+            Trouble::new(
+                "Cairn could not ask for permission to change this machine. Nothing has \
+                 been changed.",
+            )
         })?;
 
     if output.status.success() {
