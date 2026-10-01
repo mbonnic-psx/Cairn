@@ -115,36 +115,36 @@ differently per runner rather than failing; it belongs in the same commit as the
 
 ## Phase 3: User Story 1 — The evening check-in (Priority: P1) 🎯 MVP
 
-**Goal**: One quiet announcement at the chosen hour, opening onto today's reaches, a space to
-write, and perhaps a quote — with nothing else in the day interrupting anyone.
+**Goal**: A check-in the person opens when they choose, holding today's reaches, a space to
+write, and perhaps a quote — with nothing in the day interrupting anyone. *(Revised
+2026-10-01: the announcement is withdrawn.)*
 
-**Independent Test**: Set the hour a few minutes ahead, wait, and get exactly one
-notification. Open the check-in, write an entry, save, reopen — the text is intact. Restart
-the app and get no second announcement for the day.
+**Independent Test**: Leave Cairn running and confirm nothing is ever raised. Open the
+check-in, write an entry, save, reopen — the text is intact.
 
 ### Tests for User Story 1
 
-- [ ] T024 [P] [US1] Write the end-to-end announcement test — called any number of times across a day, at most one announcement is produced, and none before the hour or after the day ends — in `src-tauri/tests/us1_announcement.rs` (SC-001, SC-002)
-- [ ] T025 [P] [US1] Write the durability test proving the announcement record survives a restart, so a reopened window cannot produce a second notice, in `src-tauri/tests/us1_announcement.rs` (research R2)
+- [-] ~~T024 [P] [US1] Write the end-to-end announcement test — called any number of times across a day, at most one announcement is produced, and none before the hour or after the day ends — in `src-tauri/tests/us1_announcement.rs` (SC-001, SC-002)~~ — **WITHDRAWN 2026-10-01**: Cairn raises no notification (spec Clarifications 2026-10-01).
+- [-] ~~T025 [P] [US1] Write the durability test proving the announcement record survives a restart, so a reopened window cannot produce a second notice, in `src-tauri/tests/us1_announcement.rs` (research R2)~~ — **WITHDRAWN 2026-10-01**: Cairn raises no notification (spec Clarifications 2026-10-01).
 - [ ] T026 [P] [US1] Write the test proving the journaling space is refused rather than offered when the key is unavailable, and that nothing is written, in `src-tauri/tests/fail_closed_journal.rs` (research R5, FR-029)
 - [ ] T027 [P] [US1] Write the screen tests for the check-in — reaches shown, entry saved and reopened, quote optional and absent without degrading, no banned words — in `src/screens/__tests__/CheckIn.test.tsx`
 
 ### Implementation for User Story 1
 
-- [ ] T028 [US1] Implement the announcement orchestration in `src-tauri/src/reflection/mod.rs` and `src-tauri/src/reflection/checkin.rs`: call the pure decision, **record the answer before raising**, then return it (research R2). Depends on T001
+- [-] ~~T028 [US1] Implement the announcement orchestration in `src-tauri/src/reflection/mod.rs` and `src-tauri/src/reflection/checkin.rs`: call the pure decision, **record the answer before raising**, then return it (research R2). Depends on T001~~ — **WITHDRAWN 2026-10-01**: Cairn raises no notification (spec Clarifications 2026-10-01).
 - [ ] T029 [US1] Implement assembling a day — reaches, gaps, coverage note, entry, sealed sentence — into the `DayView` of `contracts/ui-ipc.md` in `src-tauri/src/reflection/checkin.rs` (FR-008, FR-021)
 - [ ] T030 [US1] Implement saving a journal entry in `src-tauri/src/reflection/journal.rs`, refusing empty text and refusing outright when the key is unavailable (FR-014, FR-015, FR-029)
 - [ ] T031 [US1] Implement reading a quote from the bundled set in `src-tauri/src/reflection/checkin.rs`, returning nothing as a valid complete answer (FR-008, FR-009)
-- [ ] T032 [US1] Expose `get_day`, `get_quote`, `save_journal_entry`, `announce_check_in_if_due`, `get_check_in_settings`, `set_evening_hour`, and `set_announce_check_in` in `src-tauri/src/ipc/commands.rs` and `src-tauri/src/ipc/state.rs`
+- [ ] T032 [US1] Expose `get_day`, `get_quote`, `save_journal_entry`, `announce_check_in_if_due`, `get_check_in_settings`, `set_evening_hour`, and `set_announce_check_in` in `src-tauri/src/ipc/commands.rs` and `src-tauri/src/ipc/state.rs` *(2026-10-01: `announce_check_in_if_due`, `get_check_in_settings`, `set_evening_hour` and `set_announce_check_in` are withdrawn; only the check-in's own commands remain.)*
 - [ ] T033 [US1] Add all seven new commands to the `CLASSIFIED` array in `src-tauri/tests/ipc_surface.rs`, growing its fixed size, each classified as having no effect on protection
 - [ ] T034 [P] [US1] Add the typed command wrappers in `src/ipc/journal.ts`, and extend `src/ipc/reaches.ts` with the range read
-- [ ] T035 [US1] Implement the one module permitted to raise a notification in `src/announce.ts`, polling the decision command and rendering nothing itself. Add `@tauri-apps/plugin-notification` to `package.json` **and update `package-lock.json` in the same commit** — `npm ci` fails on a lockfile that disagrees, and CI runs `npm ci`
+- [-] ~~T035 [US1] Implement the one module permitted to raise a notification in `src/announce.ts`, polling the decision command and rendering nothing itself. Add `@tauri-apps/plugin-notification` to `package.json` **and update `package-lock.json` in the same commit** — `npm ci` fails on a lockfile that disagrees, and CI runs `npm ci`~~ — **WITHDRAWN 2026-10-01**: Cairn raises no notification (spec Clarifications 2026-10-01).
 - [ ] T036 [US1] Build the check-in screen in `src/screens/CheckIn.tsx` — serif for the reflective surface, today's reaches, the journaling space, the optional quote. **No route to any protection change may appear here** (plan.md, Principle I)
-- [ ] T037 [P] [US1] Build the evening hour and announcement switch in `src/screens/Settings/EveningHour.tsx`, stating that the reminder needs Cairn to be running (Complexity Tracking C1, Principle III)
+- [-] ~~T037 [P] [US1] Build the evening hour and announcement switch in `src/screens/Settings/EveningHour.tsx`, stating that the reminder needs Cairn to be running (Complexity Tracking C1, Principle III)~~ — **WITHDRAWN 2026-10-01**: Cairn raises no notification (spec Clarifications 2026-10-01).
 - [ ] T038 [US1] Wire the check-in and settings destinations into `src/App.tsx` **without putting reach data, a count, or a hint in the shell** (FR-033)
 
 **Checkpoint**: The evening ritual works end to end. `npm run check` still passes, including
-the rewritten notification guard.
+the notification guard, which forbids notification capability entirely again (2026-10-01).
 
 ---
 
@@ -237,14 +237,14 @@ untouched. Delete a day, a range, and everything, and confirm each leaves no tra
 
 - [ ] T070 [P] Verify every user-facing string added by this slice passes `node scripts/check-banned-words.mjs` — this slice writes more prose than any before it (FR-031, SC-009)
 - [ ] T071 [P] Verify `node scripts/check-no-streaks.mjs` passes **unmodified**, and that this slice added no counter, no day count, and no chain (FR-033, SC-010)
-- [ ] T072 [P] Verify `node scripts/check-free.mjs` and `bash scripts/check-no-network-deps.sh` still pass with the notification dependency in the tree (Principle VII, Principle II)
+- [ ] T072 [P] Verify `node scripts/check-free.mjs` and `bash scripts/check-no-network-deps.sh` still pass with the notification dependency in the tree (Principle VII, Principle II) *(2026-10-01: the notification dependency is removed; verify the guards pass without it.)*
 - [ ] T073 [P] Sweep every screen with several skipped days and reaches present, confirming zero surfaces count, list, total, or draw attention to unwritten days or reach counts (SC-016, SC-004)
 - [ ] T074 **Measure (R7)** SC-006: change ranges and breakdowns against 10,000 entries and two years of seeded history on all three platforms, and record the result in `specs/003-reflection-and-history/research.md`. A miss is answered with a stated cap or a stated wait, never with silent truncation
 - [ ] T075 Run a network capture across ordinary use including several check-ins, asserting zero bytes leave the machine, and record it in `specs/003-reflection-and-history/quickstart.md` (SC-013)
-- [ ] T076 Observe the announcement across seven days, confirming exactly one per day on days Cairn was running at the hour and zero at any other time (SC-001, SC-003)
+- [-] ~~T076 Observe the announcement across seven days, confirming exactly one per day on days Cairn was running at the hour and zero at any other time (SC-001, SC-003)~~ — **WITHDRAWN 2026-10-01**: Cairn raises no notification (spec Clarifications 2026-10-01).
 - [ ] T077 Run every [quickstart.md](./quickstart.md) scenario on Windows, macOS, and Linux and record the results
 - [ ] T078 [P] Replace the Current State section of `CLAUDE.md` with this slice's commands, the four modified guards, and the two tests that are guards in disguise (T050 and T059)
-- [ ] T079 [P] Record the C1 limit — the reminder needs Cairn to be running — in `README.md` alongside the existing administrator caveat (Principle III)
+- [-] ~~T079 [P] Record the C1 limit — the reminder needs Cairn to be running — in `README.md` alongside the existing administrator caveat (Principle III)~~ — **WITHDRAWN 2026-10-01**: Cairn raises no notification (spec Clarifications 2026-10-01).
 
 ---
 

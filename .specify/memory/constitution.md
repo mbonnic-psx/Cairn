@@ -1,6 +1,23 @@
 <!--
 SYNC IMPACT REPORT
 ==================
+Version change: 1.3.0 → 1.4.0
+Rationale: MINOR. Principle V gains a rule: Cairn raises no notification of any kind,
+the evening check-in included. The person opens the check-in when they choose, and
+nothing invites them to. Cairn is a blocker that is set and then left; an evening
+reminder is still an app asking for attention. The Observability practice no longer
+refers to "the one daily reflection notification", because there is none. Principle V
+is not NON-NEGOTIABLE, and no NON-NEGOTIABLE principle changes.
+Migration impact: feature 003 drops FR-001–FR-007 and its `evening-notice` and
+`evening-settings` slices. The notification plugin, its permissions and the announce
+seam are removed. `check-no-notifications.sh` goes back to forbidding notification
+capability entirely, as it did in slice 002.
+Downstream artifacts updated: CLAUDE.md, VISION.md (owner-approved), specs/001-cairn-v1
+and specs/003-reflection-and-history.
+Approved: by the project owner, 2026-10-01 ("I dont want the app to ask the user to
+check in ever"; "1. a, 2. keep it, 3. yes").
+
+Previous amendment, 1.2.0 → 1.3.0:
 Version change: 1.2.0 → 1.3.0
 Rationale: MINOR. The safety net reached `tests-pass` (owner, 2026-09-30), the rung at
 which "Acceptance-Driven Development, Tests First" comes into force. It moves from
@@ -184,6 +201,9 @@ Cairn MUST NOT prompt for reflection, journaling, or justification in the moment
 craving or during the working day.
 
 - Reflection MUST be a single, once-daily, end-of-day ritual the user opts into.
+- Cairn MUST NOT raise a notification of any kind, including to announce that the
+  check-in is ready. The person opens the check-in when they choose to, and nothing
+  invites them to.
 - A reach MUST be recorded silently and treated as information, never as failure.
 - Cairn MUST NEVER require the user to type, solve, or answer anything in order to
   reach or leave a blocked site — no quizzes, no passphrases, no math problems.
@@ -354,9 +374,8 @@ and its audience is the person using Cairn, never a remote party.
   without restoring a backup.
 - A problem is detected by verification, never by a remote alert. Protection whose
   verified state is not what Cairn intended MUST be reported where the person looks
-  for it, in Cairn's own status (Principle III). Detection MUST NOT produce
-  interruptions that the one daily reflection notification (Principle V) does not
-  already allow.
+  for it, in Cairn's own status (Principle III). Detection MUST NOT produce an
+  interruption of any kind (Principle V).
 
 <!-- security-and-privacy: Security, privacy, and compliance -->
 ### Security and Privacy
@@ -498,4 +517,4 @@ verify compliance explicitly. Runtime development guidance for agents lives in
 `CLAUDE.md`; it MUST NOT contradict this document, and MUST be updated when this
 document changes.
 
-**Version**: 1.3.0 | **Ratified**: 2026-08-18 | **Last Amended**: 2026-09-30
+**Version**: 1.4.0 | **Ratified**: 2026-08-18 | **Last Amended**: 2026-10-01

@@ -17,7 +17,7 @@ fact, not convenience, decides every trade-off.
 | Document | What it is |
 | --- | --- |
 | `VISION.md` | Intent and voice. The source. Do not edit without being asked. |
-| `.specify/memory/constitution.md` | **Binding rules.** Currently v1.3.0. |
+| `.specify/memory/constitution.md` | **Binding rules.** Currently v1.4.0. |
 | `specs/001-cairn-v1/spec.md` | The v1 PRD — 90 functional requirements, 18 success criteria. |
 | `specs/001-cairn-v1/checklists/requirements.md` | Quality gate + validation history. |
 
@@ -134,9 +134,9 @@ platform can't support something, say so in the UI — never claim coverage you 
 have. Disclose plainly before any change affecting other user accounts. The app and
 README both state that a determined user with admin access can defeat Cairn.
 
-**Reflection at distance.** One quiet notification per day at the user's chosen
-evening hour, never repeated or escalated, off-switch in settings. Nothing else,
-ever. Never require the user to type, solve, or answer anything to reach a site or
+**Reflection at distance.** Cairn raises no notification of any kind — not even
+to say the evening check-in is ready. The check-in waits in the app for whenever
+the person opens it. Never require the user to type, solve, or answer anything to reach a site or
 keep protection running.
 
 **Free at the moment of need.** Everything in `specs/001-cairn-v1/spec.md` is

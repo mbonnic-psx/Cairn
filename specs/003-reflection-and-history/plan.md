@@ -1,5 +1,13 @@
 # Implementation Plan: The evening check-in and honest history
 
+> **Revised 2026-10-01 — the announcement is withdrawn.** The owner decided Cairn raises no
+> notification of any kind, the check-in included (spec Clarifications 2026-10-01; constitution
+> v1.4.0). Everything below about the announcement, the evening hour, the announcement switch,
+> `last_announced_day`, the notification plugin and the rewritten notification guard is kept as
+> the record of what was planned and validated, and no longer describes Cairn. The plugin, its
+> permissions, the announce seam and the decision function were removed, and
+> `check-no-notifications.sh` forbids notification capability entirely again.
+
 **Branch**: `003-reflection-and-history` | **Date**: 2026-08-27 | **Spec**: [spec.md](./spec.md)
 
 **Input**: Feature specification from `/specs/003-reflection-and-history/spec.md`

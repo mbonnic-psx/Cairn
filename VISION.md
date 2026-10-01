@@ -35,7 +35,7 @@ Reaching for a site isn't failure. It's information. The wall stops the behavior
 1. **Set the trail** — pick categories and custom sites; choose when protection is active.
 2. **Protection runs** — silently, at the system level, all day. No interruptions, no popups.
 3. **A reach happens** — the site fails to load. Cairn notes it and says nothing.
-4. **Evening check-in** — a single daily prompt: today's reaches, a journaling space, an optional quote.
+4. **Evening check-in** — a single daily page you open when you choose, never one that calls you: today's reaches, a journaling space, an optional quote.
 5. **See the pattern** — a history view showing reaches by site, by hour, by day, over time.
 6. **Share it, if you want** — a partner sees the same picture.
 
