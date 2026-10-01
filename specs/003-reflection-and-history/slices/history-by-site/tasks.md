@@ -1,0 +1,127 @@
+# Tasks — slice `history-by-site`
+
+Numbered `S`. Each names the feature task it carries out (`../../tasks.md`) and the plan's scenarios
+(`plan.md`). RED before GREEN, always: a GREEN task starts only once the RED task it answers has been seen
+failing for the reason it states. Every task is `[US2]`. `[P]` marks a task whose files no other open task in
+its phase touches.
+
+## Phase 0 — Pin: before code that was here changes
+
+- [ ] S1 [US2] [pin] Write `src/screens/__tests__/ReachesToday.test.tsx`. It renders `Reaches` with a fake
+  `read` (a plain object of two functions, written in the test file, recording its calls) and a fixed `now`
+  (an ordinary day, 30 September 2026, 20:00 local). It asserts the screen opens on *Today*, and asks
+  `listTodaysReaches` for this local midnight to that instant plus 86 400. It fails only because `Reaches`
+  takes no `read` or `now` yet. No `vi.mock`.
+- [ ] S2 [US2] [pin] `src/screens/Reaches.tsx`: add the optional `read` and `now` props, defaulting to the real
+  wrappers and `() => new Date()`, with no other change. S1 and `Reaches.test.tsx` green, and
+  `Reaches.test.tsx` is not edited. Hand the host the two rows in `plan.md`, *Pin*, for
+  `delivery/survey/pinned.md`.
+
+## Phase 1 — RED: the behaviour, stated as failing tests
+
+- [ ] S3 [P] [US2] [T039, T040, T043, T044, T049; scenarios 1–8, 10, 12] Write `src-tauri/tests/us2_by_site.rs`
+  against `AppState`, the driving port, seeding the history through `OpenHistory` as
+  `us1_write_tonight.rs` does. It covers by site most first, with the edges of the range excluded; changing the
+  range and back; the same answer with and without journal entries; a quiet range; gaps cut to the range, with
+  a note about *these days*; a range wholly inside a gap; estimates out of `by_site` and counted by date; a
+  deleted day adding no gap; sealed, and a history that opens but cannot be read; the no-history build; and the
+  serialised keys, exactly five. Every sentence is checked for voice. Written by a different agent than S11–S14.
+- [ ] S4 [P] [US2] [scenario 9] Write `src-tauri/tests/range_bounds.rs` (`#![cfg(feature = "history")]`, as
+  `bounds_and_clipping.rs` is) against `reflection::over_time::check_range`. Each limit is held at its edge and
+  one second past it: first day after last; `range_start` at −14 h and +12 h of `first_day`'s UTC midnight;
+  `range_end` the same against the day after `last_day`; offsets differing by exactly 2 h and by 2 h + 1 s; a
+  range that begins at the present and one second after it. Also a 4-week range across a 23-hour and a 25-hour
+  day, accepted.
+- [ ] S5 [P] [US2] [scenario 5] Write `src-tauri/tests/range_coverage.rs`: `store::gaps::range_coverage_note`
+  is `None` for no gaps. It states minutes under an hour, hours under two days, and days from two days up,
+  speaks of *these days* and never *today*, and passes the banned-word list. `coverage_note` for a day says
+  what it says now (the `gaps` test holds it).
+- [ ] S6 [P] [US2] [T041; scenario 11] Write `src-tauri/tests/patterns_at_scale.rs`: two years of history at
+  50 reaches a day across 300 sites, read through `AppState::summarize_reaches` for the two years, inside
+  1 000 ms. The header says what this does not measure, as `at_scale.rs`'s does.
+- [ ] S7 [P] [US2] [T044] Grow `CLASSIFIED` in `src-tauri/tests/ipc_surface.rs` from 17 to 18 with
+  `summarize_reaches` as `Effect::Reads`, so `every_classified_command_is_exposed` fails until it is exposed.
+- [ ] S8 [P] [US2] [W13] Write `src/__tests__/localDays.test.ts` for `src/localDays.ts`: today's date as
+  `YYYY-MM-DD`; a day's bounds as its two local midnights, 23 hours apart on a spring-forward day and 25 on a
+  fall-back day (with `process.env.TZ = 'Europe/London'` set at the top of the file, before any date is made); a range's bounds; adding
+  days across a month end, a year end and 29 February.
+- [ ] S9 [P] [US2] [T042, T045, T047; scenarios 13–19] Write `src/screens/__tests__/ReachesOverTime.test.tsx`
+  with a fake `read` and a fixed `now`, and no `vi.mock`. It covers the *Today* | *Over time* choice; the
+  first call for 2026-09-03 to 2026-09-30 with local-midnight bounds; changing *From* calling again; the range
+  forgotten on going back to *Today* and returning; *To* bounded by today and *From* by *To*; the order kept,
+  with a count and a bar for each site; no ranking word and no comparison; a quiet range; the coverage note and
+  the estimates sentence above the list, the latter only when non-zero; sealed; a read that throws, shown as
+  one plain sentence; no streak, *day N*, chain or banned word; and no control that changes protection.
+- [ ] S10 [US2] [W13; scenario 20] Add the clock-change case to `src/screens/__tests__/ReachesToday.test.tsx`:
+  on a 25-hour day (`TZ=Europe/London`, 25 October 2026), *Today* asks for this local midnight to the next one.
+  It fails against `start + 86 400`. (Not `[P]` with S1, which writes the same file.)
+
+## Phase 2 — GREEN: the least that passes
+
+- [ ] S11 [P] [US2] [S5] `src-tauri/src/store/gaps.rs`: `range_coverage_note(gaps)`, beside `coverage_note`,
+  which does not change. The span is in minutes, hours or days; the sentence states the limit and guesses at
+  nothing.
+- [ ] S12 [US2] [S4] `src-tauri/src/reflection/checkin.rs`: extract the rule that an instant could begin a
+  given day, as a refactor, with `bounds_and_clipping.rs` and `us1_write_tonight.rs` green before and after.
+  `src-tauri/src/reflection/over_time.rs` (new) and `reflection/mod.rs`: `check_range`, using that rule at each
+  end, plus the offset limit and the has-begun limit, with the refusal sentence in `plan.md`.
+- [ ] S13 [US2] [T043; S3] `src-tauri/src/reflection/over_time.rs`: assemble the range from an
+  `OpenHistory`: `between`, `gaps_between` cut by `clipped`, `estimates_between(first_day, last_day + 1)`
+  counted, and `by_site` from `domain::patterns::summarize` given the reaches and no estimates. Every read
+  error is returned as one, never as an empty list. Depends on S11 and S12.
+- [ ] S14 [US2] [T044; S3, S6, S7] `src-tauri/src/ipc/state.rs`: `SiteCount { domain, count }`, `Patterns` with
+  the five fields, and `AppState::summarize_reaches(first_day, last_day, range_start, range_end)`. Bounds are
+  checked first, then the history opened through `open_history`, and every refusal becomes the sealed
+  sentence. Without the `history` feature, the answer is `NO_HISTORY`. `ipc/commands.rs`: the
+  `#[tauri::command]`, whose doc comment names the reaches screen as its only caller. `main.rs`: registered.
+  Depends on S13.
+- [ ] S15 [P] [US2] [W13; S8] `src/localDays.ts`: `localToday(now)`, `dayBounds(day)`,
+  `rangeBounds(firstDay, lastDay)` and `addDays(day, n)`, built from the calendar (`new Date(y, m, d)`), never
+  by adding seconds. It holds no reach data, so the guard has nothing to say about it.
+- [ ] S16 [P] [US2] [T034, W14] `src/ipc/reaches.ts`: `SiteCount`, `Patterns` (the five fields), and
+  `summarizeReaches(firstDay, lastDay, rangeStart, rangeEnd)`. The wrapper returns what the command returns.
+  The screen turns a thrown error into its own sentence (S17).
+- [ ] S17 [US2] [T045, T047; S9, S10, S1] `src/screens/Reaches.tsx`: the *Today* | *Over time* choice; *Today*
+  on `dayBounds`; the over-time view with *From* and *To* (opening on `addDays(today, -27)` to today, and held
+  only in component state); the coverage note, then the estimates sentence, above the list; each site with its
+  count and a soft bar in one warm theme colour, decorative and `aria-hidden`, with the count as text; *Nothing
+  here for these days.* for a quiet range; the standing sentence under the list; sealed; and one plain sentence
+  for a failed read. Serif for the headings, as now. Depends on S2, S15 and S16.
+- [ ] S18 [US2] [W13, refactor] `src/screens/CheckIn.tsx`: replace its own `today()` with `localDays`, with
+  every `CheckIn*.test.tsx` green before and after. `quote` also edits this file, so whichever lands second
+  rebases. Depends on S15.
+- [ ] S19 [P] [US2] [H1, guard] `scripts/check-no-ambient-counts.mjs`: remove `History.tsx` from
+  `NAVIGATED_TO`, and say why in its header. `eslint.config.js`: remove it from the reaches block. Verify by
+  planting: reach data in a planted `src/screens/History.tsx` fails both, in `Reaches.tsx` it passes, and in
+  `App.tsx` it fails. Remove the planted files and record the runs in *Done notes*.
+
+## Phase 3 — Hold it
+
+- [ ] S20 `make verify` green; `make smoke` green (`main.rs` changed); `npm run check` (all seven guards),
+  `npm test` and `npm run lint` green; `cargo fmt --all` and
+  `cargo clippy --all-targets -- -D warnings` clean. Run by the host. This stage builds nothing.
+- [ ] S21 `contracts/ui-ipc.md`, as amended, matches `Patterns` in Rust (`ipc/state.rs`) and TypeScript
+  (`src/ipc/reaches.ts`) field for field, and S3's wire-shape test holds it.
+- [ ] S22 After the merge, on `main` (the feature's `tasks.md` and `pinned.md` are the host's): append the two
+  pinned rows if S2 has not already; tick T039, T040 and T047 if their by-site halves are all they still owe,
+  and otherwise note T039–T045, T047 and T049 as partly done, naming what remains and for which slice (5b–5d,
+  `one-day`). Tick W13 in `../write-tonight/tasks.md`, and note W14 as done for `summarizeReaches` only.
+
+## Parallel opportunities
+
+- **Phase 0 runs first and alone.** S2 is the seam that S9, S10 and S17 build on.
+- **Phase 1:** S3–S9 are all `[P]`. Each writes one new test file, apart from S7, which writes
+  `ipc_surface.rs`, a file no other task touches. The Rust tests (S3–S7) and the screen tests (S8, S9) can be
+  written by two agents at once, and S3 must be written by a different agent than S11–S14. S10 follows S1, in
+  the same file.
+- **Phase 2 has two tracks with disjoint files.**
+  - *Core:* S11 (`store/gaps.rs`) runs beside S12 (`reflection/checkin.rs`, `over_time.rs`, `mod.rs`). Then
+    S13 (`over_time.rs`), then S14 (`ipc/state.rs`, `commands.rs`, `main.rs`).
+  - *Interface:* S15 (`src/localDays.ts`) runs beside S16 (`src/ipc/reaches.ts`). Then S17 (`Reaches.tsx`),
+    with S18 (`CheckIn.tsx`) beside it.
+  - S19 (`scripts/`, `eslint.config.js`) runs at any point in Phase 2.
+  - The two tracks meet only at the contract, which is fixed before Phase 1. The interface tests run against a
+    fake reader and do not wait for the core.
+- **Across slices:** `quote` edits `CheckIn.tsx`, and so does S18. Run S18 after `quote` lands, or rebase it
+  then. `one-day` and `theirs` touch none of this slice's files except `ipc/state.rs`, `commands.rs`, `main.rs`
+  and `ipc_surface.rs`, each by adding entries, which merge cleanly.

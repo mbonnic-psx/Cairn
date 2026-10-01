@@ -90,6 +90,75 @@ many without the interface recomputing anything.
 `dst_approximate` is the honest reporting of R4's accepted approximation. When true the
 interface states that hour buckets across the range are approximate.
 
+#### Amended in slice `history-by-site` (2026-10-01)
+
+**The signature takes the range's days and their bounds, like `get_day`.** It replaces
+`(from, to, offset_seconds)` above. The command had not shipped, so nothing reads the old shape.
+
+```
+summarize_reaches(first_day, last_day, range_start, range_end) -> Patterns
+```
+
+`first_day` and `last_day` are local calendar dates (`YYYY-MM-DD`), both inside the range.
+`range_start` is the local midnight that begins `first_day`. `range_end` is the local midnight
+that ends `last_day`, which is the start of the next day. Both are epoch seconds, computed by the
+interface (research R3), never with `+ 86 400` per day. A reach counts when
+`range_start <= at < range_end`.
+
+This also settles the defect T044 records: one offset cannot reveal a change in offset. Here
+each bound, set against its own date's UTC midnight, *is* an offset. The command can derive the
+offset at each end of the range, and slice `history-by-hour` passes that pair to
+`domain::patterns::crosses_offset_change` for `dst_approximate`. Nothing needs to be added to the
+signature for it.
+
+**The bounds are checked as `get_day`'s are, at each end.** The core refuses the range, putting
+the plain sentence in `sealed` and returning nothing else, unless all of these hold:
+
+- `first_day <= last_day`;
+- `range_start` could begin `first_day` somewhere on earth: no earlier than 14 hours before
+  that date's UTC midnight and no later than 12 hours after it (the rule `check_bounds` holds
+  for a day);
+- `range_end` could begin the day after `last_day`, by the same rule;
+- the offsets at the two ends differ by no more than 2 hours, the largest seasonal clock change
+  any zone uses;
+- `range_start` is not after the present. A range that has not begun holds nothing Cairn could
+  have seen, and an empty answer would read as a quiet range.
+
+**Fields are sent once a slice can state them truthfully**, as `DayView`'s are. Slice
+`history-by-site` sends:
+
+```
+Patterns {
+  by_site:            [{ domain, count }],  // most first; equal counts by domain name, A to Z
+  gaps:               [{ from, to }],       // each cut to the part inside the range
+  coverage_note:      string | null,        // the gaps in one sentence, about the range
+  estimates_excluded: number,               // days in the range that hold the person's own estimate
+  sealed:             string | null,
+}
+```
+
+`by_hour` and `dst_approximate` (slice `history-by-hour`), `by_weekday` (`history-by-weekday`)
+and `movement` (`history-movement`) are **absent until their slices add them**. A reader treats
+an absent field as not yet known.
+
+- `by_site` is built from reaches alone (FR-023). An estimate has no site, so it cannot appear
+  here. `estimates_excluded` says how many days' estimates were left out, counted by their own
+  dates in `first_day..=last_day`.
+- `gaps` and `coverage_note` cover the range the way `get_day`'s cover a day (FR-022, SC-007).
+  The note speaks of *these days*, never *today*. A deletion the person made never adds a gap
+  (FR-022a).
+- A range with no reaches has `by_site: []` and no `sealed`. That is a quiet range (FR-024), not
+  a refusal.
+- `sealed` is set when the key is unavailable, the history cannot be read, or the bounds are
+  refused. Then `by_site` and `gaps` are empty, `coverage_note` is null, `estimates_excluded` is
+  0, and the interface shows the sentence and nothing else. A read that does not go through is
+  never an empty range.
+
+Classified `Effect::Reads`. The frontend wrapper is `summarizeReaches` in `src/ipc/reaches.ts`,
+and the reaches screen is its only caller (spec, gaps review H1).
+
+### `get_quote() -> string | null`
+
 ### `get_quote(day) -> string | null`
 
 A quote from the bundled set, or nothing. Never fetched. Null is a valid, complete answer —
