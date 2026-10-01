@@ -35,8 +35,11 @@ export const getDayView = (day: string, dayStart: number, dayEnd: number) =>
 export const saveJournalEntry = (day: string, dayStart: number, dayEnd: number, text: string) =>
   invoke<DayView>('save_journal_entry', { day, dayStart, dayEnd, text });
 
-/** A line for the check-in, or null — a complete answer (FR-008). */
-export const getQuote = () => invoke<string | null>('get_quote');
+/**
+ * A line for the check-in of `day` (YYYY-MM-DD), or null — a complete answer
+ * (FR-008). The same line comes back for the same day, across restarts.
+ */
+export const getQuote = (day: string) => invoke<string | null>('get_quote', { day });
 
 /** Whether the person wants quotes on the check-in. */
 export const getQuotesShown = () => invoke<boolean>('get_quotes_shown');

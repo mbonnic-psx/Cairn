@@ -295,7 +295,7 @@ export function CheckIn({ session }: { session?: CheckInSession }) {
         if (!stale) setShown(shown);
         // The day's line is asked for once; coming back to it keeps it (Q1).
         if (!shown || heldDay.current === day) return undefined;
-        return getQuote().then((line) => {
+        return getQuote(day).then((line) => {
           if (!stale) holdQuote(day, line);
         });
       })
@@ -329,7 +329,7 @@ export function CheckIn({ session }: { session?: CheckInSession }) {
     // Shown again in the same opening, it is the same line (Q1). Opened hidden,
     // this is the one time a line is asked for; none to be had is none shown.
     if (now && heldDay.current !== opened.day) {
-      holdQuote(opened.day, await getQuote().catch(() => null));
+      holdQuote(opened.day, await getQuote(opened.day).catch(() => null));
     }
   }
 

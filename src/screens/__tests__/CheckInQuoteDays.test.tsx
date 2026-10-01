@@ -83,6 +83,21 @@ describe('the line and choosing Tonight', () => {
     expect(quote).toHaveBeenCalledTimes(1);
   });
 
+  it('asks for the line of the day the check-in is opened for', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+    await openTonight(user);
+    await screen.findByText('The first line.');
+    expect(quote).toHaveBeenCalledWith('2026-09-30');
+
+    act(() => {
+      vi.setSystemTime(new Date(2026, 9, 1, 9, 0));
+    });
+    await openTonight(user);
+    await screen.findByText('The second line.');
+    expect(quote).toHaveBeenLastCalledWith('2026-10-01');
+  });
+
   it('on a new day is a new opening, with a line asked for again', async () => {
     const user = userEvent.setup();
     render(<App />);

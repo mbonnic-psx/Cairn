@@ -26,7 +26,7 @@ use crate::services::{
     Capability, ElevationService, HelperStatus, HostsService, Trouble,
 };
 use crate::store::config::{
-    ChosenBy, Config, ConfigStore, ProtectionIntent, ReachModeSetting,
+    ChosenBy, Config, ConfigStore, ProtectionIntent, QuoteOfTheDay, ReachModeSetting,
 };
 use crate::store::gaps::Gap;
 
@@ -761,20 +761,38 @@ impl AppState {
         }
     }
 
-    /// A line for the check-in, or nothing, which is a complete answer
-    /// (FR-008).
+    /// A line for the check-in `day` is for, or nothing, which is a complete
+    /// answer (FR-008).
     ///
-    /// A fresh roll on every call: the check-in asks once when it opens and
-    /// keeps the line while it stays open (Q1).
+    /// One line holds for the whole local day, across restarts (Q1, revised
+    /// again): the first ask for a day rolls a line at random and remembers it
+    /// with the day, as a setting; later asks for that day return it. A
+    /// remembered line for another day, one no longer in the bundled set, or
+    /// one that shows nothing, is replaced by a fresh roll. Never derived from
+    /// the date.
     ///
-    /// Nothing when the person has hidden quotes, and nothing when their
-    /// configuration cannot be read: unsure whether they hid them, Cairn shows
-    /// none rather than guess.
-    pub fn get_quote(&self) -> Option<String> {
-        if !self.get_quotes_shown().unwrap_or(false) {
+    /// Nothing, and nothing remembered, when the person has hidden quotes, and
+    /// nothing when their configuration cannot be read: unsure whether they
+    /// hid them, Cairn shows none rather than guess. If the line cannot be
+    /// saved it is still shown; after a restart the day then rolls again.
+    pub fn get_quote(&self, day: LocalDate) -> Option<String> {
+        let mut config = self.config.load().ok()?;
+        if config.quotes_hidden {
             return None;
         }
-        crate::reflection::quote::quote(&self.shipped_quotes, (self.roll)())
+        let lines = crate::reflection::quote::bundled_lines(&self.shipped_quotes);
+        if let Some(kept) = &config.quote_of_the_day {
+            if kept.day == day && lines.contains(&kept.line) {
+                return Some(kept.line.clone());
+            }
+        }
+        let line = crate::domain::quotes::choose(&lines, (self.roll)())?.to_string();
+        config.quote_of_the_day = Some(QuoteOfTheDay {
+            day,
+            line: line.clone(),
+        });
+        let _ = self.config.save(&config);
+        Some(line)
     }
 
     /// Whether the person wants a quote on the check-in. Shown until they say

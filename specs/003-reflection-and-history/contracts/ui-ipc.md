@@ -90,7 +90,7 @@ many without the interface recomputing anything.
 `dst_approximate` is the honest reporting of R4's accepted approximation. When true the
 interface states that hour buckets across the range are approximate.
 
-### `get_quote() -> string | null`
+### `get_quote(day) -> string | null`
 
 A quote from the bundled set, or nothing. Never fetched. Null is a valid, complete answer —
 a check-in without a quote is not degraded (FR-008).
@@ -98,8 +98,18 @@ a check-in without a quote is not degraded (FR-008).
 Served only to the check-in. The single-day history screen does not ask for one; a quote
 belongs to the ritual, not to the record.
 
-**Chosen at random on each call, never by the date** (slice `quote`, gaps review Q1). The
-interface asks once when the check-in opens and keeps the line while it stays open. Returns
+**Chosen at random, never by the date** (slice `quote`, gaps review Q1). The interface asks
+once when the check-in opens and keeps the line while it stays open.
+
+*Amended in slice `quote`, 2026-10-01 (Q1, revised again): the command now takes `day`, the
+local date (YYYY-MM-DD) the check-in is for, and one line holds for that day across restarts.*
+The first ask for a day chooses a line at random and remembers `{day, line}` in the
+configuration (`quote_of_the_day`, a setting readable without the key); later asks for the
+same day return it. A fresh random line is chosen when the remembered day is not `day`, or
+the remembered line is no longer in the bundled set or shows nothing. Nothing is chosen or
+remembered while quotes are hidden. If the line cannot be saved it is still returned; after a
+restart the day then chooses again. A configuration written before this field existed loads
+with no line remembered. Returns
 null when the person has hidden quotes (`set_quotes_shown(false)`), when the configuration
 cannot be read, and when the bundled set is missing or holds no line. Readable with the key
 unavailable: it does not touch the history.

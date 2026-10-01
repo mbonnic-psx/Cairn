@@ -188,8 +188,8 @@ pub fn save_journal_entry(
 /// A line for the check-in, or nothing. **The check-in is the only caller**:
 /// the wrapper lives in `src/ipc/journal.ts`, which an ESLint rule restricts.
 #[tauri::command]
-pub fn get_quote(state: State<'_, AppState>) -> Option<String> {
-    state.get_quote()
+pub fn get_quote(state: State<'_, AppState>, day: LocalDate) -> Option<String> {
+    state.get_quote(day)
 }
 
 /// Whether quotes are shown on the check-in. A setting, readable without the key.

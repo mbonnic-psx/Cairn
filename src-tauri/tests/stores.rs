@@ -138,6 +138,26 @@ fn a_configuration_from_before_quotes_could_be_hidden_shows_them() {
 }
 
 #[test]
+fn a_configuration_from_before_the_days_line_was_kept_loads_with_none() {
+    let directory = tempfile::tempdir().unwrap();
+    let store = ConfigStore::at(directory.path());
+    let held = Config {
+        trail: a_trail(),
+        intent: ProtectionIntent::On,
+        seeded: true,
+        quotes_hidden: true,
+        ..Config::default()
+    };
+    let mut value = serde_json::to_value(&held).unwrap();
+    value.as_object_mut().unwrap().remove("quote_of_the_day");
+    std::fs::write(store.path(), serde_json::to_vec_pretty(&value).unwrap()).unwrap();
+
+    let loaded = store.load().unwrap();
+    assert_eq!(loaded.quote_of_the_day, None);
+    assert_eq!(loaded, held);
+}
+
+#[test]
 fn configuration_holds_no_reach_data() {
     // FR-032 and the reason config is plain JSON at all: there is nothing
     // sensitive in it. If a reach ever appears here, this test is the tripwire.

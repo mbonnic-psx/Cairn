@@ -21,6 +21,7 @@
 
 use std::path::{Path, PathBuf};
 
+use cairn::domain::dates::LocalDate;
 use cairn::domain::normalize::ReservedNames;
 use cairn::enforcement::seed::CategoryStore;
 use cairn::helper::NoHelper;
@@ -35,6 +36,14 @@ use cairn::store::config::ConfigStore;
 /// 2026-09-30, 20:00 UTC, and the same hour a day later.
 const AN_EVENING: i64 = 1_790_798_400;
 const THE_NEXT_EVENING: i64 = AN_EVENING + 86_400;
+
+fn day() -> LocalDate {
+    "2026-09-30".parse().unwrap()
+}
+
+fn next_day() -> LocalDate {
+    "2026-10-01".parse().unwrap()
+}
 
 /// The set Cairn ships, exactly as it ships.
 fn bundled() -> PathBuf {
@@ -130,39 +139,36 @@ fn the_roll_names_a_line_of_the_bundled_set() {
     assert!(lines.len() > 3, "the bundled set should have lines in it");
 
     let third = cairn(&machine, bundled(), || 2, || AN_EVENING, true);
-    assert_eq!(third.get_quote(), Some(lines[2].clone()));
+    assert_eq!(third.get_quote(day()), Some(lines[2].clone()));
 
     // A roll past the end wraps rather than falling off it.
-    let wrapped = cairn(&machine, bundled(), || 1_000_003, || AN_EVENING, true);
+    let wrapped = cairn(&a_machine(), bundled(), || 1_000_003, || AN_EVENING, true);
     let expected = &lines[(1_000_003 % lines.len() as u64) as usize];
-    assert_eq!(wrapped.get_quote().as_ref(), Some(expected));
+    assert_eq!(wrapped.get_quote(day()).as_ref(), Some(expected));
 }
 
 // Scenario 2 — random, and never tied to the date (Q1, R6).
 
 #[test]
 fn another_roll_on_the_same_evening_can_be_another_line() {
-    let machine = a_machine();
-    let first = cairn(&machine, bundled(), || 0, || AN_EVENING, true);
-    let second = cairn(&machine, bundled(), || 1, || AN_EVENING, true);
+    let first = cairn(&a_machine(), bundled(), || 0, || AN_EVENING, true);
+    let second = cairn(&a_machine(), bundled(), || 1, || AN_EVENING, true);
 
-    assert_ne!(first.get_quote(), second.get_quote());
+    assert_ne!(first.get_quote(day()), second.get_quote(day()));
 }
 
 #[test]
 fn the_date_does_not_choose_the_line() {
-    let machine = a_machine();
-    let tonight = cairn(&machine, bundled(), || 5, || AN_EVENING, true);
-    let tomorrow = cairn(&machine, bundled(), || 5, || THE_NEXT_EVENING, true);
+    let tonight = cairn(&a_machine(), bundled(), || 5, || AN_EVENING, true);
+    let tomorrow = cairn(&a_machine(), bundled(), || 5, || THE_NEXT_EVENING, true);
 
-    assert!(tonight.get_quote().is_some());
-    assert_eq!(tonight.get_quote(), tomorrow.get_quote());
+    assert!(tonight.get_quote(day()).is_some());
+    assert_eq!(tonight.get_quote(day()), tomorrow.get_quote(next_day()));
 }
 
 #[test]
 fn each_ask_is_a_fresh_roll() {
-    // The core does not remember a line between calls: keeping it while the
-    // check-in is open is the screen's work, and reopening may bring another.
+    // A new day is a fresh roll; the same day is held (below).
     fn counting() -> u64 {
         use std::sync::atomic::{AtomicU64, Ordering};
         static NEXT: AtomicU64 = AtomicU64::new(0);
@@ -171,8 +177,8 @@ fn each_ask_is_a_fresh_roll() {
     let machine = a_machine();
     let state = cairn(&machine, bundled(), counting, || AN_EVENING, true);
 
-    let first = state.get_quote();
-    let second = state.get_quote();
+    let first = state.get_quote(day());
+    let second = state.get_quote(next_day());
     assert!(first.is_some() && second.is_some());
     assert_ne!(first, second);
 }
@@ -185,7 +191,7 @@ fn a_missing_set_is_no_quote() {
     let nowhere = machine.directory.path().join("no-such-quotes.json");
     let state = cairn(&machine, nowhere, || 0, || AN_EVENING, true);
 
-    assert_eq!(state.get_quote(), None);
+    assert_eq!(state.get_quote(day()), None);
 }
 
 #[test]
@@ -199,7 +205,7 @@ fn an_empty_or_blank_set_is_no_quote() {
         std::fs::write(&path, body).unwrap();
         for roll in [|| 0, || 1] {
             let state = cairn(&machine, path.clone(), roll, || AN_EVENING, true);
-            assert_eq!(state.get_quote(), None, "{name}");
+            assert_eq!(state.get_quote(day()), None, "{name}");
         }
     }
 }
@@ -212,7 +218,10 @@ fn blank_lines_are_never_shown() {
 
     for roll in [|| 0, || 1, || 2, || 3] {
         let state = cairn(&machine, path.clone(), roll, || AN_EVENING, true);
-        assert_eq!(state.get_quote().as_deref(), Some("The window is open."));
+        assert_eq!(
+            state.get_quote(day()).as_deref(),
+            Some("The window is open.")
+        );
     }
 }
 
@@ -229,7 +238,10 @@ fn lines_that_show_nothing_are_never_shown() {
 
     for roll in [|| 0, || 1, || 2, || 3, || 4] {
         let state = cairn(&machine, path.clone(), roll, || AN_EVENING, true);
-        assert_eq!(state.get_quote().as_deref(), Some("The window is open."));
+        assert_eq!(
+            state.get_quote(day()).as_deref(),
+            Some("The window is open.")
+        );
     }
 }
 
@@ -240,7 +252,7 @@ fn an_unreadable_set_is_no_quote() {
     std::fs::write(&path, "{ this is not json").unwrap();
     let state = cairn(&machine, path, || 0, || AN_EVENING, true);
 
-    assert_eq!(state.get_quote(), None);
+    assert_eq!(state.get_quote(day()), None);
 }
 
 // Scenario 6, the quote's half — the key has nothing to do with it.
@@ -251,7 +263,7 @@ fn a_quote_shows_with_the_key_unavailable() {
     let lines = bundled_lines();
     let sealed = cairn(&machine, bundled(), || 4, || AN_EVENING, false);
 
-    assert_eq!(sealed.get_quote(), Some(lines[4].clone()));
+    assert_eq!(sealed.get_quote(day()), Some(lines[4].clone()));
 }
 
 #[test]
@@ -267,8 +279,11 @@ fn every_bundled_line_can_come_up_as_written() {
     let lines = bundled_lines();
     let state = cairn(&machine, bundled(), counting, || AN_EVENING, true);
 
-    let shown: Vec<String> = (0..lines.len())
-        .map(|_| state.get_quote().unwrap())
+    let shown: Vec<String> = (0..lines.len() as i64)
+        .map(|offset| {
+            let day = LocalDate::from_days_since_epoch(20_000 + offset);
+            state.get_quote(day).unwrap()
+        })
         .collect();
     assert_eq!(shown, lines);
 }
@@ -281,7 +296,7 @@ fn quotes_are_shown_until_the_person_hides_them() {
     let state = cairn(&machine, bundled(), || 0, || AN_EVENING, true);
 
     assert!(state.get_quotes_shown().unwrap());
-    assert!(state.get_quote().is_some());
+    assert!(state.get_quote(day()).is_some());
 }
 
 // Scenario 5 — hidden is no quote, remembered, and undone the same way (Q2).
@@ -293,16 +308,16 @@ fn hidden_quotes_are_no_quote_and_stay_hidden_after_a_restart() {
 
     assert!(!state.set_quotes_shown(false).unwrap());
     assert!(!state.get_quotes_shown().unwrap());
-    assert_eq!(state.get_quote(), None);
+    assert_eq!(state.get_quote(day()), None);
 
     // Cairn closed and opened again, over the same data.
     let restarted = cairn(&machine, bundled(), || 3, || THE_NEXT_EVENING, true);
     assert!(!restarted.get_quotes_shown().unwrap());
-    assert_eq!(restarted.get_quote(), None);
+    assert_eq!(restarted.get_quote(day()), None);
 
     assert!(restarted.set_quotes_shown(true).unwrap());
     assert!(restarted.get_quotes_shown().unwrap());
-    assert_eq!(restarted.get_quote(), Some(bundled_lines()[3].clone()));
+    assert_eq!(restarted.get_quote(day()), Some(bundled_lines()[3].clone()));
 }
 
 #[test]
@@ -326,9 +341,9 @@ fn the_switch_works_with_the_key_unavailable() {
 
     assert!(sealed.get_quotes_shown().unwrap());
     assert!(!sealed.set_quotes_shown(false).unwrap());
-    assert_eq!(sealed.get_quote(), None);
+    assert_eq!(sealed.get_quote(day()), None);
     assert!(sealed.set_quotes_shown(true).unwrap());
-    assert!(sealed.get_quote().is_some());
+    assert!(sealed.get_quote(day()).is_some());
 }
 
 // Scenario 7 — the switch changes no protection, and never overwrites what
@@ -409,7 +424,7 @@ fn a_configuration_cairn_cannot_read_is_never_overwritten() {
     }
     assert!(state.get_quotes_shown().is_err());
     // Unsure whether they hid quotes, Cairn shows none rather than guess.
-    assert_eq!(state.get_quote(), None);
+    assert_eq!(state.get_quote(day()), None);
     assert_eq!(std::fs::read(store.path()).unwrap(), unreadable);
 }
 
@@ -423,4 +438,111 @@ fn the_application_roll_is_fresh_each_time() {
         .map(|_| cairn::reflection::quote::fresh_roll())
         .collect();
     assert!(rolls.len() > 1, "sixteen rolls, one value: {rolls:?}");
+}
+
+// Q1, revised again — the day's line holds across restarts, and is a setting.
+
+#[test]
+fn the_days_line_holds_across_a_restart_whatever_the_roll() {
+    let machine = a_machine();
+    let lines = bundled_lines();
+    let first = cairn(&machine, bundled(), || 2, || AN_EVENING, true);
+    assert_eq!(first.get_quote(day()), Some(lines[2].clone()));
+
+    let restarted = cairn(&machine, bundled(), || 5, || AN_EVENING, true);
+    assert_eq!(restarted.get_quote(day()), Some(lines[2].clone()));
+}
+
+#[test]
+fn another_day_gets_the_roll_and_is_remembered() {
+    let machine = a_machine();
+    let lines = bundled_lines();
+    let first = cairn(&machine, bundled(), || 2, || AN_EVENING, true);
+    first.get_quote(day());
+
+    let next = cairn(&machine, bundled(), || 4, || THE_NEXT_EVENING, true);
+    assert_eq!(next.get_quote(next_day()), Some(lines[4].clone()));
+
+    let restarted = cairn(&machine, bundled(), || 1, || THE_NEXT_EVENING, true);
+    assert_eq!(restarted.get_quote(next_day()), Some(lines[4].clone()));
+}
+
+#[test]
+fn a_remembered_line_no_longer_in_the_set_gives_a_fresh_one() {
+    let machine = a_machine();
+    let path = machine.directory.path().join("old-set.json");
+    std::fs::write(&path, r#"{ "quotes": ["One.", "Two.", "Three."] }"#).unwrap();
+    let before = cairn(&machine, path, || 1, || AN_EVENING, true);
+    assert_eq!(before.get_quote(day()).as_deref(), Some("Two."));
+
+    let newer = machine.directory.path().join("new-set.json");
+    std::fs::write(&newer, r#"{ "quotes": ["One.", "Three.", "Four."] }"#).unwrap();
+    let after = cairn(&machine, newer, || 2, || AN_EVENING, true);
+    assert_eq!(after.get_quote(day()).as_deref(), Some("Four."));
+}
+
+#[test]
+fn a_remembered_line_that_shows_nothing_gives_a_fresh_one() {
+    use cairn::store::config::QuoteOfTheDay;
+
+    let machine = a_machine();
+    let store = ConfigStore::at(&machine.data);
+    let mut config = store.load().unwrap();
+    config.quote_of_the_day = Some(QuoteOfTheDay {
+        day: day(),
+        line: "\u{200b}".to_string(),
+    });
+    store.save(&config).unwrap();
+
+    let state = cairn(&machine, bundled(), || 3, || AN_EVENING, true);
+    assert_eq!(state.get_quote(day()), Some(bundled_lines()[3].clone()));
+}
+
+#[test]
+fn nothing_is_remembered_while_quotes_are_hidden() {
+    let machine = a_machine();
+    let state = cairn(&machine, bundled(), || 2, || AN_EVENING, true);
+    state.set_quotes_shown(false).unwrap();
+    assert_eq!(state.get_quote(day()), None);
+    assert_eq!(
+        ConfigStore::at(&machine.data)
+            .load()
+            .unwrap()
+            .quote_of_the_day,
+        None
+    );
+
+    // Shown again, the roll names the line, since none was held.
+    state.set_quotes_shown(true).unwrap();
+    let restarted = cairn(&machine, bundled(), || 4, || AN_EVENING, true);
+    assert_eq!(restarted.get_quote(day()), Some(bundled_lines()[4].clone()));
+}
+
+#[test]
+fn an_unreadable_configuration_is_no_line_and_is_left_alone() {
+    let machine = a_machine();
+    let store = ConfigStore::at(&machine.data);
+    let unreadable = b"{ this was written by something else".to_vec();
+    std::fs::write(store.path(), &unreadable).unwrap();
+
+    let state = cairn(&machine, bundled(), || 0, || AN_EVENING, true);
+    assert_eq!(state.get_quote(day()), None);
+    assert_eq!(std::fs::read(store.path()).unwrap(), unreadable);
+}
+
+#[test]
+fn a_line_that_cannot_be_saved_is_still_shown() {
+    let machine = a_machine();
+    // A read-only data directory makes the write fail while reading works.
+    let state = cairn(&machine, bundled(), || 2, || AN_EVENING, true);
+    use std::os::unix::fs::PermissionsExt;
+    std::fs::set_permissions(&machine.data, std::fs::Permissions::from_mode(0o555))
+        .unwrap();
+    let shown = state.get_quote(day());
+    std::fs::set_permissions(&machine.data, std::fs::Permissions::from_mode(0o755))
+        .unwrap();
+    if std::fs::write(machine.data.join("probe"), b"").is_ok() {
+        return; // running as a user who ignores permissions (root)
+    }
+    assert_eq!(shown, Some(bundled_lines()[2].clone()));
 }
