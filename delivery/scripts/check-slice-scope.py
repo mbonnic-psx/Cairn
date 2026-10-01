@@ -211,11 +211,31 @@ class Scope:
         return [str(context) for context in contexts if str(context) != self.context]
 
     def owning_app(self, path: str) -> str | None:
-        """The deployable a path sits under, by its recorded `path`, or None for a path outside every app."""
+        """The deployable a path sits under, by its recorded `path`, or None for a path outside every app.
+
+        The deepest recorded path wins, so an app nested under another owns its own tree. An app recorded at the
+        repository root (`.`) owns only what sits in a directory of its own: never a file at the root (the
+        manifests, the locks, the Makefile, `project.json`), never a dot-directory, and never the host's trees
+        (`specs/`, `scripts/`, the delivery material). Without that bound a root app would own everything, and
+        this gate would refuse nothing; without the rule at all, it owns nothing, and every slice that touches
+        its screens is refused."""
+        best: tuple[int, str] | None = None
+        root_app: str | None = None
         for name in self.apps:
             app_path = self.service_path(name)
+            if app_path in ("", "."):
+                root_app = name
+                continue
             if app_path and (path == app_path or path.startswith(app_path + "/")):
-                return name
+                if best is None or len(app_path) > best[0]:
+                    best = (len(app_path), name)
+        if best is not None:
+            return best[1]
+        if root_app is not None:
+            parts = Path(path).parts
+            host_trees = {"specs", "scripts", Path(DELIVERY).parts[0] if Path(DELIVERY).parts else "delivery"}
+            if len(parts) >= 2 and not parts[0].startswith(".") and parts[0] not in host_trees:
+                return root_app
         return None
 
     def spec_violation(self, path: str) -> str | None:
