@@ -142,3 +142,24 @@ fn a_history_held_by_another_connection_is_busy_not_a_wrong_key() {
         "the history should open once nothing holds it"
     );
 }
+
+#[test]
+fn a_wrong_key_still_reads_as_sealed_and_not_as_busy() {
+    // Mutation (write-tonight): `is_busy` answering true for every failure
+    // survived. A store opened with the wrong key is sealed, in the sentence
+    // that says so — never the "just now" one, which would invite a retry that
+    // can only ever give the same answer.
+    let directory = tempfile::tempdir().unwrap();
+    match History::open(directory.path(), &key()) {
+        History::Open(_) => {}
+        History::Sealed { because } => panic!("a fresh store should open: {because}"),
+    }
+
+    let wrong = HistoryKey::Available(Key::from_bytes([9u8; 32]));
+    let sentence = because(History::open(directory.path(), &wrong));
+    assert!(
+        sentence.contains("with the key it has"),
+        "a wrong key reads as {sentence:?}"
+    );
+    assert_plain(&sentence, &[directory.path()]);
+}
