@@ -603,16 +603,28 @@ impl AppState {
         let mark = presence::Mark::at(&self.data_directory);
         presence::record_gap_since_last_seen(&history, &mark, (self.now)());
 
-        let counting = session::start(
-            self.helper.as_ref(),
-            Arc::new(RecordReach::over(history)),
-            self.now,
-        );
+        let sink = Arc::new(RecordReach::over(history));
+        let storing = sink.storing();
 
-        // The mark says "Cairn was counting at this moment", so it is only kept
-        // while that is true.
+        // With nowhere to put what it counts, Cairn is not watching in any way
+        // that lasts. The mark is left where it was, so that the next start
+        // that can open the history records all of this time as a gap; on a
+        // first run there is no mark yet, and this start is where the unseen
+        // time begins.
+        if !storing.load(std::sync::atomic::Ordering::SeqCst) && mark.read().is_none() {
+            mark.write((self.now)());
+        }
+
+        let counting = session::start(self.helper.as_ref(), sink, self.now);
+
+        // The mark says "Cairn was counting, and keeping it, at this moment", so
+        // it is only kept while that is true.
         if counting == Counting::Available {
-            presence::keep_marking(presence::Mark::at(&self.data_directory), self.now);
+            presence::keep_marking(
+                presence::Mark::at(&self.data_directory),
+                self.now,
+                storing,
+            );
         }
         counting
     }

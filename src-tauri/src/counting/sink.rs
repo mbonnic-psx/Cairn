@@ -13,7 +13,8 @@
 
 #![cfg(feature = "history")]
 
-use std::sync::Mutex;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::{Arc, Mutex};
 
 use crate::counting::listener::NoteReach;
 use crate::store::history::History;
@@ -26,13 +27,24 @@ use crate::store::history::History;
 /// and they arrive at human speed.
 pub struct RecordReach {
     history: Mutex<History>,
+    /// Whether everything counted so far has been stored. It only ever goes
+    /// from true to false: once a reach has been dropped, the time since is not
+    /// time Cairn saw, and a later success does not make it so.
+    storing: Arc<AtomicBool>,
 }
 
 impl RecordReach {
     pub fn over(history: History) -> Self {
         RecordReach {
+            storing: Arc::new(AtomicBool::new(history.is_open())),
             history: Mutex::new(history),
         }
+    }
+
+    /// Whether what Cairn counts has all been stored: the presence mark is
+    /// only refreshed while this holds (FR-022).
+    pub fn storing(&self) -> Arc<AtomicBool> {
+        Arc::clone(&self.storing)
     }
 }
 
@@ -46,6 +58,8 @@ impl NoteReach for RecordReach {
             Ok(history) => history,
             Err(poisoned) => poisoned.into_inner(),
         };
-        history.record(domain, at);
+        if !history.record(domain, at) {
+            self.storing.store(false, Ordering::SeqCst);
+        }
     }
 }

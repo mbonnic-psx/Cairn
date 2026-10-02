@@ -131,9 +131,13 @@ impl History {
     /// A sealed history is not an error at the moment of a reach: the reach
     /// produces no interface of any kind either way (FR-019), and blocking is
     /// entirely unaffected (FR-028).
-    pub fn record(&self, domain: &str, at: i64) {
-        if let History::Open(history) = self {
-            let _ = history.record(domain, at);
+    ///
+    /// Says whether the reach was stored, so that whoever is counting can tell
+    /// time it saw from time it only watched go by.
+    pub fn record(&self, domain: &str, at: i64) -> bool {
+        match self {
+            History::Open(history) => history.record(domain, at).is_ok(),
+            History::Sealed { .. } => false,
         }
     }
 
