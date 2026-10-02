@@ -255,7 +255,7 @@ describe('how the hours read', () => {
 });
 
 describe('what is said above the hours', () => {
-  it('puts the coverage note above them, and the standing sentence after them', async () => {
+  it('puts the coverage note above them, the standing sentence last on the left page, the hours on the right', async () => {
     const { read } = fakeRead(async () =>
       patterns({ coverage_note: 'Cairn was not running for 3 days in this range.' }),
     );
@@ -269,9 +269,12 @@ describe('what is said above the hours', () => {
     const standing = screen.getByText(
       'Cairn counts only while it is running. This is what it saw over these days.',
     );
-    expect(
-      standing.compareDocumentPosition(lines[23]) & Node.DOCUMENT_POSITION_PRECEDING,
-    ).toBeTruthy();
+    const [left, right] = Array.from(
+      document.querySelectorAll<HTMLElement>('.nb-spread > .nb-page'),
+    );
+    expect(left!.lastElementChild).toBe(standing);
+    expect(right!.querySelectorAll('li')).toHaveLength(24);
+    expect(left!.querySelector('li')).toBeNull();
   });
 
   it('says several estimates have no hour, above the hours', async () => {

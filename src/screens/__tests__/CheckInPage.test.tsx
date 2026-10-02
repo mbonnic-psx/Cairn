@@ -702,3 +702,21 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (name) 
     }
   });
 });
+
+describe('Tonight rendered alone, with no shell around it', () => {
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ['Date', 'setTimeout', 'clearTimeout'] });
+  });
+  afterEach(() => {
+    core?.remove();
+    core = undefined;
+    vi.useRealTimers();
+  });
+
+  it.each(Object.keys(tonightCases))('%s is its spread of two pages', async (key) => {
+    const { spread, pages } = await show(tonightCases[key]!, false);
+    expect(spread).not.toBeNull();
+    expect(spread).toHaveClass('nb-spread', 'nb-checkin-leaves');
+    expect(pages).toHaveLength(2);
+  });
+});

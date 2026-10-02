@@ -660,3 +660,31 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (name) 
     );
   });
 });
+
+describe('Today and Over time rendered alone, with no shell around them', () => {
+  const twoPages = (container: HTMLElement) => {
+    const spreads = container.querySelectorAll('.nb-spread');
+    expect(spreads).toHaveLength(1);
+    expect(spreads[0]!.querySelectorAll(':scope > .nb-page')).toHaveLength(2);
+  };
+
+  it.each(Object.keys(todayCases))('Today, %s, is its spread', (state) => {
+    const { container } = render(
+      <Reaches today={todayCases[state]} read={silentReader} now={now} />,
+    );
+    twoPages(container);
+  });
+
+  it.each(Object.keys(overTimeCases))('Over time, %s, is its spread', async (state) => {
+    const user = userEvent.setup();
+    const { container } = render(
+      <Reaches
+        today={todayCases.sealed}
+        read={overTimeReader(overTimeCases[state]!)}
+        now={now}
+      />,
+    );
+    await user.click(screen.getByRole('button', { name: 'Over time' }));
+    await waitFor(() => twoPages(container));
+  });
+});

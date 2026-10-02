@@ -13,8 +13,8 @@
  *   - the journaling space: the only element with role `textbox`
  *     (a <textarea>; any label is fine, e.g. "Tonight").
  *   - the save control: role `button`, name matching /save|keep/i.
- *   - at least one `heading`, or the textbox itself, carries the `reflective`
- *     class (serif), as Reaches.tsx does.
+ *   - the heading carries `nb-checkin-title` and the textbox `nb-checkin-write`
+ *     (serif, from tonight-page.css).
  *
  * The screen fixes the day when it opens: it computes today's date as
  * YYYY-MM-DD and its bounds in epoch seconds, from this local midnight to the
@@ -245,8 +245,9 @@ describe('the check-in', () => {
     render(<CheckIn />);
 
     const space = await screen.findByRole('textbox');
-    const surfaces = [...screen.queryAllByRole('heading'), space];
-    expect(surfaces.some((el) => el.classList.contains('reflective'))).toBe(true);
+    // `tonight-page.css` sets both classes in the notebook's serif.
+    expect(screen.getByRole('heading')).toHaveClass('nb-checkin-title');
+    expect(space).toHaveClass('nb-checkin-write');
   });
 
   it('keeps an entry on the day it was opened for, across midnight', async () => {
@@ -305,7 +306,7 @@ describe('the quote on the check-in', () => {
     render(<CheckIn />);
 
     const line = await screen.findByText(A_LINE);
-    expect(line.closest('.reflective')).not.toBeNull();
+    expect(line).toHaveClass('nb-checkin-quote__line');
     expect(screen.getAllByRole('figure')).toHaveLength(1);
 
     await user.type(screen.getByRole('textbox'), 'A long day.');
@@ -471,7 +472,9 @@ describe('the quiet switch for quotes', () => {
     await screen.findByText(A_LINE);
 
     const toggle = screen.getByRole('button', { name: 'Hide quotes' });
-    expect(toggle.classList.contains('reflective')).toBe(false);
+    // Set in the notebook's mono by `tonight-page.css`, not in its serif.
+    expect(toggle).toHaveClass('nb-checkin-switch');
+    expect(toggle).not.toHaveClass('nb-checkin-write', 'nb-checkin-title', 'nb-checkin-quote__line');
     expect(toggle.textContent ?? '').not.toMatch(/turn (protection )?off|pause|disable|unblock|allow/i);
     expect(screen.getByRole('button', { name: /save|keep/i })).toBeInTheDocument();
   });

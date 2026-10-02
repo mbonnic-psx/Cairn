@@ -332,15 +332,18 @@ describe('how it reads', () => {
     expect(screen.queryAllByRole('listitem')).toHaveLength(0);
   });
 
-  it('puts the standing sentence under the list', async () => {
+  it('puts the standing sentence last on the left page and the list on the right', async () => {
     const { read } = fakeRead();
     await openOverTime(read);
     const list = await screen.findByRole('list');
     const standing = screen.getByText(/counts only while it is running/i);
+    const [left, right] = Array.from(
+      document.querySelectorAll<HTMLElement>('.nb-spread > .nb-page'),
+    );
 
-    expect(
-      list.compareDocumentPosition(standing) & Node.DOCUMENT_POSITION_FOLLOWING,
-    ).toBeTruthy();
+    expect(left!.lastElementChild).toBe(standing);
+    expect(right).toContainElement(list);
+    expect(left).not.toContainElement(list);
   });
 });
 
