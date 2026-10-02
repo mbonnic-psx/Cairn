@@ -103,3 +103,12 @@ Findings (triaged by the host):
 | A3 | LOW | confirmed | fixed `ae0cf5c` (first offset one-directional; staircases left to the webview, noted in the contract) | A hostile caller may send a first offset up to 2 h *below* the implied one, offsets no zone has, or a staircase of changes, and every reach is bucketed up to 12 h off; counts are conserved. The screen never sends these |
 
 Held: every malformed offsets list (unsorted, duplicated, at `range_end`, empty, a wrong first instant, i64 extremes, days + 2 entries) refused with the one sentence, no panic; 4.4M entries checked in 40 ms; `by_hour` conserves every count; a reach at a change instant takes the new offset, as `Date` does; `offsetChanges` matches a 15-minute ground truth in all 419 zones, every two-year window 1900–today; 24 hours always, no ranking word; hours equal `Date.getHours()` for every whole-minute offset (1972 on).
+
+## history-by-weekday · ce9ca05 · 2026-10-02
+
+| Trigger | Status | Evidence |
+|---|---|---|
+| driving adapter (HTTP route, CLI command, queue consumer) | widened | `src-tauri/src/ipc/state.rs`: `Patterns` gains `by_weekday` (`WeekdayCount { weekday, count, days }`); `summarize_reaches`'s parameters unchanged |
+| driven adapter or the provider types behind one | already covered | range reads unchanged since `history-by-site` |
+| authorisation decision (who can reach one that already exists) | not present | single local user; `Reads` |
+| concurrency, idempotency, ordering, retention, or time | widened | a reach's local weekday by the offset in force (`domain/patterns.rs` `by_weekday`, `weekdays_in`), the week's first day from the locale (`src/localDays.ts`) |
