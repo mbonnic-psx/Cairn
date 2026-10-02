@@ -188,7 +188,7 @@
   position: relative;
   box-sizing: border-box;
   display: grid;
-  grid-template-columns: 250px minmax(0, 830px);
+  grid-template-columns: 250px minmax(0, min(1200px, max(830px, calc((100vh - 120px) * 830 / 680))));
   column-gap: 44px;
   justify-content: center;
   align-items: start;
@@ -342,7 +342,9 @@
 /* The notebook. */
 .nb-notebook {
   position: relative;
-  height: calc(100vh - 120px);
+  width: 100%;
+  aspect-ratio: 830 / 680;
+  max-height: calc(100vh - 120px);
   min-height: 480px;
   background: var(--nb-paper);
   border-radius: 6px;
@@ -525,7 +527,7 @@
     font-size: 30px;
   }
   .nb-notebook {
-    height: 100%;
+    max-height: 100%;
     min-height: 0;
   }
   .nb-page-area {
