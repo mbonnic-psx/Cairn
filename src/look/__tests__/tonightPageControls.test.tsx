@@ -161,3 +161,65 @@ describe.each(LOOKS)('focus on the paper, in the %s look (T016)', (look) => {
     expect([...found].sort()).toEqual(Object.keys(CONTROLS).sort());
   });
 });
+
+const FADES = /transition|duration-|animate-|settle/;
+
+describe('nothing the Today and Tonight spreads draw fades (T017)', () => {
+  it('declares no transition, animation or keyframes anywhere in the sheet, nor a rule for a fading class', () => {
+    expect(sheet).not.toMatch(/transition|animation|@keyframes/);
+    for (const { selector } of rules) expect(selector).not.toMatch(FADES);
+  });
+
+  describe.each(LOOKS)('in the %s look', (look) => {
+    it.each(Object.keys(scenes))('%s: no element carries a fading class', async (name) => {
+      const main = await scenes[name]!(look);
+      const all = Array.from(main.querySelectorAll('*'));
+      expect(all.length).toBeGreaterThan(0);
+      for (const el of all) {
+        expect(el.getAttribute('class') ?? '', el.outerHTML.slice(0, 80)).not.toMatch(FADES);
+      }
+    });
+  });
+
+  it('leaves every element the same node, with no fading class added, when the look changes', async () => {
+    const pairs: [string, () => React.ReactElement, () => Promise<void>][] = [
+      ['Today', () => <Reaches today={todayCases['a log, the fallback note']} read={silentReader} />, async () => undefined],
+      [
+        'Over time',
+        () => <Reaches today={todayCases['a log, the fallback note']} read={overTimeReader(overTimeCases['a list']!)} />,
+        async () => {
+          await userEvent.click(screen.getByRole('button', { name: 'Over time' }));
+          await settle();
+        },
+      ],
+      ['Tonight', () => <CheckIn />, async () => undefined],
+    ];
+    for (const [name, make, enter] of pairs) {
+      core = installFakeCore(tonightCore(tonightCases['reaches, with a quote']!));
+      const { main, rerender } = onPage(make(), 'morning');
+      await settle();
+      await enter();
+      const write = main.querySelector('textarea');
+      if (write) fireEvent.change(write, { target: { value: 'Typed before the look changed.' } });
+      const before = Array.from(main.querySelectorAll('*'));
+      expect(before.length).toBeGreaterThan(0);
+      for (const look of ['midday', 'night', 'morning'] as const) {
+        rerender(
+          <NotebookShell tabs={tabs} onSelect={noop} look={look}>
+            {make()}
+          </NotebookShell>,
+        );
+        const after = Array.from(main.querySelectorAll('*'));
+        expect(after, `${name} in ${look}`).toHaveLength(before.length);
+        after.forEach((el, i) => {
+          expect(el, `${name} in ${look}: element ${i}`).toBe(before[i]);
+          expect(el.getAttribute('class') ?? '').not.toMatch(FADES);
+        });
+        if (write) expect((main.querySelector('textarea') as HTMLTextAreaElement).value).toBe('Typed before the look changed.');
+      }
+      cleanup();
+      core.remove();
+      core = undefined;
+    }
+  });
+});
