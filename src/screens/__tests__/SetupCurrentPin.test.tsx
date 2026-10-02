@@ -3,7 +3,7 @@
  * Before Cairn changes anything, and the choosing step as `App` composes it in Current, every state, outside any
  * notebook page.
  *
- * Captured from the code as it stood before the slice changed any of them, and seen passing there. Outside a
+ * The records live in `beforeTheReveal.ts`. Captured from the code as it stood before the slice changed any of them, and seen passing there. Outside a
  * notebook page they must render exactly this, element for element (SC-009), so Current and every existing screen
  * test are unchanged. A change here is a change to today's interface: it needs its own decision, never a re-capture
  * to make a test pass.
@@ -16,9 +16,9 @@ import App from '../../App';
 import { Disclosure } from '../Disclosure';
 import { Categories } from '../Setup/Categories';
 import { CustomEntry } from '../Setup/CustomEntry';
+import { PIN } from './beforeTheReveal';
 import { installFakeCore, never, type FakeCore } from './fakeCore';
 import { categories, disclosures, localhostReason, readBack, waitingNote } from './setupCases';
-import { PIN } from './setupPin';
 
 let core: FakeCore | undefined;
 afterEach(() => {

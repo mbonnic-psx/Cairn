@@ -12,6 +12,7 @@ import type { NotebookLook } from '../../look/look';
 import { Categories } from '../Setup/Categories';
 import { Choosing } from '../Setup/Choosing';
 import { CustomEntry } from '../Setup/CustomEntry';
+import { baseline, CHOOSING_WITH_NOTE_TEXT, PIN } from './beforeTheReveal';
 import { categories, localhostReason, readBack, waitingNote } from './setupCases';
 
 const noop = () => undefined;
@@ -29,13 +30,8 @@ function onPage(ui: React.ReactElement, look: NotebookLook = 'morning') {
   return { ...view, main };
 }
 
-/** The text a screen has outside any shell: what the words on a page must equal. */
-function outside(ui: React.ReactElement): string {
-  const view = render(ui);
-  const text = view.container.textContent ?? '';
-  view.unmount();
-  return text;
-}
+/** The words the screen said before the notebook, from the baseline (`beforeTheReveal.ts`), never from a render. */
+const wasText = (html: string) => baseline(html).textContent ?? '';
 
 describe('Choosing outside any shell (T003)', () => {
   it("renders today's elements in today's order, with no wrapper", () => {
@@ -128,9 +124,9 @@ describe('Categories on a notebook page (T004)', () => {
     ['some on, some edited', categories, undefined],
     ['with a note', categories, waitingNote],
     ['none', [], undefined],
-  ])('says the same words as outside any shell: %s', (_name, list, note) => {
+  ])('says the words it said before the notebook: %s', (name, list, note) => {
     const ui = <Categories categories={list} onToggle={noop} note={note} />;
-    expect(onPage(ui).main.textContent).toBe(outside(ui));
+    expect(onPage(ui).main.textContent).toBe(wasText(PIN[`categories, ${name}`]!));
   });
 
   it('with no categories draws the heading and sentence only', () => {
@@ -192,9 +188,9 @@ describe('CustomEntry on a notebook page (T005)', () => {
     expect(add).toHaveBeenCalledWith('Example.com/path');
   });
 
-  it('says the same words as outside any shell', () => {
+  it('says the words it said before the notebook', () => {
     const ui = <CustomEntry add={async () => []} />;
-    expect(onPage(ui).main.textContent).toBe(outside(ui));
+    expect(onPage(ui).main.textContent).toBe(wasText(PIN['address, nothing typed']!));
   });
 });
 
@@ -210,6 +206,12 @@ describe('what comes back after an address is submitted, on a page (T006)', () =
   const added = (check: Check) => (
     <CustomEntry add={async () => ['example.com', 'www.example.com']} check={check} />
   );
+  const pinned: Record<string, string> = {
+    'in force': 'address added, read back in force',
+    off: 'address added, read back off',
+    'not confirmed': 'address added, read back not confirmed',
+    'could not be made': 'address added, read back could not be made',
+  };
   const reads: Array<[string, Check, RegExp]> = [
     ['in force', async () => readBack('in_force'), /^Protected: example\.com, www\.example\.com$/],
     ['off', async () => readBack('off'), /^Added — Cairn will protect these once protection is on: /],
@@ -261,15 +263,11 @@ describe('what comes back after an address is submitted, on a page (T006)', () =
     }
   });
 
-  it.each(reads)('says the same words as outside any shell for a read-back %s', async (_name, check) => {
+  it.each(reads)('says the words it said before the notebook for a read-back %s', async (name, check) => {
     const ui = added(check);
-    const { main, unmount } = onPage(ui);
+    const { main } = onPage(ui);
     await submitted(main, 'added');
-    const here = main.textContent;
-    unmount();
-    const out = render(ui);
-    await submitted(out.container, 'added');
-    expect(here).toBe(out.container.textContent);
+    expect(main.textContent).toBe(wasText(PIN[pinned[name]!]!));
   });
 
   const refusals: Array<[string, unknown, string]> = [
@@ -350,9 +348,9 @@ describe.each(['morning', 'midday', 'night'] as const)('the choosing step on a n
     ]);
   });
 
-  it('says the same words as the same props outside any shell', () => {
+  it('says the words it said before the notebook, for the same props', () => {
     const here = onPage(step(noop, waitingNote), look).main.textContent;
-    expect(here).toBe(outside(step(noop, waitingNote)));
+    expect(here).toBe(CHOOSING_WITH_NOTE_TEXT);
   });
 });
 

@@ -11,6 +11,7 @@ import App from '../../App';
 import type { CategoryPreset } from '../../ipc';
 import { Disclosure } from '../../screens/Disclosure';
 import { Choosing } from '../../screens/Setup/Choosing';
+import { SETUP_CALLS_CURRENT } from '../../screens/__tests__/beforeTheReveal';
 import { installFakeCore, type FakeCore } from '../../screens/__tests__/fakeCore';
 import {
   categories as cases,
@@ -78,24 +79,17 @@ describe('the setup steps through App, in a notebook look', () => {
     expect(headings()).toEqual(['Cairn', 'What would you like to protect?', 'Anywhere else?']);
   });
 
-  it('asks the core the same things, with the same arguments, as Current does', async () => {
-    const script = async (look: 'Morning' | 'Current') => {
-      const view = await choosing(look);
-      await userEvent.click(screen.getByRole('checkbox', { name: /News/ }));
-      await userEvent.type(screen.getByLabelText('Address to protect'), 'Example.com/path');
-      await userEvent.click(screen.getByRole('button', { name: 'Protect it' }));
-      await screen.findByText(/example\.com, www\.example\.com/);
-      const asked = core.calls.map((c) => `${c.cmd} ${JSON.stringify(c.args)}`);
-      core.calls.length = 0;
-      view.unmount();
-      list = cases.map((c) => ({ ...c }));
-      return asked;
-    };
-    const current = await script('Current');
-    const morning = await script('Morning');
-    expect(current).toContain('set_category_enabled {"id":"news","on":true}');
-    expect(current).toContain('add_custom_entry {"input":"Example.com/path"}');
-    expect([...morning].sort()).toEqual([...current].sort());
+  it('asks the core the same things, with the same arguments, as Current did', async () => {
+    const view = await choosing('Morning');
+    await userEvent.click(screen.getByRole('checkbox', { name: /News/ }));
+    await userEvent.type(screen.getByLabelText('Address to protect'), 'Example.com/path');
+    await userEvent.click(screen.getByRole('button', { name: 'Protect it' }));
+    await screen.findByText(/example\.com, www\.example\.com/);
+    const asked = core.calls.map((c) => `${c.cmd} ${JSON.stringify(c.args)}`);
+    view.unmount();
+    expect(SETUP_CALLS_CURRENT).toContain('set_category_enabled {"id":"news","on":true}');
+    expect(SETUP_CALLS_CURRENT).toContain('add_custom_entry {"input":"Example.com/path"}');
+    expect([...asked].sort()).toEqual([...SETUP_CALLS_CURRENT].sort());
   });
 
   it('shows the sentence that comes back under the box on the right page', async () => {

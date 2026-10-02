@@ -1,6 +1,6 @@
 /**
  * Before Cairn changes anything, told it is on a notebook page (slice `setup-pages`, T008–T009): the same words
- * as outside any shell, laid out as a spread whose right page ends with the two buttons, whatever the details.
+ * as before the notebook, laid out as a spread whose right page ends with the two buttons, whatever the details.
  * The core is a fake written in this tree at the one seam the interface calls it through.
  */
 import { render, screen, within } from '@testing-library/react';
@@ -11,6 +11,7 @@ import type { NotebookLook } from '../../look/look';
 import { NotebookShell } from '../../shell/NotebookShell';
 import { Disclosure } from '../Disclosure';
 import { installFakeCore, never, type FakeCore } from './fakeCore';
+import { baseline, PIN } from './beforeTheReveal';
 import { disclosures } from './setupCases';
 
 let core: FakeCore | undefined;
@@ -34,12 +35,8 @@ function onPage(ui: React.ReactElement, look: NotebookLook = 'morning') {
   return { ...view, main, spread, pages, left: pages[0]!, right: pages[1]! };
 }
 
-function outside(ui: React.ReactElement): string {
-  const view = render(ui);
-  const text = view.container.textContent ?? '';
-  view.unmount();
-  return text;
-}
+/** The words the screen said before the notebook, from the baseline (`beforeTheReveal.ts`), never from a render. */
+const wasText = (name: string) => baseline(PIN[name]!).textContent ?? '';
 
 describe.each(['morning', 'midday', 'night'] as const)('Disclosure on a notebook page, in the %s look (T008)', (look) => {
   const given = (onConfirm = noop, onBack = noop) => (
@@ -111,8 +108,8 @@ describe.each(['morning', 'midday', 'night'] as const)('Disclosure on a notebook
     ]);
   });
 
-  it('says the same words as the same details outside any shell', () => {
-    expect(onPage(given(), look).main.textContent).toBe(outside(given()));
+  it('says the words it said before the notebook, for the same details', () => {
+    expect(onPage(given(), look).main.textContent).toBe(wasText('disclosure, with details'));
   });
 
   it('shows the same spread once the details are fetched through the core', async () => {
@@ -188,14 +185,10 @@ describe('Disclosure on a notebook page without its details (T009)', () => {
     expect(feet[0]).toContain('nb-disclosure-foot');
   });
 
-  it.each(states)('%s: says the same words as the same state outside any shell', async (_name, ui, install) => {
+  it.each(states)('%s: says the words it said before the notebook', async (name, ui, install) => {
     install();
-    const { main, unmount } = onPage(ui());
+    const { main } = onPage(ui());
     await settle();
-    const here = main.textContent;
-    unmount();
-    const view = render(ui());
-    await settle();
-    expect(here).toBe(view.container.textContent);
+    expect(main.textContent).toBe(wasText(`disclosure, details ${name}`));
   });
 });
