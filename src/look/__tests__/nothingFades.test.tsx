@@ -46,6 +46,86 @@ const ruleBody = (selector: string) =>
     .map((m) => m[2]!)
     .join('');
 
+const SHEET_DIR = 'src/styles';
+const { readdirSync } = (await import(/* @vite-ignore */ nodeFs)) as { readdirSync: (path: string) => string[] };
+
+interface Motion {
+  sheet: string;
+  /** The selector, or `@keyframes name` for a keyframes block. */
+  selector: string;
+  property: string;
+  value: string;
+  /** The at-rules the declaration sits inside, outermost first. */
+  context: string[];
+}
+
+/** Every transition/animation declaration and every @keyframes block in a sheet, by walking its braces. */
+function motionIn(sheet: string, css: string): Motion[] {
+  const found: Motion[] = [];
+  const stack: { head: string; start: number }[] = [];
+  let from = 0;
+  for (let i = 0; i < css.length; i += 1) {
+    const ch = css[i];
+    if (ch === '{') {
+      stack.push({ head: css.slice(from, i).trim(), start: i + 1 });
+      from = i + 1;
+    } else if (ch === '}') {
+      const block = stack.pop()!;
+      const heads = [...stack.map((b) => b.head), block.head];
+      const inner = css.slice(block.start, i);
+      if (block.head.startsWith('@keyframes')) {
+        found.push({ sheet, selector: block.head, property: '@keyframes', value: '', context: stack.map((b) => b.head) });
+      } else if (!inner.includes('{') && !block.head.startsWith('@')) {
+        for (const d of inner.split(';')) {
+          const m = /^\s*(transition(?:-[a-z-]+)?|animation(?:-[a-z-]+)?)\s*:\s*([\s\S]*?)\s*$/.exec(d);
+          if (m) {
+            found.push({
+              sheet,
+              selector: block.head.replace(/\s+/g, ' '),
+              property: m[1]!,
+              value: m[2]!.replace(/\s*!important$/, ''),
+              context: heads.slice(0, -1),
+            });
+          }
+        }
+      }
+      from = i + 1;
+    } else if (ch === ';' && stack.length === 0) {
+      from = i + 1;
+    }
+  }
+  return found;
+}
+
+/**
+ * The only motion the sheets may declare. D3 is about a change of look re-lighting colours, so a transition
+ * is allowed only where it names no property a look token feeds. The shell tabs' hover filter is the one
+ * such (no look sets `filter`), allowed by its exact sheet, selector, property and value; `.settle` is the
+ * entrance animation, held off every page element by the class sweep above.
+ */
+const ALLOWED_MOTION = [
+  { sheet: 'notebook.css', selector: '.nb-tab', property: 'transition', value: 'filter 160ms ease' },
+  { sheet: 'theme.css', selector: '.settle', property: 'animation', value: 'settle 420ms var(--ease-gentle) both' },
+  { sheet: 'theme.css', selector: '@keyframes settle', property: '@keyframes', value: '' },
+];
+
+/** Whether a declaration sits in the `prefers-reduced-motion: reduce` block, where motion is switched off. */
+const inReducedMotion = (m: Motion) => m.context.some((c) => /prefers-reduced-motion:\s*reduce/.test(c));
+
+function unallowedMotion(sheets: Record<string, string>): string[] {
+  const out: string[] = [];
+  for (const [sheet, css] of Object.entries(sheets)) {
+    for (const m of motionIn(sheet, noComments(css))) {
+      if (inReducedMotion(m)) continue;
+      const allowed = ALLOWED_MOTION.some(
+        (a) => a.sheet === m.sheet && a.selector === m.selector && a.property === m.property && a.value === m.value,
+      );
+      if (!allowed) out.push(`${m.sheet}: ${m.selector} { ${m.property}: ${m.value} }`);
+    }
+  }
+  return out;
+}
+
 const LOOKS: NotebookLook[] = ['morning', 'midday', 'night'];
 const noop = () => undefined;
 const tabs = [{ id: 'protection' as const, label: 'Protection', current: true }];
@@ -131,6 +211,49 @@ for (const [name, c] of Object.entries(disclosureCases)) {
 for (const [name, c] of Object.entries(teardownCases)) {
   add(`Teardown, ${name}`, async (look) => onPage(<Teardown report={c} />, look));
 }
+
+describe('no sheet the app loads declares a fade', () => {
+  const sheets = Object.fromEntries(
+    readdirSync(SHEET_DIR)
+      .filter((f) => f.endsWith('.css'))
+      .map((f) => [f, readFileSync(`${SHEET_DIR}/${f}`, 'utf8')]),
+  );
+
+  it('reads every sheet main.tsx imports', () => {
+    const main = readFileSync('src/main.tsx', 'utf8');
+    const imported = [...main.matchAll(/import\s+'\.\/styles\/([^']+\.css)'/g)].map((m) => m[1]!).sort();
+    expect(Object.keys(sheets).sort()).toEqual(imported);
+  });
+
+  it('declares no transition, animation or keyframes beyond the named allowances', () => {
+    expect(unallowedMotion(sheets)).toEqual([]);
+  });
+
+  it('names a transition on a colour a look re-points, by sheet and selector', () => {
+    const planted = { ...sheets, 'protection-page.css': `${sheets['protection-page.css']}\n.nb-protection-note__button { transition: color 200ms ease; }` };
+    expect(unallowedMotion(planted)).toEqual([
+      'protection-page.css: .nb-protection-note__button { transition: color 200ms ease }',
+    ]);
+  });
+
+  it('names a transition or animation inside a media block that is not the reduced-motion one', () => {
+    const planted = { ...sheets, 'quiet-pages.css': `${sheets['quiet-pages.css']}\n@media (min-width: 900px) { .a, .b { animation-name: x; } }` };
+    expect(unallowedMotion(planted)).toEqual(['quiet-pages.css: .a, .b { animation-name: x }']);
+  });
+
+  it('holds no inline transition or animation on a rendered element', async () => {
+    for (const name of Object.keys(scenes)) {
+      const main = await scenes[name]!('morning');
+      for (const el of Array.from(main.querySelectorAll<HTMLElement>('[style]'))) {
+        const style = el.getAttribute('style') ?? '';
+        expect(style, `${name}: <${el.tagName.toLowerCase()}> style`).not.toMatch(/transition|animation/);
+      }
+      cleanup();
+      core?.remove();
+      core = undefined;
+    }
+  });
+});
 
 describe('nothing a page can show fades', () => {
   it('sweeps every screen with a page branch', () => {
