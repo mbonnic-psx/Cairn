@@ -142,24 +142,50 @@ pub struct SiteCount {
     pub count: u32,
 }
 
-/// A range of days, by site (`contracts/ui-ipc.md`, `summarize_reaches`, as
-/// amended in slice `history-by-site`).
+/// One hour of the day and how many times a site was reached for in it.
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Serialize, Deserialize)]
+pub struct HourCount {
+    /// 0 to 23, by the computer's clock at the reach's own instant.
+    pub hour: u8,
+    pub count: u32,
+}
+
+/// The offset the computer's clock takes from `from` on, as the interface
+/// sends it (`contracts/ui-ipc.md`, amended in slice `history-by-hour`). Whole
+/// seconds east of UTC. Wide integers, so that a value no zone has is refused
+/// as a range Cairn cannot place rather than failing to be read at all.
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Serialize, Deserialize)]
+pub struct OffsetChange {
+    pub from: i64,
+    pub offset: i64,
+}
+
+/// A range of days, by site and by hour (`contracts/ui-ipc.md`,
+/// `summarize_reaches`, as amended in slices `history-by-site` and
+/// `history-by-hour`).
 ///
-/// It carries only what this build can state truthfully. `by_hour`,
-/// `by_weekday`, `movement` and `dst_approximate` join it when a slice
-/// computes them; until then their absence says nothing was computed, where an
-/// empty list would claim it had been.
+/// It carries only what this build can state truthfully. `by_weekday` and
+/// `movement` join it when a slice computes them; until then their absence
+/// says nothing was computed, where an empty list would claim it had been.
 #[derive(Clone, PartialEq, Eq, Debug, Serialize, Deserialize)]
 pub struct Patterns {
     /// Most first; equal counts by domain name, A to Z.
     pub by_site: Vec<SiteCount>,
+    /// Exactly 24, hour 0 to 23 ascending, zeros included; empty only when
+    /// `sealed`, where 24 zeros would read as a quiet range.
+    pub by_hour: Vec<HourCount>,
     /// Each cut to the part inside the range.
     pub gaps: Vec<Gap>,
     /// The gaps in one sentence, about the range.
     pub coverage_note: Option<String>,
     /// How many days in the range hold the person's own estimate, which has
-    /// no site and so is in no list (FR-023).
+    /// no site and no hour, and so is in no list (FR-023).
     pub estimates_excluded: u32,
+    /// Always `false`. It was R4's flag for one offset applied across a clock
+    /// change; under gaps review B4 every hour is bucketed by the offset in
+    /// force at its instant, so none is approximate. It stays on the wire so
+    /// that it says so. The interface does not read it.
+    pub dst_approximate: bool,
     /// Present when the history could not be opened or read, or the range was
     /// not one Cairn could place. Then nothing else is.
     pub sealed: Option<String>,
@@ -169,9 +195,11 @@ impl Patterns {
     fn sealed(sentence: String) -> Self {
         Patterns {
             by_site: Vec::new(),
+            by_hour: Vec::new(),
             gaps: Vec::new(),
             coverage_note: None,
             estimates_excluded: 0,
+            dst_approximate: false,
             sealed: Some(sentence),
         }
     }
@@ -770,11 +798,11 @@ impl AppState {
         }
     }
 
-    /// A range of days, by site.
+    /// A range of days, by site and by hour.
     ///
     /// **Called only by the Reaches screen** (FR-030a), as `list_todays_reaches`
-    /// is. The bounds are checked first, as `get_day`'s are, then the history is
-    /// opened; every refusal is the one sealed sentence, and a read that does
+    /// is. The bounds are checked first, as `get_day`'s are, then the offsets
+    /// the computer's clock had across them, then the history is opened; every refusal is the one sealed sentence, and a read that does
     /// not go through is never an empty range.
     pub fn summarize_reaches(
         &self,
@@ -782,10 +810,11 @@ impl AppState {
         last_day: LocalDate,
         range_start: i64,
         range_end: i64,
+        offsets: &[OffsetChange],
     ) -> Patterns {
         #[cfg(feature = "history")]
         {
-            use crate::reflection::over_time::{assemble, check_range};
+            use crate::reflection::over_time::{assemble, check_offsets, check_range};
             use crate::store::gaps::range_coverage_note;
 
             if let Err(trouble) =
@@ -793,20 +822,49 @@ impl AppState {
             {
                 return Patterns::sealed(trouble.message);
             }
+            let offsets: Vec<(i64, i64)> = offsets
+                .iter()
+                .map(|change| (change.from, change.offset))
+                .collect();
+            let (first_offset, changes) = match check_offsets(
+                first_day,
+                last_day,
+                range_start,
+                range_end,
+                &offsets,
+            ) {
+                Ok(checked) => checked,
+                Err(trouble) => return Patterns::sealed(trouble.message),
+            };
             let history = match self.open_history() {
                 Ok(history) => history,
                 Err(sentence) => return Patterns::sealed(sentence),
             };
-            match assemble(&history, first_day, last_day, range_start, range_end) {
+            match assemble(
+                &history,
+                first_day,
+                last_day,
+                range_start,
+                range_end,
+                first_offset,
+                &changes,
+            ) {
                 Ok(range) => Patterns {
                     by_site: range
                         .by_site
                         .into_iter()
                         .map(|(domain, count)| SiteCount { domain, count })
                         .collect(),
+                    by_hour: range
+                        .by_hour
+                        .into_iter()
+                        .zip(0u8..)
+                        .map(|(count, hour)| HourCount { hour, count })
+                        .collect(),
                     coverage_note: range_coverage_note(&range.gaps),
                     gaps: range.gaps,
                     estimates_excluded: range.estimates_excluded,
+                    dst_approximate: false,
                     sealed: None,
                 },
                 Err(trouble) => Patterns::sealed(trouble.message),
@@ -815,7 +873,7 @@ impl AppState {
 
         #[cfg(not(feature = "history"))]
         {
-            let _ = (first_day, last_day, range_start, range_end);
+            let _ = (first_day, last_day, range_start, range_end, offsets);
             Patterns::sealed(NO_HISTORY.into())
         }
     }

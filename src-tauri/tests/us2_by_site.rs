@@ -18,7 +18,7 @@ use cairn::domain::dates::LocalDate;
 use cairn::domain::normalize::ReservedNames;
 use cairn::enforcement::seed::CategoryStore;
 use cairn::helper::NoHelper;
-use cairn::ipc::state::Patterns;
+use cairn::ipc::state::{OffsetChange, Patterns};
 use cairn::ipc::AppState;
 use cairn::platform::hosts::SystemHosts;
 use cairn::services::{
@@ -129,8 +129,22 @@ fn app(setup: &Setup, keychain: &Keychain) -> AppState {
     }
 }
 
+/// The offsets of a range in UTC: one entry, the offset `range_start` implies.
+fn offsets_of(range_start: i64) -> Vec<OffsetChange> {
+    vec![OffsetChange {
+        from: range_start,
+        offset: 0,
+    }]
+}
+
 fn summarize(state: &AppState) -> Patterns {
-    state.summarize_reaches(first_day(), last_day(), range_start(), range_end())
+    state.summarize_reaches(
+        first_day(),
+        last_day(),
+        range_start(),
+        range_end(),
+        &offsets_of(range_start()),
+    )
 }
 
 #[cfg(feature = "history")]
@@ -170,7 +184,7 @@ fn assert_in_voice(sentence: &str) {
 // --- Scenario 12: the wire shape ---------------------------------------------
 
 #[test]
-fn the_answer_serialises_to_exactly_five_keys() {
+fn the_answer_serialises_to_exactly_seven_keys() {
     let state_setup = setup();
     let state = app(&state_setup, &Keychain::available());
     let value = serde_json::to_value(summarize(&state)).unwrap();
@@ -184,13 +198,15 @@ fn the_answer_serialises_to_exactly_five_keys() {
     assert_eq!(
         keys,
         [
+            "by_hour",
             "by_site",
             "coverage_note",
+            "dst_approximate",
             "estimates_excluded",
             "gaps",
             "sealed"
         ],
-        "no by_hour, by_weekday, movement or dst_approximate: nothing computed them"
+        "no by_weekday or movement: nothing computed them"
     );
 }
 
@@ -200,6 +216,7 @@ fn the_answer_serialises_to_exactly_five_keys() {
 mod with_history {
     use super::*;
 
+    use cairn::ipc::state::HourCount;
     use cairn::store::history::{CoverageGap, History, OpenHistory};
     use cairn::store::key::HistoryKey;
 
@@ -262,6 +279,7 @@ mod with_history {
             last_day(),
             midnight(date("2026-09-24")),
             range_end(),
+            &offsets_of(midnight(date("2026-09-24"))),
         );
         let again = summarize(&state);
 
@@ -306,9 +324,11 @@ mod with_history {
             patterns,
             Patterns {
                 by_site: Vec::new(),
+                by_hour: (0..24).map(|hour| HourCount { hour, count: 0 }).collect(),
                 gaps: Vec::new(),
                 coverage_note: None,
                 estimates_excluded: 0,
+                dst_approximate: false,
                 sealed: None,
             }
         );
@@ -494,25 +514,33 @@ mod with_history {
             sentence
         };
 
-        let first_after_last =
-            state.summarize_reaches(last_day(), first_day(), range_start(), range_end());
+        let first_after_last = state.summarize_reaches(
+            last_day(),
+            first_day(),
+            range_start(),
+            range_end(),
+            &offsets_of(range_start()),
+        );
         let bad_start = state.summarize_reaches(
             first_day(),
             last_day(),
             range_start() + 13 * HOUR,
             range_end(),
+            &offsets_of(range_start() + 13 * HOUR),
         );
         let a_day_short = state.summarize_reaches(
             first_day(),
             last_day(),
             range_start(),
             range_end() - DAY,
+            &offsets_of(range_start()),
         );
         let offsets_three_hours_apart = state.summarize_reaches(
             first_day(),
             last_day(),
             range_start(),
             range_end() + 3 * HOUR,
+            &offsets_of(range_start()),
         );
         let tomorrow = date("2026-10-01");
         let not_begun = state.summarize_reaches(
@@ -520,6 +548,7 @@ mod with_history {
             tomorrow,
             midnight(tomorrow),
             midnight(tomorrow) + DAY,
+            &offsets_of(midnight(tomorrow)),
         );
 
         let sentences: Vec<String> = [
@@ -540,6 +569,7 @@ mod with_history {
             last_day(),
             range_start(),
             range_end() - HOUR,
+            &offsets_of(range_start()),
         );
         assert_eq!(accepted.sealed, None);
     }
