@@ -199,6 +199,48 @@ pub fn by_site(reaches: &[Reach], from: i64, to: i64) -> Vec<(String, u32)> {
     sorted_sites(site_counts)
 }
 
+/// The offset the computer's clock takes from `from` on, in whole seconds
+/// east of UTC (`contracts/patterns.md`, amended in slice `history-by-hour`).
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct OffsetChange {
+    /// The instant, in epoch seconds, the offset begins to be in force.
+    pub from: i64,
+    pub offset_seconds: i32,
+}
+
+/// The hours of `[from, to)`, each reach counted in the hour the computer's
+/// clock showed at its own instant (gaps review B4).
+///
+/// `first_offset` is in force until the first of `changes`; each change is in
+/// force from its `from` on. A reach takes the offset of the last change at or
+/// before its instant, found by binary search, and is bucketed as
+/// [`summarize`] buckets it. The changes must increase: that is the caller's
+/// check (`reflection::over_time::check_offsets`), not this module's. The
+/// reaches' order does not matter, and estimates never come in (FR-023).
+///
+/// Range membership is decided on the raw `at`, as for [`summarize`].
+pub fn by_hour(
+    reaches: &[Reach],
+    first_offset: i32,
+    changes: &[OffsetChange],
+    from: i64,
+    to: i64,
+) -> [u32; 24] {
+    let mut hours = [0u32; 24];
+    for reach in reaches {
+        if reach.at < from || reach.at >= to {
+            continue;
+        }
+        let in_force = changes.partition_point(|change| change.from <= reach.at);
+        let offset = match in_force.checked_sub(1) {
+            Some(index) => changes[index].offset_seconds,
+            None => first_offset,
+        };
+        hours[hour_of_day(reach.at, offset) as usize] += 1;
+    }
+    hours
+}
+
 /// Most reached first; equal counts by domain name.
 fn sorted_sites(site_counts: HashMap<String, u32>) -> Vec<(String, u32)> {
     let mut by_site: Vec<(String, u32)> = site_counts.into_iter().collect();
