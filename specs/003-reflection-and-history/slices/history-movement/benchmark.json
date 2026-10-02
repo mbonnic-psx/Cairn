@@ -109,6 +109,67 @@
       ],
       "delegated": true,
       "signals": {}
+    },
+    {
+      "stage": "tasks",
+      "started": "2026-10-02T21:17:13Z",
+      "planned": "tasks: fast → sonnet — Claude Code: the Agent tool's `model` parameter, set per call",
+      "tasks": {
+        "start": {
+          "open": 41,
+          "done": 33
+        },
+        "end": {
+          "open": 22,
+          "done": 2
+        }
+      },
+      "ended": "2026-10-02T21:27:02Z",
+      "seconds": 589,
+      "span": {
+        "from": {
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/beb113a0-0614-4833-8a55-53ca692431a6.jsonl": 1225981,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/beb113a0-0614-4833-8a55-53ca692431a6/subagents/agent-a9d8920e4a85c016a.jsonl": 1427333
+        },
+        "to": {
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/beb113a0-0614-4833-8a55-53ca692431a6.jsonl": 1314398,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/beb113a0-0614-4833-8a55-53ca692431a6/subagents/agent-a2ccc0a5d683de558.jsonl": 617014,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/beb113a0-0614-4833-8a55-53ca692431a6/subagents/agent-a9d8920e4a85c016a.jsonl": 1427333
+        }
+      },
+      "usage": {
+        "source": "claude",
+        "session": "beb113a0-0614-4833-8a55-53ca692431a6",
+        "read": "message.usage on each assistant line, once per requestId",
+        "host": {
+          "claude-opus-5-5": {
+            "input": 10,
+            "output": 3058,
+            "cache_read": 828519,
+            "cache_creation": 8184
+          }
+        },
+        "subagents": {
+          "claude-sonnet-5-5": {
+            "input": 14,
+            "output": 78,
+            "cache_read": 420606,
+            "cache_creation": 106683
+          }
+        },
+        "agents": [
+          "drive-tasks"
+        ]
+      },
+      "ran": [
+        "claude-opus-5-5",
+        "claude-sonnet-5-5"
+      ],
+      "agents": [
+        "drive-tasks"
+      ],
+      "delegated": true,
+      "signals": {}
     }
   ]
 }

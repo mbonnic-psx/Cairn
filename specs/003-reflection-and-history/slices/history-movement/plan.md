@@ -603,8 +603,8 @@ src/
 ├── __tests__/dates.test.ts    # NEW: scenarios 25–27 (TZ=Pacific/Kiritimati)
 ├── ipc/reaches.ts             # MODIFIED: MovementRow; Patterns.movement; the doc comment
 ├── screens/Reaches.tsx        # MODIFIED: Day by day in the choice; the rows; the estimates reason
-├── screens/__tests__/ReachesDayByDay.test.tsx      # NEW: scenarios 28–40 (TZ=Europe/London)
-├── screens/__tests__/ReachesDayByDayPage.test.tsx  # NEW: scenario 41
+├── screens/__tests__/ReachesMovement.test.tsx      # NEW: scenarios 28–40 (TZ=Europe/London)
+├── screens/__tests__/ReachesMovementPage.test.tsx  # NEW: scenario 41
 ├── screens/__tests__/beforeTheReveal.ts            # MODIFIED: DAY_BY_DAY_DELTA beside BY_DAY_DELTA (D46)
 ├── screens/__tests__/{TonightWordsKept, ReachesPage, ReachesByHourPage, ReachesByDayPage}.test.tsx  # MODIFIED: apply DAY_BY_DAY_DELTA; Seen by holds four buttons
 ├── screens/__tests__/{ReachesByHour, ReachesByDay, ReachesRowGuard}.test.tsx  # MODIFIED: Seen by holds four buttons; the list guard's corners with Day by day
