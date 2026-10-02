@@ -1,4 +1,4 @@
-# [PROJECT_NAME] — the product owner's brief
+# Cairn — the product owner's brief
 
 `/cruise` runs `/drive` with nobody at the wheel, and this page is the owner it decides for. The `drive-skipper`
 delegate reads it before every product decision, after the specification and the constitution and before the
@@ -36,9 +36,13 @@ specification is a guess, and the entry says which.]
 
 ## Out of scope
 
-[What this product deliberately does not do, so the completion audit does not open a slice for it: an
-integration deferred, an actor not served yet, a report nobody asked for. Each line is a decision already
-taken; the skipper cites it rather than re-taking it.]
+- **The `reveal` slice of 004-notebook-landscape is never run by `/cruise`.** It makes the notebook the default and removes today's interface. It runs only after the owner has seen all three looks (morning, midday, night) in a demo and accepted them (spec SC-008, FR-032). The owner said so on 2026-10-01: "Stop it before the reveal? — yes". A run that reaches it parks with `cruise: parked: reveal needs the owner's own demo of all three looks`.
+- The clock choosing the look is a later feature, not part of 004.
+- Anything this brief leaves as a placeholder: decide from the specification, the constitution and the standing decisions, and say so.
+
+## How the owner reads results
+
+The owner works by voice. Every report, question and park reason they will read is short and in plain words, numbers every item, and gives a recommendation with a one-line reason for each question.
 
 ## Always ask a person
 
