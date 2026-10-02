@@ -96,6 +96,70 @@
       "signals": {
         "driver": "cruise"
       }
+    },
+    {
+      "stage": "tasks",
+      "started": "2026-10-02T07:18:43Z",
+      "planned": "tasks: fast → sonnet — Claude Code: the Agent tool's `model` parameter, set per call",
+      "tasks": {
+        "start": null,
+        "end": {
+          "open": 12,
+          "done": 0
+        }
+      },
+      "ended": "2026-10-02T07:21:04Z",
+      "seconds": 141,
+      "span": {
+        "from": {
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/38291911-927b-4903-988c-b186b0926631.jsonl": 840098,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/38291911-927b-4903-988c-b186b0926631/subagents/agent-a88431f48e70d9221.jsonl": 687394,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/38291911-927b-4903-988c-b186b0926631/subagents/agent-ad389a9bc61d7ade6.jsonl": 748289
+        },
+        "to": {
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/38291911-927b-4903-988c-b186b0926631.jsonl": 841753,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/38291911-927b-4903-988c-b186b0926631/subagents/agent-a00a50fff0bd746b5.jsonl": 361434,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/38291911-927b-4903-988c-b186b0926631/subagents/agent-a88431f48e70d9221.jsonl": 757245,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/38291911-927b-4903-988c-b186b0926631/subagents/agent-ac0e9074d934ee013.jsonl": 353019,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/38291911-927b-4903-988c-b186b0926631/subagents/agent-ad389a9bc61d7ade6.jsonl": 819935
+        }
+      },
+      "usage": {
+        "source": "claude",
+        "session": "38291911-927b-4903-988c-b186b0926631",
+        "read": "message.usage on each assistant line, once per requestId",
+        "host": {},
+        "subagents": {
+          "claude-sonnet-5-5": {
+            "input": 28,
+            "output": 2465,
+            "cache_read": 687556,
+            "cache_creation": 151423
+          },
+          "claude-opus-5-5": {
+            "input": 18,
+            "output": 6805,
+            "cache_read": 1583146,
+            "cache_creation": 29094
+          }
+        },
+        "agents": [
+          "drive-slice",
+          "drive-tasks"
+        ]
+      },
+      "ran": [
+        "claude-opus-5-5",
+        "claude-sonnet-5-5"
+      ],
+      "agents": [
+        "drive-slice",
+        "drive-tasks"
+      ],
+      "delegated": true,
+      "signals": {
+        "driver": "cruise"
+      }
     }
   ]
 }

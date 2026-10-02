@@ -12,7 +12,10 @@
 
 The branches follow today's code exactly: the heading and sentence follow `report.complete`; the checked list renders
 when `confirmed` is not empty; *Still here* renders when `residue` is not empty, whatever `complete` says
-(`src/screens/Teardown.tsx` as of `b73df5b`). `Disclosures.helper` is not shown today and is not shown here.
+(`src/screens/Teardown.tsx` as of `b73df5b`). `Disclosures.helper` is not shown today and is not shown here. A complete report that still carries residue is a
+shape the interface type allows and the core never sends: the core sets `complete: residue.is_empty()`
+(`src-tauri/src/enforcement/teardown.rs:89`). The spread renders it as today's code does, and it raises no question
+of honesty (Principle III) because it cannot occur.
 
 **The pages**: each spread is the shell's `.nb-spread` inside the shell's one scrolling page area, `.nb-page` for the
 left page and `.nb-page .nb-page--ruled` for the right, exactly as protection-page's `Spread` does
