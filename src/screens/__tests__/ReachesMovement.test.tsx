@@ -413,3 +413,50 @@ describe('how a week row reads (scenario 32)', () => {
     );
   });
 });
+
+describe('a row Cairn did not count for (scenario 33, first half)', () => {
+  const unseen = { seen: 'none' as const, count: 0 };
+
+  it('shows its name and not seen, with no count and no bar, never a zero', async () => {
+    await openWeeks(weekRows({ 2: unseen }));
+
+    const line = lines()[2]!;
+    expect(leaves(line)).toEqual([weekOfInWords('2026-08-21', false), 'not seen']);
+    expect(barOf(line)).toBeNull();
+    expect(within(line).queryByText('0')).toBeNull();
+    expect(leaves(lines()[3]!)).toEqual([weekOfInWords('2026-08-28', false), '4']);
+  });
+
+  it('takes the largest bar from the rows that are drawn', async () => {
+    const rows = weekRows({ 5: unseen }).map((row, place) => ({
+      ...row,
+      count: ({ 0: 4, 1: 2, 8: 1 } as Record<number, number>)[place] ?? 0,
+    }));
+    await openWeeks(rows);
+
+    expect(barOf(lines()[0]!)).toHaveStyle({ width: '100%' });
+    expect(barOf(lines()[1]!)).toHaveStyle({ width: '50%' });
+    expect(barOf(lines()[5]!)).toBeNull();
+  });
+
+  it('shows it in the quiet list too, with the sentence above', async () => {
+    const rows = weekRows().map((row) => ({ ...row, ...unseen }));
+    await openWeeks(rows);
+
+    expect(screen.getByText(NOTHING)).toBeInTheDocument();
+    for (const line of lines()) {
+      expect(leaves(line)[1]).toMatch(/not seen$/);
+      expect(barOf(line)).toBeNull();
+    }
+  });
+
+  it('shows a day row the same way', async () => {
+    const rows = dayRows({ 4: 3 });
+    rows[1] = { ...rows[1]!, ...unseen };
+    const { read } = fakeRead(async () => patterns({ movement: rows }));
+    await openDayByDay(read);
+    await waitFor(() => expect(lines()).toHaveLength(28));
+
+    expect(leaves(lines()[1]!)).toEqual([shortDateInWords('2026-09-06', false), 'not seen']);
+  });
+});

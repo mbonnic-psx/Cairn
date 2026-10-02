@@ -30,6 +30,7 @@ import {
   largestCount,
   listTodaysReaches,
   summarizeReaches,
+  type MovementRow,
   type OffsetChange,
   type Patterns,
   type TodaysReaches,
@@ -99,6 +100,17 @@ interface Row {
   absent?: boolean;
 }
 
+/** What is said beside a row's name, joined by `, `: how many dates a short week holds, then what was seen. */
+const clauseOf = (row: MovementRow): string => {
+  const parts: string[] = [];
+  // Only a week that holds fewer than seven dates says how many it holds; the core's `span` says which is a week.
+  if (row.span === 'week' && row.days < 7) {
+    parts.push(`across ${row.days} ${row.days === 1 ? 'day' : 'days'}`);
+  }
+  if (row.seen === 'none') parts.push('not seen');
+  return parts.join(', ');
+};
+
 /**
  * The lines of the range in the view chosen: sites most first, all 24 hours from midnight, or the seven
  * days of the week from `weekStart`. Each day is picked by its own `weekday`, not by its place in the
@@ -134,11 +146,9 @@ const rowsOf = (answer: Patterns, seen: Seen, weekStart: number): Row[] => {
           ? weekOfInWords(row.day, withYear)
           : shortDateInWords(row.day, withYear),
       count: row.count,
-      // Only a week that holds fewer than seven dates says how many it holds; the core's `span` says which is a week.
-      clause:
-        row.span === 'week' && row.days < 7
-          ? `across ${row.days} ${row.days === 1 ? 'day' : 'days'}`
-          : undefined,
+      clause: clauseOf(row) || undefined,
+      // Not seen, and not a single reach: a name and its clause, never a zero (FR-022).
+      absent: row.seen === 'none' && row.count === 0,
     }));
   }
   // An answer with no days at all (sealed) draws none; otherwise all seven are drawn (W3), a weekday
