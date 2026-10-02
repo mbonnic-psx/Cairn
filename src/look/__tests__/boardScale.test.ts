@@ -189,10 +189,7 @@ describe('everything inside the notebook grows by one factor (D39; notebook.css)
  * Lengths a page sheet may still write in px because the test that pins them is outside the slice's manifest. An entry here must
  * name a length that is still there: the test below fails while an entry is stale.
  */
-export const PENDING_OUTSIDE_MANIFEST: Array<{ sheet: string; found: string }> = [
-  // nothingFades.test.tsx:312 pins `border-radius: 8px` and is outside board-scale's T012 manifest: scale it with that test.
-  { sheet: 'protection-page.css', found: '.nb-protection-note__button { border-radius: 8px }' },
-];
+export const PENDING_OUTSIDE_MANIFEST: Array<{ sheet: string; found: string }> = [];
 
 // T006: the same factor sizes every page. Each page sheet is read from disk; a length added to one later fails here.
 describe.each(['protection-page.css', 'quiet-pages.css', 'setup-pages.css', 'tonight-page.css'])(
