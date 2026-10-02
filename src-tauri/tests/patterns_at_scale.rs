@@ -15,7 +15,9 @@
 //! pass, against London's five offsets for the two years, and the bound is
 //! unchanged. So are the days of the week and how many of each the range holds
 //! (slice `history-by-weekday`, scenario 18): the days are counted in the same
-//! pass, and the bound is unchanged.
+//! pass, and the bound is unchanged. So are the rows of the days (slice
+//! `history-movement`, scenario 23): 105 weekly rows, in the same pass and under
+//! the same bound.
 //!
 //! The history is written before the clock starts, through the store's own
 //! connection layer, and the bound is 1 000 ms, as `at_scale.rs` bounds its
@@ -184,6 +186,18 @@ fn two_years_by_site_and_hour_are_read_quickly() {
     );
     let days_held: u32 = patterns.by_weekday.iter().map(|day| day.days).sum();
     assert_eq!(i64::from(days_held), DAYS, "the two years' 730 days");
+    // Two years are 105 weekly rows, holding every reach.
+    assert_eq!(patterns.movement.len() as i64, (DAYS + 6) / 7);
+    assert!(patterns
+        .movement
+        .iter()
+        .all(|row| row.span == cairn::domain::patterns::Span::Week));
+    let in_rows: u32 = patterns.movement.iter().map(|row| row.count).sum();
+    assert_eq!(
+        i64::from(in_rows),
+        DAYS * REACHES_A_DAY,
+        "every reach in the range is in a row"
+    );
     assert!(
         elapsed.as_millis() < 1_000,
         "two years by site, hour and day took {elapsed:?} - something is quadratic"

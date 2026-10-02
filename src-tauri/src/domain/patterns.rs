@@ -10,7 +10,9 @@
 //!
 //! [`by_hour`] and [`by_weekday`] place each reach by the offset in force at its
 //! own instant; [`weekdays_in`] counts the weekdays the range holds, by the
-//! calendar alone (gaps review B4, W4, W5).
+//! calendar alone (gaps review B4, W4, W5). [`movement`] places each reach in the
+//! row of the local date it fell on, a row a date up to [`DAILY_UP_TO`] dates and
+//! a row seven dates beyond, and allocates nothing per date (gaps review M3, R5).
 //!
 //! This module reads no clock and knows nothing about what platform it runs
 //! on (FR-019, FR-020, FR-024) — the local offset that turns an instant into
@@ -317,6 +319,9 @@ pub fn weekdays_in(first_day: LocalDate, last_day: LocalDate) -> [u32; 7] {
 /// (gaps review M3).
 pub const DAILY_UP_TO: i64 = 56;
 
+/// The dates a row of a long range holds.
+const DAYS_IN_A_WEEK_ROW: i64 = 7;
+
 /// What a range is, as the core needs it to build its rows: the dates, the
 /// bounds the interface computed for them, and the offsets in force across them
 /// as [`crate::reflection::over_time::check_offsets`] returned them.
@@ -375,21 +380,33 @@ pub fn movement(
         .days_since_epoch()
         .checked_sub(first_day)
         .and_then(|difference| difference.checked_add(1))
-        .filter(|dates| *dates > 0 && *dates <= DAILY_UP_TO)
+        .filter(|dates| *dates > 0)
     else {
         return Vec::new();
     };
+    // One row to a date up to the threshold, one to seven dates beyond it, the
+    // last holding what is left.
+    let length = if dates <= DAILY_UP_TO {
+        1
+    } else {
+        DAYS_IN_A_WEEK_ROW
+    };
+    let span = if length == 1 { Span::Day } else { Span::Week };
+    let rows_wanted = dates / length + i64::from(dates % length > 0);
 
-    let mut rows: Vec<MovementRow> = (0..dates)
-        .map(|index| MovementRow {
-            day: LocalDate::from_days_since_epoch(first_day + index),
-            days: 1,
-            span: Span::Day,
+    // The rows are what is returned, so they are all that is allocated, once.
+    let mut rows: Vec<MovementRow> = Vec::with_capacity(rows_wanted as usize);
+    for index in 0..rows_wanted {
+        let begins = index * length;
+        rows.push(MovementRow {
+            day: LocalDate::from_days_since_epoch(first_day + begins),
+            days: (dates - begins).min(length) as u32,
+            span,
             count: 0,
             seen: Seen::Whole,
             so_far: false,
-        })
-        .collect();
+        });
+    }
 
     for reach in reaches {
         if reach.at < range.from || reach.at >= range.to {
@@ -397,7 +414,7 @@ pub fn movement(
         }
         let offset = offset_in_force(range.first_offset, range.changes, reach.at);
         let day = local_day(reach.at, offset);
-        let index = (day - first_day).clamp(0, dates - 1);
+        let index = (day - first_day).clamp(0, dates - 1) / length;
         let row = &mut rows[index as usize];
         row.count = row.count.saturating_add(1);
     }

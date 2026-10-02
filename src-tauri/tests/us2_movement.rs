@@ -373,6 +373,131 @@ mod with_history {
         assert_eq!(patterns.estimates_excluded, 2);
     }
 
+    // Scenario 3
+    #[test]
+    fn fifty_six_dates_are_still_daily() {
+        let setup = setup();
+        let _ = seed(&setup.data);
+        let state = app(&setup, &Keychain::available());
+
+        let patterns =
+            Range::new("2026-08-08", "2026-10-02", HOUR, HOUR, &[]).ask(&state);
+
+        assert_eq!(patterns.movement.len(), 56);
+        assert!(patterns.movement.iter().all(|row| row.span == Span::Day));
+    }
+
+    // Scenario 4
+    #[test]
+    fn fifty_seven_dates_are_nine_weekly_rows() {
+        let setup = setup();
+        let _ = seed(&setup.data);
+        let state = app(&setup, &Keychain::available());
+
+        let patterns =
+            Range::new("2026-08-07", "2026-10-02", HOUR, HOUR, &[]).ask(&state);
+
+        assert_eq!(patterns.movement.len(), 9);
+        assert!(patterns.movement.iter().all(|row| row.span == Span::Week));
+        let begun: Vec<String> = patterns.movement.iter().map(named).collect();
+        assert_eq!(
+            begun,
+            [
+                "2026-08-07",
+                "2026-08-14",
+                "2026-08-21",
+                "2026-08-28",
+                "2026-09-04",
+                "2026-09-11",
+                "2026-09-18",
+                "2026-09-25",
+                "2026-10-02"
+            ]
+        );
+        let days: Vec<u32> = patterns.movement.iter().map(|row| row.days).collect();
+        assert_eq!(days, [7, 7, 7, 7, 7, 7, 7, 7, 1]);
+        assert_eq!(days.iter().sum::<u32>(), 57);
+    }
+
+    // Scenario 5
+    #[test]
+    fn a_weeks_edges_are_the_local_midnights() {
+        let setup = setup();
+        let history = seed(&setup.data);
+        // 2026-08-13 23:30 BST, the last half hour of the first row, and
+        // 2026-08-14 00:30 BST.
+        history.record("a.example", 1_786_660_200).unwrap();
+        history.record("a.example", 1_786_663_800).unwrap();
+        let state = app(&setup, &Keychain::available());
+
+        let patterns =
+            Range::new("2026-08-07", "2026-10-02", HOUR, HOUR, &[]).ask(&state);
+
+        assert_eq!(&counts(&patterns)[..3], [1, 1, 0]);
+    }
+
+    // Scenario 6
+    #[test]
+    fn a_year_across_both_changes_is_53_weekly_rows() {
+        let setup = setup();
+        let history = seed(&setup.data);
+        // 2025-07-01 23:30 UTC, which is 2 July 00:30 BST.
+        history.record("a.example", 1_751_412_600).unwrap();
+        let state = app(&setup, &Keychain::available());
+        let year = Range::new(
+            "2025-01-01",
+            "2025-12-31",
+            0,
+            0,
+            &[(1_743_296_400, HOUR), (1_761_440_400, 0)],
+        );
+
+        let patterns = year.ask(&state);
+
+        assert_eq!(patterns.sealed, None);
+        assert_eq!(patterns.movement.len(), 53);
+        let last = patterns.movement[52];
+        assert_eq!((named(&last), last.days), ("2025-12-31".into(), 1));
+        assert_eq!(named(&patterns.movement[26]), "2025-07-02");
+        assert_eq!(patterns.movement[26].count, 1, "BST, not UTC");
+        assert_eq!(patterns.movement[25].count, 0);
+    }
+
+    // Scenario 7
+    #[test]
+    fn every_reach_in_the_range_is_in_exactly_one_row_and_the_edges_are_in_none() {
+        let ranges = [
+            Range::four_weeks(),
+            Range::new("2026-08-07", "2026-10-02", HOUR, HOUR, &[]),
+        ];
+        for range in &ranges {
+            let setup = setup();
+            let history = seed(&setup.data);
+            for index in 0..50 {
+                history
+                    .record(
+                        &format!("site{}.example", index % 4),
+                        range.start + 1 + index * 17_000,
+                    )
+                    .unwrap();
+            }
+            history.record("edge.example", range.start - 1).unwrap();
+            history.record("edge.example", range.end).unwrap();
+            let state = app(&setup, &Keychain::available());
+
+            let patterns = range.ask(&state);
+
+            let in_rows: u32 = counts(&patterns).iter().sum();
+            let in_hours: u32 = patterns.by_hour.iter().map(|hour| hour.count).sum();
+            let on_weekdays: u32 = patterns.by_weekday.iter().map(|day| day.count).sum();
+            let at_sites: u32 = patterns.by_site.iter().map(|site| site.count).sum();
+            assert_eq!(in_rows, 50, "the edges are in no row");
+            assert_eq!(in_rows, in_hours);
+            assert_eq!(in_rows, on_weekdays);
+            assert_eq!(in_rows, at_sites);
+        }
+    }
+
     // Scenario 21
     #[test]
     fn a_range_that_cannot_be_placed_is_sealed_with_no_rows() {
