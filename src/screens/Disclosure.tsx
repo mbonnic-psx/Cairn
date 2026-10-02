@@ -11,6 +11,7 @@ import { useEffect, useState } from 'react';
 import { Button } from '../components/Button';
 import { Card } from '../components/Card';
 import { getDisclosures, type Disclosures } from '../ipc';
+import { useNotebookPage } from '../shell/notebookPage';
 
 export function Disclosure({
   onConfirm,
@@ -22,11 +23,62 @@ export function Disclosure({
   disclosures?: Disclosures;
 }) {
   const [details, setDetails] = useState<Disclosures | undefined>(disclosures);
+  const onPage = useNotebookPage();
 
   useEffect(() => {
     if (disclosures) return;
     getDisclosures().then(setDetails).catch(() => setDetails(undefined));
   }, [disclosures]);
+
+  if (onPage && details) {
+    return (
+      <div className="nb-spread nb-disclosure-spread">
+        <div className="nb-page nb-disclosure-left">
+          <h2 className="nb-disclosure-title">Before Cairn changes anything</h2>
+
+          <p className="nb-disclosure-lead">
+            Cairn protects this whole machine, so the changes it makes affect everyone who
+            uses it. It writes only inside its own marked section, and it keeps a copy of
+            what was there first.
+          </p>
+
+          <ul className="nb-disclosure-list">
+            {details.in_force.map((line) => (
+              <li key={line} className="nb-disclosure-line">
+                <span aria-hidden className="nb-disclosure-dot nb-disclosure-dot--in-force" />
+                <span>{line}</span>
+              </li>
+            ))}
+          </ul>
+
+          <p className="nb-disclosure-helper">{details.helper}</p>
+        </div>
+
+        <div className="nb-page nb-disclosure-right">
+          <h3 className="nb-disclosure-subtitle">What this does not cover</h3>
+          <ul className="nb-disclosure-list">
+            {details.not_covered.map((line) => (
+              <li key={line} className="nb-disclosure-line">
+                <span aria-hidden className="nb-disclosure-dot nb-disclosure-dot--not-covered" />
+                <span>{line}</span>
+              </li>
+            ))}
+          </ul>
+
+          <p className="nb-disclosure-administrator">{details.administrator}</p>
+
+          <div className="nb-disclosure-foot">
+            <button type="button" className="nb-disclosure-confirm" onClick={onConfirm}>
+              Yes, set this up
+            </button>
+            <button type="button" className="nb-disclosure-back" onClick={onBack}>
+              Not yet
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <Card className="max-w-2xl">
