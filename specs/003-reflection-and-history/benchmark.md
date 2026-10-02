@@ -1,6 +1,6 @@
 # Benchmark — 003-reflection-and-history
 
-Drawn 2026-10-02T09:28:50Z at `977752d` from 3 record(s) under `specs/003-reflection-and-history/` by `scripts/agents/benchmark.py overview`; `/benchmark` redraws it, and so does closing a slice. Regenerated whole, never edited: the records beside each slice are the source.
+Drawn 2026-10-02T15:12:14Z at `55303a7` from 3 record(s) under `specs/003-reflection-and-history/` by `scripts/agents/benchmark.py overview`; `/benchmark` redraws it, and so does closing a slice. Regenerated whole, never edited: the records beside each slice are the source.
 
 ## Slices
 
