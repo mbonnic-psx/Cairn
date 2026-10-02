@@ -111,6 +111,56 @@
   --color-moss-600: #4a5e41;
 }
 
+/* Night: a lamp-lit page under a plum sky. Values from the canvas board
+ * G-Night; moves made to meet a contrast floor are recorded in
+ * slices/looks/research.md (L1). The moon takes the sun's tokens, since one
+ * body hangs in the sky at a time. */
+[data-look="night"] {
+  --nb-paper: #f1e6d0;
+  --nb-ink: #2a2119;
+  --nb-ink-body: #33291f;
+  --nb-ink-quiet: #6b5a47;
+  --nb-rule: #dccdb1;
+  --nb-margin: #c99a83;
+  --nb-accent-amber: #7d5a22;
+  --nb-button: #33291f;
+  --nb-button-ink: #f1e6d0;
+
+  --nb-sky-top: #221c22;
+  --nb-sky-mid: #3a2b2a;
+  --nb-sky-bottom: #7a4a38;
+  --nb-greeting-ink: #f6ecdc;
+  --nb-greeting-body: #d9cbb4;
+  --nb-greeting-quiet: #d7c9b5;
+  --nb-sun-size: 56px;
+  --nb-sun-left: 18%;
+  --nb-sun-top: 41%;
+  --nb-sun: #f3e6cf;
+  --nb-sun-glow: #f3e6cf2e;
+  --nb-hill-far: #4c3a33;
+  --nb-hill-mid: #352c27;
+  --nb-hill-near: #221d1a;
+  --nb-stone-base: #e6d5b6;
+  --nb-stone-moss: #c9b48e;
+  --nb-stone-amber: #efe0c4;
+  --nb-stone-pale: #d6c19b;
+  --nb-shadow-edge: #8a7860;
+  --nb-shadow-soft: #00000099;
+
+  --nb-tab-protection: #8f8574;
+  --nb-tab-trail: #8a9478;
+  --nb-tab-reaches: #a69070;
+  --nb-tab-checkin: #a68a7c;
+  --nb-tab-limits: #9a9283;
+  --nb-tab-ink: #1d1915;
+
+  --color-ink-500: #5c5245;
+  --color-ink-400: #6b5f52;
+  --color-amber-600: #7d5a22;
+  --color-amber-500: #876124;
+  --color-moss-600: #4a5e41;
+}
+
 /* The window. */
 .nb-root {
   position: relative;

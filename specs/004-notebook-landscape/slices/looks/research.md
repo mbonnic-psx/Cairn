@@ -29,6 +29,13 @@ values, by token, with `frame`'s morning token in the same role:
 - Midday: none. `#6b5440` on `#ecca8a` measures 4.51:1, over the floor, so the canvas values stand. The canvas shows
   four tab colours and no green; midday's `trail` tab keeps morning's `#b9c4a7`, and the sun sits at 11.7% / 7.5%
   (150 / 60 px of 1280 x 800).
+- Night, `--nb-greeting-quiet`: `#c9b79c` -> `#d7c9b5` (lightness only, hue kept). The pair it fixed: quiet greeting
+  text on the sky's bottom stop `#7a4a38`, 3.75:1 -> 4.51:1. It now sits a hair under `--nb-greeting-body` (`#d9cbb4`).
+- Night, `--color-amber-500` (the theme-palette override, set per look): morning's `#8a6325` -> `#876124`. The pair
+  it fixed: amber text on night's lamp-lit paper `#f1e6d0`, 4.36:1 -> 4.51:1.
+- Night's `reaches` tab: the canvas shows four tab colours and none is amber, so `#a69070` was chosen at the lightness
+  of its neighbours (a gap in the canvas, not a floor move; tab ink `#1d1915` on it passes 4.5:1).
+- Night's moon takes the sun's tokens (`--nb-sun-*`: 56px at 18% / 41%, the board's 230 / 330 px of 1280 x 800).
 
 The canvas names tabs by its own sample set (it shows a Settings tab, which does not exist: spec Assumptions).
 Map its colours onto the five real tabs in the order the canvas uses them, the current tab taking the paper colour

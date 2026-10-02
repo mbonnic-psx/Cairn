@@ -360,3 +360,22 @@ function completeAndReadable(look: Exclude<LookName, 'morning'>) {
 describe('midday look (US2; FR-009, FR-021, FR-016, FR-033)', () => {
   completeAndReadable('midday');
 });
+
+describe('night look (US2; FR-009, FR-021, FR-016, FR-033, D4)', () => {
+  completeAndReadable('night');
+
+  it('reads the amber "not confirmed" text on the lamp-lit paper at 4.5:1 (FR-016)', () => {
+    expect(contrastRatio(token('--nb-accent-amber', 'night'), token('--nb-paper', 'night'))).toBeGreaterThanOrEqual(TEXT);
+    expect(contrastRatio(token('--color-amber-600', 'night'), token('--nb-paper', 'night'))).toBeGreaterThanOrEqual(TEXT);
+  });
+});
+
+describe('the mark on every look\'s own sky (FR-033, D4)', () => {
+  const looks: LookName[] = ['morning', 'midday', 'night'];
+  it.each(looks.flatMap((look) => SKIES.map((sky) => [look, sky] as const)))(
+    '%s: --nb-stone-base holds 3:1 on %s',
+    (look, sky) => {
+      expect(contrastRatio(token('--nb-stone-base', look), token(sky, look))).toBeGreaterThanOrEqual(3);
+    },
+  );
+});
