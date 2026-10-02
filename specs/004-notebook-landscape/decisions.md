@@ -445,3 +445,15 @@ Every product decision a `/cruise` run took, in order. A person overrides one by
 - **Confidence:** medium · **Would reverse if:** at the demo at 2560×1440 the owner says the writing reads too large or a page holds too little; the cap then drops toward 1.5.
 - **Written to:** `specs/004-notebook-landscape/spec.md` (Clarifications, FR-036)
 - **Status:** standing
+- **Note, 2026-10-02 (Phase 4, T011):** the page area's type is 16px, not 16.5px, so the 383·s measure holds about 77 characters a line, not 75; within "about 75", and the test bounds it at 78.5. A line for the owner's reveal demo if lines read long.
+
+## D40 — Do the notebook's corners and soft shadows grow with it?
+- **Stage:** after acceptance (Phase 4, T012) · **Slice:** board-scale · **When:** 2026-10-02T21:40:00Z · **Iteration:** 10
+- **Question:** Converge pass 1 found the notebook's and tabs' 6px corners, the notebook's drop shadow, the night lamp glow and the stones' glow kept at their 1280 sizes while everything else inside grows by D39's factor. Do they grow too, or is that a taste call for the owner?
+- **Options:** grow them by the same factor, keeping the 1px edge line at 1px (recommended by T012); leave them and put them on the owner's demo list
+- **Decision:** Grow them. Radii, shadow offsets and blurs and the glows take `calc(N * var(--nb-u))`; 1px edges and focus rings stay as they are.
+- **Why:** D39 says everything inside the notebook grows by one factor so the scene is the board, larger; a 1660px notebook with a 1280-size corner and shadow reads as a smaller board's paper cut bigger. The 1px-lines exception in D39 is for lines, which corners and soft shadows are not.
+- **Decided by:** host (standing decision D39)
+- **Confidence:** high · **Would reverse if:** the owner, at the reveal demo, finds the shadow heavy at 2560×1440
+- **Written to:** `specs/004-notebook-landscape/slices/board-scale/tasks.md` (T012)
+- **Status:** standing
