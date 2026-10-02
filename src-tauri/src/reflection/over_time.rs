@@ -1,7 +1,7 @@
 //! A range of days, assembled from the history (slice `history-by-site`).
 
 use crate::domain::dates::LocalDate;
-use crate::domain::patterns::{summarize, Reach};
+use crate::domain::patterns::{by_site, Reach};
 use crate::reflection::checkin::{could_begin, offset_from_midnight};
 use crate::services::Trouble;
 use crate::store::gaps::{clipped, Gap};
@@ -105,7 +105,7 @@ pub fn assemble(
     let estimates = history.estimates_between(first_day, day_after_last)?;
 
     Ok(Range {
-        by_site: summarize(&reaches, &[], 0, range_start, range_end).by_site,
+        by_site: by_site(&reaches, range_start, range_end),
         gaps: clipped(&gaps, range_start, range_end),
         estimates_excluded: u32::try_from(estimates.len()).unwrap_or(u32::MAX),
     })
