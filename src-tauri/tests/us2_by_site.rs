@@ -184,7 +184,7 @@ fn assert_in_voice(sentence: &str) {
 // --- Scenario 12: the wire shape ---------------------------------------------
 
 #[test]
-fn the_answer_serialises_to_exactly_eight_keys() {
+fn the_answer_serialises_to_exactly_nine_keys() {
     let state_setup = setup();
     let state = app(&state_setup, &Keychain::available());
     let value = serde_json::to_value(summarize(&state)).unwrap();
@@ -205,9 +205,10 @@ fn the_answer_serialises_to_exactly_eight_keys() {
             "dst_approximate",
             "estimates_excluded",
             "gaps",
+            "movement",
             "sealed"
         ],
-        "no movement: nothing computed it"
+        "nine keys, movement among them"
     );
 }
 
@@ -324,6 +325,7 @@ mod with_history {
         assert_eq!(
             patterns,
             Patterns {
+                movement: patterns.movement.clone(),
                 by_site: Vec::new(),
                 by_hour: (0..24).map(|hour| HourCount { hour, count: 0 }).collect(),
                 // Four weeks: four of each day, none reached.

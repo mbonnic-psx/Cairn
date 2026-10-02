@@ -278,7 +278,7 @@ fn assert_in_voice(sentence: &str) {
 // --- Scenario 16: the wire shape -----------------------------------------------
 
 #[test]
-fn the_answer_serialises_to_exactly_eight_keys_and_dst_approximate_is_false() {
+fn the_answer_serialises_to_exactly_nine_keys_and_dst_approximate_is_false() {
     let state_setup = setup();
     let state = app(&state_setup, &Keychain::available());
     let value = serde_json::to_value(Range::four_weeks_in_utc().ask(&state)).unwrap();
@@ -295,9 +295,10 @@ fn the_answer_serialises_to_exactly_eight_keys_and_dst_approximate_is_false() {
             "dst_approximate",
             "estimates_excluded",
             "gaps",
+            "movement",
             "sealed"
         ],
-        "never movement: nothing computed it"
+        "nine keys, movement among them"
     );
     assert_eq!(object["dst_approximate"], serde_json::json!(false));
 }

@@ -20,6 +20,8 @@
 
 use std::collections::HashMap;
 
+use serde::{Deserialize, Serialize};
+
 use super::dates::LocalDate;
 
 /// Seconds in a day. Every local-day and hour-of-day bucket below divides by
@@ -309,6 +311,97 @@ pub fn weekdays_in(first_day: LocalDate, last_day: LocalDate) -> [u32; 7] {
         *count = u32::try_from(held).unwrap_or(u32::MAX);
     }
     weekdays
+}
+
+/// The rows past which a range is shown by the week rather than by the day
+/// (gaps review M3).
+pub const DAILY_UP_TO: i64 = 56;
+
+/// What a range is, as the core needs it to build its rows: the dates, the
+/// bounds the interface computed for them, and the offsets in force across them
+/// as [`crate::reflection::over_time::check_offsets`] returned them.
+#[derive(Clone, Copy, Debug)]
+pub struct LocalRange<'a> {
+    pub first_day: LocalDate,
+    pub last_day: LocalDate,
+    pub from: i64,
+    pub to: i64,
+    pub first_offset: i32,
+    pub changes: &'a [OffsetChange],
+}
+
+/// How many dates a row holds, by name on the wire.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum Span {
+    Day,
+    Week,
+}
+
+/// How much of a row Cairn saw, by name on the wire.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum Seen {
+    Whole,
+    Part,
+    None,
+}
+
+/// One row of the range: its first date, how many dates it holds, how many
+/// reaches fall in it, how much of it Cairn saw, and whether it is not over.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct MovementRow {
+    pub day: LocalDate,
+    pub days: u32,
+    pub span: Span,
+    pub count: u32,
+    pub seen: Seen,
+    pub so_far: bool,
+}
+
+/// The rows of `range`: one per date up to [`DAILY_UP_TO`] dates, one per seven
+/// beyond, each with its reaches. See `contracts/patterns.md`, amended in slice
+/// `history-movement`.
+pub fn movement(
+    reaches: &[Reach],
+    range: &LocalRange<'_>,
+    unseen: &[(i64, i64)],
+    now: i64,
+) -> Vec<MovementRow> {
+    let _ = (unseen, now);
+    let first_day = range.first_day.days_since_epoch();
+    let Some(dates) = range
+        .last_day
+        .days_since_epoch()
+        .checked_sub(first_day)
+        .and_then(|difference| difference.checked_add(1))
+        .filter(|dates| *dates > 0 && *dates <= DAILY_UP_TO)
+    else {
+        return Vec::new();
+    };
+
+    let mut rows: Vec<MovementRow> = (0..dates)
+        .map(|index| MovementRow {
+            day: LocalDate::from_days_since_epoch(first_day + index),
+            days: 1,
+            span: Span::Day,
+            count: 0,
+            seen: Seen::Whole,
+            so_far: false,
+        })
+        .collect();
+
+    for reach in reaches {
+        if reach.at < range.from || reach.at >= range.to {
+            continue;
+        }
+        let offset = offset_in_force(range.first_offset, range.changes, reach.at);
+        let day = local_day(reach.at, offset);
+        let index = (day - first_day).clamp(0, dates - 1);
+        let row = &mut rows[index as usize];
+        row.count = row.count.saturating_add(1);
+    }
+    rows
 }
 
 /// Most reached first; equal counts by domain name.

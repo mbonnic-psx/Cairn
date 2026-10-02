@@ -13,6 +13,7 @@ use std::alloc::{GlobalAlloc, Layout, System};
 use std::sync::atomic::{AtomicUsize, Ordering};
 
 use cairn::domain::dates::LocalDate;
+use cairn::domain::patterns::LocalRange;
 use cairn::reflection::over_time::assemble;
 use cairn::services::Key;
 use cairn::store::history::History;
@@ -78,7 +79,15 @@ fn a_range_of_thousands_of_years_holds_nothing_per_day() {
 
     let before = HELD.load(Ordering::SeqCst);
     PEAK.store(before, Ordering::SeqCst);
-    let range = assemble(&history, first, last, start, end, 0, &[]).unwrap();
+    let local = LocalRange {
+        first_day: first,
+        last_day: last,
+        from: start,
+        to: end,
+        first_offset: 0,
+        changes: &[],
+    };
+    let range = assemble(&history, &local, end).unwrap();
     let extra = PEAK.load(Ordering::SeqCst) - before;
 
     assert_eq!(range.by_site, vec![("example.com".to_string(), 1)]);

@@ -1,6 +1,6 @@
 //! Pure domain logic. No I/O, no clock, no platform conditionals.
 //!
-//! Eight functions here each guard a constitutional principle, and each has
+//! Nine functions here each guard a constitutional principle, and each has
 //! its own dedicated test — the first four cataloged in `data-model.md`,
 //! "Constitution-critical functions" (feature 002); the fifth in
 //! `specs/003-reflection-and-history/contracts/patterns.md`:
@@ -15,10 +15,11 @@
 //! | [`patterns::by_hour`] | an hour is the one the computer's clock showed at the reach's own instant, across a clock change (B4; III) |
 //! | [`patterns::by_weekday`] | a day of the week is the one the computer's calendar showed at the reach's own instant, across a clock change (W5; III) |
 //! | [`patterns::weekdays_in`] | how many of each weekday a range holds is stated beside its count, by the calendar alone (W4; III) |
+//! | [`patterns::movement`] | a row of days is never presented as seen when Cairn was not counting, nor as zero when it did not see it, and every reach is in exactly one row (M3, M5; FR-022, III) |
 //!
 //! Purity is enforced by `scripts/check-domain-purity.sh`, not by convention.
 //! Nothing here reads a file, a clock, or an environment variable: callers pass
-//! those in as plain values, which is what makes these eight testable to the
+//! those in as plain values, which is what makes these nine testable to the
 //! standard the constitution sets.
 
 pub mod dates;
