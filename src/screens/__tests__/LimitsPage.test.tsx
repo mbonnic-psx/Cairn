@@ -6,7 +6,7 @@ import { render } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { Disclosures } from '../../ipc';
-import type { NotebookLook } from '../../look/look';
+import type { Look } from '../../look/look';
 import { NotebookShell } from '../../shell/NotebookShell';
 import { Limits } from '../Limits';
 import { baseline, LIMITS } from './beforeTheReveal';
@@ -14,7 +14,7 @@ import { disclosureCases } from './quietCases';
 
 const tabs = [{ id: 'limits' as const, label: 'What Cairn covers', current: true }];
 
-let look: NotebookLook = 'morning';
+let look: Look = 'morning';
 
 function onPage(ui: React.ReactElement) {
   const view = render(

@@ -7,7 +7,7 @@ import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import type { NotebookLook } from '../../look/look';
+import type { Look } from '../../look/look';
 import { NotebookShell } from '../../shell/NotebookShell';
 import { Disclosure } from '../Disclosure';
 import { installFakeCore, never, type FakeCore } from './fakeCore';
@@ -23,7 +23,7 @@ afterEach(() => {
 const noop = () => undefined;
 const tabs = [{ id: 'protection' as const, label: 'Protection', current: true }];
 
-function onPage(ui: React.ReactElement, look: NotebookLook = 'morning') {
+function onPage(ui: React.ReactElement, look: Look = 'morning') {
   const view = render(
     <NotebookShell tabs={tabs} onSelect={noop} look={look}>
       {ui}

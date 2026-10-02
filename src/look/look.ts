@@ -1,8 +1,6 @@
 // The looks the interface can wear.
 // A look is chosen by the person at the switch, never derived from the clock.
 export type Look = 'morning' | 'midday' | 'night'
-// Every look wears the notebook shell; the alias keeps the name the shell and the screens already use.
-export type NotebookLook = Look
 
 const GREETINGS: Record<Look, string> = {
   morning: 'Good morning.',

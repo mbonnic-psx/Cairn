@@ -11,7 +11,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { rangeInWords } from '../../localDays';
 import type { OffsetChange, Patterns } from '../../ipc/reaches';
-import type { NotebookLook } from '../../look/look';
+import type { Look } from '../../look/look';
 import { NotebookShell } from '../../shell/NotebookShell';
 import { Reaches } from '../Reaches';
 import {
@@ -28,7 +28,7 @@ import { baseline, wordsOf, OVER_TIME, TODAY } from './beforeTheReveal';
 const tabs = [{ id: 'reaches' as const, label: 'Today', current: true }];
 
 /** The look the cases below run in: every case runs in all three. */
-let look: NotebookLook = 'morning';
+let look: Look = 'morning';
 
 function onPage(ui: React.ReactElement) {
   const view = render(

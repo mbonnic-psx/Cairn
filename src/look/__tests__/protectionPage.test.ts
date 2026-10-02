@@ -138,7 +138,7 @@ describe('the protection-page stylesheet', () => {
       expect(css).not.toMatch(/background[^;]*--nb-paper/);
     });
 
-    it('leaves the palette classes to Current: the on-page badge carries none', () => {
+    it('leaves the palette classes out: the on-page badge carries none', () => {
       const onPage = protection.match(/<span className=\{`nb-protection-badge[^`]*`\}/)?.[0] ?? '';
       expect(onPage).not.toBe('');
       expect(onPage).not.toMatch(/toneClasses|bg-|text-/);

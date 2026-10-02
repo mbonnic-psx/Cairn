@@ -116,7 +116,7 @@ describe('notebook.css behaviour rules', () => {
     }
   });
 
-  it('scopes every selector to the notebook, so Current stays untouched (SC-009)', () => {
+  it('scopes every selector to the notebook, so nothing outside the notebook is styled (SC-009)', () => {
     expect(rules.length).toBeGreaterThan(10);
     for (const r of rules) {
       for (const one of r.selector.split(',')) expect(one.trim()).toMatch(/^(\.nb-|\[data-look)/);
@@ -542,7 +542,7 @@ describe('text laid over the scene meets its floor against the sun or moon behin
   });
 
   // T020 (research Q4): every line of text over the sky is its own band, from the
-  // stylesheet's own values, for both layouts at every height the window allows,
+  // stylesheet's own values, for the wide and the narrow layout at every height the window allows,
   // and each band's own ink is checked only against what can sit behind it.
   const pct = (look: LookName, name: string) => parseFloat(blockOf(look).match(new RegExp(`${name}:\\s*([\\d.]+)%`))![1]!) / 100;
   /** N of a look token written `calc(N * var(--nb-u))`: the sun's diameter at s = 1 (the token still means the diameter). */

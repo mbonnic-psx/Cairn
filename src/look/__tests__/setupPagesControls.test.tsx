@@ -16,7 +16,7 @@ import { installFakeCore, never, type FakeCore } from '../../screens/__tests__/f
 import { categories, disclosures, localhostReason, waitingNote } from '../../screens/__tests__/setupCases';
 import { NotebookShell } from '../../shell/NotebookShell';
 import { contrastRatio } from '../contrast';
-import type { NotebookLook } from '../look';
+import type { Look } from '../look';
 
 const nodeFs = 'node:' + 'fs';
 const { readFileSync } = (await import(/* @vite-ignore */ nodeFs)) as {
@@ -27,7 +27,7 @@ const sheet = noComments(readFileSync('src/styles/setup-pages.css', 'utf8'));
 const notebook = noComments(readFileSync('src/styles/notebook.css', 'utf8'));
 const rules = [...sheet.matchAll(/([^{};]+)\{([^{}]*)\}/g)].map((m) => ({ selector: m[1]!.trim(), body: m[2]! }));
 
-const LOOKS: NotebookLook[] = ['morning', 'midday', 'night'];
+const LOOKS: Look[] = ['morning', 'midday', 'night'];
 const tabs = [{ id: 'protection' as const, label: 'Protection', current: true }];
 const noop = () => undefined;
 
@@ -50,7 +50,7 @@ const CONTROLS = [
 const FOCUSABLE = 'input, button, select, textarea, a[href], [tabindex]';
 const settle = () => new Promise((resolve) => setTimeout(resolve, 20));
 
-function onPage(ui: React.ReactElement, look: NotebookLook) {
+function onPage(ui: React.ReactElement, look: Look) {
   const view = render(
     <NotebookShell tabs={tabs} onSelect={noop} look={look}>
       {ui}
@@ -60,7 +60,7 @@ function onPage(ui: React.ReactElement, look: NotebookLook) {
 }
 
 /** Every state of every on-page branch, as a function that renders it in a look and returns the page area. */
-const scenes: Record<string, (look: NotebookLook) => Promise<HTMLElement>> = {
+const scenes: Record<string, (look: Look) => Promise<HTMLElement>> = {
   'the choosing step, with categories, a note and a reason': async (look) => {
     core = installFakeCore({
       add_custom_entry: () => {

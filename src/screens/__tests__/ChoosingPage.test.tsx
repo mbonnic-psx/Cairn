@@ -7,7 +7,7 @@ import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
 import { NotebookShell } from '../../shell/NotebookShell';
-import type { NotebookLook } from '../../look/look';
+import type { Look } from '../../look/look';
 import { Categories } from '../Setup/Categories';
 import { Choosing } from '../Setup/Choosing';
 import { CustomEntry } from '../Setup/CustomEntry';
@@ -19,7 +19,7 @@ const noop = () => undefined;
 const tabs = [{ id: 'protection' as const, label: 'Protection', current: true }];
 
 /** Render inside the notebook, in a look: the screen is then on a page. */
-function onPage(ui: React.ReactElement, look: NotebookLook = 'morning') {
+function onPage(ui: React.ReactElement, look: Look = 'morning') {
   const view = render(
     <NotebookShell tabs={tabs} onSelect={noop} look={look}>
       {ui}

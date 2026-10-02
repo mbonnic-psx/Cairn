@@ -7,7 +7,7 @@ import { render } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { TeardownReport } from '../../ipc';
-import type { NotebookLook } from '../../look/look';
+import type { Look } from '../../look/look';
 import { NotebookShell } from '../../shell/NotebookShell';
 import { Teardown } from '../Teardown';
 import { baseline, TEARDOWN, TEARDOWN_COMPLETE_WITH_RESIDUE, TEARDOWN_TEXT_SET_ASIDE } from './beforeTheReveal';
@@ -15,7 +15,7 @@ import { teardownCases } from './quietCases';
 
 const tabs = [{ id: 'protection' as const, label: 'Protection', current: true }];
 
-let look: NotebookLook = 'morning';
+let look: Look = 'morning';
 
 function onPage(ui: React.ReactElement) {
   const view = render(

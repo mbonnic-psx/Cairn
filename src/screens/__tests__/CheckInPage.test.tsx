@@ -8,7 +8,7 @@ process.env.TZ = 'Europe/London';
 import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { NotebookLook } from '../../look/look';
+import type { Look } from '../../look/look';
 import { NotebookShell } from '../../shell/NotebookShell';
 import { CheckIn, type CheckInSession } from '../CheckIn';
 import { installFakeCore, never, type FakeCore } from './fakeCore';
@@ -39,7 +39,7 @@ import {
 const tabs = [{ id: 'reaches' as const, label: 'Tonight', current: true }];
 
 /** The look the cases below run in: every case runs in all three. */
-let look: NotebookLook = 'morning';
+let look: Look = 'morning';
 let core: FakeCore | undefined;
 
 /** Lets every answer the fake core has given reach the screen. */

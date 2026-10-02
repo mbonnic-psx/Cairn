@@ -59,7 +59,7 @@ const NOTHING_VISIBLE = new RegExp(
   'u',
 );
 
-// The words, once: Current and the notebook page both read them.
+// The words, once: the page and the tests that hold them both read them.
 const TONIGHT = 'Tonight';
 const LOOKING = 'Looking…';
 const HOW_THE_DAY_WENT = 'How the day went';

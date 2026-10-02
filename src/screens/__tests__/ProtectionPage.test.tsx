@@ -7,7 +7,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { protectionWords } from '../../ipc';
 import { NotebookShell } from '../../shell/NotebookShell';
-import type { NotebookLook } from '../../look/look';
+import type { Look } from '../../look/look';
 import { Protection } from '../Protection';
 import { installFakeCore, never, type FakeCore } from './fakeCore';
 import { baseline, wordsOf, PROTECTION } from './beforeTheReveal';
@@ -22,7 +22,7 @@ afterEach(() => {
 const tabs = [{ id: 'protection' as const, label: 'Protection', current: true }];
 
 /** The look the cases below run in: every case runs in all three (the quickstart says so). */
-let look: NotebookLook = 'morning';
+let look: Look = 'morning';
 
 function onPage(ui: React.ReactElement) {
   const view = render(

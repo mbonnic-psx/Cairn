@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest';
 
 import { Landscape } from '../../shell/Landscape';
 import { contrastRatio } from '../contrast';
-import type { NotebookLook } from '../look';
+import type { Look } from '../look';
 
 // T022 (looks; research Q5): the hilltop cairn's outline stones hold 3:1 against whatever is painted
 // behind them, in every look, at every window from 800x600 up. The geometry comes from notebook.css,
@@ -23,7 +23,7 @@ const sheetNames: string[] = readdirSync('src/styles').filter((f) => f.endsWith(
 const loaded = [...readFileSync('src/main.tsx', 'utf8').matchAll(/import\s+'\.\/styles\/([\w-]+\.css)'/g)].map((m) => m[1]!);
 const sheets = sheetNames.map((name) => ({ name, text: readFileSync(`src/styles/${name}`, 'utf8').replace(/\/\*[\s\S]*?\*\//g, '') }));
 
-const LOOKS: NotebookLook[] = ['morning', 'midday', 'night'];
+const LOOKS: Look[] = ['morning', 'midday', 'night'];
 const FLOOR = 3;
 
 const bodyOf = (selector: string): string => {
@@ -49,7 +49,7 @@ const num = (selector: string, prop: string, unit: string): number => {
   return Number(m[1]);
 };
 
-function tokenOf(look: NotebookLook, name: string): string {
+function tokenOf(look: Look, name: string): string {
   const block = css.match(new RegExp(`\\[data-look="${look}"\\]\\s*\\{([^}]*)\\}`))?.[1] ?? '';
   const m = block.match(new RegExp(`${name}:\\s*(#[0-9a-fA-F]{6})\\s*;`));
   if (!m) throw new Error(`token ${name} is not a #rrggbb colour in the ${look} block`);
@@ -67,7 +67,7 @@ const mix = (a: string, b: string, t: number) =>
     .join('');
 
 /** The sky: top at 0%, mid at 60%, bottom at 100%, as `.nb-sky` declares. */
-const skyAt = (look: NotebookLook, fraction: number) =>
+const skyAt = (look: Look, fraction: number) =>
   fraction <= 0.6
     ? mix(tokenOf(look, '--nb-sky-top'), tokenOf(look, '--nb-sky-mid'), fraction / 0.6)
     : mix(tokenOf(look, '--nb-sky-mid'), tokenOf(look, '--nb-sky-bottom'), (fraction - 0.6) / 0.4);
@@ -101,7 +101,7 @@ const STONE = [1, 2, 3, 4, 5].map((n) => ({
 const WIDEST = Math.max(...STONE.map((s) => s.width));
 
 /** The tone class of the first (top) and last (bottom) stone, as the rendered Landscape paints them. */
-function outlineTokens(look: NotebookLook): string[] {
+function outlineTokens(look: Look): string[] {
   const html = renderToStaticMarkup(createElement(Landscape, { look }));
   const stones = [...html.matchAll(/class="nb-stone nb-stone--(\w+) nb-stone--(\d)"/g)];
   expect(stones).toHaveLength(5);

@@ -32,7 +32,7 @@ import {
   tonightCore,
 } from '../../screens/__tests__/tonightCases';
 import { NotebookShell } from '../../shell/NotebookShell';
-import type { NotebookLook } from '../look';
+import type { Look } from '../look';
 
 const nodeFs = 'node:' + 'fs';
 const { readFileSync } = (await import(/* @vite-ignore */ nodeFs)) as {
@@ -123,7 +123,7 @@ function unallowedMotion(sheets: Record<string, string>): string[] {
   return out;
 }
 
-const LOOKS: NotebookLook[] = ['morning', 'midday', 'night'];
+const LOOKS: Look[] = ['morning', 'midday', 'night'];
 const noop = () => undefined;
 const tabs = [{ id: 'protection' as const, label: 'Protection', current: true }];
 const settle = () => act(async () => new Promise<void>((resolve) => setTimeout(resolve, 20)));
@@ -138,7 +138,7 @@ afterEach(() => {
   core = undefined;
 });
 
-function onPage(ui: React.ReactElement, look: NotebookLook) {
+function onPage(ui: React.ReactElement, look: Look) {
   const view = render(
     <NotebookShell tabs={tabs} onSelect={noop} look={look}>
       {ui}
@@ -147,7 +147,7 @@ function onPage(ui: React.ReactElement, look: NotebookLook) {
   return view.container.querySelector('main') as HTMLElement;
 }
 
-type Scene = (look: NotebookLook) => Promise<HTMLElement>;
+type Scene = (look: Look) => Promise<HTMLElement>;
 const scenes: Record<string, Scene> = {};
 const add = (name: string, scene: Scene) => {
   scenes[name] = scene;

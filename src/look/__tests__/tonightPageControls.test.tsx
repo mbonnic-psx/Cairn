@@ -28,7 +28,7 @@ import {
 } from '../../screens/__tests__/tonightCases';
 import { NotebookShell } from '../../shell/NotebookShell';
 import { contrastRatio } from '../contrast';
-import type { NotebookLook } from '../look';
+import type { Look } from '../look';
 
 const nodeFs = 'node:' + 'fs';
 const { readFileSync } = (await import(/* @vite-ignore */ nodeFs)) as {
@@ -39,7 +39,7 @@ const sheet = noComments(readFileSync('src/styles/tonight-page.css', 'utf8'));
 const notebook = noComments(readFileSync('src/styles/notebook.css', 'utf8'));
 const rules = [...sheet.matchAll(/([^{};]+)\{([^{}]*)\}/g)].map((m) => ({ selector: m[1]!.trim(), body: m[2]! }));
 
-const LOOKS: NotebookLook[] = ['morning', 'midday', 'night'];
+const LOOKS: Look[] = ['morning', 'midday', 'night'];
 const tabs = [{ id: 'reaches' as const, label: 'Today', current: true }];
 const noop = () => undefined;
 
@@ -119,7 +119,7 @@ const tonightMarkers: Record<string, Marker> = {
   'a day that ended while open': 'Wednesday 30 September',
 };
 
-function onPage(ui: React.ReactElement, look: NotebookLook) {
+function onPage(ui: React.ReactElement, look: Look) {
   const view = render(
     <NotebookShell tabs={tabs} onSelect={noop} look={look}>
       {ui}
@@ -128,7 +128,7 @@ function onPage(ui: React.ReactElement, look: NotebookLook) {
   return { ...view, main: view.container.querySelector('main') as HTMLElement };
 }
 
-async function tonight(name: string, look: NotebookLook): Promise<HTMLElement> {
+async function tonight(name: string, look: Look): Promise<HTMLElement> {
   const c = tonightCases[name]!;
   const scene = `Tonight: ${name}`;
   const marker = tonightMarkers[name];
@@ -174,7 +174,7 @@ async function tonight(name: string, look: NotebookLook): Promise<HTMLElement> {
 }
 
 /** Every state of both spreads, as a function that renders it in a look and returns the page area. */
-const scenes: Record<string, (look: NotebookLook) => Promise<HTMLElement>> = {};
+const scenes: Record<string, (look: Look) => Promise<HTMLElement>> = {};
 for (const name of Object.keys(todayCases)) {
   scenes[`Today, Today view: ${name}`] = async (look) => {
     const { main } = onPage(<Reaches today={todayCases[name]} read={silentReader} />, look);

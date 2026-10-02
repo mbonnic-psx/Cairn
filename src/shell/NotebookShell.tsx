@@ -5,7 +5,7 @@
  */
 import { useEffect, useRef, type ReactNode } from 'react';
 
-import type { NotebookLook } from '../look/look';
+import type { Look } from '../look/look';
 import type { Tab, TabId } from '../navigation';
 import { CairnMark } from './CairnMark';
 import { Greeting } from './Greeting';
@@ -20,7 +20,7 @@ export function NotebookShell({
 }: {
   tabs: Tab[];
   onSelect: (id: TabId) => void;
-  look: NotebookLook;
+  look: Look;
   /** Which screen is open, where one tab holds several (choosing and its disclosure); the current tab otherwise. */
   page?: string;
   children: ReactNode;

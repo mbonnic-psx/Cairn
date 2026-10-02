@@ -7,7 +7,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { Trail as TrailData } from '../../ipc';
 import { NotebookShell } from '../../shell/NotebookShell';
-import type { NotebookLook } from '../../look/look';
+import type { Look } from '../../look/look';
 import { Trail } from '../Trail';
 import { baseline, wordsOf, TRAIL } from './beforeTheReveal';
 import { trailCases } from './pinCases';
@@ -15,7 +15,7 @@ import { trailCases } from './pinCases';
 const tabs = [{ id: 'trail' as const, label: 'What is protected', current: true }];
 
 /** The look the cases below run in: every case runs in all three (the quickstart says so). */
-let look: NotebookLook = 'morning';
+let look: Look = 'morning';
 
 function onPage(ui: React.ReactElement) {
   const view = render(

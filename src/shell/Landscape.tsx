@@ -3,12 +3,12 @@
  * stones. Decoration only: hidden from assistive technology, no controls, no
  * motion of its own. Every colour comes from a token in notebook.css.
  */
-import type { NotebookLook } from '../look/look';
+import type { Look } from '../look/look';
 
 const STARS = [1, 2, 3, 4, 5, 6] as const;
 const STONES = ['base', 'moss', 'amber', 'pale', 'base'] as const;
 
-export function Landscape({ look }: { look: NotebookLook }) {
+export function Landscape({ look }: { look: Look }) {
   const night = look === 'night';
   return (
     <div className="nb-landscape" data-testid="landscape" aria-hidden="true">

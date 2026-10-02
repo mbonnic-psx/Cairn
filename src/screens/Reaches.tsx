@@ -50,7 +50,7 @@ const realReader: ReachesReader = {
 };
 const realNow = () => new Date();
 
-// The words, once: Current and the notebook page both read them.
+// The words, once: the page and the tests that hold them both read them.
 const WHICH_DAYS = 'Which days';
 const TODAY = 'Today';
 const OVER_TIME = 'Over time';
