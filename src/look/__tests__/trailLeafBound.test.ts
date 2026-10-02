@@ -13,7 +13,8 @@ const rules = [...css.matchAll(/([^{};]+)\{([^{}]*)\}/g)].map((m) => ({
   body: m[2]!,
 }));
 const decl = (body: string, prop: string): string | undefined =>
-  body.match(new RegExp(`(?:^|[;\\s])${prop}\\s*:\\s*([^;]+)`))?.[1]?.trim();
+  // The last declaration is the one that applies; an earlier one is a fallback for a webview that drops it.
+  [...body.matchAll(new RegExp(`(?:^|[;\\s])${prop}\\s*:\\s*([^;]+)`, 'g'))].at(-1)?.[1]?.trim();
 const ruleFor = (selector: string) => rules.find((r) => r.selector === selector);
 
 const LEAF = '.nb-trail-leaves > .nb-trail-sticky';

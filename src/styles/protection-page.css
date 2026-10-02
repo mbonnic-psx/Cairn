@@ -33,6 +33,8 @@
   top: 0;
   align-self: start;
   /* However much it says, it never outgrows the page area: it scrolls inside itself instead of clipping. */
+  max-height: 100%;
+  /* The line above stays for a webview that does not know cqh; the one below is the bound that works. */
   max-height: 100cqh;
   overflow-y: auto;
 }
