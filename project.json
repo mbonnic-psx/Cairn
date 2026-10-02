@@ -127,11 +127,11 @@
     "recommended": "leave-it",
     "trigger": null,
     "because": [
-      "the trigger — 'Build the rest of Cairn v1 as small, verified slices, with agents doing the work under the same gates as a person.' — names neither a platform, a delivery problem, a change problem, a capability nor a host, so no strategy follows from it; leave the architecture where it is until it does, and take the delivery rungs below, which pay off regardless"
+      "the trigger \u2014 'Build the rest of Cairn v1 as small, verified slices, with agents doing the work under the same gates as a person.' \u2014 names neither a platform, a delivery problem, a change problem, a capability nor a host, so no strategy follows from it; leave the architecture where it is until it does, and take the delivery rungs below, which pay off regardless"
     ],
     "before": [
-      "a pipeline that deploys on a passing `verify` — the path to production is `unknown`",
-      "a green suite in the gate — the safety net is `tests-exist`"
+      "a pipeline that deploys on a passing `verify` \u2014 the path to production is `unknown`",
+      "a green suite in the gate \u2014 the safety net is `tests-exist`"
     ],
     "stop": "now, as far as the architecture goes",
     "decided": "leave-it",
@@ -140,7 +140,7 @@
     "programme": [
       {
         "kind": "rung",
-        "step": "Runtime (rung 4): no container image is built here — a first `Dockerfile`, and `make verify` grows a step that builds it",
+        "step": "Runtime (rung 4): no container image is built here \u2014 a first `Dockerfile`, and `make verify` grows a step that builds it",
         "pacing": "not scheduled; recorded so it is not forgotten",
         "evidence": "survey: no Dockerfile or Compose file"
       }
