@@ -39,8 +39,10 @@ Added by `protection-page` (D6), before the other page slices build against it.
   Current and every existing screen test are unchanged (SC-009).
 - Both layouts come from the one component and the one set of state and handlers. A page slice never copies a
   screen into a second component.
-- A page slice's own styles live in a stylesheet of its own under `src/styles/`, every selector starting `.nb-`,
-  so two page slices never edit the same rules.
+- A page slice's own styles live in a stylesheet of its own under `src/styles/`, imported once from `src/main.tsx`.
+  Every selector in it starts with one prefix per screen, `.nb-<screen>-` (`protection-page` uses `.nb-protection-`
+  and `.nb-trail-`), so two page slices never edit or override each other's rules. The spread classes above stay
+  the shell's; a page slice uses them and never restyles them.
 
 ## Headings
 
