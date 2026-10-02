@@ -55,6 +55,48 @@ describe('the notebook sheet declares the sizing (FR-035)', () => {
   });
 });
 
+/** The body of every block opened by `header`, braces matched. */
+function blocksOf(text: string, header: RegExp): string[] {
+  const out: string[] = [];
+  for (const m of text.matchAll(new RegExp(header.source, 'g'))) {
+    const start = m.index! + m[0].length;
+    let depth = 1;
+    let i = start;
+    while (i < text.length && depth > 0) {
+      depth += text[i] === '{' ? 1 : text[i] === '}' ? -1 : 0;
+      i++;
+    }
+    out.push(text.slice(start, i - 1));
+  }
+  return out;
+}
+
+describe('where aspect-ratio is not read, the notebook still has a definite height (research R3)', () => {
+  const noRatio = blocksOf(css, /@supports not \(aspect-ratio: 1 \/ 1\)\s*\{/);
+  const afterNarrow = css.indexOf('@supports not (aspect-ratio: 1 / 1)') > css.indexOf(narrowBlock) + narrowBlock.length;
+  const baseFallback = noRatio.map((b) => ruleIn(b.replace(/@media[^{]*\{[\s\S]*\}/, ''), '.nb-notebook')).find(Boolean);
+  const narrowFallback = noRatio
+    .flatMap((b) => blocksOf(b, /@media \(max-width: 1099px\)\s*\{/))
+    .map((b) => ruleIn(b, '.nb-notebook'))
+    .find(Boolean);
+
+  it('gives the side-by-side notebook the height the ratio gave it before', () => {
+    expect(noRatio.length).toBeGreaterThan(0);
+    expect(declOf(baseFallback, 'height')).toBe('calc(100vh - 120px)');
+  });
+  it('gives the narrow notebook the room left, so the page area scrolls', () => {
+    expect(declOf(narrowFallback, 'height')).toBe('100%');
+  });
+  it('comes after the narrow block, so it wins at equal weight', () => {
+    expect(afterNarrow).toBe(true);
+  });
+  it('covers every layout that sizes the notebook by its ratio', () => {
+    const sized = [nb, nbNarrow].filter((r) => declOf(r, 'aspect-ratio') !== undefined || declOf(r, 'max-height') !== undefined);
+    expect(sized).toHaveLength(2);
+    expect([baseFallback, narrowFallback].every((r) => declOf(r, 'height') !== undefined)).toBe(true);
+  });
+});
+
 // A model built from the parsed numbers.
 const [, aside, cap, floor, off, rw, rh] = (track ?? []).map((x, i) => (i === 0 ? 0 : Number(x)));
 const gap = px(declOf(root, 'column-gap'));
