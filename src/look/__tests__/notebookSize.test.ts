@@ -52,7 +52,7 @@ const track = columns.match(/^([\d.]+)vw minmax\(0, min\(([\d.]+)vw, ([\d.]+)vh\
 const gapVw = Number(declOf(root, 'column-gap')?.match(/^([\d.]+)vw$/)?.[1]);
 const wideDecl = declOf(root, 'padding')?.match(/^([\d.]+)vh 0 0 ([\d.]+)vw$/);
 const narrowPadM = declOf(rootNarrow, 'padding')?.match(/^(\d+)px (\d+)px (\d+)px (\d+)px$/);
-const narrowPad = { right: Number(narrowPadM?.[2]), left: Number(narrowPadM?.[4]) };
+const narrowPad = { top: Number(narrowPadM?.[1]), right: Number(narrowPadM?.[2]), bottom: Number(narrowPadM?.[3]), left: Number(narrowPadM?.[4]) };
 const [aspectW, aspectH] = (declOf(nb, 'aspect-ratio') ?? '').split('/').map((x) => Number(x.trim()));
 const breakpoint = Number(css.match(/@media \(max-width: (\d+)px\)/)?.[1]) + 1;
 
@@ -83,7 +83,12 @@ function place(w: number, h: number): Placed {
     };
   }
   const room = w - narrowPad.left - narrowPad.right;
-  return { left: narrowPad.left, top: 0, width: room, height: room / (aspectW! / aspectH!), greetingLeft: narrowPad.left, greetingTop: 0 };
+  // Height: the landscape the ratio gives, held to max-height (a share of the room left under the greeting) and no less than min-height.
+  const roomLeft = h - narrowPad.top - narrowPad.bottom - px(declOf(rootNarrow, 'row-gap')) - px(declOf(ruleIn(narrowBlock, '.nb-greeting__words'), 'font-size'));
+  const share = Number(declOf(nbNarrow, 'max-height')?.match(/^([\d.]+)%$/)?.[1]) / 100;
+  const minH = px(declOf(nbNarrow, 'min-height')?.replace(/^0$/, '0px'));
+  const height = Math.max(minH, Math.min(share * roomLeft, (room * aspectH!) / aspectW!));
+  return { left: narrowPad.left, top: 0, width: room, height, greetingLeft: narrowPad.left, greetingTop: 0 };
 }
 const size = (w: number, h: number) => place(w, h);
 /** D39's s as the notebook's own size gives it. */
@@ -411,6 +416,12 @@ describe('a page\'s line keeps a comfortable measure (D39, research R7)', () => 
   const gapN = spreadGaps[0] ?? NaN;
   const capN = nOf(measure);
 
+  // D39: 66 characters in a 337px leaf at 16px type, so an average serif advance of 337 / 66 / 16.5 em.
+  const PAGE_FONT = Number(declOf(ruleIn(base, '.nb-page-area'), 'font-size')?.match(/^calc\(([\d.]+) \* var\(--nb-u\)\)$/)?.[1]);
+  const ADVANCE = 337 / 66 / 16.5;
+  // D39's "about 75" is at 16.5px type; the sheet's page font is 16px, so the same column holds 75 x 16.5/16 characters.
+  const MOST_CHARS = (75 * 16.5) / 16 + 1;
+
   /** The leaf's width and the measure's cap at a window, every length N x s. */
   const leaf = (w: number, h: number) => (place(w, h).width - (padLeft + padRight + gapN) * sOf(w, h)) / 2;
   const cap = (w: number, h: number) => capN * sOf(w, h);
@@ -466,14 +477,15 @@ describe('a page\'s line keeps a comfortable measure (D39, research R7)', () => 
 
   it('holds the line to the cap wherever the leaf is wider, and never shortens it elsewhere, in every wide window', () => {
     const bad: string[] = [];
+    let leafExceeds = false;
     for (let w = 1100; w <= 3840; w += 20) {
       for (let h = 600; h <= 2160; h += 20) {
-        const line = Math.min(leaf(w, h), cap(w, h));
-        if (line > cap(w, h) + 1e-9 || line > leaf(w, h) + 1e-9) bad.push(`${w}x${h}: ${line}`);
-        if (leaf(w, h) <= cap(w, h) && line !== leaf(w, h)) bad.push(`${w}x${h}: shortened`);
-        if (line / sOf(w, h) > capN + 1e-9) bad.push(`${w}x${h}: more than ${capN} units`);
+        if (leaf(w, h) / (ADVANCE * PAGE_FONT * sOf(w, h)) > MOST_CHARS) leafExceeds = true;
+        const chars = Math.min(leaf(w, h), cap(w, h)) / (ADVANCE * PAGE_FONT * sOf(w, h));
+        if (chars > MOST_CHARS) bad.push(`${w}x${h}: ${chars.toFixed(1)} characters`);
       }
     }
     expect(bad.slice(0, 8)).toEqual([]);
+    expect(leafExceeds, 'the uncapped leaf would exceed 75 characters somewhere, so the cap is load-bearing').toBe(true);
   });
 });
