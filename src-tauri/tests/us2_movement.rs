@@ -803,6 +803,103 @@ mod with_history {
         );
     }
 
+    // Scenarios 1, 2 and 17, the so far part
+    #[test]
+    fn only_the_last_row_of_four_weeks_is_so_far_and_every_row_is_seen_whole() {
+        let setup = setup();
+        let _ = seed(&setup.data);
+        let state = app(&setup, &Keychain::available());
+
+        let patterns = Range::four_weeks().ask(&state);
+
+        let so_far: Vec<bool> = patterns.movement.iter().map(|row| row.so_far).collect();
+        let mut expected = vec![false; 28];
+        expected[27] = true;
+        assert_eq!(so_far, expected);
+        assert!(patterns.movement.iter().all(|row| row.seen == Seen::Whole));
+    }
+
+    #[test]
+    fn the_one_date_that_is_today_is_so_far() {
+        let setup = setup();
+        let _ = seed(&setup.data);
+        let state = app(&setup, &Keychain::available());
+
+        let patterns = Range::today().ask(&state);
+
+        assert!(patterns.movement[0].so_far);
+    }
+
+    #[test]
+    fn an_hours_gap_today_leaves_it_so_far_and_partly_seen() {
+        let setup = setup();
+        let history = seed(&setup.data);
+        let midnight = 1_790_895_600;
+        history
+            .record_gap(&CoverageGap {
+                from: midnight + HOUR,
+                to: midnight + 2 * HOUR,
+            })
+            .unwrap();
+        let state = app(&setup, &Keychain::available());
+
+        let patterns = Range::four_weeks().ask(&state);
+
+        let today = patterns.movement[27];
+        assert_eq!((today.so_far, today.seen), (true, Seen::Part));
+    }
+
+    #[test]
+    fn after_midnight_no_row_is_so_far() {
+        let setup = setup();
+        let _ = seed(&setup.data);
+        // 2026-10-03 00:30 BST.
+        let state = app_at(&setup, &Keychain::available(), || 1_790_983_800);
+
+        let patterns = Range::four_weeks().ask(&state);
+
+        assert!(patterns.movement.iter().all(|row| !row.so_far));
+    }
+
+    // Scenario 18
+    #[test]
+    fn tomorrows_row_asked_at_half_past_eleven_is_so_far_whole_and_zero() {
+        let setup = setup();
+        let _ = seed(&setup.data);
+        // 2026-10-02 23:30 BST.
+        let state = app_at(&setup, &Keychain::available(), || 1_790_980_200);
+        let range = Range::new("2026-09-05", "2026-10-03", HOUR, HOUR, &[]);
+
+        let patterns = range.ask(&state);
+
+        assert_eq!(patterns.sealed, None, "check_range lets tomorrow through");
+        let tomorrow = patterns.movement[28];
+        assert_eq!(named(&tomorrow), "2026-10-03");
+        assert_eq!(
+            (tomorrow.so_far, tomorrow.seen, tomorrow.count),
+            (true, Seen::Whole, 0)
+        );
+        assert!(patterns.movement[27].so_far);
+    }
+
+    #[test]
+    fn the_clock_is_read_once_for_the_range_check_and_the_rows() {
+        use std::sync::atomic::AtomicUsize;
+        static READS: AtomicUsize = AtomicUsize::new(0);
+        fn counting() -> i64 {
+            READS.fetch_add(1, Ordering::SeqCst);
+            NOW
+        }
+        let setup = setup();
+        let _ = seed(&setup.data);
+        let state = app_at(&setup, &Keychain::available(), counting);
+
+        let patterns = Range::four_weeks().ask(&state);
+
+        assert_eq!(patterns.sealed, None);
+        assert_eq!(READS.load(Ordering::SeqCst), 1);
+    }
+
     // Scenario 21
     #[test]
     fn a_range_that_cannot_be_placed_is_sealed_with_no_rows() {

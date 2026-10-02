@@ -421,6 +421,13 @@ pub fn movement(
         row.count = row.count.saturating_add(1);
     }
 
+    // A row is not over while any of its instants is at or after the present.
+    for_each_piece(range, dates, length, |row, _, ends| {
+        if ends > now {
+            rows[row].so_far = true;
+        }
+    });
+
     if !unseen.is_empty() {
         let seen = coverage(range, dates, length, rows.len(), unseen, now);
         for (row, (seeable, unseen_part)) in rows.iter_mut().zip(seen) {

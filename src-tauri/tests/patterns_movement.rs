@@ -737,3 +737,94 @@ mod holding_a_reach {
         }
     }
 }
+
+// --- Scenarios 17 and 18: the row holding today is so far ----------------------------------
+
+fn so_far_of(rows: &[MovementRow]) -> Vec<LocalDate> {
+    rows.iter()
+        .filter(|row| row.so_far)
+        .map(|row| row.day)
+        .collect()
+}
+
+#[test]
+fn only_the_row_holding_today_is_so_far() {
+    let rows = four_weeks(&[], &[], NOW);
+
+    assert_eq!(so_far_of(&rows), [date(2026, 10, 2)]);
+}
+
+#[test]
+fn one_date_which_is_today_is_so_far() {
+    let day = date(2026, 10, 2);
+    let range = LocalRange {
+        first_day: day,
+        last_day: day,
+        from: 1_790_895_600,
+        to: 1_790_982_000,
+        first_offset: 3600,
+        changes: &[],
+    };
+
+    assert_eq!(so_far_of(&movement(&[], &range, &[], NOW)), [day]);
+}
+
+#[test]
+fn a_gap_an_hour_long_today_leaves_todays_row_so_far_and_part() {
+    let midnight = 1_790_895_600;
+    let rows = four_weeks(&[(midnight + HOUR, midnight + 2 * HOUR)], &[], NOW);
+
+    let today = row_of(&rows, date(2026, 10, 2));
+    assert_eq!((today.so_far, today.seen), (true, Seen::Part));
+}
+
+#[test]
+fn a_gap_after_now_is_not_unseen_time_because_only_instants_before_now_count() {
+    let rows = four_weeks(&[(NOW + HOUR, NOW + 2 * HOUR)], &[], NOW);
+
+    let today = row_of(&rows, date(2026, 10, 2));
+    assert_eq!((today.so_far, today.seen), (true, Seen::Whole));
+}
+
+#[test]
+fn after_todays_midnight_no_row_is_so_far() {
+    // 2026-10-03 00:30 BST.
+    let rows = four_weeks(&[], &[], 1_790_982_000 + 1_800);
+
+    assert_eq!(so_far_of(&rows), Vec::<LocalDate>::new());
+}
+
+#[test]
+fn a_row_after_today_is_so_far_whole_and_zero() {
+    // 2026-09-05 to 2026-10-03, asked at 23:30 on the 2nd.
+    let range = LocalRange {
+        first_day: date(2026, 9, 5),
+        last_day: date(2026, 10, 3),
+        from: 1_788_562_800,
+        to: 1_791_068_400,
+        first_offset: 3600,
+        changes: &[],
+    };
+    let rows = movement(&[], &range, &[], 1_790_982_000 - 1_800);
+
+    assert_eq!(so_far_of(&rows), [date(2026, 10, 2), date(2026, 10, 3)]);
+    let tomorrow = row_of(&rows, date(2026, 10, 3));
+    assert_eq!((tomorrow.seen, tomorrow.count), (Seen::Whole, 0));
+}
+
+#[test]
+fn the_last_weekly_row_holding_today_is_so_far() {
+    let range = LocalRange {
+        first_day: date(2026, 8, 7),
+        last_day: date(2026, 10, 2),
+        from: 1_786_057_200,
+        to: 1_790_982_000,
+        first_offset: 3600,
+        changes: &[],
+    };
+    let rows = movement(&[], &range, &[], NOW);
+
+    assert_eq!(rows.len(), 9);
+    assert_eq!(so_far_of(&rows), [date(2026, 10, 2)]);
+    assert_eq!(rows[8].days, 1);
+}
