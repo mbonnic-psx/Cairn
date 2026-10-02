@@ -668,7 +668,7 @@ answer arrives. There is no inline height or overflow.
 
 ## Open questions, for the owner
 
-The plan and its scenarios are written to the recommendations. Each question says what changes otherwise.
+**Answered by the owner, 2026-10-02 ("all yes"): each recommendation stands, recorded in `spec.md` as M9 (Q1), M10 (Q2) and M11 (Q3).** Nothing below changes the plan; the text is kept as the record of what was asked.
 
 **Q1: where a week begins.** M3 names a week by the date it begins ("week of 6 Oct") but not which weekday that is.
 *Recommendation*, which this plan is written to: weeks run from the range's first day, so every week is seven

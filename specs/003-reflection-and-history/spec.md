@@ -407,6 +407,14 @@ may be very long), and the decisions of the three views before it. Decided by th
 - **M8 — a quiet range.** The quiet sentence ("Nothing here for these days.", FR-024) and every row at zero under
   it, as for hours (B5). Rows Cairn did not see still read *not seen* (M5).
 
+- **M9 — where a week begins (owner, 2026-10-02: "all yes").** A weekly row's week runs from the range's first day,
+  so every week holds seven dates except possibly the last, and a short last week says how many days it holds
+  ("across 3 days") beside its name.
+- **M10 — how a row's date is written (same message).** In the computer's own short form ("Oct 6" on a US computer,
+  "6 Oct" on a UK one), as the hours and weekday names follow the computer. Sentences stay Cairn's English.
+- **M11 — a range of centuries (same message).** Weekly rows however long the range: nothing is hidden. Whether a
+  range may start before Cairn first counted is left to slice `first-counted` (H5).
+
 Already stated, and held by this slice as written: no streak, day count or chain, and no "day N" (scenario 5) —
 rows are named by their dates, never numbered; everything is available with no journal entry ever written
 (scenario 3); a sealed answer shows the sentence and nothing else.
