@@ -388,6 +388,40 @@ describe('night look (US2; FR-009, FR-021, FR-016, FR-033, D4)', () => {
   });
 });
 
+/** Split a selector list at its top-level commas, so `:is(.a, .b)` stays whole. */
+function splitList(list: string): string[] {
+  const parts: string[] = [];
+  let depth = 0;
+  let from = 0;
+  for (let i = 0; i < list.length; i += 1) {
+    const c = list[i];
+    if (c === '(' || c === '[') depth += 1;
+    else if (c === ')' || c === ']') depth -= 1;
+    else if (c === ',' && depth === 0) {
+      parts.push(list.slice(from, i).trim());
+      from = i + 1;
+    }
+  }
+  parts.push(list.slice(from).trim());
+  return parts.filter(Boolean);
+}
+/** One selector with every `:is(…)` / `:where(…)` unwrapped, one result per alternative. */
+function unwrapped(item: string): string[] {
+  const m = /:(?:is|where)\(([^()]*)\)/.exec(item);
+  if (!m) return [item];
+  return splitList(m[1]!).flatMap((alt) => unwrapped(item.slice(0, m.index) + alt + item.slice(m.index + m[0].length)));
+}
+/** True when some form of `item`, its last compound (attributes dropped) holds every simple selector of `selector`. */
+function appliesTo(item: string, selector: string): boolean {
+  const simple = (s: string) => new Set(s.match(/::?[\w-]+(?:\([^()]*\))?|[.#][\w-]+|[\w-]+/g) ?? []);
+  const want = simple(selector);
+  return unwrapped(item).some((form) => {
+    const last = form.replace(/\[[^\]]*\]/g, '').trim().split(/[\s>+~]+/).pop()!;
+    const have = simple(last);
+    return [...want].every((token) => have.has(token));
+  });
+}
+
 describe('text laid over the scene meets its floor against the sun or moon behind it (FR-021, SC-003)', () => {
   // The disc sits behind text only where it shares a horizontal band with the
   // greeting. No layout engine runs here, so the band is arithmetic from the
@@ -506,12 +540,12 @@ describe('text laid over the scene meets its floor against the sun or moon behin
     .map((path) => path.slice(path.lastIndexOf('/') + 1))
     .sort();
   const loaded = [...readFileSync('src/main.tsx', 'utf8').matchAll(/import\s+'\.\/styles\/([\w-]+\.css)'/g)].map((m) => m[1]!);
-  const applying = (selector: string) => {
+  const applying = (selector: string, synthetic?: Record<string, string>) => {
     const found: Array<{ item: string; scope: string; sheet: string }> = [];
-    for (const sheet of sheetNames) {
+    for (const sheet of synthetic ? Object.keys(synthetic) : sheetNames) {
       const scope: string[] = [];
       const re = /([^{}]*)\{|\}/g;
-      const source = noComments(readFileSync(`src/styles/${sheet}`, 'utf8'));
+      const source = noComments(synthetic ? synthetic[sheet]! : readFileSync(`src/styles/${sheet}`, 'utf8'));
       let m: RegExpExecArray | null;
       while ((m = re.exec(source))) {
         if (m[0] === '}') {
@@ -523,9 +557,8 @@ describe('text laid over the scene meets its floor against the sun or moon behin
           scope.push(header);
           continue;
         }
-        for (const item of header.split(',').map((x) => x.trim())) {
-          const last = item.split(/[\s>+~]+/).pop()!.replace(/\[[^\]]*\]/g, '');
-          if (last === selector) found.push({ item, scope: scope.join(' > '), sheet });
+        for (const item of splitList(header)) {
+          if (appliesTo(item, selector)) found.push({ item, scope: scope.join(' > '), sheet });
         }
         re.lastIndex = source.indexOf('}', re.lastIndex) + 1;
       }
@@ -542,6 +575,19 @@ describe('text laid over the scene meets its floor against the sun or moon behin
   it.each(READ)('%s: the rules that can apply to it are exactly the ones the band model reads, in notebook.css', (selector, scopes) => {
     const found = applying(selector).map((r) => `${r.sheet}: ${r.item === selector ? r.scope : `${r.scope} { ${r.item} }`}`);
     expect(found, `${selector} has a rule the band model does not read`).toEqual(scopes.map((scope) => `notebook.css: ${scope}`));
+  });
+
+  // T016: a rule counts as applying when its last compound holds every simple selector of the modelled one,
+  // whatever the form. Synthetic plants stand in for a sheet; none is written under src/styles/.
+  it.each([
+    ['.nb-root', '.nb-root.nb-root--x'],
+    ['.nb-root', ':is(.nb-root)'],
+    ['.nb-sun', ':where(.nb-sun)'],
+    ['.nb-aside', '.nb-aside:not(.nb-other)'],
+    ['.nb-titlebar', '.nb-page :is(.nb-titlebar, .nb-other)'],
+  ])('%s: names the plant %s by sheet and selector', (selector, plant) => {
+    const found = applying(selector, { 'zz.css': `${plant} { opacity: 0; }` });
+    expect(found.map((r) => `${r.sheet}: ${r.item}`)).toEqual([`zz.css: ${plant}`]);
   });
 
   const HEIGHTS = Array.from({ length: Math.floor((2160 - 600) / 20) + 1 }, (_, i) => 600 + i * 20);

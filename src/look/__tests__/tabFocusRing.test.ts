@@ -85,7 +85,40 @@ interface Found {
   item: string;
   scope: string;
 }
-/** Every selector in the sheet whose last compound (attribute selectors dropped) is `selector`, with the at-rules around it. */
+/** Split a selector list at its top-level commas, so `:is(.a, .b)` stays whole. */
+function splitList(list: string): string[] {
+  const parts: string[] = [];
+  let depth = 0;
+  let from = 0;
+  for (let i = 0; i < list.length; i += 1) {
+    const c = list[i];
+    if (c === '(' || c === '[') depth += 1;
+    else if (c === ')' || c === ']') depth -= 1;
+    else if (c === ',' && depth === 0) {
+      parts.push(list.slice(from, i).trim());
+      from = i + 1;
+    }
+  }
+  parts.push(list.slice(from).trim());
+  return parts.filter(Boolean);
+}
+/** One selector with every `:is(…)` / `:where(…)` unwrapped, one result per alternative. */
+function unwrapped(item: string): string[] {
+  const m = /:(?:is|where)\(([^()]*)\)/.exec(item);
+  if (!m) return [item];
+  return splitList(m[1]!).flatMap((alt) => unwrapped(item.slice(0, m.index) + alt + item.slice(m.index + m[0].length)));
+}
+/** True when some form of `item`, its last compound (attributes dropped) holds every simple selector of `selector`. */
+function appliesTo(item: string, selector: string): boolean {
+  const simple = (s: string) => new Set(s.match(/::?[\w-]+(?:\([^()]*\))?|[.#][\w-]+|[\w-]+/g) ?? []);
+  const want = simple(selector);
+  return unwrapped(item).some((form) => {
+    const last = form.replace(/\[[^\]]*\]/g, '').trim().split(/[\s>+~]+/).pop()!;
+    const have = simple(last);
+    return [...want].every((token) => have.has(token));
+  });
+}
+/** Every selector in the sheet whose last compound (attributes dropped, `:is(…)` unwrapped) holds every simple selector of `selector`, with the at-rules around it. */
 function rulesApplyingTo(source: string, selector: string): Found[] {
   const found: Found[] = [];
   const scope: string[] = [];
@@ -101,9 +134,8 @@ function rulesApplyingTo(source: string, selector: string): Found[] {
       scope.push(header);
       continue;
     }
-    for (const item of header.split(',').map((x) => x.trim())) {
-      const last = item.split(/[\s>+~]+/).pop()!.replace(/\[[^\]]*\]/g, '');
-      if (last === selector) found.push({ item, scope: scope.join(' > ') });
+    for (const item of splitList(header)) {
+      if (appliesTo(item, selector)) found.push({ item, scope: scope.join(' > ') });
     }
     re.lastIndex = source.indexOf('}', re.lastIndex) + 1;
   }
@@ -135,5 +167,28 @@ describe('every rule that can apply to a tab\'s focus ring is one the guard mode
       .filter((r) => r.sheet !== 'notebook.css' || r.item !== SELECTOR || r.scope !== '')
       .map((r) => `${r.sheet}: ${r.scope ? r.scope + ' { ' : ''}${r.item}${r.scope ? ' }' : ''}`);
     expect(unmodelled, `${SELECTOR} has a rule this guard does not model`).toEqual([]);
+  });
+});
+
+// T016 (loose-ends; quiet-pages T013, FR-022): a rule counts as applying when its last compound contains every
+// simple selector of the modelled one, whatever the form, so a more specific compound, `:is(…)` or `:where(…)`
+// is seen. Synthetic plants stand in for a sheet; none is written under src/styles/.
+describe('the matcher sees a rule whatever the form of its selector (T016)', () => {
+  const SELECTOR = '.nb-tab:focus-visible';
+  const PLANTS = [
+    '.nb-tab.nb-tab--x:focus-visible',
+    ':is(.nb-tab):focus-visible',
+    '.nb-tab:is(:focus-visible)',
+    ':where(.nb-tab):where(:focus-visible)',
+    '.nb-tab:focus-visible:not(.nb-tab--y)',
+    '.nb-page :is(.nb-tab, .nb-other):focus-visible',
+  ];
+  it.each(PLANTS)('names the plant %s by sheet and selector', (plant) => {
+    const found = rulesApplyingTo(`${plant} { box-shadow: none; }`, SELECTOR);
+    expect(found.map((r) => r.item)).toEqual([plant]);
+  });
+  it('still passes over rules for other tabs and other states', () => {
+    const source = '.nb-tab { color: red; } .nb-tab--x:focus-visible { color: red; } .nb-tab:hover { color: red; } .nb-tabs:focus-visible { color: red; }';
+    expect(rulesApplyingTo(source, SELECTOR)).toEqual([]);
   });
 });

@@ -141,15 +141,49 @@ describe('the hilltop cairn\'s outline stones hold 3:1 on what lies behind them 
 // scene with no change here. T011: every sheet is global once its screen is imported, so every sheet under
 // src/styles/ is read. Each selector the model reads has exactly one rule, bare, in notebook.css, or the guard
 // fails by sheet and selector.
+/** Split a selector list at its top-level commas, so `:is(.a, .b)` stays whole. */
+function splitList(list: string): string[] {
+  const parts: string[] = [];
+  let depth = 0;
+  let from = 0;
+  for (let i = 0; i < list.length; i += 1) {
+    const c = list[i];
+    if (c === '(' || c === '[') depth += 1;
+    else if (c === ')' || c === ']') depth -= 1;
+    else if (c === ',' && depth === 0) {
+      parts.push(list.slice(from, i).trim());
+      from = i + 1;
+    }
+  }
+  parts.push(list.slice(from).trim());
+  return parts.filter(Boolean);
+}
+/** One selector with every `:is(…)` / `:where(…)` unwrapped, one result per alternative. */
+function unwrapped(item: string): string[] {
+  const m = /:(?:is|where)\(([^()]*)\)/.exec(item);
+  if (!m) return [item];
+  return splitList(m[1]!).flatMap((alt) => unwrapped(item.slice(0, m.index) + alt + item.slice(m.index + m[0].length)));
+}
+/** True when some form of `item`, its last compound (attributes dropped) holds every simple selector of `selector`. */
+function appliesTo(item: string, selector: string): boolean {
+  const simple = (s: string) => new Set(s.match(/::?[\w-]+(?:\([^()]*\))?|[.#][\w-]+|[\w-]+/g) ?? []);
+  const want = simple(selector);
+  return unwrapped(item).some((form) => {
+    const last = form.replace(/\[[^\]]*\]/g, '').trim().split(/[\s>+~]+/).pop()!;
+    const have = simple(last);
+    return [...want].every((token) => have.has(token));
+  });
+}
+
 describe('every rule that can apply to what the cairn guard models is the one it reads (FR-021, SC-003; quiet-pages T013, loose-ends T011)', () => {
   const MODELLED = [
     ...(['far', 'mid', 'near'] as const).map((n) => `.nb-hill--${n}`),
     '.nb-cairn',
     ...[1, 2, 3, 4, 5].map((n) => `.nb-stone--${n}`),
   ];
-  const rulesFor = (selector: string) => {
+  const rulesFor = (selector: string, from: Array<{ name: string; text: string }> = sheets) => {
     const found: Array<{ item: string; scope: string }> = [];
-    for (const sheet of sheets) {
+    for (const sheet of from) {
       const scope: string[] = [];
       const re = /([^{}]*)\{|\}/g;
       let m: RegExpExecArray | null;
@@ -163,9 +197,8 @@ describe('every rule that can apply to what the cairn guard models is the one it
           scope.push(header);
           continue;
         }
-        for (const item of header.split(',').map((x) => x.trim())) {
-          const last = item.split(/[\s>+~]+/).pop()!.replace(/\[[^\]]*\]/g, '');
-          if (last === selector) found.push({ item: `${sheet.name}: ${scope.length ? scope.join(' > ') + ' { ' + item + ' }' : item}`, scope: sheet.name });
+        for (const item of splitList(header)) {
+          if (appliesTo(item, selector)) found.push({ item: `${sheet.name}: ${scope.length ? scope.join(' > ') + ' { ' + item + ' }' : item}`, scope: sheet.name });
         }
         re.lastIndex = sheet.text.indexOf('}', re.lastIndex) + 1;
       }
@@ -182,5 +215,19 @@ describe('every rule that can apply to what the cairn guard models is the one it
   it.each(MODELLED)('%s has one bare rule, the one the model reads, and no other, in any sheet', (selector) => {
     const found = rulesFor(selector).map((r) => r.item);
     expect(found, `${selector} has a rule this guard does not model`).toEqual([`notebook.css: ${selector}`]);
+  });
+
+  // T016: a rule counts as applying when its last compound holds every simple selector of the modelled one,
+  // whatever the form. Synthetic plants stand in for a sheet; none is written under src/styles/.
+  it.each([
+    '.nb-cairn.nb-cairn--x',
+    ':is(.nb-cairn)',
+    ':where(.nb-cairn)',
+    '.nb-hill--far:not(.nb-other)',
+    '.nb-page :is(.nb-stone--3, .nb-other)',
+  ])('names the plant %s by sheet and selector', (plant) => {
+    const modelled = ['.nb-hill--far', '.nb-cairn', '.nb-stone--3'].filter((m) => rulesFor(m, [{ name: 'zz.css', text: `${plant} { opacity: 0; }` }]).length > 0);
+    expect(modelled.length, 'some modelled selector sees the plant').toBe(1);
+    expect(rulesFor(modelled[0]!, [{ name: 'zz.css', text: `${plant} { opacity: 0; }` }]).map((r) => r.item)).toEqual([`zz.css: ${plant}`]);
   });
 });
