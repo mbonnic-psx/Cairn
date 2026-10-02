@@ -135,6 +135,48 @@ impl DayView {
     }
 }
 
+/// One site and how many times it was reached for in a range.
+#[derive(Clone, PartialEq, Eq, Debug, Serialize, Deserialize)]
+pub struct SiteCount {
+    pub domain: String,
+    pub count: u32,
+}
+
+/// A range of days, by site (`contracts/ui-ipc.md`, `summarize_reaches`, as
+/// amended in slice `history-by-site`).
+///
+/// It carries only what this build can state truthfully. `by_hour`,
+/// `by_weekday`, `movement` and `dst_approximate` join it when a slice
+/// computes them; until then their absence says nothing was computed, where an
+/// empty list would claim it had been.
+#[derive(Clone, PartialEq, Eq, Debug, Serialize, Deserialize)]
+pub struct Patterns {
+    /// Most first; equal counts by domain name, A to Z.
+    pub by_site: Vec<SiteCount>,
+    /// Each cut to the part inside the range.
+    pub gaps: Vec<Gap>,
+    /// The gaps in one sentence, about the range.
+    pub coverage_note: Option<String>,
+    /// How many days in the range hold the person's own estimate, which has
+    /// no site and so is in no list (FR-023).
+    pub estimates_excluded: u32,
+    /// Present when the history could not be opened or read, or the range was
+    /// not one Cairn could place. Then nothing else is.
+    pub sealed: Option<String>,
+}
+
+impl Patterns {
+    fn sealed(sentence: String) -> Self {
+        Patterns {
+            by_site: Vec::new(),
+            gaps: Vec::new(),
+            coverage_note: None,
+            estimates_excluded: 0,
+            sealed: Some(sentence),
+        }
+    }
+}
+
 /// What a build without the history says wherever a day would be.
 #[cfg(not(feature = "history"))]
 const NO_HISTORY: &str =
@@ -561,16 +603,28 @@ impl AppState {
         let mark = presence::Mark::at(&self.data_directory);
         presence::record_gap_since_last_seen(&history, &mark, (self.now)());
 
-        let counting = session::start(
-            self.helper.as_ref(),
-            Arc::new(RecordReach::over(history)),
-            self.now,
-        );
+        let sink = Arc::new(RecordReach::over(history));
+        let storing = sink.storing();
 
-        // The mark says "Cairn was counting at this moment", so it is only kept
-        // while that is true.
+        // With nowhere to put what it counts, Cairn is not watching in any way
+        // that lasts. The mark is left where it was, so that the next start
+        // that can open the history records all of this time as a gap; on a
+        // first run there is no mark yet, and this start is where the unseen
+        // time begins.
+        if !storing.load(std::sync::atomic::Ordering::SeqCst) && mark.read().is_none() {
+            mark.write((self.now)());
+        }
+
+        let counting = session::start(self.helper.as_ref(), sink, self.now);
+
+        // The mark says "Cairn was counting, and keeping it, at this moment", so
+        // it is only kept while that is true.
         if counting == Counting::Available {
-            presence::keep_marking(presence::Mark::at(&self.data_directory), self.now);
+            presence::keep_marking(
+                presence::Mark::at(&self.data_directory),
+                self.now,
+                storing,
+            );
         }
         counting
     }
@@ -713,6 +767,56 @@ impl AppState {
         {
             let _ = (day, day_start, day_end);
             DayView::sealed(NO_HISTORY.into())
+        }
+    }
+
+    /// A range of days, by site.
+    ///
+    /// **Called only by the Reaches screen** (FR-030a), as `list_todays_reaches`
+    /// is. The bounds are checked first, as `get_day`'s are, then the history is
+    /// opened; every refusal is the one sealed sentence, and a read that does
+    /// not go through is never an empty range.
+    pub fn summarize_reaches(
+        &self,
+        first_day: LocalDate,
+        last_day: LocalDate,
+        range_start: i64,
+        range_end: i64,
+    ) -> Patterns {
+        #[cfg(feature = "history")]
+        {
+            use crate::reflection::over_time::{assemble, check_range};
+            use crate::store::gaps::range_coverage_note;
+
+            if let Err(trouble) =
+                check_range(first_day, last_day, range_start, range_end, (self.now)())
+            {
+                return Patterns::sealed(trouble.message);
+            }
+            let history = match self.open_history() {
+                Ok(history) => history,
+                Err(sentence) => return Patterns::sealed(sentence),
+            };
+            match assemble(&history, first_day, last_day, range_start, range_end) {
+                Ok(range) => Patterns {
+                    by_site: range
+                        .by_site
+                        .into_iter()
+                        .map(|(domain, count)| SiteCount { domain, count })
+                        .collect(),
+                    coverage_note: range_coverage_note(&range.gaps),
+                    gaps: range.gaps,
+                    estimates_excluded: range.estimates_excluded,
+                    sealed: None,
+                },
+                Err(trouble) => Patterns::sealed(trouble.message),
+            }
+        }
+
+        #[cfg(not(feature = "history"))]
+        {
+            let _ = (first_day, last_day, range_start, range_end);
+            Patterns::sealed(NO_HISTORY.into())
         }
     }
 

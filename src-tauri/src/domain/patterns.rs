@@ -147,10 +147,7 @@ pub fn summarize(
         }
     }
 
-    let mut by_site: Vec<(String, u32)> = site_counts.into_iter().collect();
-    by_site.sort_by(|(domain_a, count_a), (domain_b, count_b)| {
-        count_b.cmp(count_a).then_with(|| domain_a.cmp(domain_b))
-    });
+    let by_site = sorted_sites(site_counts);
 
     let by_day: Vec<(LocalDate, u32)> = match window {
         Some((first, _)) => by_day_counts
@@ -184,6 +181,31 @@ pub fn summarize(
         by_day,
         estimates_excluded,
     }
+}
+
+/// The sites reached in `[from, to)`, most first, and nothing else.
+///
+/// What a range-by-site view needs of [`summarize`], without the per-hour,
+/// per-weekday and per-day lists it would build and throw away: the per-day
+/// list is one entry for every day of the range, and a range can be thousands
+/// of years (R5). Counts and order are those `summarize` gives.
+pub fn by_site(reaches: &[Reach], from: i64, to: i64) -> Vec<(String, u32)> {
+    let mut site_counts: HashMap<String, u32> = HashMap::new();
+    for reach in reaches {
+        if reach.at >= from && reach.at < to {
+            *site_counts.entry(reach.domain.clone()).or_insert(0) += 1;
+        }
+    }
+    sorted_sites(site_counts)
+}
+
+/// Most reached first; equal counts by domain name.
+fn sorted_sites(site_counts: HashMap<String, u32>) -> Vec<(String, u32)> {
+    let mut by_site: Vec<(String, u32)> = site_counts.into_iter().collect();
+    by_site.sort_by(|(domain_a, count_a), (domain_b, count_b)| {
+        count_b.cmp(count_a).then_with(|| domain_a.cmp(domain_b))
+    });
+    by_site
 }
 
 /// Whether the local offset changed between the two ends of a range —

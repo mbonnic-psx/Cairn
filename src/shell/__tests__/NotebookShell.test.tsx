@@ -63,7 +63,7 @@ describe('NotebookShell tabs', () => {
   it('renders no tab for an id tabsFor does not return', () => {
     shell(tabsFor('choosing', false));
     const names = screen.getAllByRole('button').map((b) => b.textContent);
-    expect(names).toEqual(['Protection', 'Tonight', 'What Cairn covers']);
+    expect(names).toEqual(['Protection', 'Today', 'Tonight', 'What Cairn covers']);
   });
 
   it('wears the morning look', () => {

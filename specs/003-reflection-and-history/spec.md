@@ -292,6 +292,31 @@ Already stated, and held by this slice as written: quotes are bundled and never 
 banned-words check. A quote shows the same whether today held reaches or none, and whether
 the journal is sealed, because it is not about the day.
 
+### Gaps reviewed — slice `history-by-site` (2026-10-01)
+
+Checked against US2 scenarios 1, 3, 4 and 5, FR-019, FR-022–FR-024, SC-005–SC-008, and the standing guard that
+keeps reach numbers on the reaches screen alone. Decided by the owner:
+
+- **H1 — where it lives.** On the reaches screen (the header's *Today*), as a choice between *Today* and *Over
+  time*, never a screen of its own, so reach numbers stay on the one screen that may hold them
+  (`check-no-ambient-counts`).
+- **H2 — the range it opens on.** The last 4 weeks, ending today. The person can change it; the choice is not a
+  setting and is not remembered.
+- **H3 — how it reads.** A calm list of sites, the most reached-for first, each with its count and a soft bar.
+  No ranking words (*top*, *worst*, *most problematic*), no colour that means good or bad, no comparison with an
+  earlier range, and nothing that congratulates a short list.
+- **H4 — what Cairn did not see.** Any period in the range Cairn was not counting is stated above the list, as
+  the check-in states it for a day (FR-022, FR-022a); day-level estimates are not counted in it (FR-023).
+
+- **H5 — time Cairn never recorded.** The range states the gaps Cairn recorded, and the standing sentence that
+  Cairn counts only while it is running, as Today and the check-in do. Time before Cairn first counted, while
+  protection was off, or while the person chose silence is not recorded as a gap, and this slice does not invent
+  it. A later slice, `first-counted`, records when Cairn first counted, so every count can state the time before
+  it (owner, 2026-10-01: "1. yes").
+
+Already stated, and held by this slice as written: a range with no reaches reads as a quiet range (FR-024); no
+streak, day count or chain (scenario 5); everything is available with no journal entry ever written (scenario 3).
+
 ## Requirements *(mandatory)*
 
 ### Functional Requirements

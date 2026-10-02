@@ -25,6 +25,23 @@ const LONGEST_DAY: i64 = 26 * 3600;
 const EARLIEST_START: i64 = -14 * 3600;
 const LATEST_START: i64 = 12 * 3600;
 
+/// How far `instant` is from the UTC midnight of `day`; `None` where the
+/// difference does not fit, which no real instant produces.
+pub(crate) fn offset_from_midnight(day: LocalDate, instant: i64) -> Option<i64> {
+    day.days_since_epoch()
+        .checked_mul(86_400)
+        .and_then(|midnight| instant.checked_sub(midnight))
+}
+
+/// Whether `instant` could be the moment `day` begins, somewhere on earth: no
+/// earlier than 14 hours before the date's UTC midnight and no later than 12
+/// hours after it. The rule `check_bounds` holds for a day, and `over_time`
+/// holds at each end of a range.
+pub(crate) fn could_begin(day: LocalDate, instant: i64) -> bool {
+    offset_from_midnight(day, instant)
+        .is_some_and(|offset| (EARLIEST_START..=LATEST_START).contains(&offset))
+}
+
 /// Whether `[day_start, day_end)` could be `day` somewhere on earth (J4).
 ///
 /// The core does not know the person's zone, so it holds the interface to
@@ -33,13 +50,10 @@ const LATEST_START: i64 = 12 * 3600;
 /// hours at which `day` can begin anywhere. Bounds outside that would make
 /// the day show reaches of other days, or an untrue empty one (Principle III).
 pub fn check_bounds(day: LocalDate, day_start: i64, day_end: i64) -> Result<(), Trouble> {
-    let midnight_utc = day.days_since_epoch() * 86_400;
-    let offset = day_start - midnight_utc;
-    let span = day_end - day_start;
-    if span <= 0
-        || span > LONGEST_DAY
-        || !(EARLIEST_START..=LATEST_START).contains(&offset)
-    {
+    let span_fits = day_end
+        .checked_sub(day_start)
+        .is_some_and(|span| span > 0 && span <= LONGEST_DAY);
+    if !span_fits || !could_begin(day, day_start) {
         return Err(Trouble::new(
             "Cairn could not tell which day that is just now, so it has shown and \
              saved nothing. Protection is unaffected.",

@@ -16,7 +16,7 @@ use crate::enforcement::state::ProtectionState;
 use crate::store::config::ReachModeSetting;
 
 use super::state::{
-    AppState, CategoryPreset, DayView, Disclosures, PendingView, TodaysReaches,
+    AppState, CategoryPreset, DayView, Disclosures, Patterns, PendingView, TodaysReaches,
 };
 
 #[tauri::command]
@@ -159,6 +159,19 @@ pub fn list_todays_reaches(
     day_end: i64,
 ) -> TodaysReaches {
     state.list_todays_reaches(day_start, day_end)
+}
+
+/// A range of days, by site. **The Reaches screen is the only caller**
+/// (FR-030a): an ESLint rule restricts `src/ipc/reaches.ts`.
+#[tauri::command]
+pub fn summarize_reaches(
+    state: State<'_, AppState>,
+    first_day: LocalDate,
+    last_day: LocalDate,
+    range_start: i64,
+    range_end: i64,
+) -> Patterns {
+    state.summarize_reaches(first_day, last_day, range_start, range_end)
 }
 
 /// One day, whole. **The check-in and the single-day screen are the only

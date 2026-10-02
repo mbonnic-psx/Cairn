@@ -15,6 +15,8 @@
 //! is what happened".
 
 use std::path::{Path, PathBuf};
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
 use std::time::Duration;
 
 /// How often the mark is refreshed while Cairn is running.
@@ -73,11 +75,23 @@ impl Mark {
 /// The thread is deliberately never joined: it holds nothing that needs
 /// releasing, and the process exiting is exactly the event the mark is there to
 /// record the far side of.
-pub fn keep_marking(mark: Mark, now: fn() -> i64) {
+pub fn keep_marking(mark: Mark, now: fn() -> i64, storing: Arc<AtomicBool>) {
     std::thread::spawn(move || loop {
-        mark.write(now());
+        mark_if_storing(&mark, now(), &storing);
         std::thread::sleep(REFRESH);
     });
+}
+
+/// Leave the mark, but only while everything counted is being stored.
+///
+/// The mark says "Cairn saw this moment". A session whose history is sealed, or
+/// whose last reach could not be written, saw nothing it could keep, so it
+/// leaves the mark where it was: the next start that can open the history then
+/// records the gap covering all of that time (FR-022, Principle III).
+pub fn mark_if_storing(mark: &Mark, at: i64, storing: &AtomicBool) {
+    if storing.load(Ordering::SeqCst) {
+        mark.write(at);
+    }
 }
 
 /// Record the period between the last mark and now, if it was long enough to

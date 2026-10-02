@@ -65,6 +65,7 @@ fn main() {
             commands::get_reach_mode,
             commands::set_reach_mode,
             commands::list_todays_reaches,
+            commands::summarize_reaches,
             commands::get_disclosures,
             commands::request_protection_off,
             commands::remove_custom_entry,

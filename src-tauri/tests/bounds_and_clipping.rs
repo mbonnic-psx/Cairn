@@ -53,3 +53,15 @@ fn a_gap_with_no_length_inside_the_day_is_dropped() {
         (midnight + HOUR, midnight + 2 * HOUR)
     );
 }
+
+#[test]
+fn an_instant_at_either_extreme_is_refused_not_a_panic() {
+    let (day, midnight) = day();
+    for extreme in [i64::MIN, i64::MAX] {
+        assert!(check_bounds(day, extreme, midnight + 24 * HOUR).is_err());
+        assert!(check_bounds(day, midnight, extreme).is_err());
+        assert!(check_bounds(day, extreme, extreme).is_err());
+    }
+    assert!(check_bounds(day, i64::MAX, i64::MIN).is_err());
+    assert!(check_bounds(day, i64::MIN, i64::MAX).is_err());
+}

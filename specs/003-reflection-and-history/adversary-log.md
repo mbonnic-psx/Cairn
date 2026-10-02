@@ -57,3 +57,27 @@ Findings (triaged by the host):
 | A6 | LOW | confirmed | deferred — the owner (matthew-volaris), 2026-10-01: agreed to leave it after the explanation that it needs administrator access, which can already switch Cairn off (README) | A FIFO in place of the quotes file blocks `get_quote` (a sync command), which would freeze the window. Needs write access to the install's resources, i.e. admin |
 
 Held: missing, empty and pre-slice config read as shown; a malformed setting makes the config unreadable and shows neither line nor switch (fail closed); a save never loses trail, pending change or trusted clock, and a half-way save leaves the old file; hostile quotes files (empty, non-strings, invalid UTF-8, a directory, missing, 100k lines, a 50 MB line) give no line or a line, never a panic; the roll is never the date; the quote is only reachable from `CheckIn.tsx`; the shipped 24 lines pass the banned-words check and read clean against R6.
+
+## history-by-site · 1ed58e6 · 2026-10-01
+
+| Trigger | Status | Evidence |
+|---|---|---|
+| driving adapter (HTTP route, CLI command, queue consumer) | widened | `src-tauri/src/ipc/commands.rs`: `summarize_reaches(first_day, last_day, range_start, range_end)` |
+| driven adapter or the provider types behind one | widened | `src-tauri/src/store/history.rs` range reads (`between`, `gaps_between`, `estimates_between`) through `reflection/over_time.rs` |
+| authorisation decision (who can reach one that already exists) | not present | single local user; the screen offers no protection control (`ReachesOverTime.test.tsx`), the command is `Reads` (`tests/ipc_surface.rs`) |
+| concurrency, idempotency, ordering, retention, or time | widened | range bounds across clock changes (`check_range`, `src/localDays.ts`), a late answer after a range change (`Reaches.tsx`), two years of history (`tests/patterns_at_scale.rs`) |
+
+Spawned: reaches over a range · `drive-adversary` · host (Opus 5.5) · delegated, fresh context · manifest: `src-tauri/src/ipc/commands.rs`, `src-tauri/src/ipc/state.rs`, `src-tauri/src/reflection/over_time.rs`, `src-tauri/src/reflection/checkin.rs`, `src-tauri/src/store/gaps.rs`, `src-tauri/src/store/history.rs`, `src-tauri/src/domain/patterns.rs`, `src-tauri/tests/us2_by_site.rs`, `range_bounds.rs`, `range_coverage.rs`, `patterns_at_scale.rs`, `ipc_surface.rs`, `src/screens/Reaches.tsx`, `src/localDays.ts`, `src/ipc/reaches.ts`, and their screen tests
+Omitted: authorisation · not present
+
+Findings (triaged by the host):
+
+| # | Severity | Triage | State | Finding |
+|---|---|---|---|---|
+| R1 | HIGH | confirmed (component-level reproduction through the calls `begin_counting_session` makes) | fixed `759a95b` (pinned first in `2fbaf4a`; the mark is not refreshed while reaches cannot be stored) | A counting session that starts with the key unavailable leaves no gap: the inferred gap and every reach go into a sealed store (no-ops), yet `keep_marking` refreshes the presence mark, so the next good start infers nothing. Days Cairn did not see, and days whose reaches were dropped, read as complete and quiet (Principle III, FR-022, H4). Predates the slice (`counting/presence.rs`, `counting/sink.rs`, `ipc/state.rs` `begin_counting_session`); the over-time view is where it shows |
+| R2 | LOW | confirmed | fixed `d518b81` | A `last_day` of 9999-12-31 makes `estimates_between`'s text comparison against `10000-01-01` fail, so the estimates sentence vanishes (FR-023). IPC only; `range_end` is never checked against the present |
+| R3 | LOW | confirmed | fixed `c855134` (merged in every place gaps are summed) | Overlapping gap rows are summed after `clipped`, so a 28-day range can read "about 84 days". Reachable with two Cairn processes at once (no single-instance guard) or a clock moved back |
+| R4 | LOW | confirmed | fixed `9ee3d2b` | `Math.max(1, ...by_site.map(…))` in `Reaches.tsx` throws past ~65k–125k distinct sites, blanking the screen |
+| R5 | LOW | confirmed | fixed `51fc952` | The widest range a hostile caller can send (±9999 years) builds a 7.3M-entry per-day list for nothing (0.16 s, 94 MB). IPC only |
+
+Held: edges half-open and exact; gaps clipped and cut at both edges, rounded up; no double count across a clock change; estimates never a site; every bound refusal plain, checked arithmetic; a 4-week range across DST in eight odd zones (30-min, 2-h, date-line) accepted; no OS text or path in any sentence; a late answer dropped; the range forgotten on leaving (H2); no protection route, no count outside the reaches screen; no ranking, praise, streak or banned word. 1.06M reaches over 60k sites read in 0.40 s.

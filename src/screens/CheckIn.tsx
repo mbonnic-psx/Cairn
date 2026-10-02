@@ -31,6 +31,7 @@ import {
   setQuotesShown,
   type DayView,
 } from '../ipc/journal';
+import { dayBounds, localToday } from '../localDays';
 
 /**
  * Text that shows nothing is empty (G4), here as in the store: the same
@@ -70,17 +71,10 @@ export interface Today {
   end: number;
 }
 
-/** Today's local date and its two local midnights. Not start + 24 h: a day can be 23 or 25 hours long. */
+/** Today's local date and its two local midnights (a day can be 23 or 25 hours long). */
 function today(): Today {
-  const now = new Date();
-  const start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const end = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
-  const pad = (n: number) => String(n).padStart(2, '0');
-  return {
-    day: `${start.getFullYear()}-${pad(start.getMonth() + 1)}-${pad(start.getDate())}`,
-    start: Math.round(start.getTime() / 1000),
-    end: Math.round(end.getTime() / 1000),
-  };
+  const day = localToday(new Date());
+  return { day, ...dayBounds(day) };
 }
 
 const WEEKDAYS = [

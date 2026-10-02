@@ -15,4 +15,6 @@
 pub mod checkin;
 #[cfg(feature = "history")]
 pub mod journal;
+#[cfg(feature = "history")]
+pub mod over_time;
 pub mod quote;
