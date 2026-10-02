@@ -14,7 +14,7 @@ description: "Tasks for slice `quiet-pages` of 004-notebook-landscape"
 
 ## Phase 0: Pin (done before any implementation; the host runs it)
 
-- [ ] T001 [P] [US3] **Pin.** Record today's markup before the screens change (plan, *Pin*). Write `src/screens/__tests__/QuietCurrentPin.test.tsx`: render `Limits` and `Teardown` outside any shell and assert `container.innerHTML` equals a literal string captured from the unchanged code. States: `Limits` with one covered line, and with two; `Teardown` complete with checked lines and none residue; complete with no checked lines; partial with checked lines and residue; partial with residue only. Seen passing on unchanged code: there is no RED, this is a characterisation. Mark it the Pin in the commit. Files: `src/screens/__tests__/QuietCurrentPin.test.tsx`. Ledger: `delivery/survey/pinned.md` gets a row (over `Limits.tsx` and `Teardown.tsx`) if `check-slice-scope` lets a slice write it, and the row is handed back to the host otherwise (see *Handed back*).
+- [x] T001 [P] [US3] **Pin.** Record today's markup before the screens change (plan, *Pin*). Write `src/screens/__tests__/QuietCurrentPin.test.tsx`: render `Limits` and `Teardown` outside any shell and assert `container.innerHTML` equals a literal string captured from the unchanged code. States: `Limits` with one covered line, and with two; `Teardown` complete with checked lines and none residue; complete with no checked lines; partial with checked lines and residue; partial with residue only. Seen passing on unchanged code: there is no RED, this is a characterisation. Mark it the Pin in the commit. Files: `src/screens/__tests__/QuietCurrentPin.test.tsx`. Ledger: `delivery/survey/pinned.md` gets a row (over `Limits.tsx` and `Teardown.tsx`) if `check-slice-scope` lets a slice write it, and the row is handed back to the host otherwise (see *Handed back*).
 
 ## Phase 1: User Story 3 — What Cairn covers and This machine is as it was as spreads (P2)
 
@@ -52,7 +52,9 @@ Committed mockups of the white-box states: not applicable here. This repository 
 
 ## Handed back
 
-- `delivery/survey/pinned.md` needs a row for the pin written in T001 (`QuietCurrentPin.test.tsx`, over `Limits.tsx` and `Teardown.tsx`), unless `check-slice-scope` lets this slice write it; the host writes it otherwise.
+- `delivery/survey/pinned.md` needs a row for the pin written in T001. `check-slice-scope` refuses it on a slice branch ("outside every deployable and not a slice's to write"), so the host appends it on `main`, verbatim:
+
+  `| 2026-10-02 | What Cairn covers and This machine is as it was as they render today: the covered lines, what is not covered, what is kept and the note on administrators (one and two covered lines); teardown as it was and almost everything undone, with and without checked lines and what is left, element for element. Nothing pinned What Cairn covers before this row. Slice 004 `quiet-pages` adds their notebook spreads beside them and leaves this output unchanged in Current | `Limits.tsx`, `Teardown.tsx` outside the notebook (no page context) | `QuietCurrentPin.test.tsx` (`quietCases.ts`); `Waiting.test.tsx` (the teardown report) | `npx vitest run src/screens/__tests__/QuietCurrentPin.test.tsx src/screens/__tests__/Waiting.test.tsx` |`
 - This machine is as it was is not reachable from the app (D16): no browser can show either outcome; the tests render both in every look, and the demo names it under *Not working yet*.
 
 ## Dependencies and order
