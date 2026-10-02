@@ -68,15 +68,15 @@ wrong.
 | Principle | How this slice stands | Verdict |
 |---|---|---|
 | I. The wall holds | Nothing here reacts to a blocked request. Both screens are reached only by a tab (FR-027). | Pass |
-| II. Local-first | No dependency, no font or image fetched. | Pass |
-| III. Encryption at rest | No data touched. | N/A |
-| IV. Reversible | No system file touched. | N/A |
-| V. Honest about limits | The state shown is still the core's read-back; "not confirmed" keeps its own words and is never shown as protected (`Trail` heading and the badge keep today's rules). The list is called protected only while in force, as today. | Pass |
-| VI. Voice and visuals (v1.5.0) | Words unchanged; amber for not confirmed and waiting, no red; serif for headings, the sentence and the list; mono only for the badge, the figures' labels, the list's caption and the button. The waiting time stays a phrase, never a countdown. No count is added anywhere: the two figures and the count sentence are today's, on today's screens. | Pass |
-| VII. Free at the moment of need | Nothing gated. | Pass |
+| II. Local-First, Zero Telemetry | No dependency, no font or image fetched. No data touched, so encryption at rest is not reached. | Pass |
+| III. Honest About Limits | The state shown is still the core's read-back; "not confirmed" keeps its own words and is never shown as protected (`Trail` heading and the badge keep today's rules). The list is called protected only while in force, as today. | Pass |
+| IV. Reversible by Construction | No system file touched. | N/A |
+| V. Reflection Happens at Distance | No notification, prompt or required answer is added; nothing is typed or solved to reach a site or keep protection running. | Pass |
+| VI. Voice, Language, and Gamification Discipline (v1.5.0) | Words unchanged; amber for not confirmed and waiting, no red; serif for headings, the sentence and the list; mono only for the badge, the figures' labels, the list's caption and the button. The waiting time stays a phrase, never a countdown. No count is added anywhere: the two figures and the count sentence are today's, on today's screens. | Pass |
+| VII. Free at the Moment of Need | Nothing gated. | Pass |
 | The waiting period (FR-047e) | "Keep things as they are" stays as reachable as today, beside the state (FR-020). Nothing offers a change now. | Pass |
 | Continuous Integration on Trunk | Lands on `main` behind the development switch; Current is the default and unchanged (FR-011, FR-032). | Pass |
-| Agent change meets the same bar / tests first | One RED-GREEN-REFACTOR increment per rule; Current's markup pinned before the screens change (*Pin*). | Pass |
+| Agent-Generated Change Meets the Same Bar; Acceptance-Driven Development, Tests First | One RED-GREEN-REFACTOR increment per rule; Current's markup pinned before the screens change (*Pin*). | Pass |
 
 No violations. Complexity Tracking is empty.
 

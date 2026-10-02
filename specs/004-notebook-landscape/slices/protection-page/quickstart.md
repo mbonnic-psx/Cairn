@@ -2,9 +2,27 @@
 
 ## See it
 
-Both spreads need the core and protection on. In a browser alone (`npm run dev`) protection always reads as off,
-so the Protection tab opens setup and What is protected has no tab: **neither spread can be seen there** (research
-P6).
+Both spreads need the core and protection on. In a browser alone (`npm run dev`) there is no core, so protection
+reads as off, the Protection tab opens setup and What is protected has no tab. Two ways in:
+
+**A browser, with the demo fake core** (`demo/fake-core.js`, loaded before the page, answering the read calls from
+the page itself; nothing is written or sent). With `npm run dev` serving, for example, on port 1431:
+
+```sh
+agent-browser --init-script specs/004-notebook-landscape/slices/protection-page/demo/fake-core.js \
+  open 'http://127.0.0.1:1431/?core=in_force&list=long'
+```
+
+- `?core=in_force` protection on and checked, a short list (four addresses).
+- `?core=in_force&list=long` the same with 120 addresses, one of them very long.
+- `?core=not_verified` protection on, not confirmed just now.
+
+Choose a look on **Look (testing)**, then the Protection tab and **What is protected** (**What you chose** when not
+confirmed). A waiting change cannot be shown this way (research P6). "Checking this machine…" and "a read that could
+not be made" cannot be reached through the app at all: `App` renders Protection only once it holds a state, so the
+tests carry them.
+
+**The application:**
 
 ```sh
 npm ci
@@ -34,7 +52,7 @@ npm test && npm run lint && npm run check
 npm run build && ! grep -rl "Look (testing)" dist/
 ```
 
-The tests render every state below in every look, including the ones the running app cannot reach today.
+The tests render every state below in every look (`describe.each` over morning, midday and night in `ProtectionPage.test.tsx` and `TrailPage.test.tsx`), including the ones the running app cannot reach today.
 
 ## Not working yet
 
@@ -42,9 +60,9 @@ The tests render every state below in every look, including the ones the running
   for a waiting change and never passes one to the Protection screen, so the note with "Keep things as they are"
   appears only in the tests (`ProtectionPage.test.tsx`, `Waiting.test.tsx`). That is today's behaviour, in Current
   as in the notebook, and this feature does not change what Cairn does (D7).
-- **"Not confirmed"** is reachable only by changing Cairn's section of the hosts file by hand, as an administrator,
-  after protection is on, and opening Protection before Cairn repairs it (research P6). The tests cover it in every
+- **"Not confirmed"** is reachable in a browser through the demo fake core (`?core=not_verified`). In the application it is reachable only by changing Cairn's
+  section of the hosts file by hand, as an administrator, after protection is on, and opening Protection before Cairn repairs it (research P6). The tests cover it in every
   look.
-- **"Checking this machine…"** and **a read that could not be made** show only for the moment before the core
-  answers, or when it cannot answer at all; the tests cover both.
+- **"Checking this machine…"** and **a read that could not be made** cannot be reached through the app at all:
+  `App` renders Protection only once it holds a state. The tests cover both, in every look.
 - No real-browser layout check runs in CI (frame T024): the fit at 800×600 is checked by eye in the demo.
