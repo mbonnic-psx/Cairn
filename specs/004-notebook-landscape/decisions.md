@@ -318,6 +318,7 @@ Every product decision a `/cruise` run took, in order. A person overrides one by
 - **Confidence:** high · **Would reverse if:** the owner reads D23 as open and sealed days only
 - **Written to:** `specs/003-reflection-and-history/tasks.md` (T080)
 - **Status:** standing
+- **Note, 2026-10-02 (D48):** the reason is spent: the reveal (#55) removed Current. T080 stays with 003, which built the screen, rewritten without Current.
 
 ## D29 — What does SC-002's "search of the released interface" search?
 - **Stage:** slice gaps · **Slice:** loose-ends · **When:** 2026-10-02T12:22:00Z · **Iteration:** 7
@@ -534,4 +535,26 @@ Every product decision a `/cruise` run took, in order. A person overrides one by
 - **Decided by:** drive-skipper (claude-opus-5-5[1m])
 - **Confidence:** high · **Would reverse if:** moving the tabs in the DOM cannot be done without changing where or how they are drawn in some look or window size; then (c), never a moved tab
 - **Written to:** `src/shell/NotebookShell.tsx`, `src/shell/__tests__/NotebookShell.test.tsx`, `specs/004-notebook-landscape/contracts/ui-shell.md` (Navigation)
+- **Status:** standing
+
+## D48 — Who owns the honesty gaps the completion audit found when the core fails?
+- **Stage:** completion audit · **Slice:** none (after `reveal`) · **When:** 2026-10-03T03:40:00Z · **Iteration:** 11
+- **Question:** The audit found nothing in 004 unbuilt. It did find screens that go blank, silent or wrong when the core fails, all there before the notebook and kept word for word by it: a failed protection read at start shows setup as if Cairn were off (HIGH); the categories vanish when they cannot be read; a turn-on that succeeded returns to setup when the trail read fails; What is protected's tab does nothing when the trail read fails; What Cairn covers is blank while loading and on a failed read; Today stays on "Looking…" when its read fails; two setup sentences and Today's and Over time's loading sentences are never announced; "1 addresses, across 1 lists"; a teardown's "These are still here" over an empty list. Does 004 take them, or the features that own what the screens do?
+- **Options:** hand them to the features that own the behaviour, as tasks, the way D11, D20 and D28 did: 002 for protection, setup, What Cairn covers and teardown (T105–T112), 003 for Today (T081, beside T080) (recommended: 004 changes how Cairn looks and nothing it does, and each fix changes what a screen says); a new 004 slice
+- **Decision:** Hand them on, as written in each task list. T105 is HIGH and goes first in 002.
+- **Why:** Fixing any of them changes what Cairn does or says, which 004 promised not to change; the features that own the behaviour own the fix and its tests. The notebook keeps each sentence they add through a D46 delta.
+- **Decided by:** host (standing decision D11)
+- **Confidence:** high · **Would reverse if:** the owner wants these fixed before anything else, as a slice of their own
+- **Written to:** `specs/002-machine-wide-protection/tasks.md` (T105–T112), `specs/003-reflection-and-history/tasks.md` (T080, T081)
+- **Status:** standing
+
+## D49 — Does the "Fonts missing" edge case need a test of its own?
+- **Stage:** completion audit · **Slice:** none (after `reveal`) · **When:** 2026-10-03T03:40:00Z · **Iteration:** 11
+- **Question:** The fallback stacks exist and end in generic serif and monospace, but no test holds that serif text stays serif and typewriter text stays typewriter when a bundled font cannot be used.
+- **Options:** one stylesheet test, as host work on main (recommended: the behaviour is built, only its hold is missing); a slice
+- **Decision:** One test, `src/look/__tests__/fontFallback.test.ts`: each stack names its bundled face first, then system faces of the same kind, and ends in the generic family; no page sheet names a face of its own. Its teeth were shown by dropping `serif` from the stack.
+- **Why:** A criterion built and not held is a test to write, not a thing a person does.
+- **Decided by:** host (stage recommendation)
+- **Confidence:** high · **Would reverse if:** a real-browser runner arrives (D27) and can check the rendered face instead
+- **Written to:** `src/look/__tests__/fontFallback.test.ts`
 - **Status:** standing

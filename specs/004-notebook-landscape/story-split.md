@@ -58,7 +58,7 @@ the frame's page-spread layout and the look tokens, both settled by `frame` and 
 - `protection-page` lands the notebook context and heading outline (D6, D9) before `setup-pages` and `quiet-pages`
   start; they build against it. Carried tasks are owned as D10 says.
 - A waiting change is never shown in the running app (`App` never fetches it). That is 002's to fix, as a task in
-  `specs/002-machine-wide-protection/tasks.md` (D11). When it lands, Current's Protection shows it too; that is 002's
+  `specs/002-machine-wide-protection/tasks.md` (D11). When it lands, Protection shows it; that is 002's
   change, not a break of SC-009.
 - A spread with no control may not scroll from the keyboard in the macOS and Linux webview: the page area is the
   shell's. One shell task makes it reachable and scrollable by keyboard, as host work on main before `reveal` (D19).
@@ -69,7 +69,7 @@ the frame's page-spread layout and the look tokens, both settled by `frame` and 
   only; no WebKit run was possible here, so the owner's macOS/Linux demo is where it is seen.
 - Before Cairn changes anything can be confirmed before its details (what is not covered) are shown, while they load
   or when they cannot be read. That is 002's to fix, as a task in `specs/002-machine-wide-protection/tasks.md` (D20).
-  When it lands, Current's disclosure changes too; that is 002's change, not a break of SC-009.
+  When it lands, the disclosure changes; that is 002's change.
 - A real-browser check of the layout at 800×600 (frame T024: tabs and greeting inside the notebook, spreads scrolling
   without overlap or clipping, FR-025, FR-029) waits on the owner choosing a browser test runner, a new dependency
   (D10, D27). Until then the demos' screenshots are the only proof of real layout.
