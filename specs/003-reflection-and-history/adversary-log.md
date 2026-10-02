@@ -57,3 +57,12 @@ Findings (triaged by the host):
 | A6 | LOW | confirmed | deferred — the owner (matthew-volaris), 2026-10-01: agreed to leave it after the explanation that it needs administrator access, which can already switch Cairn off (README) | A FIFO in place of the quotes file blocks `get_quote` (a sync command), which would freeze the window. Needs write access to the install's resources, i.e. admin |
 
 Held: missing, empty and pre-slice config read as shown; a malformed setting makes the config unreadable and shows neither line nor switch (fail closed); a save never loses trail, pending change or trusted clock, and a half-way save leaves the old file; hostile quotes files (empty, non-strings, invalid UTF-8, a directory, missing, 100k lines, a 50 MB line) give no line or a line, never a panic; the roll is never the date; the quote is only reachable from `CheckIn.tsx`; the shipped 24 lines pass the banned-words check and read clean against R6.
+
+## history-by-site · 1ed58e6 · 2026-10-01
+
+| Trigger | Status | Evidence |
+|---|---|---|
+| driving adapter (HTTP route, CLI command, queue consumer) | widened | `src-tauri/src/ipc/commands.rs`: `summarize_reaches(first_day, last_day, range_start, range_end)` |
+| driven adapter or the provider types behind one | widened | `src-tauri/src/store/history.rs` range reads (`between`, `gaps_between`, `estimates_between`) through `reflection/over_time.rs` |
+| authorisation decision (who can reach one that already exists) | not present | single local user; the screen offers no protection control (`ReachesOverTime.test.tsx`), the command is `Reads` (`tests/ipc_surface.rs`) |
+| concurrency, idempotency, ordering, retention, or time | widened | range bounds across clock changes (`check_range`, `src/localDays.ts`), a late answer after a range change (`Reaches.tsx`), two years of history (`tests/patterns_at_scale.rs`) |
