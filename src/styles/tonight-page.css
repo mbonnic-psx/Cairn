@@ -126,6 +126,15 @@
   max-width: 34em;
 }
 
+/* The Seen by choice, on the left page under the date boxes: the buttons are the Which days buttons, with their
+   ink, their line under the pressed one and their focus ring, so this holds only where the pair sits. */
+.nb-reaches-seen {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 20px;
+  margin: 12px 0 0;
+}
+
 /* From and To: typewriter labels over serif boxes. The box's edge is drawn here, because a native one is a
    colour no token sets and nothing could hold it to 3:1 (D15): 1px in the quiet ink on the paper itself. */
 .nb-reaches-range {

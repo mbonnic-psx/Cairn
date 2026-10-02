@@ -27,9 +27,11 @@ const day = (over: Partial<TodaysReaches> = {}): TodaysReaches => ({
 });
 const range = (domain: string, over: Partial<Patterns> = {}): Patterns => ({
   by_site: [{ domain, count: 1 }],
+  by_hour: [],
   gaps: [],
   coverage_note: null,
   estimates_excluded: 0,
+  dst_approximate: false,
   sealed: null,
   ...over,
 });

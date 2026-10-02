@@ -51,6 +51,9 @@ describe('the screen with the real reader', () => {
       lastDay: '2026-09-30',
       rangeStart: expect.any(Number),
       rangeEnd: expect.any(Number),
+      offsets: expect.arrayContaining([
+        expect.objectContaining({ from: expect.any(Number), offset: expect.any(Number) }),
+      ]),
     });
   });
 });

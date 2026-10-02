@@ -111,7 +111,7 @@ const offsetAt = (epochSeconds: number): number =>
  * Found by asking `Date` for the offset at each local midnight, as `rangeBounds` finds the
  * midnights; where neighbouring midnights differ, the first instant of the new offset is searched
  * to the second. The core buckets each reach by the offset in force at its instant from this list
- * (`domain::patterns::by_hour`), so every hour agrees with the times the Today log prints. Holds no
+ * (in the core's domain layer), so every hour agrees with the times the Today log prints. Holds no
  * reach data.
  */
 export function offsetChanges(firstDay: string, lastDay: string): OffsetChange[] {
