@@ -495,6 +495,27 @@ describe('focus is visible on every sky and on the paper (FR-022, FR-021; resear
   });
 });
 
+describe('what applies outside any [data-look]: the switch on Current (FR-022, FR-011)', () => {
+  // The switch is the one .nb-element that renders with no [data-look] ancestor
+  // (on Current it carries none), so every --nb-* a rule of its own reads is unset there.
+  const bare = ruleFor('.nb-switch select:focus-visible');
+
+  it('gives the focused select the browser\'s own ring on Current, where --nb-focus-sky is unset', () => {
+    const own = ruleFor('.nb-switch:not([data-look]) select:focus-visible');
+    expect(own.some((r) => /outline:\s*auto\b/.test(r.body))).toBe(true);
+    // It sits after the look-coloured rule, and is the only way the unset var is answered.
+    const order = rules.map((r) => r.selector);
+    expect(order.indexOf('.nb-switch:not([data-look]) select:focus-visible')).toBeGreaterThan(
+      order.indexOf(bare[0]!.selector),
+    );
+  });
+
+  it('says plainly what the switch does on Current: its text inherits, it draws the browser\'s ring', () => {
+    expect(notebook).not.toMatch(/On Current it has no look and no rule/);
+    expect(notebook).toMatch(/On Current[\s\S]{0,120}inherit/);
+  });
+});
+
 describe('the switch is readable on every look\'s sky (FR-021, FR-011, FR-012; research L5)', () => {
   it('takes its text colour from the greeting body token', () => {
     expect(ruleFor('.nb-switch').some((r) => /color:\s*var\(--nb-greeting-body\)/.test(r.body))).toBe(true);

@@ -289,7 +289,8 @@
 .nb-stone--5 { width: 74px; height: 21px; }
 
 /* The testing switch sits over the sky, outside the shell, and wears the look
- * it shows (LookSwitch sets data-look). On Current it has no look and no rule. */
+ * it shows (LookSwitch sets data-look). On Current it has no look, so its tokens
+ * are unset: the text inherits, and the focused select draws the browser's own ring. */
 .nb-switch {
   color: var(--nb-greeting-body);
 }
@@ -475,6 +476,10 @@
 .nb-switch select:focus-visible {
   outline: 2px solid var(--nb-focus-sky);
   outline-offset: 2px;
+}
+/* On Current --nb-focus-sky is unset, which would leave the focused select with no outline at all. */
+.nb-switch:not([data-look]) select:focus-visible {
+  outline: auto;
 }
 
 /* Narrow windows: the greeting moves above the notebook. */
