@@ -154,6 +154,43 @@ describe('the notebook never narrows, never stands upright, and widens with the 
   });
 });
 
+// T013. Above the cap the greeting, notebook and tabs are one group, centred on the window.
+describe('above the cap the group is centred on the window, and narrow it is never upright (FR-035, D35)', () => {
+  const tabsRight = -px(declOf(ruleIn(base, '.nb-tabs'), 'right')?.replace(/^-/, ''));
+  it('reads the tabs\' offset and the root\'s justification from the sheet', () => {
+    expect(tabsRight).toBe(-44);
+    expect(declOf(root, 'justify-content')).toBe('center');
+    expect(Number.isFinite(wide.left) && Number.isFinite(wide.right) && Number.isFinite(gap)).toBe(true);
+  });
+
+  it('puts the centre of aside-to-tabs on the centre of the window, +-1px, at every width from 1660 to 3840', () => {
+    const bad: string[] = [];
+    for (let w = 1660; w <= 3840; w += 20) {
+      for (const h of [900, 1440, 2160]) {
+        const content = w - wide.left - wide.right;
+        const trackW = size(w, h).width; // the notebook's width is the track's
+        const groupW = aside! + gap + trackW;
+        const left = wide.left + (content - groupW) / 2; // justify-content: center
+        const right = left + groupW - tabsRight; // the tabs stand 44px past the notebook
+        const centre = (left + right) / 2;
+        if (Math.abs(centre - w / 2) > 1) bad.push(`${w}x${h}: centre ${centre} of ${w / 2}`);
+      }
+    }
+    expect(bad.slice(0, 8)).toEqual([]);
+  });
+
+  it('never stands the narrow notebook upright, in any window 800-1099 wide and 600-2160 tall', () => {
+    const bad: string[] = [];
+    for (let w = 800; w <= 1099; w++) {
+      for (let h = 600; h <= 2160; h += 20) {
+        const s = size(w, h);
+        if (s.height > s.width) bad.push(`${w}x${h}`);
+      }
+    }
+    expect(bad.slice(0, 8)).toEqual([]);
+  });
+});
+
 // The tab column (T008). Each tab is a flex item that may shrink, so a label is whole only if the tab it ends
 // in is at least as tall as the label's longest word.
 describe('the tab column fits the notebook at every window the model covers (FR-035)', () => {
