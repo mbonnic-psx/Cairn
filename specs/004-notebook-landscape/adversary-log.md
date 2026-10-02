@@ -59,3 +59,14 @@ Skipped: nothing widened, and the slice does not close the split. Covered by row
 | concurrency, idempotency, ordering, retention, or time | already covered | the add-then-read-back order in `CustomEntry.tsx` and the waiting untick are today's, unchanged (pinned by `SetupCurrentPin.test.tsx`); no time is read |
 
 Skipped: nothing widened, and the slice does not close the split. Covered by row `frame` · release gate on the notebook. The disclosure's yes before its details arrive is today's behaviour, handed to 002 (D20).
+
+## quiet-pages · 716a7e7 · 2026-10-02
+
+| Trigger | Status | Evidence |
+|---|---|---|
+| driving adapter (HTTP route, CLI command, queue consumer) | not present | no IPC command, route or CLI added (`src-tauri/` untouched, `ipc_surface.rs` unchanged); `App.tsx` unchanged; the demo fake core ships in no build |
+| driven adapter or the provider types behind one | not present | no store, file or system call touched; the diff is `src/screens/Limits.tsx`, `src/screens/Teardown.tsx`, `src/styles/quiet-pages.css`, the tab focus ring in `src/styles/notebook.css`, one import in `src/main.tsx`, and tests |
+| authorisation decision (who can reach one that already exists) | already covered | row `frame` (release gate on the notebook): a released build still forces `current`; Teardown stays unreachable from the app (D16) |
+| concurrency, idempotency, ordering, retention, or time | not present | the screens render what they are given; nothing reads time or orders anything new |
+
+Skipped: nothing widened, and the slice does not close the split. Covered by row `frame` · release gate on the notebook.

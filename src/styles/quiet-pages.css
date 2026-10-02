@@ -1,0 +1,112 @@
+/*
+ * What Cairn covers and This machine is as it was as spreads (slice `quiet-pages`).
+ *
+ * Colour comes only from the shell's tokens, so every look re-points it and every pair is already proved
+ * at its floor (look/__tests__/tokens.test.ts). Nothing here moves: no animation, no transition. Everything a
+ * person reads is the page's serif; the three section labels get the typewriter face from the shell's own
+ * `.nb-label`, so this sheet names no mono rule. The spreads hold no control, so there is no focus rule.
+ * Each mark is told apart by shape first (a dot, an open ring) and by tone second, never by tone alone.
+ */
+
+/* Two leaves inside the shell's one scrolling page area. The spread is at least as tall as the page area
+   (whose height is definite), so the ruled leaf stretches to the foot of it; a longer left page grows both. */
+.nb-limits-leaves,
+.nb-teardown-leaves {
+  column-gap: 48px;
+  min-height: 100%;
+}
+
+/* The headings: the page's serif, the ink, and nothing else to say. */
+.nb-limits-title,
+.nb-teardown-title {
+  margin: 0;
+  font-family: var(--nb-font-serif);
+  font-size: 30px;
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--nb-ink);
+}
+
+/* A short list, one line to a mark. The mark hangs beside the first line of its words and never moves them. */
+.nb-limits-list,
+.nb-teardown-list {
+  margin: 24px 0 0;
+  padding: 0;
+  max-width: 34em;
+  list-style: none;
+}
+.nb-limits-line,
+.nb-teardown-line {
+  display: flex;
+  gap: 14px;
+  color: var(--nb-ink-body);
+}
+.nb-limits-line + .nb-limits-line,
+.nb-teardown-line + .nb-teardown-line {
+  margin-top: 14px;
+}
+
+/* The marks: 8px, round, centred on the first line of the words beside them (0.58em of the 1.65 line).
+   Review found a 7px ring with a 1.5px edge drew a 1px hairline at 1x, too faint to tell from a dot at a glance. */
+.nb-limits-mark,
+.nb-teardown-mark {
+  box-sizing: border-box;
+  flex-shrink: 0;
+  width: 8px;
+  height: 8px;
+  margin-top: 0.58em;
+  border-radius: 50%;
+}
+/* Covered, and checked: a solid dot in the quiet ink. */
+.nb-limits-mark--dot,
+.nb-teardown-mark--dot {
+  background-color: var(--nb-ink-quiet);
+}
+/* Not covered: the same size, an open ring in the same ink, so shape alone says it is not the same as covered. */
+.nb-limits-mark--ring {
+  border: 2px solid var(--nb-ink-quiet);
+  background-color: transparent;
+}
+/* Still here: a solid dot in amber, the one warm mark on the page. */
+.nb-teardown-mark--amber {
+  background-color: var(--nb-accent-amber);
+}
+
+/* The section labels sit apart from the list above them, close to what they name. */
+.nb-limits-label,
+.nb-teardown-label {
+  margin: 40px 0 0;
+}
+.nb-limits-label + .nb-limits-list,
+.nb-teardown-label + .nb-teardown-list {
+  margin-top: 12px;
+}
+
+.nb-limits-kept {
+  margin: 12px 0 0;
+  max-width: 34em;
+  color: var(--nb-ink-body);
+}
+
+/* The note on administrators: a hairline, then the quiet ink. It is the last thing on the page. */
+.nb-limits-note {
+  margin: 36px 0 0;
+  max-width: 34em;
+  padding-top: 22px;
+  border-top: 1px solid var(--nb-rule);
+  color: var(--nb-ink-quiet);
+}
+
+/* This machine is as it was: its sentence under the heading, then what was checked, then what is left. */
+.nb-teardown-sentence {
+  margin: 12px 0 0;
+  max-width: 34em;
+  font-size: 18px;
+  color: var(--nb-ink-body);
+}
+.nb-teardown-checked {
+  margin-top: 28px;
+}
+.nb-teardown-residue {
+  margin-top: 12px;
+}
