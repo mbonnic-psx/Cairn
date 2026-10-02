@@ -2,7 +2,7 @@
  * The look switch at the App level: dev builds only, starts on Morning,
  * and changing the look loses neither the step nor the check-in's text.
  */
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -185,6 +185,34 @@ describe('the production build', () => {
       await userEvent.tab();
       expect(document.activeElement?.closest('.nb-switch')).toBeNull();
     }
+  });
+
+  // FR-012: not reachable by any key combination. Every Ctrl / Alt / Meta / Shift combination with each letter,
+  // digit and function key, pressed on the page, on the focused control and on the window, leaves the morning.
+  it('no key combination changes the look in a production render', async () => {
+    vi.stubEnv('DEV', false);
+    const { container } = render(<App />);
+    await screen.findByText('What would you like to protect?');
+    const keys = [
+      ...'abcdefghijklmnopqrstuvwxyz'.split(''),
+      ...'0123456789'.split(''),
+      ...Array.from({ length: 12 }, (_, i) => `F${i + 1}`),
+    ];
+    const modifiers = ['ctrlKey', 'altKey', 'metaKey', 'shiftKey'] as const;
+    for (let mask = 1; mask < 1 << modifiers.length; mask += 1) {
+      const held = Object.fromEntries(modifiers.map((m, i) => [m, (mask & (1 << i)) !== 0]));
+      for (const key of keys) {
+        const init = { key, ...held, bubbles: true };
+        for (const target of [document.body, document.activeElement ?? document.body, window] as const) {
+          fireEvent.keyDown(target, init);
+          fireEvent.keyUp(target, init);
+        }
+      }
+    }
+    expect(container.querySelector('[data-look="morning"]')).not.toBeNull();
+    expect(container.querySelector('[data-look="midday"], [data-look="night"]')).toBeNull();
+    expect(screen.getByText('Good morning.')).toBeInTheDocument();
+    expect(screen.queryByText('Good evening.')).toBeNull();
   });
 
   // FR-013: whatever the hour, a released build wears the morning. Only Date is faked, so findBy still polls.
