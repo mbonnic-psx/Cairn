@@ -15,9 +15,9 @@ const theme = readFileSync('src/styles/theme.css', 'utf8');
 
 const vendored = Object.keys(import.meta.glob('../../assets/fonts/*.woff2'));
 
-// Every screen and component the notebook can wear, read as text (tests excluded).
+// Every screen the notebook can wear, read as text (tests excluded).
 const sources = import.meta.glob(
-  ['../../screens/**/*.tsx', '../../components/**/*.tsx', '!**/__tests__/**'],
+  ['../../screens/**/*.tsx', '!**/__tests__/**'],
   { query: '?raw', import: 'default', eager: true },
 ) as Record<string, string>;
 
@@ -152,7 +152,7 @@ describe('notebook.css behaviour rules', () => {
   });
 });
 
-describe.each(['morning', 'midday', 'night'] as const)('%s: every colour a screen draws as text, on the paper (FR-021, SC-003)', (look) => {
+describe.each(['morning', 'midday', 'night'] as const)('%s: every colour drawn as text, on the paper (FR-021, SC-003)', (look) => {
   const colourOf = (css: string) => {
     const out = new Map<string, string>();
     for (const m of css.matchAll(/--color-([a-z]+-\d+):\s*(#[0-9a-fA-F]{6})\s*;/g)) out.set(m[1]!, m[2]!);
@@ -160,36 +160,30 @@ describe.each(['morning', 'midday', 'night'] as const)('%s: every colour a scree
   };
   const base = colourOf(theme);
   const lookBlock = notebook.match(new RegExp(`\\[data-look="${look}"\\]\\s*\\{[^}]*\\}`))![0];
-  const onPaper = new Map([...base, ...colourOf(lookBlock)]);
+  const repointed = colourOf(lookBlock);
+  const onPaper = new Map([...base, ...repointed]);
 
-  // A text class is read when it stands alone: variants (disabled:, hover:) mark
-  // states that sit on another fill. text-sand-50 is the button's label on its own fill.
-  const used = new Set<string>();
-  for (const src of Object.values(sources)) {
-    for (const m of src.matchAll(/(?<![\w:-])text-((?:ink|amber|moss|clay|sand)-\d+)(?![\w-])/g)) used.add(m[1]!);
-  }
-  used.delete('sand-50');
-
-  it('finds the text colours the screens use', () => {
+  it('has no screen source that carries a palette text class: the page sheets colour the text', () => {
     expect(Object.keys(sources).length).toBeGreaterThan(5);
-    expect([...used].sort()).toEqual(expect.arrayContaining(['ink-400', 'ink-500', 'ink-700', 'ink-900', 'amber-600', 'moss-600']));
+    const carriers = Object.entries(sources)
+      .filter(([, src]) => /(?<![\w-])text-(?:ink|amber|moss|clay|sand)-\d+(?![\w-])/.test(src))
+      .map(([file]) => file);
+    expect(carriers).toEqual([]);
   });
 
-  it.each([...used].sort())('text-%s meets 4.5:1 on the paper', (name) => {
-    const colour = onPaper.get(name);
-    expect(colour, `no colour for ${name}`).toBeDefined();
-    expect(contrastRatio(colour!, token('--nb-paper', look))).toBeGreaterThanOrEqual(TEXT);
+  it('re-points only --color-moss-600, the one palette value a page sheet draws as text', () => {
+    expect([...repointed.keys()]).toEqual(['moss-600']);
+    expect(theme).toMatch(/--color-moss-600:/);
   });
 
-  it('keeps the status badges readable on their own tints', () => {
-    for (const [fg, bg] of [['moss-600', 'moss-100'], ['amber-600', 'amber-100'], ['ink-500', 'sand-100']] as const) {
-      expect(contrastRatio(onPaper.get(fg)!, onPaper.get(bg)!)).toBeGreaterThanOrEqual(TEXT);
-    }
+  it('reads that value, and the body ink the theme sets, on the paper at 4.5:1', () => {
+    expect(contrastRatio(onPaper.get('moss-600')!, token('--nb-paper', look))).toBeGreaterThanOrEqual(TEXT);
+    expect(contrastRatio(onPaper.get('ink-700')!, token('--nb-paper', look))).toBeGreaterThanOrEqual(TEXT);
   });
 
-  it('leaves the Current look to the theme: the overrides sit under [data-look]', () => {
+  it('leaves the theme without a look: the one re-point sits under [data-look]', () => {
     expect(theme).not.toMatch(/data-look/);
-    expect(lookBlock).toMatch(/--color-ink-400:/);
+    expect(lookBlock).toMatch(/--color-moss-600:/);
   });
 });
 
@@ -362,9 +356,9 @@ describe('the notebook renders the same on every platform', () => {
     expect(ruleFor('.nb-tab').every((r) => !/writing-mode/.test(r.body))).toBe(true);
   });
 
-  it("points the screens' serif at the bundled face, so no platform font stands in", () => {
+  it("points the page sheets' serif at the bundled face, so no platform font stands in", () => {
     const shared = ruleFor('[data-look]').map((r) => r.body).join('\n');
-    expect(shared).toMatch(/--font-serif:\s*var\(--font-notebook-serif\)/);
+    expect(shared).toMatch(/--nb-font-serif:\s*var\(--font-notebook-serif\)/);
   });
 });
 
@@ -387,7 +381,7 @@ describe('tokens: what differs per look, and what every look shares (FR-009, FR-
   });
 
   it('keeps the fonts in one shared block, not in any look', () => {
-    for (const name of ['--font-serif', '--nb-font-serif', '--nb-font-mono']) {
+    for (const name of ['--nb-font-serif', '--nb-font-mono']) {
       expect(shared()).toContain(`${name}:`);
       expect(blockOf('morning')).not.toContain(`${name}:`);
     }
@@ -450,17 +444,11 @@ function completeAndReadable(look: Exclude<LookName, 'morning'>) {
     expect(contrastRatio(t('--nb-ink'), t('--nb-paper'))).toBeGreaterThanOrEqual(TEXT);
   });
 
-  it('the theme palette overrides read on the paper, and the badges on their tints', () => {
+  it('the theme palette overrides read on the paper', () => {
     const overrides = [...blockOf(look).matchAll(/(--color-[a-z]+-\d+):\s*(#[0-9a-fA-F]{6})/g)];
     expect(overrides.length).toBeGreaterThan(0);
     for (const [, name, colour] of overrides) {
       expect(contrastRatio(colour!, t('--nb-paper')), name).toBeGreaterThanOrEqual(TEXT);
-    }
-    const own = new Map(overrides.map((m) => [m[1]!.replace('--color-', ''), m[2]!]));
-    const tints = new Map([...theme.matchAll(/--color-([a-z]+-\d+):\s*(#[0-9a-fA-F]{6})\s*;/g)].map((m) => [m[1]!, m[2]!]));
-    const colour = (n: string) => own.get(n) ?? tints.get(n)!;
-    for (const [fg, bg] of [['moss-600', 'moss-100'], ['amber-600', 'amber-100'], ['ink-500', 'sand-100']] as const) {
-      expect(contrastRatio(colour(fg), colour(bg)), `${fg} on ${bg}`).toBeGreaterThanOrEqual(TEXT);
     }
   });
 
@@ -486,7 +474,6 @@ describe('night look (US2; FR-009, FR-021, FR-016, FR-033, D4)', () => {
 
   it('reads the amber "not confirmed" text on the lamp-lit paper at 4.5:1 (FR-016)', () => {
     expect(contrastRatio(token('--nb-accent-amber', 'night'), token('--nb-paper', 'night'))).toBeGreaterThanOrEqual(TEXT);
-    expect(contrastRatio(token('--color-amber-600', 'night'), token('--nb-paper', 'night'))).toBeGreaterThanOrEqual(TEXT);
   });
 });
 

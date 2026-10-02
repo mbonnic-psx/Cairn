@@ -10,7 +10,6 @@ import type { Tab, TabId } from '../navigation';
 import { CairnMark } from './CairnMark';
 import { Greeting } from './Greeting';
 import { Landscape } from './Landscape';
-import { NotebookPageContext } from './notebookPage';
 
 export function NotebookShell({
   tabs,
@@ -48,7 +47,7 @@ export function NotebookShell({
         <span className="nb-margin" aria-hidden="true" />
         <span className="nb-fold" aria-hidden="true" />
         <main ref={pageArea} className="nb-page-area nb-page" tabIndex={0}>
-          <NotebookPageContext.Provider value={true}>{children}</NotebookPageContext.Provider>
+          {children}
         </main>
         <nav className="nb-tabs" aria-label="Pages">
           {tabs.map((tab) => (

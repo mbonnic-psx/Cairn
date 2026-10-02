@@ -100,13 +100,10 @@ function motionIn(sheet: string, css: string): Motion[] {
 /**
  * The only motion the sheets may declare. D3 is about a change of look re-lighting colours, so a transition
  * is allowed only where it names no property a look token feeds. The shell tabs' hover filter is the one
- * such (no look sets `filter`), allowed by its exact sheet, selector, property and value; `.settle` is the
- * entrance animation, held off every page element by the class sweep above.
+ * such (no look sets `filter`), allowed by its exact sheet, selector, property and value.
  */
 const ALLOWED_MOTION = [
   { sheet: 'notebook.css', selector: '.nb-tab', property: 'transition', value: 'filter 160ms ease' },
-  { sheet: 'theme.css', selector: '.settle', property: 'animation', value: 'settle 420ms var(--ease-gentle) both' },
-  { sheet: 'theme.css', selector: '@keyframes settle', property: '@keyframes', value: '' },
 ];
 
 /** Whether a declaration sits in exactly the `@media (prefers-reduced-motion: reduce)` block (whitespace-normalised), where motion is switched off. */

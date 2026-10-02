@@ -7,9 +7,6 @@
 
 /* What is the same in every look. */
 [data-look] {
-  /* The screens' own serif is the bundled face here, so no platform font
-   * (Palatino on Windows, DejaVu on Linux) stands in for it. */
-  --font-serif: var(--font-notebook-serif);
   --nb-font-serif: var(--font-notebook-serif);
   --nb-font-mono: var(--font-notebook-mono);
 
@@ -63,13 +60,9 @@
   --nb-tab-limits: #cfc5b3;
   --nb-tab-ink: #2a2119;
 
-  /* Today's screens colour their text with the theme's palette. On the paper
-   * the lighter shades fall under 4.5:1, so inside the notebook alone they
-   * are re-pointed to darker warm values of the same families. */
-  --color-ink-500: #5c5245;
-  --color-ink-400: #6b5f52;
-  --color-amber-600: #7d5a22;
-  --color-amber-500: #8a6325;
+  /* The page sheets draw one palette value as text. On the paper the theme's
+   * moss falls under 4.5:1, so inside the notebook alone it is re-pointed to a
+   * darker warm value of the same family. */
   --color-moss-600: #4a5e41;
 }
 
@@ -116,10 +109,6 @@
   --nb-tab-limits: #cfc5b3;
   --nb-tab-ink: #2a2119;
 
-  --color-ink-500: #5c5245;
-  --color-ink-400: #6b5f52;
-  --color-amber-600: #7d5a22;
-  --color-amber-500: #8a6325;
   --color-moss-600: #4a5e41;
 }
 
@@ -184,10 +173,6 @@
   --nb-tab-limits: #9a9283;
   --nb-tab-ink: #1d1915;
 
-  --color-ink-500: #5c5245;
-  --color-ink-400: #6b5f52;
-  --color-amber-600: #7d5a22;
-  --color-amber-500: #876124;
   --color-moss-600: #4a5e41;
 }
 
