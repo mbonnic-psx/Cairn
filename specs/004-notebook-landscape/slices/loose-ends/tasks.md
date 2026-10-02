@@ -144,6 +144,10 @@ Six findings, none CRITICAL or HIGH, none needing a product decision. All closed
 5. LOW. The spec's "Nothing new for the person to see" and the plan's file list fell behind the diff. Closed: both aligned (the ring and the forced-colours edges; `tonight-page.css`).
 6. LOW, handed back. Decisions D26–D28 read `2026-10-02T15:40:00Z`, iteration 6, later than D29–D31 (`12:22Z`, iteration 7). It is D26–D28 whose time is wrong: it is later than this slice's own commits. The decision log is the host's, so it is not edited here.
 
+### The map, and the gate (host, at the commit after `419e541`)
+
+`make -f delivery/Makefile verify` is green: all gates pass, and `check-convergence` reports 3 of 9 axes at target. No rung moved. Safety net stays `tests-pass`, since mutation runs after acceptance. Structure and Strategy are unchanged, because the code stays in the interface's home under ADR 0002. The slice touches no other axis: it adds no runtime, release path or data. It does not change how the application starts. The only change outside a page branch's markup is CSS inside the forced-colours blocks and two rules on the page sheets, and `npm run build` is green. The slice goes to its demo with T015 (MEDIUM), T016 and T017 (LOW) open in Phase 4.
+
 ## Questions for the host
 
 No product question arose. Three host questions, settled by the host (drive-slice) on 2026-10-02:
