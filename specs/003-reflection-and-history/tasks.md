@@ -245,6 +245,7 @@ untouched. Delete a day, a range, and everything, and confirm each leaves no tra
 - [ ] T077 Run every [quickstart.md](./quickstart.md) scenario on Windows, macOS, and Linux and record the results
 - [ ] T078 [P] Replace the Current State section of `CLAUDE.md` with this slice's commands, the four modified guards, and the two tests that are guards in disguise (T050 and T059)
 - [-] ~~T079 [P] Record the C1 limit — the reminder needs Cairn to be running — in `README.md` alongside the existing administrator caveat (Principle III)~~ — **WITHDRAWN 2026-10-01**: Cairn raises no notification (spec Clarifications 2026-10-01).
+- [ ] T080 [P] Tonight's loading sentence and its could-not-be-read sentence sit in no live region, so a screen reader is never told the evening could not be opened (`src/screens/CheckIn.tsx:389-406`, held as "nothing announced" by `CheckInPage.test.tsx:146`). Put them in the check-in's one polite live region, in Current and on the notebook page alike, and change that test to say so. Handed on by the 004 completion audit (004 D28): it changes Current, which 004 may not (SC-009)
 
 ---
 
