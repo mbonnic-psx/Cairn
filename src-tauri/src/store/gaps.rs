@@ -90,3 +90,34 @@ pub fn coverage_note(gaps: &[Gap]) -> Option<String> {
          then is not here. This is what Cairn saw, not everything that happened."
     ))
 }
+
+/// What is said above a range's reaches when part of it was not observed.
+///
+/// Beside [`coverage_note`], which speaks of a single day and is unchanged.
+/// The span is in minutes, hours or days, and the sentence states the limit
+/// and guesses at nothing.
+pub fn range_coverage_note(gaps: &[Gap]) -> Option<String> {
+    if gaps.is_empty() {
+        return None;
+    }
+
+    let minutes = gaps.iter().map(Gap::seconds).sum::<i64>() / 60;
+    let hours = minutes / 60;
+    let days = hours / 24;
+
+    let span = if hours >= 48 {
+        format!("{days} days")
+    } else if hours >= 1 {
+        format!("{hours} {}", if hours == 1 { "hour" } else { "hours" })
+    } else {
+        format!(
+            "{minutes} {}",
+            if minutes == 1 { "minute" } else { "minutes" }
+        )
+    };
+
+    Some(format!(
+        "Cairn was not running for about {span} of these days, so anything you reached \
+         for then is not here. This is what Cairn saw, not everything that happened."
+    ))
+}
