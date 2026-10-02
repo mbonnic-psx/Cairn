@@ -498,6 +498,102 @@ mod with_history {
         }
     }
 
+    // Scenarios 8 to 10
+    #[test]
+    fn a_reach_is_in_the_row_of_the_date_the_clock_showed_then() {
+        let setup = setup();
+        let history = seed(&setup.data);
+        // 2026-09-13 23:59 BST, 2026-09-14 00:01 BST, and 2026-09-13 23:30 UTC,
+        // which is 00:30 BST on the 14th.
+        for at in [1_789_340_340, 1_789_340_460, 1_789_342_200] {
+            history.record("a.example", at).unwrap();
+        }
+        let state = app(&setup, &Keychain::available());
+
+        let patterns = Range::four_weeks().ask(&state);
+
+        assert_eq!(
+            occupied(&patterns),
+            [("2026-09-13".to_string(), 1), ("2026-09-14".to_string(), 2)]
+        );
+    }
+
+    #[test]
+    fn autumns_25_hour_date_is_one_row_for_a_reach_at_each_end() {
+        let setup = setup();
+        let history = seed(&setup.data);
+        // 2026-10-25 00:30 BST and 23:30 GMT.
+        history.record("a.example", 1_792_884_600).unwrap();
+        history.record("a.example", 1_792_971_000).unwrap();
+        let state = app_at(&setup, &Keychain::available(), || 1_793_707_200);
+        let autumn = Range::new("2026-10-19", "2026-11-01", HOUR, 0, &[(AUTUMN, 0)]);
+
+        let patterns = autumn.ask(&state);
+
+        assert_eq!(occupied(&patterns), [("2026-10-25".to_string(), 2)]);
+    }
+
+    #[test]
+    fn springs_late_evening_utc_is_in_the_next_row() {
+        let setup = setup();
+        let history = seed(&setup.data);
+        // 2026-03-29 23:30 UTC, 00:30 BST on the 30th.
+        history.record("a.example", 1_774_827_000).unwrap();
+        let state = app(&setup, &Keychain::available());
+        let spring = Range::new("2026-03-23", "2026-04-05", 0, HOUR, &[(SPRING, HOUR)]);
+
+        let patterns = spring.ask(&state);
+
+        assert_eq!(occupied(&patterns), [("2026-03-30".to_string(), 1)]);
+    }
+
+    // Scenario 11
+    #[test]
+    fn a_skipped_midnight_is_placed_not_sealed_under_either_first_offset() {
+        let start = 1_776_981_600;
+        let end = midnight("2026-05-01") - 3 * HOUR;
+        for first_offset in [3 * HOUR, 2 * HOUR] {
+            let setup = setup();
+            seed(&setup.data).record("a.example", start + 60).unwrap();
+            let state = app(&setup, &Keychain::available());
+
+            let patterns = state.summarize_reaches(
+                date("2026-04-24"),
+                date("2026-04-30"),
+                start,
+                end,
+                &[change(start, first_offset)],
+            );
+
+            assert_eq!(patterns.sealed, None, "placed at +{first_offset}");
+            assert_eq!(occupied(&patterns), [("2026-04-24".to_string(), 1)]);
+        }
+    }
+
+    // Scenario 12
+    #[test]
+    fn a_clock_change_after_midnight_leaves_one_row_counting_both() {
+        let setup = setup();
+        let history = seed(&setup.data);
+        history.record("a.example", 1_289_100_600).unwrap();
+        history.record("a.example", 1_289_149_200).unwrap();
+        let state = app(&setup, &Keychain::available());
+
+        let patterns = state.summarize_reaches(
+            date("2010-11-07"),
+            date("2010-11-07"),
+            1_289_098_800,
+            1_289_188_800,
+            &[
+                change(1_289_098_800, -10_800),
+                change(1_289_098_860, -14_400),
+            ],
+        );
+
+        assert_eq!(patterns.sealed, None);
+        assert_eq!(counts(&patterns), [2]);
+    }
+
     // Scenario 21
     #[test]
     fn a_range_that_cannot_be_placed_is_sealed_with_no_rows() {

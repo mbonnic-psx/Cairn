@@ -414,6 +414,9 @@ pub fn movement(
         }
         let offset = offset_in_force(range.first_offset, range.changes, reach.at);
         let day = local_day(reach.at, offset);
+        // A clock that goes back just after midnight reads the range's first
+        // instants as the date before its first (the W-A1 midnight): the nearest
+        // row holds them, so every reach in the range is in exactly one row.
         let index = (day - first_day).clamp(0, dates - 1) / length;
         let row = &mut rows[index as usize];
         row.count = row.count.saturating_add(1);

@@ -290,3 +290,133 @@ mod properties {
         }
     }
 }
+
+// --- Scenarios 8 to 12: a reach is in the row of its own local date ------------------
+
+/// A range given by its bounds, as the interface would have computed them.
+fn ranged(
+    (first_day, last_day): (LocalDate, LocalDate),
+    (from, to): (i64, i64),
+    first_offset: i32,
+    changes: &[OffsetChange],
+    reaches: &[Reach],
+) -> Vec<MovementRow> {
+    let range = LocalRange {
+        first_day,
+        last_day,
+        from,
+        to,
+        first_offset,
+        changes,
+    };
+    movement(reaches, &range, &[], to)
+}
+
+fn holding(rows: &[MovementRow], count: u32) -> Vec<LocalDate> {
+    rows.iter()
+        .filter(|row| row.count == count)
+        .map(|row| row.day)
+        .collect()
+}
+
+#[test]
+fn a_reach_at_the_last_minute_of_a_date_and_one_at_the_first_of_the_next_are_in_two_rows()
+{
+    let local = |day: LocalDate, hour: i64, minute: i64| {
+        day.days_since_epoch() * DAY + hour * HOUR + minute * 60 - HOUR
+    };
+    let rows = london_summer(
+        date(2026, 9, 5),
+        date(2026, 10, 2),
+        &reaches(&[
+            local(date(2026, 9, 13), 23, 59),
+            local(date(2026, 9, 14), 0, 1),
+        ]),
+    );
+    assert_eq!(holding(&rows, 1), [date(2026, 9, 13), date(2026, 9, 14)]);
+}
+
+#[test]
+fn half_past_eleven_at_night_in_utc_is_half_past_midnight_in_summer_time() {
+    // 2026-09-13 23:30 UTC.
+    let at = date(2026, 9, 13).days_since_epoch() * DAY + 23 * HOUR + 1_800;
+    let rows = london_summer(date(2026, 9, 5), date(2026, 10, 2), &reaches(&[at]));
+    assert_eq!(holding(&rows, 1), [date(2026, 9, 14)]);
+}
+
+#[test]
+fn autumns_two_ends_of_the_25_hour_date_are_in_one_row() {
+    // 2026-10-25 00:30 BST and 23:30 GMT.
+    let changes = [OffsetChange {
+        from: 1_792_890_000,
+        offset_seconds: 0,
+    }];
+    let rows = ranged(
+        (date(2026, 10, 19), date(2026, 11, 1)),
+        (1_792_364_400, 1_793_491_200),
+        3600,
+        &changes,
+        &reaches(&[1_792_884_600, 1_792_971_000]),
+    );
+    assert_eq!(rows.len(), 14);
+    assert_eq!(holding(&rows, 2), [date(2026, 10, 25)]);
+}
+
+#[test]
+fn springs_late_evening_utc_is_the_next_date_in_summer_time() {
+    // 2026-03-29 23:30 UTC is 00:30 BST on the 30th.
+    let changes = [OffsetChange {
+        from: 1_774_746_000,
+        offset_seconds: 3600,
+    }];
+    let rows = ranged(
+        (date(2026, 3, 23), date(2026, 4, 5)),
+        (1_774_224_000, 1_775_430_000),
+        0,
+        &changes,
+        &reaches(&[1_774_827_000]),
+    );
+    assert_eq!(holding(&rows, 1), [date(2026, 3, 30)]);
+}
+
+#[test]
+fn a_skipped_midnight_places_the_first_reach_in_the_first_row_under_either_first_offset()
+{
+    // Africa/Cairo, 2026-04-24: the clocks skip midnight.
+    let start = 1_776_981_600;
+    let end = date(2026, 5, 1).days_since_epoch() * DAY - 3 * HOUR;
+    for first_offset in [3 * 3600, 2 * 3600] {
+        let rows = ranged(
+            (date(2026, 4, 24), date(2026, 4, 30)),
+            (start, end),
+            first_offset,
+            &[],
+            &reaches(&[start + 60]),
+        );
+        assert_eq!(
+            holding(&rows, 1),
+            [date(2026, 4, 24)],
+            "first offset {first_offset}"
+        );
+    }
+}
+
+#[test]
+fn a_clock_change_just_after_midnight_puts_both_reaches_in_the_one_row() {
+    // America/Goose_Bay, 2010-11-07, whose clocks went back at 00:01: the
+    // instants after it read as the day before the range's only date.
+    let changes = [OffsetChange {
+        from: 1_289_098_860,
+        offset_seconds: -14_400,
+    }];
+    let day = date(2010, 11, 7);
+    let rows = ranged(
+        (day, day),
+        (1_289_098_800, 1_289_188_800),
+        -10_800,
+        &changes,
+        &reaches(&[1_289_100_600, 1_289_149_200]),
+    );
+    assert_eq!(rows.len(), 1);
+    assert_eq!(rows[0].count, 2, "nothing lost, nothing counted twice");
+}
