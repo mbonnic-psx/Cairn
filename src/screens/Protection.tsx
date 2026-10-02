@@ -132,7 +132,7 @@ export function Protection({
 /** The notebook's two pages: what is said on the left, a blank ruled page (or a note) on the right. */
 function Spread({ children, right }: { children: ReactNode; right?: ReactNode }) {
   return (
-    <div className="nb-spread">
+    <div className="nb-spread nb-leaves">
       <div className="nb-page">{children}</div>
       <div className="nb-page nb-page--ruled">{right}</div>
     </div>

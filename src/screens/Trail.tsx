@@ -23,7 +23,7 @@ export function Trail({ trail, status }: { trail: TrailData; status?: Protection
 
   if (onPage) {
     return (
-      <div className="nb-spread">
+      <div className="nb-spread nb-leaves">
         <div className="nb-page nb-page--sticky">
           <h2 className="nb-trail-title">
             {inForce ? 'What you are protecting' : 'What you have chosen'}

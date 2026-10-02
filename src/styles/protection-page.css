@@ -1,0 +1,148 @@
+/*
+ * Protection and What is protected as spreads (slice `protection-page`).
+ *
+ * Colour comes only from the shell's tokens, so every look re-points it and every pair is already proved
+ * at its floor (look/__tests__/tokens.test.ts). Nothing here moves: no animation, no transition. The
+ * typewriter face is for small labels only: the badge, a figure's name, the waiting note's button.
+ * Everything a person reads is the page's serif.
+ */
+
+/* Two leaves inside the shell's one scrolling page area. */
+.nb-leaves {
+  column-gap: 48px;
+  align-items: start;
+}
+.nb-leaves > .nb-page {
+  /* The page area already carries the margins; a leaf is only its own column. */
+  min-height: 100%;
+}
+.nb-leaves > .nb-page--ruled {
+  /* The first line of writing sits on a rule: the ruling starts 22px into the 32px pitch. */
+  padding-top: 22px;
+  min-height: 420px;
+  overflow-wrap: anywhere;
+}
+/* What is protected: its left leaf stays put while the list scrolls past on the right. */
+.nb-leaves > .nb-page--sticky {
+  position: sticky;
+  top: 0;
+}
+
+/* The state of protection, on the left leaf. */
+.nb-state {
+  display: inline-block;
+  padding: 3px 12px;
+  border-radius: 999px;
+  font-family: var(--nb-font-mono);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+}
+.nb-state-title {
+  margin: 24px 0 0;
+  font-family: var(--nb-font-serif);
+  font-size: 30px;
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--nb-ink);
+}
+.nb-state-detail {
+  margin: 12px 0 0;
+  max-width: 34em;
+  font-size: 18px;
+  color: var(--nb-ink-body);
+}
+
+/* Two plain figures with a hairline between them. */
+.nb-figures {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin: 32px 0 0;
+  padding-top: 20px;
+  border-top: 1px solid var(--nb-rule);
+}
+.nb-figure {
+  min-width: 0;
+}
+.nb-figure__label {
+  font-family: var(--nb-font-mono);
+  font-size: 12px;
+  color: var(--nb-ink-quiet);
+}
+.nb-figure__value {
+  margin: 4px 0 0;
+  font-size: 24px;
+  line-height: 1.3;
+  color: var(--nb-ink);
+  overflow-wrap: anywhere;
+}
+
+/* A note in the amber language: an edge, with its words left on the paper. */
+.nb-note {
+  margin: 0;
+  padding: 2px 0 2px 16px;
+  border-left: 3px solid var(--nb-accent-amber);
+  color: var(--nb-accent-amber);
+}
+.nb-note__what {
+  margin: 0;
+  color: var(--nb-ink);
+}
+.nb-note__sentence {
+  margin: 8px 0 0;
+  color: var(--nb-ink-body);
+}
+.nb-note__button {
+  margin: 12px 0 0 -8px;
+  font-family: var(--nb-font-mono);
+  font-size: 12.5px;
+  color: var(--nb-ink-quiet);
+}
+.nb-trail-title {
+  margin: 0;
+  font-family: var(--nb-font-serif);
+  font-size: 30px;
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--nb-ink);
+}
+.nb-trail-count {
+  margin: 12px 0 0;
+  max-width: 34em;
+  font-size: 18px;
+  color: var(--nb-ink-body);
+}
+.nb-trail-count + .nb-note {
+  margin-top: 16px;
+}
+.nb-trail-taking-out {
+  margin: 32px 0 0;
+  max-width: 34em;
+  padding-top: 20px;
+  border-top: 1px solid var(--nb-rule);
+  color: var(--nb-ink-quiet);
+}
+
+/* The list, ruled like an inventory: one address to a line, each on a rule. */
+.nb-inventory {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.nb-inventory__line {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  line-height: 32px;
+}
+.nb-inventory__address {
+  min-width: 0;
+  color: var(--nb-ink);
+  overflow-wrap: anywhere;
+}
+.nb-inventory__aside {
+  flex: none;
+  font-size: 14px;
+  color: var(--nb-ink-quiet);
+}
