@@ -144,6 +144,40 @@ the owner decides otherwise, Q1 changes K4's scenario 7, and Q2 changes K9's sce
   by day of week and movement as what remains (5c, 5d). Close T046 as superseded by B4. If the owner answers Q1 as
   recommended, amend B4's gloss in `spec.md` with the owner's words.
 
+## Phase 4 — Convergence (pass 1)
+
+Appended by converge pass 1 at `28982cd`. Graded; K23 is `HIGH` and re-opens the loop, K24 rides with it.
+
+- [ ] K23 [US2] [HIGH] [Principle III] **A range whose first midnight the clock skips is placed, not sealed.**
+  Seen: in a zone that puts its clocks forward at 00:00 (Africa/Cairo 2026-04-24, America/Santiago 2026-09-06,
+  America/Havana 2026-03-08, Asia/Beirut 2026-03-29; found with Node under each `TZ`), `new Date(y, m, d)` is
+  01:00 at the new offset, so `rangeBounds(...).start` implies the old offset (Cairo +7 200) while
+  `offsetChanges(...)[0].offset` is the one in force there (+10 800). `check_offsets` demands they be equal
+  (`reflection/over_time.rs:186`, and `contracts/ui-ipc.md`'s rule "the first offset is the one `range_start`
+  implies"), so the whole *Over time* answer, *By site* included, is the sealed sentence for every range that
+  begins on that day. `check_range` accepts the same bounds. Probe at `28982cd`: `check_offsets(2026-04-24,
+  2026-04-30, 1_776_981_600, …, [(1_776_981_600, 10_800)])` returned the sealed sentence; probe removed. This is
+  a regression for *By site*, which placed that range before this slice. RED in `src-tauri/tests/offset_changes.rs`:
+  that Cairo range, and the Santiago one, are accepted with the offsets `offsetChanges` sends, and a first offset
+  more than a clock change from the implied one is still refused; and in a new `src/__tests__/offsetChangesCairo.test.ts`
+  (`process.env.TZ = 'Africa/Cairo'`) the list `offsetChanges` gives for a range starting 2026-04-24. GREEN: amend
+  the rule in `contracts/ui-ipc.md` (the first offset is the one in force at `range_start`, within a clock change of
+  the one it implies, and no further), then `check_offsets`. The sweep: **every rule in the core that compares an
+  offset the interface states with the one an end implies** — the first entry (`over_time.rs:186`), the last
+  (`over_time.rs`, `within_a_clock_change(previous.1, implied_offset(day_after_last, range_end)?)`), and
+  `check_range`'s two ends — each held at a skipped midnight and at a repeated one (a zone falling back at 01:00 to
+  00:00, America/Havana 2026-11-01), at the start and at the end of a range. Record in the verdict what each gave.
+- [ ] K24 [US2] [MEDIUM] [Principle III] **A clock change exactly at the range's end is pinned as outside it.**
+  Seen: `localDays.ts:139` (`if (high < end)`) excludes a change at `end`, which is right (the core refuses an
+  entry at or after `range_end`), but no test reaches it: the London and Lord Howe cases change away from midnight.
+  Mutating it to `high <= end` left all 79 frontend files green (2 488 tests) at `28982cd`; mutation restored.
+  The case is real: in Cairo a range ending 2026-04-23 ends at the change's instant, and the mutant would send an
+  entry the core refuses, sealing the range. RED in the K23 Cairo test file: that range gives exactly one entry.
+  The sweep: **every boundary of `offsetChanges`' loop in a zone that changes at midnight** — a change at the
+  range's start, at its end, and at a midnight inside it (Cairo 2026-04-20 to 2026-04-30: one change, at
+  1_776_981_600) — each pinned, with the expected list derived independently of `offsetChanges` (fixed epoch
+  constants, as the London file has).
+
 ## Parallel opportunities
 
 - **Phase 0 runs first and alone.** K1 records the baseline and gives the host the two rows K5 and K11 need.
