@@ -24,6 +24,13 @@ const toneClasses = {
   quiet: 'bg-sand-100 text-ink-500',
 } as const;
 
+/** The same three tones on the paper: the pill's fill and words come from the look's tokens, not the palette. */
+const badgeTone = {
+  moss: 'nb-protection-badge--moss',
+  amber: 'nb-protection-badge--amber',
+  quiet: 'nb-protection-badge--quiet',
+} as const;
+
 export function Protection({
   state,
   pending,
@@ -77,7 +84,7 @@ export function Protection({
   if (onPage) {
     return (
       <Spread right={pending && <Waiting pending={pending} onCancelled={onCancelled} />}>
-        <span className={`nb-protection-badge ${toneClasses[words.tone]}`}>{words.title}</span>
+        <span className={`nb-protection-badge ${badgeTone[words.tone]}`}>{words.title}</span>
         <h2 className="nb-protection-title">{words.title}</h2>
         <p className="nb-protection-detail">{words.detail}</p>
         {current.status !== 'off' && (

@@ -35,9 +35,21 @@
   display: inline-block;
   padding: 3px 12px;
   border-radius: 999px;
+  /* A pill the paper does not swallow: the rule colour is a different surface from the paper in every look,
+     and the ink on it is held at the text floor (look/__tests__/tokens.test.ts). */
+  background-color: var(--nb-rule);
+  color: var(--nb-ink);
   font-family: var(--nb-font-mono);
   font-size: 12px;
   letter-spacing: 0.04em;
+}
+/* One fill, three tones: the words say the state, and the not-confirmed tone keeps the amber of its note as an edge. */
+.nb-protection-badge--moss,
+.nb-protection-badge--quiet {
+  box-shadow: none;
+}
+.nb-protection-badge--amber {
+  box-shadow: inset 0 0 0 1px var(--nb-accent-amber);
 }
 .nb-protection-title {
   margin: 24px 0 0;

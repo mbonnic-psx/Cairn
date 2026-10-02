@@ -120,6 +120,30 @@ describe('the protection-page stylesheet', () => {
     }
   });
 
+  describe('the state badge\'s pill is drawn from the look tokens, for every tone (T026)', () => {
+    const TONES = ['moss', 'amber', 'quiet'];
+    const badge = rules.filter((r) => r.selector.split(',').map((x) => x.trim()).includes('.nb-protection-badge'));
+
+    it('fills the pill from --nb-rule and sets its words in --nb-ink', () => {
+      const b = badge.map((r) => r.body).join('');
+      expect(b).toMatch(/background-color:\s*var\(--nb-rule\)/);
+      expect(b).toMatch(/(?:^|[;\s])color:\s*var\(--nb-ink\)/);
+    });
+
+    it.each(TONES)('names the %s tone in the screen and in the sheet, and the screen takes no palette class for it', (tone) => {
+      expect(protection).toMatch(/nb-protection-badge \$\{badgeTone\[words\.tone\]\}/);
+      expect(protection).toContain(`'nb-protection-badge--${tone}'`);
+      expect(styled).toContain(`nb-protection-badge--${tone}`);
+      expect(css).not.toMatch(/background[^;]*--nb-paper/);
+    });
+
+    it('leaves the palette classes to Current: the on-page badge carries none', () => {
+      const onPage = protection.match(/<span className=\{`nb-protection-badge[^`]*`\}/)?.[0] ?? '';
+      expect(onPage).not.toBe('');
+      expect(onPage).not.toMatch(/toneClasses|bg-|text-/);
+    });
+  });
+
   it('has no animation, transition or keyframes', () => {
     expect(css).not.toMatch(/animation|transition|@keyframes/);
   });

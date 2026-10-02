@@ -244,6 +244,16 @@ describe('the shell contract in the stylesheet (contracts/ui-shell.md)', () => {
   });
 });
 
+describe.each(['morning', 'midday', 'night'] as const)('the state badge\'s pill in the %s look (T026)', (look) => {
+  it('is visibly a different surface from the paper', () => {
+    expect(contrastRatio(token('--nb-rule', look), token('--nb-paper', look))).toBeGreaterThanOrEqual(1.1);
+  });
+
+  it('holds the badge\'s words (--nb-ink) at the text floor', () => {
+    expect(contrastRatio(token('--nb-ink', look), token('--nb-rule', look))).toBeGreaterThanOrEqual(TEXT);
+  });
+});
+
 describe('the notebook renders the same on every platform', () => {
   it('turns the tab label, not the button, sideways', () => {
     expect(ruleFor('.nb-tab-label').some((r) => /writing-mode:\s*vertical-rl/.test(r.body))).toBe(true);
