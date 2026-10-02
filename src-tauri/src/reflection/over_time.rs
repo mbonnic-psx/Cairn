@@ -127,8 +127,10 @@ const HIGHEST_OFFSET: i64 = 14 * 3600;
 ///
 /// - the list is not empty and has no more entries than the range has days,
 ///   plus one;
-/// - the first begins at `range_start`, with the offset `range_start` implies
-///   for `first_day`;
+/// - the first begins at `range_start`, with the offset in force there, which
+///   is within a clock change of the one `range_start` implies for
+///   `first_day` (a clock that skips its first midnight begins the day at the
+///   new offset);
 /// - the instants strictly increase and all come before `range_end`;
 /// - every offset lies between -12 h and +14 h;
 /// - neighbouring offsets differ, by no more than a clock change can;
@@ -183,7 +185,7 @@ fn offsets_in_force(
     let (first, rest) = offsets.split_first()?;
     if offsets.len() > most
         || first.0 != range_start
-        || Some(first.1) != implied_offset(first_day, range_start)
+        || !within_a_clock_change(first.1, implied_offset(first_day, range_start)?)
     {
         return None;
     }

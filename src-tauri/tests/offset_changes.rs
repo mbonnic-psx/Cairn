@@ -177,11 +177,17 @@ fn the_first_entry_begins_at_range_start_to_the_second() {
 }
 
 #[test]
-fn the_first_offset_is_the_one_range_start_implies() {
-    accepted(FOUR_DAYS.check(3600, 3600, &[(FOUR_DAYS.start(3600), 3600)]));
-    refused(FOUR_DAYS.check(3600, 3600, &[(FOUR_DAYS.start(3600), 3599)]));
-    refused(FOUR_DAYS.check(3600, 3600, &[(FOUR_DAYS.start(3600), 3601)]));
-    refused(FOUR_DAYS.check(3600, 3600, &[(FOUR_DAYS.start(3600), 0)]));
+fn the_first_offset_is_within_a_clock_change_of_the_one_range_start_implies() {
+    // Amended in K23: a clock that skips its first midnight begins the day an
+    // hour late, at the new offset, so the offset in force is one change from
+    // the implied one, and no further.
+    let start = FOUR_DAYS.start(3600);
+    accepted(FOUR_DAYS.check(3600, 3600, &[(start, 3600)]));
+    accepted(FOUR_DAYS.check(3600, 3600, &[(start, 3600 - 2 * HOUR)]));
+    accepted(FOUR_DAYS.check(3600, 3600, &[(start, 3600 + 2 * HOUR)]));
+    refused(FOUR_DAYS.check(3600, 3600, &[(start, 3600 - 2 * HOUR - 1)]));
+    refused(FOUR_DAYS.check(3600, 3600, &[(start, 3600 + 2 * HOUR + 1)]));
+    refused(FOUR_DAYS.check(3600, 3600, &[(start, 3600 + 5 * HOUR)]));
 }
 
 #[test]
@@ -304,4 +310,195 @@ fn the_extremes_are_refused_not_panicked() {
     }
     // Neighbours that would overflow a subtraction.
     refused(FOUR_DAYS.check(0, 0, &[(start(), i64::MAX), (start() + 1, i64::MIN)]));
+}
+
+// --- Zones that change at midnight (K23) ------------------------------------------
+//
+// Epoch seconds are fixed constants, found with Node under each `TZ`. At a
+// skipped midnight the zone's `new Date(y, m, d)` is 01:00 at the new offset, so
+// the start implies the old offset and the offset in force is the new one.
+
+fn assert_placed(
+    case: &Case,
+    start_offset: i64,
+    end_offset: i64,
+    offsets: &[(i64, i64)],
+) {
+    accepted(case.check(start_offset, end_offset, offsets));
+    check_range(
+        date(case.first),
+        date(case.last),
+        case.start(start_offset),
+        case.end(end_offset),
+        LATER,
+    )
+    .expect("the range's own bounds are accepted");
+}
+
+#[test]
+fn a_range_starting_on_a_skipped_midnight_is_placed_with_the_offset_in_force() {
+    let zones = [
+        // Africa/Cairo 2026-04-24: +02:00 to +03:00 at 00:00.
+        (
+            "2026-04-24",
+            "2026-04-30",
+            "2026-05-01",
+            7200,
+            10_800,
+            10_800,
+        ),
+        // America/Santiago 2026-09-06: -04:00 to -03:00 at 00:00.
+        (
+            "2026-09-06",
+            "2026-09-10",
+            "2026-09-11",
+            -14_400,
+            -10_800,
+            -10_800,
+        ),
+        // America/Havana 2026-03-08: -05:00 to -04:00 at 00:00.
+        (
+            "2026-03-08",
+            "2026-03-12",
+            "2026-03-13",
+            -18_000,
+            -14_400,
+            -14_400,
+        ),
+        // Asia/Beirut 2026-03-29: +02:00 to +03:00 at 00:00.
+        (
+            "2026-03-29",
+            "2026-04-02",
+            "2026-04-03",
+            7200,
+            10_800,
+            10_800,
+        ),
+    ];
+    for (first, last, after_last, implied, in_force, end_offset) in zones {
+        let case = Case {
+            first,
+            last,
+            after_last,
+        };
+        assert_placed(
+            &case,
+            implied,
+            end_offset,
+            &[(case.start(implied), in_force)],
+        );
+        let (offset, changes) = case
+            .check(implied, end_offset, &[(case.start(implied), in_force)])
+            .unwrap();
+        assert_eq!(i64::from(offset), in_force, "{first}");
+        assert!(changes.is_empty(), "{first}");
+    }
+    // The probe that sealed Over time: Cairo from 2026-04-24, start 1_776_981_600.
+    let cairo = Case {
+        first: "2026-04-24",
+        last: "2026-04-30",
+        after_last: "2026-05-01",
+    };
+    assert_eq!(cairo.start(7200), 1_776_981_600);
+}
+
+#[test]
+fn a_first_offset_more_than_a_clock_change_from_the_implied_one_is_still_refused() {
+    let cairo = Case {
+        first: "2026-04-24",
+        last: "2026-04-30",
+        after_last: "2026-05-01",
+    };
+    let at = cairo.start(7200);
+    refused(cairo.check(7200, 10_800, &[(at, 7200 + 2 * HOUR + 1)]));
+    refused(cairo.check(7200, 10_800, &[(at, 7200 - 2 * HOUR - 1)]));
+    accepted(cairo.check(7200, 10_800, &[(at, 7200 + 2 * HOUR)]));
+}
+
+#[test]
+fn a_range_ending_on_a_skipped_midnight_is_placed_and_its_last_offset_held() {
+    // Cairo: a range ending 2026-04-23 ends at the change's instant, 1_776_981_600,
+    // which implies the old offset (+7200); the day after that, 2026-04-24, ends
+    // at 1_777_064_400 and implies +10800.
+    let ends_at_change = Case {
+        first: "2026-04-20",
+        last: "2026-04-23",
+        after_last: "2026-04-24",
+    };
+    assert_eq!(ends_at_change.end(7200), 1_776_981_600);
+    let s = ends_at_change.start(7200);
+    assert_placed(&ends_at_change, 7200, 7200, &[(s, 7200)]);
+    // An entry at the range's end is outside it.
+    refused(ends_at_change.check(7200, 7200, &[(s, 7200), (1_776_981_600, 10_800)]));
+    accepted(ends_at_change.check(7200, 7200, &[(s, 7200), (1_776_981_599, 10_800)]));
+    // The last offset is held to the one the end implies.
+    refused(ends_at_change.check(7200, 7200, &[(s, 7200 + 2 * HOUR + 1)]));
+
+    let after = Case {
+        first: "2026-04-20",
+        last: "2026-04-24",
+        after_last: "2026-04-25",
+    };
+    let s = after.start(7200);
+    assert_placed(&after, 7200, 10_800, &[(s, 7200), (1_776_981_600, 10_800)]);
+    assert_placed(&after, 7200, 10_800, &[(s, 7200)]);
+    refused(after.check(
+        7200,
+        10_800,
+        &[(s, 7200), (1_776_981_600, 10_800 + 2 * HOUR + 1)],
+    ));
+}
+
+#[test]
+fn a_repeated_midnight_is_placed_at_the_start_and_at_the_end_of_a_range() {
+    // America/Havana 2026-11-01: 01:00 (-04:00) falls back to 00:00 (-05:00) at
+    // 1_793_509_200; midnight happens twice and `new Date` gives the first,
+    // 1_793_505_600, at -04:00.
+    let from_it = Case {
+        first: "2026-11-01",
+        last: "2026-11-05",
+        after_last: "2026-11-06",
+    };
+    assert_eq!(from_it.start(-14_400), 1_793_505_600);
+    assert_placed(
+        &from_it,
+        -14_400,
+        -18_000,
+        &[(1_793_505_600, -14_400), (1_793_509_200, -18_000)],
+    );
+    // Beginning at the second midnight: -05:00 is both implied and in force.
+    assert_placed(&from_it, -18_000, -18_000, &[(1_793_509_200, -18_000)]);
+    refused(from_it.check(-14_400, -18_000, &[(1_793_505_600, -14_400 + 2 * HOUR + 1)]));
+
+    let to_it = Case {
+        first: "2026-10-28",
+        last: "2026-10-31",
+        after_last: "2026-11-01",
+    };
+    assert_eq!(to_it.end(-14_400), 1_793_505_600);
+    let s = to_it.start(-14_400);
+    assert_placed(&to_it, -14_400, -14_400, &[(s, -14_400)]);
+    refused(to_it.check(-14_400, -14_400, &[(s, -14_400), (1_793_505_600, -18_000)]));
+    refused(to_it.check(-14_400, -14_400, &[(s, -14_400 + 2 * HOUR + 1)]));
+
+    let through_it = Case {
+        first: "2026-10-28",
+        last: "2026-11-01",
+        after_last: "2026-11-02",
+    };
+    let s = through_it.start(-14_400);
+    assert_placed(
+        &through_it,
+        -14_400,
+        -18_000,
+        &[(s, -14_400), (1_793_509_200, -18_000)],
+    );
+    // The second midnight as a range's end implies -05:00; holding -04:00 to the
+    // end is within a clock change, and -07:00 would not be.
+    assert_placed(&through_it, -14_400, -18_000, &[(s, -14_400)]);
+    refused(through_it.check(
+        -14_400,
+        -18_000,
+        &[(s, -14_400), (1_793_509_200, -18_000 - 2 * HOUR - 1)],
+    ));
 }

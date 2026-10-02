@@ -176,7 +176,10 @@ list with `Date`, as it computes the bounds (`src/localDays.ts`, `offsetChanges`
 the same sealed sentence as for its bounds and nothing else returned, unless:
 
 - the list is not empty and has no more entries than the range has days, plus one;
-- the first `from` is `range_start`, and the first offset is the one `range_start` implies for `first_day`;
+- the first `from` is `range_start`, and the first offset is the one in force there, within 2 hours of the one
+  `range_start` implies for `first_day` (amended 2026-10-02, convergence K23: where a zone puts its clocks forward
+  at 00:00, `range_start` is 01:00 at the new offset, so it implies the old one while the offset in force is the
+  new one; the two are one clock change apart, and no further);
 - the `from`s strictly increase and are all before `range_end`;
 - every offset lies between −12 h and +14 h;
 - neighbouring offsets differ, by no more than 2 hours;

@@ -653,7 +653,9 @@ mod with_history {
         let sentences = [
             refused(Vec::new()),
             refused(vec![change(start + 1, HOUR)]),
-            refused(vec![change(start, 0)]),
+            // London implies +1 h; a first offset a clock change from it is
+            // the offset in force, and three hours is not.
+            refused(vec![change(start, -2 * HOUR)]),
             refused(vec![change(start, HOUR), change(start, 0)]),
             refused(vec![change(start, HOUR), change(london.end, 0)]),
             refused(vec![change(start, 15 * HOUR)]),
