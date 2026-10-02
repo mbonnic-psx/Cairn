@@ -350,3 +350,14 @@ Every product decision a `/cruise` run took, in order. A person overrides one by
 - **Confidence:** high · **Would reverse if:** a later feature chooses a frame of Cairn's own and the owner accepts it
 - **Written to:** `specs/004-notebook-landscape/spec.md` (Clarifications)
 - **Status:** standing
+
+## D32 — Does the run merge 003's `history-by-site` (#29) and then start `tonight-page`?
+- **Stage:** ready-set selection · **Slice:** tonight-page · **When:** 2026-10-02T15:12:00Z · **Iteration:** 7
+- **Question:** The owner's message, queued 2026-10-02: "yes, merge PR #29 (003 history-by-site) yourself — the owner accepted that slice in its demo. Then start tonight-page."
+- **Options:** merge #29, then run `tonight-page` (the owner's answer)
+- **Decision:** Yes, as the owner said. Both had already happened when the message reached the run: #29 merged at 2026-10-02T09:28Z, and `tonight-page` merged as #38 at 11:41Z (D21). Nothing more to do.
+- **Why:** The owner accepted `history-by-site` in its own demo, and `tonight-page` was waiting only for it (story split, Parking lot).
+- **Decided by:** human
+- **Confidence:** high · **Would reverse if:** the owner asks for #29 to be reverted
+- **Written to:** `specs/004-notebook-landscape/slices/README.md` (tonight-page row)
+- **Status:** standing
