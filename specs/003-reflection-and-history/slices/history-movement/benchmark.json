@@ -1,0 +1,56 @@
+{
+  "_comment": "What each stage of /drive cost this slice and how well it did, one entry per stage run, appended by scripts/agents/benchmark.py at the stage's start and end. Tokens come from the harness's own transcript or are null with the reason; signals are what the stage reported. `make benchmark` reads every record. docs/agent-harnesses.md says what the numbers can and cannot be compared with.",
+  "feature": "003-reflection-and-history",
+  "slice": "history-movement",
+  "from": "1c6f57257fd08350e22c454f38a4ecc6bd44c2a6",
+  "stages": [
+    {
+      "stage": "gaps",
+      "started": "2026-10-02T20:36:55Z",
+      "planned": "gaps: strong → host model — `strong` maps to the host model",
+      "tasks": {
+        "start": {
+          "open": 41,
+          "done": 33
+        },
+        "end": {
+          "open": 41,
+          "done": 33
+        }
+      },
+      "ended": "2026-10-02T20:48:35Z",
+      "seconds": 700,
+      "span": {
+        "from": {
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/beb113a0-0614-4833-8a55-53ca692431a6.jsonl": 941368
+        },
+        "to": {
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/beb113a0-0614-4833-8a55-53ca692431a6.jsonl": 996815
+        }
+      },
+      "usage": {
+        "source": "claude",
+        "session": "beb113a0-0614-4833-8a55-53ca692431a6",
+        "read": "message.usage on each assistant line, once per requestId",
+        "host": {
+          "claude-opus-5-5": {
+            "input": 10,
+            "output": 3023,
+            "cache_read": 694919,
+            "cache_creation": 7574
+          }
+        },
+        "subagents": {},
+        "agents": []
+      },
+      "ran": [
+        "claude-opus-5-5"
+      ],
+      "agents": null,
+      "delegated": false,
+      "signals": {
+        "gaps": 8
+      }
+    }
+  ]
+}

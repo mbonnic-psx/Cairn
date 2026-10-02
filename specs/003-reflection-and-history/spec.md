@@ -382,6 +382,35 @@ recommendation"):
 Already stated, and held by this slice as written: the time Cairn did not see is stated above the days (H4, H5); no
 ranking word, no colour that means good or bad (B3).
 
+### Gaps reviewed — slice `history-movement` (2026-10-02)
+
+Checked against US2 scenario 2, FR-020, FR-022–FR-024, the `movement` field of `contracts/ui-ipc.md`, R5 (a range
+may be very long), and the decisions of the three views before it. Decided by the owner ("1. yes, 2. yes, 3. yes,
+4. yes, 5. yes, 6. yes, 7. yes, 8. yes"):
+
+- **M1 — where it lives.** A fourth option in *Over time*'s choice, *Day by day*, after *By site*, *By hour* and
+  *By day*, sharing the same range. Not a screen of its own, nothing in the header (H1).
+- **M2 — how it reads.** One row per date, oldest first, each with its count and the same soft bar as the other
+  views. The movement is the shape of the bars; there is no chart to learn.
+- **M3 — long ranges.** A range of up to 8 weeks (56 days) is shown one row per day. A longer range is shown one
+  row per week, named by the date it begins ("week of 6 Oct"), so a year reads as about 52 rows rather than 365.
+  Nothing is hidden: every reach in the range is in exactly one row.
+- **M4 — no verdict on the movement.** No trend line, no average, no *up*, *down*, *better*, *worse* or "fewer than
+  last week", no comparison with an earlier range (H3), and no colour that means good or bad. A reach is
+  information; the person reads the shape themselves.
+- **M5 — days Cairn did not see.** A row Cairn was not counting for at all reads *not seen*, with no count and no
+  bar, never a zero (FR-022). A row Cairn saw only part of keeps its count with a quiet *partly seen* mark. The
+  coverage note above the rows still states the gaps, as for the other views (H4, H5).
+- **M6 — today.** The row holding today is marked *so far*, so an unfinished day does not read as a drop.
+- **M7 — estimates stay out.** A day's own estimate is not counted in its row, and the exclusion is stated as in
+  the other views (FR-023, W6).
+- **M8 — a quiet range.** The quiet sentence ("Nothing here for these days.", FR-024) and every row at zero under
+  it, as for hours (B5). Rows Cairn did not see still read *not seen* (M5).
+
+Already stated, and held by this slice as written: no streak, day count or chain, and no "day N" (scenario 5) —
+rows are named by their dates, never numbered; everything is available with no journal entry ever written
+(scenario 3); a sealed answer shows the sentence and nothing else.
+
 ## Requirements *(mandatory)*
 
 ### Functional Requirements
