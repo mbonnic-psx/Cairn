@@ -98,11 +98,20 @@ export interface OffsetChange {
 }
 
 /**
- * How far east of UTC the computer's clock is at an instant, in whole seconds. `Date` applies the
- * zone's full history; the `+ 0` turns a negative zero, which UTC itself would give, into zero.
+ * How far east of UTC the computer's clock is at an instant, in whole seconds: exactly the offset
+ * `Date`'s own local fields use. Taken from those fields (the local reading as if it were UTC, less
+ * the instant), not from `getTimezoneOffset()`, which is whole minutes and so is wrong by up to 30
+ * seconds where a zone kept a mean time not on a minute (Monrovia before 1972, -00:44:30). The
+ * `+ 0` turns a negative zero, which UTC itself would give, into zero.
  */
-const offsetAt = (epochSeconds: number): number =>
-  Math.round(-new Date(epochSeconds * 1000).getTimezoneOffset() * 60) + 0;
+function offsetAt(epochSeconds: number): number {
+  const d = new Date(epochSeconds * 1000);
+  // `setUTCFullYear` rather than `Date.UTC`, which reads years 0 to 99 as 1900 to 1999.
+  const asUtc = new Date(0);
+  asUtc.setUTCFullYear(d.getFullYear(), d.getMonth(), d.getDate());
+  asUtc.setUTCHours(d.getHours(), d.getMinutes(), d.getSeconds(), 0);
+  return Math.round(asUtc.getTime() / 1000) - epochSeconds + 0;
+}
 
 /**
  * The offsets the computer's clock has across `firstDay` to `lastDay`: the one in force where the
