@@ -191,6 +191,27 @@ describe('the protection-page stylesheet', () => {
     });
   });
 
+  describe('every control shows a focus indicator of its own (T015)', () => {
+    // The focusable elements the two screens' on-page branches emit, found in their sources.
+    const focusable = [
+      ...(protection + trail).matchAll(
+        /<(?:Button|button|a|input|select|textarea)\b[^>]*?className="([^"]*\bnb-[^"]*)"/g,
+      ),
+    ].flatMap((m) => m[1]!.split(/\s+/).filter((c) => c.startsWith('nb-')));
+
+    it('finds the controls it is meant to cover (today: the waiting note\'s button)', () => {
+      expect(focusable).toContain('nb-protection-note__button');
+    });
+
+    it.each(focusable)('.%s has a :focus-visible rule drawing its outline from --nb-ink', (name) => {
+      const own = rules.filter((r) =>
+        r.selector.split(',').map((x) => x.trim()).includes(`.${name}:focus-visible`),
+      );
+      expect(own.length, `no :focus-visible rule for .${name}`).toBeGreaterThan(0);
+      expect(own.map((r) => r.body).join('')).toMatch(/outline:\s*2px solid var\(--nb-ink\)/);
+    });
+  });
+
   it('has a rule for every slice class the screens name, and names no class they do not', () => {
     for (const name of named) {
       if (SHELL.includes(name)) continue;
