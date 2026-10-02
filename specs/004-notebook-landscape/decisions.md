@@ -11,7 +11,8 @@ Every product decision a `/cruise` run took, in order. A person overrides one by
 - **Decided by:** human
 - **Confidence:** high · **Would reverse if:** the owner accepts all three looks in a demo and asks for the reveal
 - **Written to:** `.specify/product-owner.md` (Out of scope), `specs/004-notebook-landscape/story-split.md` (row 7 needs the owner's demo)
-- **Status:** standing
+- **Status:** overridden by human 2026-10-02
+- **Note, 2026-10-02 (D41):** the condition is met. The owner demoed frame, then fold-and-width and board-scale on main, accepted all three looks and said "go reveal".
 
 ## D2 — Does a released build open at 1280×800 before the reveal?
 - **Stage:** after acceptance (adversary triage) · **Slice:** frame · **When:** 2026-10-01T23:58:00Z · **Iteration:** 1
@@ -456,4 +457,59 @@ Every product decision a `/cruise` run took, in order. A person overrides one by
 - **Decided by:** host (standing decision D39)
 - **Confidence:** high · **Would reverse if:** the owner, at the reveal demo, finds the shadow heavy at 2560×1440
 - **Written to:** `specs/004-notebook-landscape/slices/board-scale/tasks.md` (T012)
+- **Status:** standing
+
+## D41 — Does the `reveal` slice run now?
+- **Stage:** split · **Slice:** reveal · **When:** 2026-10-02T23:00:00Z · **Iteration:** 11
+- **Question:** D1 held `reveal` for the owner. The owner, 2026-10-02: "go reveal". They have demoed all three looks themselves (frame, then fold-and-width and board-scale on main) and accept them (SC-008). May the run take `reveal` through the full ladder and merge it?
+- **Options:** run `reveal` now, through plan, tasks, implement, converge, demo, Phase 4 and merge (the owner's answer); keep parking on it
+- **Decision:** Run it now. The notebook becomes Cairn's interface: morning by default in a released build; today's interface and the Current choice removed; a three-way Morning, Midday, Night switch left for development builds until the clock feature replaces it (FR-012, FR-013a, FR-032). The slice also closes the frame adversary finding R1 by removing the dead Current path from the bundle. Then the completion audit, and the run ends.
+- **Why:** The owner asked for this release in their own words, after their own demo of all three looks, which is the acceptance SC-008 and D1 waited for. It is not "releasing what a person has not asked for".
+- **Decided by:** human
+- **Confidence:** high · **Would reverse if:** the owner withdraws the go
+- **Written to:** `specs/004-notebook-landscape/story-split.md` (slice 7), `specs/004-notebook-landscape/decisions.md` (D1)
+- **Status:** standing
+
+## D42 — Do the screens' one-column layouts go with Current?
+- **Stage:** slice gaps · **Slice:** reveal · **When:** 2026-10-02T23:10:00Z · **Iteration:** 11
+- **Question:** Each screen lays itself out as a spread only when the notebook tells it it is on a page (D6), and otherwise renders today's one column, which only Current uses. With Current removed, do those branches stay?
+- **Options:** remove them, the "on a notebook page" signal, `CurrentShell` and whatever only they used (recommended: FR-032 removes today's interface, and R1 asks for the dead path out of the bundle); keep them as dead code
+- **Decision:** Remove them. Every screen renders only as its notebook spread.
+- **Why:** After the reveal nobody can reach today's interface, so its code is weight in what ships and a second layout every later screen change would have to keep working for nobody.
+- **Decided by:** host (stage recommendation)
+- **Confidence:** high · **Would reverse if:** the owner wants today's interface kept reachable somewhere
+- **Written to:** `specs/004-notebook-landscape/spec.md` (Clarifications)
+- **Status:** standing
+
+## D43 — What becomes of the tests that held Current exactly as before?
+- **Stage:** slice gaps · **Slice:** reveal · **When:** 2026-10-02T23:10:00Z · **Iteration:** 11
+- **Question:** The `*CurrentPin` tests and the older interface tests hold today's interface unchanged (SC-009). SC-009 holds "until the reveal". What happens to them?
+- **Options:** retire the Current pins, first moving every word, state and control they hold that no notebook test holds onto the notebook page; older tests that render a screen alone keep their assertions and render the screen as it now is (recommended: FR-018 must lose nothing); delete them outright; keep them against a kept Current
+- **Decision:** The first.
+- **Why:** The person must still find every word, state and control on the page they found before (FR-018). A pin that only proved "unchanged from the old layout" has nothing left to prove; a pin that proved a word was there still does.
+- **Decided by:** host (stage recommendation)
+- **Confidence:** high · **Would reverse if:** a retired pin turns out to hold behaviour no other test holds, found by mutation or the adversary
+- **Written to:** `specs/004-notebook-landscape/spec.md` (Clarifications)
+- **Status:** standing
+
+## D44 — What does a development build start on after the reveal?
+- **Stage:** slice gaps · **Slice:** reveal · **When:** 2026-10-02T23:10:00Z · **Iteration:** 11
+- **Question:** FR-011 starts the switch on Current every time. With Current gone, what does it start on, and what does it offer?
+- **Options:** Morning, every start, not remembered, offering Morning, Midday, Night in that order, label and place unchanged (recommended: a released build opens on morning, FR-032, and a development build should open as a released one does); remember the last look
+- **Decision:** The first.
+- **Why:** A tester sees first what a person sees first. Remembering would be new state this feature never had.
+- **Decided by:** host (stage recommendation)
+- **Confidence:** high · **Would reverse if:** the owner wants a development build to remember the look
+- **Written to:** `specs/004-notebook-landscape/spec.md` (FR-011, User Story 2 scenarios 5 and 6, Clarifications)
+- **Status:** standing
+
+## D45 — What proves the released build after the reveal?
+- **Stage:** slice gaps · **Slice:** reveal · **When:** 2026-10-02T23:10:00Z · **Iteration:** 11
+- **Question:** D29's production-build test proves no switch ships. After the reveal it must also prove the notebook ships and Current does not (R1).
+- **Options:** extend D29's test: what ships carries the morning look and "Good morning." and none of the switch's words or Current's shell (recommended); a new CI check (changes a gate, which no slice may do)
+- **Decision:** Extend D29's test, with its teeth shown against a development build as before.
+- **Why:** R1 was found because nothing searched what ships for the dead path; the same search, widened, keeps it out.
+- **Decided by:** host (stage recommendation)
+- **Confidence:** high · **Would reverse if:** the production build inside the suite proves too slow and the owner prefers a CI step
+- **Written to:** `specs/004-notebook-landscape/spec.md` (Clarifications), `specs/004-notebook-landscape/adversary-log.md` (R1)
 - **Status:** standing
