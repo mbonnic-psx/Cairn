@@ -150,3 +150,8 @@ None.
 ## Open questions
 
 None. Every product question about this slice was answered before the split (FR-031) and at slice gaps (D16).
+
+Two needs met after convergence lie outside this slice's files and do not block it; both are handed to the host (`tasks.md`, *Handed back*):
+
+- **The pin's ledger row.** `check-slice-scope` refuses `delivery/survey/pinned.md` on a slice branch; the row is written out verbatim in `tasks.md` for the host to append on `main`.
+- **Keyboard scrolling of a spread with no control (MEDIUM).** The notebook's scrolling page area (`src/shell/NotebookShell.tsx:39`) is focusable only where the engine makes a scroller focusable; WebKit (macOS, Linux) is believed not to. A shell change, frame's file, touching every spread. Recommendation: one shell task before `reveal`.
