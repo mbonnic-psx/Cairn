@@ -221,3 +221,55 @@ Every product decision a `/cruise` run took, in order. A person overrides one by
 - **Confidence:** high · **Would reverse if:** every path to the first system change already shows What this does not cover and the note on administrators before the yes, somewhere other than this screen
 - **Written to:** `specs/002-machine-wide-protection/tasks.md` (task appended on the trunk after this slice merges), `specs/004-notebook-landscape/slices/setup-pages/tasks.md` (T026), `specs/004-notebook-landscape/story-split.md` (Parking lot)
 - **Status:** standing
+
+## D21 — Does `tonight-page` lay out 003's Over time view as a notebook spread too?
+- **Stage:** slice gaps · **Slice:** tonight-page · **When:** 2026-10-02T10:02:00Z · **Iteration:** 5
+- **Question:** 003's `history-by-site` (PR #29, accepted 2026-10-01) put a "Which days" pair (Today / Over time) at the top of the Today screen, and an Over time view under it: a heading naming the range in words, From and To date boxes, a coverage note, an estimates-excluded line, the sites with counts and soft bars, "Nothing here for these days.", a could-not-read sentence, a sealed sentence and "Cairn counts only while it is running…" at the foot. 004's Assumptions call Over time "not yet built … out of scope". It is now built, inside the screen `tonight-page` lays out. Does `tonight-page` carry it?
+- **Options:** (a) yes: `tonight-page` lays out Over time and the Which days buttons as part of the Today screen (recommended by the host); (b) no: only the Today view, and Over time stays a single column on the paper, unstyled at the reveal; (c) a separate slice for Over time before `reveal`
+- **Decision:** (a). The Today screen's spread includes both views and the Which days buttons, word for word, in every state the view has today: looking, could not read, sealed, nothing here, the list, the coverage note and the estimates line. The buttons stay in the same place on the spread in both views. The bars stay warm (FR-016). Current keeps the screen exactly as it is on main after #29 (SC-009). "One day" is still not built and stays out of scope. 004's Assumptions drop Over time from the not-yet-built list. Layout: D22.
+- **Why:** A person who opens Today in the notebook and presses "Over time" should still be in the notebook. Shipping a page in the old style inside a new spread is the "half a screen" the split promises no slice leaves. FR-018 names Today as a screen to lay out with every control and state it has, and Over time is now part of it. The Assumption was written so screens adopt the style when they exist, and this one does. (b) would let the reveal ship an unstyled page. (c) would put two slices on the same screen file, and they would collide at merge, as D10 warned.
+- **Decided by:** drive-skipper (claude-opus-5-5)
+- **Confidence:** high · **Would reverse if:** #29 does not reach main before `tonight-page` is planned, or the owner pulls Over time out of the Today screen
+- **Written to:** `specs/004-notebook-landscape/spec.md` (Clarifications, Assumptions), `specs/004-notebook-landscape/story-split.md` (row 4)
+- **Status:** standing
+
+## D22 — How do the Today screen's parts sit on a notebook spread, in each of its states?
+- **Stage:** slice gaps · **Slice:** tonight-page · **When:** 2026-10-02T10:03:00Z · **Iteration:** 5
+- **Question:** The Today screen has the Which days buttons, the Today view (heading, the typed log or "Nothing here for today.", the coverage note at its foot; "Looking…"; a sealed day) and the Over time view (heading naming the range, From/To, coverage note, estimates line, the sites with counts and soft bars or "Nothing here for these days.", "Looking…", could-not-read, sealed, and "Cairn counts only while it is running. This is what it saw over these days." at its foot). How do they sit on two pages, in each state?
+- **Options:** (a) like What is protected (D8): Which days, the heading and the notes on the left page, the log or list on the right page, ruled, "Nothing here…" where the list would be; loading, sealed and could-not-read on the left page only, the right page blank and ruled (recommended); (b) everything on the left page, the right page blank and ruled, in every state; (c) something else
+- **Decision:** (a), made exact:
+  1. Today, with a log: the left page holds the Which days buttons at the top (small, typewriter face), then "Today", then the coverage note, the last thing on the left page, set off by its rule. The right page holds the typed log, ruled, one reach a line: the site, then its time. A long log scrolls inside the notebook (FR-025).
+  2. Today, nothing yet today: the left page as in 1. "Nothing here for today." sits at the top of the right page, where the log would begin.
+  3. Today, sealed: the left page holds Which days, "Today" and the sealed sentence. The right page is blank and ruled.
+  4. Today, loading: the left page holds Which days and "Looking…", with no heading, exactly as the screen does now. The right page is blank and ruled.
+  5. Over time: the left page holds Which days, the heading naming the range, From and To, then the coverage note, the estimates line and "Cairn counts only while it is running. This is what it saw over these days.", the last set off by its rule. The right page holds the sites, ruled, one site a line, each with its count and soft bar, or "Nothing here for these days." at its top.
+  6. Over time loading, could-not-read and sealed: the left page holds Which days, the heading, From and To, then that one sentence where the notes would be. The right page is blank and ruled. The date boxes stay where they are in every state.
+  7. Control edges: D15's floor covers this screen. The edges of the From and To boxes, and whatever shows which Which days button is pressed, meet at least 3:1 against the paper in every look, each held by a test.
+  8. Current renders exactly what it renders now (D6, SC-009).
+- **Why:** A typed log down a ruled page is how US3 describes Today, and it is how What is protected already sits (D8): the person reads what the log is and what Cairn could see before reading down it. Kept as the last thing on the left page, the coverage sentence reads as the honest caveat (Principle III), not a second heading. In states with no list, nothing is invented to fill the right page (FR-031). Nothing is added and no words change (FR-018). A person who cannot find the date boxes on night's paper cannot look back over their weeks (D15, WCAG 1.4.11). The owner brief's actor, priorities and taste are placeholders, so this is decided from the specification, the constitution and D6–D8, D13–D15, D17.
+- **Decided by:** drive-skipper (claude-opus-5-5)
+- **Confidence:** medium · **Would reverse if:** the owner, at the reveal demo, wants the coverage note back under the log, in today's reading order
+- **Written to:** `specs/004-notebook-landscape/spec.md` (Clarifications)
+- **Status:** standing
+
+## D23 — How do Tonight's parts sit on its spread, in each state?
+- **Stage:** slice gaps · **Slice:** tonight-page · **When:** 2026-10-02T10:10:00Z · **Iteration:** 5
+- **Question:** The check-in is a heading, the quote, today's reaches (or "Nothing here for today."), the coverage note, "How the day went" with its writing space, "Keep this", the save's status sentence and "Hide quotes"/"Show quotes". It also has a sealed day, a load that has not arrived or could not be made, and a day that ended while it was open. Where does each go on two pages?
+- **Options:** as US3 says: today's reaches on the left page, the quote and a lined journal page on the right with "Keep this" (recommended, the specification's own words); everything on the left page
+- **Decision:** Left page: the heading ("Tonight", or the date once the day has ended), today's reaches as a typed log with times, or "Nothing here for …", and the coverage note under them. Right page: the quote, then "How the day went" and the writing space as a lined page in the serif, "Keep this", the status sentence, and the quotes switch at the foot. A sealed day: the heading and the sealed sentence on the left; the quote, the status sentence and the switch on the right, where they sit on an open day. While the day is loading, or could not be read: "Looking…" or the reason on the left page, the right page blank and ruled (FR-031). The status sentence stays one polite live region in every state.
+- **Why:** US3 names this layout ("today's reaches on the left page; the quote and a lined journal page on the right, with Keep this"), and FR-019 asks the journal to read as a lined notebook page. Putting the switch and the status in the same place on a sealed day keeps the page from moving under someone who comes back to it.
+- **Decided by:** host (stage recommendation)
+- **Confidence:** high · **Would reverse if:** the owner, at the reveal demo, wants the quote above the reaches on the left page
+- **Written to:** `specs/004-notebook-landscape/spec.md` (Clarifications)
+- **Status:** standing
+
+## D24 — What holds the lined journal page readable and usable?
+- **Stage:** slice gaps · **Slice:** tonight-page · **When:** 2026-10-02T10:10:00Z · **Iteration:** 5
+- **Question:** A lined writing space can drift: lines that stay still while the text scrolls, lines that cut through letters, an edge that vanishes on night's paper, a focus ring lost on the lines. Nothing in the spec says which of these must hold.
+- **Options:** the ruled lines sit under each line of text and move with it as it scrolls, the writing space's edge meets 3:1 against the paper in every look (D15), focus stays visible on it in every look (looks T021, carried by D10), nothing fades (looks T024), and under forced colours the lines may drop while the edge and text stay (recommended); leave it to the owner's eye at the demo
+- **Decision:** All of the first option, held by tests where a test can see it (the edge's contrast, the focus ring, no transition, the line spacing matching the text's line height) and shown in the demo in every look at 1280×800 and 800×600.
+- **Why:** The writing is the point of the check-in. A person who cannot find where to write, or whose words sit between the lines, is pushed away from the one thing the evening is for.
+- **Decided by:** host (standing decision D15)
+- **Confidence:** medium · **Would reverse if:** the owner, at the reveal demo, wants the writing space drawn as bare lines with no edge
+- **Written to:** `specs/004-notebook-landscape/spec.md` (Clarifications)
+- **Status:** standing

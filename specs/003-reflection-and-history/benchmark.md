@@ -1,19 +1,31 @@
 # Benchmark — 003-reflection-and-history
 
-Drawn 2026-10-02T02:16:56Z at `669fdda` from 2 record(s) under `specs/003-reflection-and-history/` by `scripts/agents/benchmark.py overview`; `/benchmark` redraws it, and so does closing a slice. Regenerated whole, never edited: the records beside each slice are the source.
+Drawn 2026-10-02T09:28:50Z at `977752d` from 3 record(s) under `specs/003-reflection-and-history/` by `scripts/agents/benchmark.py overview`; `/benchmark` redraws it, and so does closing a slice. Regenerated whole, never edited: the records beside each slice are the source.
 
 ## Slices
 
-2 slice(s) recorded, 4h22m in all.
+3 slice(s) recorded, 6h25m in all.
 
 | slice | delegate/cycle | wall | in | out | models | sessions | converge | +tasks | gaps | mutation | adversary | demo | verify✗ | rework | tasks | files | ±lines |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| history-by-site | rule/rule, story/rule | 2h03m | 44.7M | 32.9k | claude-opus-5-5, claude-sonnet-5-5 | 1 | 1 | 4 | 0/0 | interface 97.07% (Stryker, scoped, TZ=Europe/London); core 107/108 viable caught, 1 Tauri wrapper app-only | 5 | — | 0 | 0 | 26 | 48 | +4450/-101 |
 | quote | none/rule, rule/rule | 2h56m | 53.6M | 43.8k | claude-opus-5-5, claude-sonnet-5-5 | 1 | 2 | 7 | 0/0 | interface 95.86% (Stryker, scoped); core 29/32 live (7 wrappers app-only), dead quote() removed | 6 | — | 1 | 0 | 19 | 94 | +11149/-674 |
 | write-tonight | rule/rule | 1h26m | 42.6M | 45.5k | claude-opus-5-5, claude-sonnet-5-5 | 1 | 0 | 0 | 0/0 | interface 96.96% (Stryker, scoped); core 22/24 viable | 10 | — | 0 | 0 | 16 | 49 | +5816/-604 |
 
 delegate/cycle = how implementation was delegated and driven; in = input + cache read + cache creation tokens; gaps = before/after converge; +tasks = tasks converge appended; sessions = harness sessions read; a stage's tokens are a floor (the turn that ends it is partly uncounted); a trailing + makes wall a floor because an unbracketed stage is missing; tokens are not prices.
 
 ## Stages
+
+### history-by-site — 2h03m
+
+| stage | started (UTC) | wall | in | out | model | agent | delegated | reported |
+|---|---|---|---|---|---|---|---|---|
+| implement | 2026-10-02 02:16 | 13m56s | 11.9M | 8.3k | claude-opus-5-5, claude-sonnet-5-5 | drive-implement | yes | verify_failures=0, delegate=story, cycle=rule, split=0 |
+| converge | 2026-10-02 02:30 | 4m43s | 2.6M | 1.8k | claude-opus-5-5 | drive-converge | yes | — |
+| implement | 2026-10-02 02:56 | 5m14s | 4.1M | 4.1k | claude-opus-5-5, claude-sonnet-5-5 | drive-implement | yes | verify_failures=0, delegate=rule, cycle=rule, split=0 |
+| adversary | 2026-10-02 03:01 | 19m35s | 6.2M | 6.2k | claude-opus-5-5 | drive-adversary | yes | findings=5, seams=1 |
+| implement | 2026-10-02 03:21 | 9m58s | 7.8M | 4.8k | claude-opus-5-5, claude-sonnet-5-5 | drive-implement | yes | verify_failures=0, delegate=rule, cycle=rule, split=0 |
+| mutation | 2026-10-02 03:31 | 1h09m | 12.2M | 7.6k | claude-opus-5-5, claude-sonnet-5-5 | drive-implement | yes | mutation_score=interface 97.07% (Stryker, scoped, TZ=Europe/London); core 107/108 viable caught, 1 Tauri wrapper app-only |
 
 ### quote — 2h56m
 
@@ -42,6 +54,7 @@ delegate/cycle = how implementation was delegated and driven; in = input + cache
 
 ## Notes
 
+- history-by-site: implemented as rule/rule and story/rule — its wall compares with neither
 - quote: implemented as none/rule and rule/rule — its wall compares with neither
 
 ## Reading these numbers
