@@ -1,5 +1,22 @@
 @import 'tailwindcss';
 
+/* Only the files that ship name a utility the released stylesheet carries. Tailwind 4 reads every file under the
+ * project for class-like words; the tests, the frozen markup of the retired interface, the specs, the prototype and
+ * the design sources would otherwise keep that interface's utilities in the build (adversary A1, R1).
+ * `@source not "<path>"` is parsed in node_modules/tailwindcss/dist/lib.js (the `@source` branch strips a leading
+ * `not ` and records the pattern as negated). */
+@source not '../**/__tests__/**';
+@source not '../**/*.test.*';
+@source not '../../specs';
+@source not '../../prototype';
+@source not '../../design';
+@source not '../../delivery';
+@source not '../../scripts';
+@source not '../../.specify';
+@source not '../../*.md';
+@source not '../../*.jsonl';
+@source not '../../**/*.jsonl';
+
 /* Cairn's surface.
  *
  * Warm, quiet, and generous with space. Serif where someone is meant to slow
