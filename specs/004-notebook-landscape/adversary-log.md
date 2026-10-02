@@ -70,3 +70,14 @@ Skipped: nothing widened, and the slice does not close the split. Covered by row
 | concurrency, idempotency, ordering, retention, or time | not present | the screens render what they are given; nothing reads time or orders anything new |
 
 Skipped: nothing widened, and the slice does not close the split. Covered by row `frame` · release gate on the notebook.
+
+## tonight-page · c2f5f33 · 2026-10-02
+
+| Trigger | Status | Evidence |
+|---|---|---|
+| driving adapter (HTTP route, CLI command, queue consumer) | not present | no IPC command, route or CLI added (`src-tauri/` untouched, `ipc_surface.rs` unchanged); `App.tsx` unchanged; the demo fake core ships in no build |
+| driven adapter or the provider types behind one | not present | no store, file or system call touched; the diff is `src/screens/Reaches.tsx`, `src/screens/CheckIn.tsx` (the component below `useCheckInSession`; the hook is unchanged), `src/styles/tonight-page.css`, one import in `src/main.tsx`, and tests |
+| authorisation decision (who can reach one that already exists) | already covered | row `frame` (release gate on the notebook): a released build still forces `current`; no protection control reachable from either spread (Principle I, `ReachesPage.test.tsx`, `CheckInPage.test.tsx`) |
+| concurrency, idempotency, ordering, retention, or time | already covered | the spreads render the state and handlers the screens already had: a day ending under an open check-in, a save returning after more was typed, and Over time's range are 003's, attacked in `specs/003-reflection-and-history/adversary-log.md` (history-by-site R2–R5, the check-in rows); the on-page branch reads them and adds no clock, ordering or retry |
+
+Skipped: nothing widened, and the slice does not close the split (`reveal` remains). Covered by row `frame` · release gate on the notebook, and 003's `history-by-site` and check-in rows.

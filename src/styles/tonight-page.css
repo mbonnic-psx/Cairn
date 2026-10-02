@@ -1,0 +1,381 @@
+/*
+ * Today (both views) and Tonight as spreads (slice `tonight-page`).
+ *
+ * Colour comes only from the shell's tokens, so every look re-points it and every pair is already proved at
+ * its floor (look/__tests__/tokens.test.ts). Nothing here moves: no animation, no transition. The typewriter
+ * face is for small labels only: the Which days buttons, From and To, the times and the counts, "Keep this"
+ * and the quotes switch. Everything a person reads, and everything they write, is the page's serif.
+ *
+ * Design (frontend-design, second pass). The notebook look already chose the palette, the serif and the two
+ * leaves, so this sheet spends its one bit of boldness where the check-in asks for it: the writing space is
+ * the notebook's own ruling continued into a box, so a person writes on the page and not in a form. The rest
+ * is the other page sheets' quiet column: headings at 30px, sentences at 18px, a hairline above the closing
+ * note. A typed line is 32px tall, the notebook's own pitch, so each one sits on a rule of the right page.
+ */
+
+/* Two leaves inside the shell's one scrolling page area. The spread is at least as tall as the page area
+   (whose height is definite), so the ruled leaf reaches the foot of it; a longer left leaf grows both. */
+.nb-reaches-leaves,
+.nb-checkin-leaves {
+  column-gap: 48px;
+  min-height: 100%;
+}
+/* Today: the Which days group is the top of the left column, the left page sits under it, and the ruled page
+   runs down both rows. The group is not a page, so a change of view keeps the button just pressed. */
+.nb-reaches-leaves {
+  grid-template-rows: auto 1fr;
+}
+.nb-reaches-leaves > .nb-reaches-which {
+  grid-column: 1;
+  grid-row: 1;
+}
+.nb-reaches-leaves > .nb-page {
+  grid-column: 1;
+  grid-row: 2;
+  overflow-wrap: break-word;
+}
+.nb-reaches-leaves > .nb-page--ruled {
+  grid-column: 2;
+  grid-row: 1 / -1;
+  /* The first line of writing sits on a rule: the ruling starts 22px into the 32px pitch. */
+  padding-top: 22px;
+  overflow-wrap: anywhere;
+}
+/* Tonight: the right leaf is a column, so the quotes switch can take the foot. */
+.nb-checkin-leaves > .nb-page {
+  overflow-wrap: break-word;
+}
+.nb-checkin-leaves > .nb-page--ruled {
+  display: flex;
+  flex-direction: column;
+  padding-top: 22px;
+}
+
+/* The Which days buttons: small typewriter labels. The pressed one is marked by a line under it in the ink and
+   ink words; the other keeps a transparent line of the same width, so pressing one moves nothing. */
+.nb-reaches-which {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 20px;
+  margin: 0 0 24px;
+}
+.nb-reaches-which__button {
+  min-height: 32px;
+  padding: 0 2px;
+  border: 0;
+  border-bottom: 1.5px solid transparent;
+  background-color: transparent;
+  font-family: var(--nb-font-mono);
+  font-size: 12.5px;
+  letter-spacing: 0.04em;
+  color: var(--nb-ink-quiet);
+  cursor: pointer;
+}
+.nb-reaches-which__button[aria-pressed='true'] {
+  border-bottom: 1.5px solid var(--nb-ink);
+  color: var(--nb-ink);
+}
+.nb-reaches-which__button:hover {
+  color: var(--nb-ink);
+}
+
+/* The headings: the page's serif, the ink, and nothing else to say. */
+.nb-reaches-title,
+.nb-checkin-title {
+  margin: 0;
+  font-family: var(--nb-font-serif);
+  font-size: 30px;
+  font-weight: 500;
+  line-height: 1.2;
+  text-wrap: balance;
+  color: var(--nb-ink);
+}
+
+/* A sentence that stands for the state: looking, could not read, sealed, and what was left out. */
+.nb-reaches-sentence,
+.nb-checkin-sentence {
+  margin: 16px 0 0;
+  max-width: 34em;
+  font-size: 18px;
+  color: var(--nb-ink-body);
+}
+.nb-reaches-title + .nb-reaches-sentence,
+.nb-checkin-title + .nb-checkin-sentence {
+  margin-top: 12px;
+}
+
+/* The closing note: a hairline, then the quiet ink. It is the last thing on the left page. */
+.nb-reaches-note,
+.nb-checkin-note {
+  margin: 24px 0 0;
+  max-width: 34em;
+  padding-top: 20px;
+  border-top: 1px solid var(--nb-rule);
+}
+
+/* The note style, once: the closing notes, and the coverage note and estimates line of Over time, read alike
+   in both Today views. The aside has no hairline; the closing note below it carries it. */
+.nb-reaches-note,
+.nb-reaches-aside,
+.nb-checkin-note {
+  font-size: 16px;
+  color: var(--nb-ink-quiet);
+}
+.nb-reaches-aside {
+  margin: 16px 0 0;
+  max-width: 34em;
+}
+
+/* From and To: typewriter labels over serif boxes. The box's edge is drawn here, because a native one is a
+   colour no token sets and nothing could hold it to 3:1 (D15): 1px in the quiet ink on the paper itself. */
+.nb-reaches-range {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+  margin: 20px 0 0;
+}
+/* The label column is as wide for From as for To, so the two boxes start at the same place. */
+.nb-reaches-field {
+  display: grid;
+  grid-template-columns: 5ch auto;
+  align-items: center;
+  column-gap: 8px;
+  font-family: var(--nb-font-mono);
+  font-size: 12.5px;
+  letter-spacing: 0.04em;
+  color: var(--nb-ink-quiet);
+}
+.nb-reaches-date {
+  min-height: 36px;
+  padding: 4px 8px;
+  border: 1px solid var(--nb-ink-quiet);
+  border-radius: 3px;
+  background-color: transparent;
+  font-family: var(--nb-font-serif);
+  font-size: 16px;
+  color: var(--nb-ink-body);
+}
+
+/* The typed logs: a line to a rule, the site on the left and its time (or its bar and count) on the right.
+   A site's name wraps before its time does. */
+.nb-reaches-log,
+.nb-checkin-log {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.nb-checkin-log {
+  margin-top: 24px;
+}
+.nb-reaches-line,
+.nb-checkin-line {
+  display: flex;
+  /* Centred, not on the baseline: the label's smaller face on a baseline would stretch the line past 32px. */
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  line-height: 32px;
+}
+.nb-reaches-site,
+.nb-checkin-site {
+  min-width: 0;
+  color: var(--nb-ink);
+  overflow-wrap: anywhere;
+}
+/* The site takes what the others leave, so in Over time every bar starts at the same place and ends at the
+   same place, whatever the names' lengths; in Today it is what keeps the time at the right. */
+.nb-reaches-site {
+  flex: 1 1 0;
+}
+.nb-reaches-time,
+.nb-checkin-time,
+.nb-reaches-count {
+  flex-shrink: 0;
+  font-family: var(--nb-font-mono);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--nb-ink-quiet);
+}
+.nb-reaches-count {
+  min-width: 2ch;
+  text-align: right;
+}
+/* "Nothing here…": where the first line of the log would begin. */
+.nb-reaches-empty {
+  margin: 0;
+  font-size: 18px;
+  line-height: 32px;
+  color: var(--nb-ink-body);
+}
+.nb-checkin-empty {
+  margin: 24px 0 0;
+  max-width: 34em;
+  font-size: 18px;
+  color: var(--nb-ink-body);
+}
+
+/* A soft bar between a site and its count: a share of the largest, warm and quiet in every look. */
+.nb-reaches-bar {
+  flex: 0 0 28%;
+  align-self: center;
+  height: 6px;
+  border-radius: 3px;
+  background-color: var(--nb-rule);
+  overflow: hidden;
+}
+.nb-reaches-bar__fill {
+  height: 100%;
+  border-radius: 3px;
+  background-color: var(--nb-ink-quiet);
+}
+
+/* The quote: italic serif in the quiet ink, on the same 32px pitch as the page's ruling. */
+.nb-checkin-quote {
+  margin: 0 0 32px;
+}
+.nb-checkin-quote__line {
+  margin: 0;
+  max-width: 34em;
+  font-size: 18px;
+  font-style: italic;
+  line-height: 32px;
+  color: var(--nb-ink-quiet);
+}
+
+/* "How the day went" over the writing space. Both are on the pitch, so the space's own rules continue the
+   page's. */
+.nb-checkin-label {
+  display: block;
+}
+.nb-checkin-label__text {
+  display: block;
+  font-size: 20px;
+  line-height: 32px;
+  color: var(--nb-ink);
+}
+/* The writing space: its rules are drawn here, at the pitch of its own line height, and travel with the text
+   (`local`), so each line sits on a rule however far it has scrolled. There is no padding above, so the first
+   line sits on the first rule; its ground is the paper, so the page's ruling does not show through beside its
+   own. The 1px edge shifts the tiling by one pixel, put back by the position. Never a fixed height. */
+.nb-checkin-write {
+  display: block;
+  width: 100%;
+  min-height: calc(14rem + 2px);
+  margin: 0;
+  padding: 0 12px;
+  border: 1px solid var(--nb-ink-quiet);
+  border-radius: 3px;
+  background-color: var(--nb-paper);
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 31px,
+    var(--nb-rule) 31px,
+    var(--nb-rule) 32px
+  );
+  background-size: 100% 32px;
+  background-position: 0 -1px;
+  background-attachment: local;
+  font-family: var(--nb-font-serif);
+  font-size: 18px;
+  line-height: 32px;
+  color: var(--nb-ink);
+  resize: vertical;
+}
+
+/* "Keep this" is the page's one filled button; quiet and edged while there is nothing to keep. The edge is
+   always there, so the button does not change size. */
+.nb-checkin-keep {
+  align-self: flex-start;
+  min-height: 40px;
+  /* The space is 226px with its edge, so 30px puts the button on the pitch again. */
+  margin-top: 30px;
+  padding: 0 20px;
+  border: 1px solid var(--nb-button);
+  border-radius: 3px;
+  background-color: var(--nb-button);
+  font-family: var(--nb-font-mono);
+  font-size: 12.5px;
+  letter-spacing: 0.04em;
+  color: var(--nb-button-ink);
+  cursor: pointer;
+}
+.nb-checkin-keep:hover {
+  background-color: var(--nb-ink);
+}
+.nb-checkin-keep:disabled {
+  border-color: var(--nb-ink-quiet);
+  /* The paper, not nothing: a rule of the page would otherwise strike through its words. */
+  background-color: var(--nb-paper);
+  color: var(--nb-ink-quiet);
+  cursor: not-allowed;
+}
+
+/* The save's sentence, one polite region that keeps its line when empty so nothing jumps. */
+.nb-checkin-status {
+  min-height: 32px;
+  /* 40px of button and 24px of margin are two pitches, so the sentence sits on a rule. */
+  margin: 24px 0 32px;
+  max-width: 34em;
+  font-size: 18px;
+  line-height: 32px;
+  /* The paper, so a rule of the page does not strike through the sentence when the writing space has been
+     dragged to a height off the pitch. */
+  background-color: var(--nb-paper);
+  color: var(--nb-ink-body);
+}
+
+/* The quotes switch: a quiet typewriter label at the foot of the right page. */
+.nb-checkin-switch {
+  align-self: flex-start;
+  margin-top: auto;
+  padding: 4px 0;
+  border: 0;
+  /* The paper, so a rule of the page does not strike through its words. */
+  background-color: var(--nb-paper);
+  font-family: var(--nb-font-mono);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: var(--nb-ink-quiet);
+  cursor: pointer;
+}
+.nb-checkin-switch:hover {
+  color: var(--nb-ink);
+}
+
+/* A focus indicator of its own on every control, from the ink every look holds at 3:1 on its paper
+   (look/__tests__/tokens.test.ts): today's clay focus is a palette colour no look re-points. */
+.nb-reaches-which__button:focus-visible {
+  outline: 2px solid var(--nb-ink);
+  outline-offset: 2px;
+}
+.nb-reaches-date:focus-visible {
+  outline: 2px solid var(--nb-ink);
+  outline-offset: 2px;
+}
+.nb-checkin-write:focus-visible {
+  outline: 2px solid var(--nb-ink);
+  outline-offset: 2px;
+}
+.nb-checkin-keep:focus-visible {
+  outline: 2px solid var(--nb-ink);
+  outline-offset: 2px;
+}
+.nb-checkin-switch:focus-visible {
+  outline: 2px solid var(--nb-ink);
+  outline-offset: 2px;
+}
+
+/* Forced colours: the writing space drops its rules (they would cut through the words) and keeps its edge
+   and text in the system's; the bars would otherwise vanish, so they take the system's ink. */
+@media (forced-colors: active) {
+  .nb-checkin-write {
+    background-image: none;
+  }
+  .nb-reaches-bar {
+    border: 1px solid CanvasText;
+  }
+  .nb-reaches-bar__fill {
+    background-color: CanvasText;
+  }
+}

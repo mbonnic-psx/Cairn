@@ -273,3 +273,14 @@ Every product decision a `/cruise` run took, in order. A person overrides one by
 - **Confidence:** medium · **Would reverse if:** the owner, at the reveal demo, wants the writing space drawn as bare lines with no edge
 - **Written to:** `specs/004-notebook-landscape/spec.md` (Clarifications)
 - **Status:** standing
+
+## D25 — Is "How the day went" a small label in the typewriter face, or the writing's heading in the serif?
+- **Stage:** after-converge gaps · **Slice:** tonight-page · **When:** 2026-10-02T11:40:00Z · **Iteration:** 5
+- **Question:** "How the day went" is the label of the writing space, set in the serif at 20px on the page, as Current sets it. FR-014 and US3 scenario 3 put small labels in the typewriter face; D12 made a 14px label one.
+- **Options:** (a) keep the serif: it reads as the prompt that opens the journal page, at the size of a subheading, and Principle VI keeps the serif for reflective writing (recommended by the gaps review and the slice); (b) the typewriter face, like From and To
+- **Decision:** (a). It stays in the serif, as on the page today.
+- **Why:** It opens the writing, not a control's name: the person reads it as the question the evening asks, and FR-014 sets reflective writing in the serif. D12 was a small note beside a control; this is the page's prompt.
+- **Decided by:** host (stage recommendation)
+- **Confidence:** medium · **Would reverse if:** the owner, at the reveal demo, reads it as a small label and wants the typewriter face
+- **Written to:** `specs/004-notebook-landscape/slices/tonight-page/plan.md` (Open questions)
+- **Status:** standing
