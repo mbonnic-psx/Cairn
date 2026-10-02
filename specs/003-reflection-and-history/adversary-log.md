@@ -90,3 +90,16 @@ Held: edges half-open and exact; gaps clipped and cut at both edges, rounded up;
 | driven adapter or the provider types behind one | already covered | the range reads are unchanged since `history-by-site` (row above) |
 | authorisation decision (who can reach one that already exists) | not present | single local user; `Reads` (`tests/ipc_surface.rs`) |
 | concurrency, idempotency, ordering, retention, or time | widened | offsets in force per instant (`domain/patterns.rs` `by_hour`, `reflection/over_time.rs` `check_offsets`, `src/localDays.ts` `offsetChanges`) |
+
+Spawned: reaches by hour across a range · `drive-adversary` · host (Opus 5.5) · delegated, fresh context · manifest: `src-tauri/src/domain/patterns.rs`, `src-tauri/src/reflection/over_time.rs`, `src-tauri/src/ipc/state.rs`, `src-tauri/src/ipc/commands.rs`, `src-tauri/tests/patterns_by_hour.rs`, `offset_changes.rs`, `us2_by_hour.rs`, `us2_by_site.rs`, `patterns_at_scale.rs`, `range_allocation.rs`, `src/localDays.ts`, `src/ipc/reaches.ts`, `src/screens/Reaches.tsx`, `src/styles/tonight-page.css`, and their tests
+Omitted: authorisation · not present; driven adapter · already covered by the `history-by-site` row
+
+Findings (triaged by the host):
+
+| # | Severity | Triage | State | Finding |
+|---|---|---|---|---|
+| A1 | LOW | confirmed | open | tzdata has a 3-hour change (Antarctica/Casey 2010–11, 2018–19, 2020–21; Vostok 1994–95; Ust-Nera 1980–81), so `check_offsets`' "no more than 2 hours" seals ranges `check_range` places, By site included; the contract's premise ("the largest seasonal change any zone uses") is untrue |
+| A2 | LOW | confirmed | open | `offsetAt` uses `getTimezoneOffset()`, whole minutes in V8, while `Date`'s local fields carry seconds: before 1972 the hours can disagree with the Today log by up to 52 s at a boundary (B4) |
+| A3 | LOW | confirmed | open | A hostile caller may send a first offset up to 2 h *below* the implied one, offsets no zone has, or a staircase of changes, and every reach is bucketed up to 12 h off; counts are conserved. The screen never sends these |
+
+Held: every malformed offsets list (unsorted, duplicated, at `range_end`, empty, a wrong first instant, i64 extremes, days + 2 entries) refused with the one sentence, no panic; 4.4M entries checked in 40 ms; `by_hour` conserves every count; a reach at a change instant takes the new offset, as `Date` does; `offsetChanges` matches a 15-minute ground truth in all 419 zones, every two-year window 1900–today; 24 hours always, no ranking word; hours equal `Date.getHours()` for every whole-minute offset (1972 on).
