@@ -151,14 +151,14 @@ describe('notebook.css behaviour rules', () => {
   });
 });
 
-describe('every colour a screen draws as text, on the paper (FR-021, SC-003)', () => {
+describe.each(['morning', 'midday', 'night'] as const)('%s: every colour a screen draws as text, on the paper (FR-021, SC-003)', (look) => {
   const colourOf = (css: string) => {
     const out = new Map<string, string>();
     for (const m of css.matchAll(/--color-([a-z]+-\d+):\s*(#[0-9a-fA-F]{6})\s*;/g)) out.set(m[1]!, m[2]!);
     return out;
   };
   const base = colourOf(theme);
-  const lookBlock = notebook.match(/\[data-look="morning"\]\s*\{[^}]*\}/)![0];
+  const lookBlock = notebook.match(new RegExp(`\\[data-look="${look}"\\]\\s*\\{[^}]*\\}`))![0];
   const onPaper = new Map([...base, ...colourOf(lookBlock)]);
 
   // A text class is read when it stands alone: variants (disabled:, hover:) mark
@@ -177,7 +177,7 @@ describe('every colour a screen draws as text, on the paper (FR-021, SC-003)', (
   it.each([...used].sort())('text-%s meets 4.5:1 on the paper', (name) => {
     const colour = onPaper.get(name);
     expect(colour, `no colour for ${name}`).toBeDefined();
-    expect(contrastRatio(colour!, token('--nb-paper'))).toBeGreaterThanOrEqual(TEXT);
+    expect(contrastRatio(colour!, token('--nb-paper', look))).toBeGreaterThanOrEqual(TEXT);
   });
 
   it('keeps the status badges readable on their own tints', () => {
