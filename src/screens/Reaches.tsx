@@ -372,14 +372,21 @@ function OverTimeView({
                 {rows.map((row) => (
                   <li key={row.key} className="nb-reaches-line">
                     <span className="nb-reaches-site">{row.name}</span>
-                    <div aria-hidden="true" className="nb-reaches-bar">
-                      <div
-                        data-testid="bar"
-                        className="nb-reaches-bar__fill"
-                        style={{ width: `${Math.round((row.count / largest) * 100)}%` }}
-                      />
-                    </div>
-                    <span className="nb-reaches-count">{row.count}</span>
+                    {row.clause !== undefined && (
+                      <span className="nb-reaches-time">{row.clause}</span>
+                    )}
+                    {!row.absent && (
+                      <>
+                        <div aria-hidden="true" className="nb-reaches-bar">
+                          <div
+                            data-testid="bar"
+                            className="nb-reaches-bar__fill"
+                            style={{ width: `${Math.round((row.count / largest) * 100)}%` }}
+                          />
+                        </div>
+                        <span className="nb-reaches-count">{row.count}</span>
+                      </>
+                    )}
                   </li>
                 ))}
               </ul>
