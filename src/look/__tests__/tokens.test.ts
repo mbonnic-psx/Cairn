@@ -370,6 +370,37 @@ describe('night look (US2; FR-009, FR-021, FR-016, FR-033, D4)', () => {
   });
 });
 
+describe('text laid over the scene meets its floor against the sun or moon behind it (FR-021, SC-003)', () => {
+  // The disc sits behind text only where it shares a horizontal band with the
+  // greeting. No layout engine runs here, so the band is arithmetic from the
+  // tokens: the greeting's text (its time, then up to two lines of words) ends
+  // by GREETING_BOTTOM px from the top of the window, at the two sizes the
+  // window is proved at, and the disc's top edge is its place token of that
+  // height. A disc whose top is below that never sits behind the greeting.
+  const SIZES = [
+    { name: '1280x800', height: 800, greetingBottom: 280 },
+    { name: '800x600', height: 600, greetingBottom: 200 },
+  ];
+  const discTop = (look: LookName, height: number) => (parseFloat(blockOf(look).match(/--nb-sun-top:\s*([\d.]+)%/)![1]!) / 100) * height;
+  const looks: LookName[] = ['morning', 'midday', 'night'];
+
+  it.each(looks.flatMap((look) => SIZES.map((size) => [look, size] as const)))(
+    '%s at %o: every text token holds its floor on the disc, wherever the disc can sit behind the greeting',
+    (look, size) => {
+      if (discTop(look, size.height) >= size.greetingBottom) return;
+      const sun = token('--nb-sun', look);
+      expect(contrastRatio(token('--nb-greeting-ink', look), sun), 'greeting ink').toBeGreaterThanOrEqual(LARGE);
+      for (const name of ['--nb-greeting-body', '--nb-greeting-quiet']) {
+        expect(contrastRatio(token(name, look), sun), name).toBeGreaterThanOrEqual(TEXT);
+      }
+    },
+  );
+
+  it('still has a look whose disc sits behind the greeting, so the check is live', () => {
+    expect(looks.some((look) => SIZES.some((size) => discTop(look, size.height) < size.greetingBottom))).toBe(true);
+  });
+});
+
 describe('the mark on every look\'s own sky (FR-033, D4)', () => {
   const looks: LookName[] = ['morning', 'midday', 'night'];
   it.each(looks.flatMap((look) => SKIES.map((sky) => [look, sky] as const)))(

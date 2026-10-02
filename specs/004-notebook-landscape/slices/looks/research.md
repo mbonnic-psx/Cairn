@@ -26,7 +26,9 @@ values, by token, with `frame`'s morning token in the same role:
 
 **Departures made** (token, look: old → new, the pair it fixed):
 
-- Midday: none. `#6b5440` on `#ecca8a` measures 4.51:1, over the floor, so the canvas values stand. The canvas shows
+- Midday, `--nb-greeting-quiet`: `#6b5440` -> `#66503d` (lightness only, hue kept; the sun stays where the canvas
+  puts it). The pair it fixed: the greeting's weekday and time on the sun disc `#f5c374`, 4.36:1 -> 4.66:1. Against
+  the sky stops it only rises (`#ecca8a`: 4.51 -> 4.81). The rest of midday's canvas values stand. The canvas shows
   four tab colours and no green; midday's `trail` tab keeps morning's `#b9c4a7`, and the sun sits at 11.7% / 7.5%
   (150 / 60 px of 1280 x 800).
 - Night, `--nb-greeting-quiet`: `#c9b79c` -> `#d7c9b5` (lightness only, hue kept). The pair it fixed: quiet greeting
