@@ -70,9 +70,11 @@ const sites = [
 
 const range = (over: Partial<Patterns>): Patterns => ({
   by_site: sites,
+  by_hour: [],
   gaps: [],
   coverage_note: null,
   estimates_excluded: 0,
+  dst_approximate: false,
   sealed: null,
   ...over,
 });

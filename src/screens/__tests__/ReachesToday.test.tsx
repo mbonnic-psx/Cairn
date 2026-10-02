@@ -21,9 +21,11 @@ const quietDay: TodaysReaches = {
 };
 const quietRange: Patterns = {
   by_site: [],
+  by_hour: [],
   gaps: [],
   coverage_note: null,
   estimates_excluded: 0,
+  dst_approximate: false,
   sealed: null,
 };
 

@@ -16,8 +16,10 @@ import { useNotebookPage } from '../shell/notebookPage';
 import {
   addDays,
   dayBounds,
+  hourInWords,
   isLocalDate,
   localToday,
+  offsetChanges,
   rangeBounds,
   rangeInWords,
 } from '../localDays';
@@ -25,6 +27,7 @@ import {
   largestCount,
   listTodaysReaches,
   summarizeReaches,
+  type OffsetChange,
   type Patterns,
   type TodaysReaches,
 } from '../ipc/reaches';
@@ -37,14 +40,15 @@ export interface ReachesReader {
     lastDay: string,
     rangeStart: number,
     rangeEnd: number,
+    offsets: OffsetChange[],
   ) => Promise<Patterns>;
 }
 
 // Wrappers, not references: the real functions are looked up when called, not when the screen loads.
 const realReader: ReachesReader = {
   listTodaysReaches: (dayStart, dayEnd) => listTodaysReaches(dayStart, dayEnd),
-  summarizeReaches: (firstDay, lastDay, rangeStart, rangeEnd) =>
-    summarizeReaches(firstDay, lastDay, rangeStart, rangeEnd),
+  summarizeReaches: (firstDay, lastDay, rangeStart, rangeEnd, offsets) =>
+    summarizeReaches(firstDay, lastDay, rangeStart, rangeEnd, offsets),
 };
 const realNow = () => new Date();
 
@@ -61,10 +65,41 @@ const COUNTED_ONLY_WHILE_RUNNING =
   'Cairn counts only while it is running. This is what it saw over these days.';
 const COULD_NOT_READ =
   'Cairn could not read your history just now. Protection is unaffected.';
-const ESTIMATE_ONE =
-  'Your own estimate for 1 day is not counted here, because an estimate has no site.';
-const estimatesMany = (days: number) =>
-  `Your own estimates for ${days} days are not counted here, because an estimate has no site.`;
+const SEEN_BY = 'Seen by';
+const BY_SITE = 'By site';
+const BY_HOUR = 'By hour';
+/** What an estimate has none of, in the view it is left out of. */
+const estimatesSentence = (days: number, view: Seen) =>
+  days === 1
+    ? `Your own estimate for 1 day is not counted here, because an estimate has no ${view}.`
+    : `Your own estimates for ${days} days are not counted here, because an estimate has no ${view}.`;
+
+/** The two ways to see a range: by the sites reached, or by the hours of the day. */
+type Seen = 'site' | 'hour';
+
+/** One line of a range's list: a site or an hour, with its count. */
+interface Row {
+  key: string;
+  name: string;
+  count: number;
+}
+
+/** The lines of the range in the view chosen: sites most first, or all 24 hours from midnight. */
+const rowsOf = (answer: Patterns, seen: Seen): Row[] =>
+  seen === 'site'
+    ? answer.by_site.map((site) => ({
+        key: site.domain,
+        name: site.domain,
+        count: site.count,
+      }))
+    : answer.by_hour.map((one) => ({
+        key: String(one.hour),
+        name: hourInWords(one.hour),
+        count: one.count,
+      }));
+
+/** Whether the view has nothing to count: no sites, or no reach in any hour. */
+const isQuiet = (rows: Row[]) => rows.every((row) => row.count === 0);
 
 /** Where a view sits: today's card, or the two pages of a spread (the right one ruled and empty for now). */
 function Frame({ onPage, children }: { onPage: boolean; children: ReactNode }) {
@@ -199,7 +234,9 @@ function TodayView({
         </h2>
         <p
           className={
-            onPage ? 'nb-reaches-sentence' : 'reflective mt-4 max-w-prose text-lg text-ink-700'
+            onPage
+              ? 'nb-reaches-sentence'
+              : 'reflective mt-4 max-w-prose text-lg text-ink-700'
           }
         >
           {day.sealed}
@@ -282,13 +319,15 @@ function OverTimeView({
   const [firstDay, setFirstDay] = useState(() => addDays(todayDay, -27));
   const [lastDay, setLastDay] = useState(todayDay);
   const [answer, setAnswer] = useState<Answer>('looking');
+  // Which breakdown of the one answer: forgotten with the range on leaving the view.
+  const [seen, setSeen] = useState<Seen>('site');
 
   useEffect(() => {
     let current = true;
     const { start, end } = rangeBounds(firstDay, lastDay);
     setAnswer('looking');
     read
-      .summarizeReaches(firstDay, lastDay, start, end)
+      .summarizeReaches(firstDay, lastDay, start, end, offsetChanges(firstDay, lastDay))
       .then((patterns) => current && setAnswer(patterns))
       .catch(() => current && setAnswer('unreadable'));
     return () => {
@@ -316,6 +355,8 @@ function OverTimeView({
     />
   );
 
+  const choice = <SeenByChoice onPage={onPage} seen={seen} onChoose={setSeen} />;
+
   if (onPage) {
     const sentence =
       answer === 'looking'
@@ -325,13 +366,14 @@ function OverTimeView({
           : answer.sealed;
     // The answer to draw as a list: none while looking, unreadable or sealed.
     const list = typeof answer === 'string' || answer.sealed ? null : answer;
-    const sites = list?.by_site ?? [];
-    const largest = largestCount(sites);
+    const rows = list ? rowsOf(list, seen) : [];
+    const largest = largestCount(rows);
     return (
       <>
         <div className="nb-page">
           <h2 className="nb-reaches-title">{rangeInWords(firstDay, lastDay)}</h2>
           {boxes}
+          {choice}
           {!list ? (
             <p className="nb-reaches-sentence">{sentence}</p>
           ) : (
@@ -341,9 +383,7 @@ function OverTimeView({
               )}
               {list.estimates_excluded > 0 && (
                 <p className="nb-reaches-aside">
-                  {list.estimates_excluded === 1
-                    ? ESTIMATE_ONE
-                    : estimatesMany(list.estimates_excluded)}
+                  {estimatesSentence(list.estimates_excluded, seen)}
                 </p>
               )}
               <p className="nb-reaches-note">{COUNTED_ONLY_WHILE_RUNNING}</p>
@@ -351,24 +391,27 @@ function OverTimeView({
           )}
         </div>
         <div className="nb-page nb-page--ruled">
-          {!list ? null : sites.length === 0 ? (
-            <p className="nb-reaches-empty">{NOTHING_THESE_DAYS}</p>
-          ) : (
-            <ul className="nb-reaches-log">
-              {sites.map((site) => (
-                <li key={site.domain} className="nb-reaches-line">
-                  <span className="nb-reaches-site">{site.domain}</span>
-                  <div aria-hidden="true" className="nb-reaches-bar">
-                    <div
-                      data-testid="bar"
-                      className="nb-reaches-bar__fill"
-                      style={{ width: `${Math.round((site.count / largest) * 100)}%` }}
-                    />
-                  </div>
-                  <span className="nb-reaches-count">{site.count}</span>
-                </li>
-              ))}
-            </ul>
+          {!list ? null : (
+            <>
+              {isQuiet(rows) && <p className="nb-reaches-empty">{NOTHING_THESE_DAYS}</p>}
+              {rows.length > 0 && (seen === 'hour' || !isQuiet(rows)) && (
+                <ul className="nb-reaches-log">
+                  {rows.map((row) => (
+                    <li key={row.key} className="nb-reaches-line">
+                      <span className="nb-reaches-site">{row.name}</span>
+                      <div aria-hidden="true" className="nb-reaches-bar">
+                        <div
+                          data-testid="bar"
+                          className="nb-reaches-bar__fill"
+                          style={{ width: `${Math.round((row.count / largest) * 100)}%` }}
+                        />
+                      </div>
+                      <span className="nb-reaches-count">{row.count}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </>
           )}
         </div>
       </>
@@ -383,8 +426,44 @@ function OverTimeView({
 
       {boxes}
 
-      <RangeBody answer={answer} />
+      {choice}
+
+      <RangeBody answer={answer} seen={seen} />
     </Frame>
+  );
+}
+
+/** By site | By hour, under the date boxes in every state, so it never moves when an answer arrives. */
+function SeenByChoice({
+  onPage,
+  seen,
+  onChoose,
+}: {
+  onPage: boolean;
+  seen: Seen;
+  onChoose: (seen: Seen) => void;
+}) {
+  return (
+    <div
+      className={onPage ? 'nb-reaches-seen' : 'mt-4 flex gap-2'}
+      role="group"
+      aria-label={SEEN_BY}
+    >
+      <ViewButton
+        onPage={onPage}
+        current={seen === 'site'}
+        onClick={() => onChoose('site')}
+      >
+        {BY_SITE}
+      </ViewButton>
+      <ViewButton
+        onPage={onPage}
+        current={seen === 'hour'}
+        onClick={() => onChoose('hour')}
+      >
+        {BY_HOUR}
+      </ViewButton>
+    </div>
   );
 }
 
@@ -438,7 +517,7 @@ function DateBoxes({
   );
 }
 
-function RangeBody({ answer }: { answer: Answer }) {
+function RangeBody({ answer, seen }: { answer: Answer; seen: Seen }) {
   if (answer === 'looking') {
     return <p className="mt-8 text-ink-400">{LOOKING}</p>;
   }
@@ -453,7 +532,8 @@ function RangeBody({ answer }: { answer: Answer }) {
     );
   }
 
-  const largest = largestCount(answer.by_site);
+  const rows = rowsOf(answer, seen);
+  const largest = largestCount(rows);
 
   return (
     <>
@@ -462,29 +542,28 @@ function RangeBody({ answer }: { answer: Answer }) {
       )}
       {answer.estimates_excluded > 0 && (
         <p className="reflective mt-4 max-w-prose text-ink-500">
-          {answer.estimates_excluded === 1
-            ? ESTIMATE_ONE
-            : estimatesMany(answer.estimates_excluded)}
+          {estimatesSentence(answer.estimates_excluded, seen)}
         </p>
       )}
 
-      {answer.by_site.length === 0 ? (
+      {isQuiet(rows) && (
         <p className="reflective mt-8 max-w-prose text-lg text-ink-700">
           {NOTHING_THESE_DAYS}
         </p>
-      ) : (
+      )}
+      {rows.length > 0 && (seen === 'hour' || !isQuiet(rows)) && (
         <ul className="mt-8 divide-y divide-sand-200">
-          {answer.by_site.map((site) => (
-            <li key={site.domain} className="py-3">
+          {rows.map((row) => (
+            <li key={row.key} className="py-3">
               <div className="flex items-baseline justify-between">
-                <span className="text-ink-900">{site.domain}</span>
-                <span className="text-sm text-ink-500">{site.count}</span>
+                <span className="text-ink-900">{row.name}</span>
+                <span className="text-sm text-ink-500">{row.count}</span>
               </div>
               <div aria-hidden="true" className="mt-2 h-1.5 rounded-full bg-sand-100">
                 <div
                   data-testid="bar"
                   className="h-1.5 rounded-full bg-moss-500"
-                  style={{ width: `${Math.round((site.count / largest) * 100)}%` }}
+                  style={{ width: `${Math.round((row.count / largest) * 100)}%` }}
                 />
               </div>
             </li>

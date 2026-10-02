@@ -64,6 +64,30 @@ These are the contract; the implementation is free to change under them.
    than an empty list, so the interface renders a quiet range rather than a missing one
    (FR-024).
 
+#### Amended in slice `history-by-hour` (2026-10-02)
+
+Gaps review B4 decides a reach counts in the hour the computer's clock showed at its own instant, so one offset
+for a range is no longer the rule for hours. Added beside `summarize`, which is unchanged:
+
+```rust
+pub struct OffsetChange { pub from: i64, pub offset_seconds: i32 }
+
+pub fn by_hour(
+    reaches: &[Reach],
+    first_offset: i32,          // in force from `from`; supplied by the interface
+    changes: &[OffsetChange],   // each in force from its `from` on; strictly increasing, inside `[from, to)`
+    from: i64,
+    to: i64,
+) -> [u32; 24]
+```
+
+Each reach in `[from, to)` is bucketed by the offset of the last change at or before its `at` (or `first_offset`
+before the first change), with the hour rule above. Properties 1, 2, 4, 5 and 6 hold for it as they do for
+`summarize`. With no changes it equals `summarize(...).by_hour` for `first_offset`. A reach's hour depends only on
+the offset in force at its instant. Checking that the changes increase is the caller's job
+(`reflection::over_time::check_offsets`), not this module's. `crosses_offset_change` stays, but it no longer feeds
+`dst_approximate` (`ui-ipc.md`, amended the same day). See `slices/history-by-hour/plan.md`, *The hour*.
+
 ### Deliberately not in this module
 
 No formatting, no labels, no words. `by_weekday` returns `0–6`, not "Monday". The pure layer

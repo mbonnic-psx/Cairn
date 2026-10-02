@@ -11,6 +11,10 @@
 //! nothing here should be read as having answered it. What it does catch is an
 //! accidentally quadratic path, where two years take minutes.
 //!
+//! The hours (slice `history-by-hour`, scenario 15) are counted in the same
+//! pass, against London's five offsets for the two years, and the bound is
+//! unchanged.
+//!
 //! The history is written before the clock starts, through the store's own
 //! connection layer, and the bound is 1 000 ms, as `at_scale.rs` bounds its
 //! own cost. In a debug build the bound is the same as in release.
@@ -24,6 +28,7 @@ use cairn::domain::dates::LocalDate;
 use cairn::domain::normalize::ReservedNames;
 use cairn::enforcement::seed::CategoryStore;
 use cairn::helper::NoHelper;
+use cairn::ipc::state::OffsetChange;
 use cairn::ipc::AppState;
 use cairn::platform::hosts::SystemHosts;
 use cairn::services::{
@@ -35,6 +40,7 @@ use cairn::store::history::{History, HISTORY_FILE};
 use cairn::store::key::HistoryKey;
 
 const A_KEY: [u8; 32] = [7u8; 32];
+const HOUR: i64 = 3_600;
 const DAY: i64 = 86_400;
 const DAYS: i64 = 730;
 const REACHES_A_DAY: i64 = 50;
@@ -105,20 +111,30 @@ fn seed(data: &Path, first_midnight: i64) {
 }
 
 #[test]
-fn two_years_by_site_are_read_quickly() {
+fn two_years_by_site_and_hour_are_read_quickly() {
     let directory = tempfile::tempdir().unwrap();
     let data = directory.path().join("cairn-data");
     std::fs::create_dir_all(&data).unwrap();
 
     let first_day = date("2024-10-01");
     let last_day = date("2026-09-30");
-    let range_start = first_day.days_since_epoch() * DAY;
+    // London's local midnights: both ends are in summer time, so the range is
+    // exactly 730 days of seconds, with four clock changes inside it.
+    let range_start = first_day.days_since_epoch() * DAY - HOUR;
     let range_end = range_start + DAYS * DAY;
     assert_eq!(
         range_end,
-        date("2026-10-01").days_since_epoch() * DAY,
+        date("2026-10-01").days_since_epoch() * DAY - HOUR,
         "two years, from the first midnight to the one after the last"
     );
+    let london = [
+        (range_start, HOUR),
+        (1_729_990_800, 0),
+        (1_743_296_400, HOUR),
+        (1_761_440_400, 0),
+        (1_774_746_000, HOUR),
+    ]
+    .map(|(from, offset)| OffsetChange { from, offset });
     seed(&data, range_start);
 
     let shipped = Path::new(env!("CARGO_MANIFEST_DIR")).join("resources/categories");
@@ -138,7 +154,8 @@ fn two_years_by_site_are_read_quickly() {
     };
 
     let started = Instant::now();
-    let patterns = state.summarize_reaches(first_day, last_day, range_start, range_end);
+    let patterns =
+        state.summarize_reaches(first_day, last_day, range_start, range_end, &london);
     let elapsed = started.elapsed();
 
     assert_eq!(patterns.sealed, None);
@@ -149,8 +166,15 @@ fn two_years_by_site_are_read_quickly() {
         "every reach in the range is in a count"
     );
     assert_eq!(patterns.by_site.len() as i64, SITES);
+    assert_eq!(patterns.by_hour.len(), 24);
+    let in_hours: u32 = patterns.by_hour.iter().map(|hour| hour.count).sum();
+    assert_eq!(
+        i64::from(in_hours),
+        DAYS * REACHES_A_DAY,
+        "every reach in the range is in an hour"
+    );
     assert!(
         elapsed.as_millis() < 1_000,
-        "two years by site took {elapsed:?} - something is quadratic"
+        "two years by site and hour took {elapsed:?} - something is quadratic"
     );
 }

@@ -119,8 +119,10 @@ the plain sentence in `sealed` and returning nothing else, unless all of these h
   that date's UTC midnight and no later than 12 hours after it (the rule `check_bounds` holds
   for a day);
 - `range_end` could begin the day after `last_day`, by the same rule;
-- the offsets at the two ends differ by no more than 2 hours, the largest seasonal clock change
-  any zone uses;
+- the offsets at the two ends differ by no more than 3 hours, the largest clock change in tzdata
+  (amended 2026-10-02, adversary A1: the premise was "2 hours, the largest seasonal change any zone
+  uses", and it was untrue. Antarctica/Casey went from +11:00 to +08:00 in 2018, and Vostok and
+  Ust-Nera have had 3-hour changes. Every 2-hour bound below is now 3 hours);
 - `range_start` is not after the present. A range that has not begun holds nothing Cairn could
   have seen, and an empty answer would read as a quiet range.
 
@@ -156,6 +158,62 @@ an absent field as not yet known.
 
 Classified `Effect::Reads`. The frontend wrapper is `summarizeReaches` in `src/ipc/reaches.ts`,
 and the reaches screen is its only caller (spec, gaps review H1).
+
+#### Amended in slice `history-by-hour` (2026-10-02)
+
+**The command takes the offsets in force across the range.** This adds one parameter to the signature of
+2026-10-01. Gaps review B4 decides a reach counts in the hour the computer's clock showed at its own instant, and
+the two ends of a range cannot say what happened between them. A range from January to December has the same
+offset at both ends and a summer inside it.
+
+```
+summarize_reaches(first_day, last_day, range_start, range_end, offsets) -> Patterns
+
+offsets: [{ from, offset }]   // from: epoch seconds; offset: seconds east of UTC, whole seconds
+```
+
+`offsets[0]` is `{ from: range_start, offset: the offset in force there }`. Each later entry is an instant inside
+the range at which the computer's clock changes its offset, and the offset from then on. The interface computes the
+list with `Date`, as it computes the bounds (`src/localDays.ts`, `offsetChanges`). The core refuses the range, with
+the same sealed sentence as for its bounds and nothing else returned, unless:
+
+- the list is not empty and has no more entries than the range has days, plus one;
+- the first `from` is `range_start`, and the first offset is the one in force there: the one `range_start` implies
+  for `first_day`, or up to 3 hours above it (amended 2026-10-02, convergence K23: where a zone puts its clocks
+  forward at 00:00, `range_start` is 01:00 at the new offset, so it implies the old one while the offset in force
+  is the new one, one clock change above. Narrowed 2026-10-02, adversary A3: the rule was "within 3 hours" in
+  either direction, and a first offset below the implied one is never the computer's, since a clock that skips
+  a midnight only puts the offset up. It is refused. What the core does not check, because the webview is the
+  clock's authority and the screen never sends it: an offset no zone has, and a staircase of changes that each
+  pass the neighbour rule. Neither is trivially false in every zone, and a rule for them would be a guess about
+  zones the core does not know);
+- the `from`s strictly increase and are all before `range_end`;
+- every offset lies between −12 h and +14 h;
+- neighbouring offsets differ, by no more than 3 hours;
+- the last offset is within 3 hours of the one `range_end` implies for the day after `last_day`.
+
+**Fields.** Slice `history-by-hour` adds two, so the answer holds seven keys:
+
+```
+  by_hour:          [{ hour, count }],  // exactly 24, hour 0–23 ascending, zeros included; [] when sealed
+  dst_approximate:  bool,               // false: every hour is bucketed by the offset in force at its instant
+```
+
+- `by_hour` is built from reaches alone (FR-023). An estimate has no hour. `estimates_excluded` is the same count
+  by site states. A quiet range is 24 zeros (FR-024). A sealed answer is `[]`, never 24 zeros, which would read as a
+  quiet range.
+- **`dst_approximate` changes meaning.** It was R4's flag for one offset applied across a change. Under this
+  signature no hour is approximate, so it is always `false`. It stays on the wire, rather than being removed, so
+  that it says what B4 says ("`dst_approximate` stays false whenever the hours are exact"). The interface does not
+  read it, and T046's notice is not built. `domain::patterns::crosses_offset_change` no longer feeds it.
+- **A time-zone change.** The core keeps no zone. The hour follows the offsets the interface sends, so after the
+  computer moves to another zone, every reach is read in the zone it has now, as the *Today* log prints it. Whether
+  a reach should instead keep the hour from before the move is the owner's question
+  (`slices/history-by-hour/plan.md`, Q1). Answering yes would need more than domain and timestamp to be recorded
+  (Principle II).
+
+`by_weekday` (`history-by-weekday`) and `movement` (`history-movement`) are still absent. Each will take the same
+`offsets` when it is built.
 
 ### `get_quote(day) -> string | null`
 

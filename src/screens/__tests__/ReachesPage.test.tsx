@@ -10,7 +10,7 @@ import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { rangeInWords } from '../../localDays';
-import type { Patterns } from '../../ipc/reaches';
+import type { OffsetChange, Patterns } from '../../ipc/reaches';
 import type { NotebookLook } from '../../look/look';
 import { NotebookShell } from '../../shell/NotebookShell';
 import { Reaches } from '../Reaches';
@@ -314,9 +314,15 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (name) 
       const reader = overTimeReader(overTimeCases[answer]!);
       const read = {
         ...reader,
-        summarizeReaches: (a: string, b: string, c: number, d: number) => {
+        summarizeReaches: (
+          a: string,
+          b: string,
+          c: number,
+          d: number,
+          e: OffsetChange[],
+        ) => {
           extra?.calls?.push([a, b]);
-          return reader.summarizeReaches(a, b, c, d);
+          return reader.summarizeReaches(a, b, c, d, e);
         },
       };
       const view = onPage(<Reaches today={todayCases.sealed} read={read} now={now} />);
@@ -338,8 +344,9 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (name) 
         const { left } = await overTime(state);
         const sentence = sentenceFor[state]!;
         await waitFor(() => expect(left!.lastElementChild).toHaveTextContent(sentence));
-        const [heading, range, last] = Array.from(left!.children) as HTMLElement[];
-        expect(left!.children).toHaveLength(3);
+        const [heading, range, seen, last] = Array.from(left!.children) as HTMLElement[];
+        expect(left!.children).toHaveLength(4);
+        expect(seen).toHaveAttribute('aria-label', 'Seen by');
         expect(heading!.tagName).toBe('H2');
         expect(heading).toHaveTextContent(RANGE);
         expect(within(range!).getByLabelText('From')).toBeInTheDocument();
@@ -471,9 +478,12 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (name) 
       'left page: range, From and To, then the notes, the closing sentence last: %s',
       async (state, notes) => {
         const { left } = await listed(overTimeCases[state] as Patterns);
-        const [heading, range, ...rest] = Array.from(left.children) as HTMLElement[];
+        const [heading, range, seen, ...rest] = Array.from(
+          left.children,
+        ) as HTMLElement[];
         expect(heading).toHaveTextContent(RANGE);
         expect(range).toHaveClass('nb-reaches-range');
+        expect(seen).toHaveAttribute('aria-label', 'Seen by');
         expect(rest.map((el) => el.textContent)).toEqual(notes);
         expect(rest[rest.length - 1]).toHaveClass('nb-reaches-note');
       },
@@ -635,9 +645,12 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (name) 
       'left page: range, From and To, the notes, the closing sentence last: %s',
       async (state, notes) => {
         const { left } = await empty(state);
-        const [heading, range, ...rest] = Array.from(left.children) as HTMLElement[];
+        const [heading, range, seen, ...rest] = Array.from(
+          left.children,
+        ) as HTMLElement[];
         expect(heading).toHaveTextContent(RANGE);
         expect(range).toHaveClass('nb-reaches-range');
+        expect(seen).toHaveAttribute('aria-label', 'Seen by');
         expect(rest.map((el) => el.textContent)).toEqual(notes);
         expect(rest[rest.length - 1]).toHaveClass('nb-reaches-note');
       },

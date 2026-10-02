@@ -78,7 +78,7 @@ fn a_range_of_thousands_of_years_holds_nothing_per_day() {
 
     let before = HELD.load(Ordering::SeqCst);
     PEAK.store(before, Ordering::SeqCst);
-    let range = assemble(&history, first, last, start, end).unwrap();
+    let range = assemble(&history, first, last, start, end, 0, &[]).unwrap();
     let extra = PEAK.load(Ordering::SeqCst) - before;
 
     assert_eq!(range.by_site, vec![("example.com".to_string(), 1)]);

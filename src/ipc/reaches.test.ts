@@ -49,16 +49,24 @@ describe('the reaches wrappers', () => {
   });
 
   it('asks for the range by its dates and bounds and returns what the core says', async () => {
-    await expect(summarizeReaches('2026-09-03', '2026-09-30', 100, 200)).resolves.toEqual(
-      {
-        reaches: [],
-      },
-    );
+    const offsets = [
+      { from: 100, offset: 3600 },
+      { from: 150, offset: 0 },
+    ];
+    await expect(
+      summarizeReaches('2026-09-03', '2026-09-30', 100, 200, offsets),
+    ).resolves.toEqual({
+      reaches: [],
+    });
     expect(invoke).toHaveBeenCalledWith('summarize_reaches', {
       firstDay: '2026-09-03',
       lastDay: '2026-09-30',
       rangeStart: 100,
       rangeEnd: 200,
+      offsets: [
+        { from: 100, offset: 3600 },
+        { from: 150, offset: 0 },
+      ],
     });
   });
 });

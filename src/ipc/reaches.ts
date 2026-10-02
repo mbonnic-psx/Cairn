@@ -1,5 +1,5 @@
 /**
- * Today's reaches, and a range of days by site.
+ * Today's reaches, and a range of days by site and by hour.
  *
  * In a file of its own so the restriction can be stated where it is enforced:
  * **the Reaches screen is the only thing that may import this** (FR-030a). An
@@ -41,19 +41,38 @@ export interface SiteCount {
   count: number;
 }
 
+export interface HourCount {
+  /** 0 to 23, by the computer's clock at the reach's own instant. */
+  hour: number;
+  count: number;
+}
+
+/** The offset the computer's clock takes from `from` on: epoch seconds, and whole seconds east of UTC. */
+export interface OffsetChange {
+  from: number;
+  offset: number;
+}
+
 /**
- * A range of days, by site. Only what Cairn can state truthfully is here:
- * by hour, by day of week and movement join it when a slice computes them.
+ * A range of days, by site and by hour. Only what Cairn can state truthfully is here:
+ * by day of week and movement join it when a slice computes them.
  */
 export interface Patterns {
   /** Most first; equal counts by domain name. */
   by_site: SiteCount[];
+  /** Exactly 24, hour 0 to 23 ascending, zeros included; empty only when `sealed`. */
+  by_hour: HourCount[];
   /** Each cut to the part inside the range. */
   gaps: Gap[];
   /** The gaps in one sentence, about the range. */
   coverage_note: string | null;
-  /** How many days in the range hold the person's own estimate, which has no site. */
+  /** How many days in the range hold the person's own estimate, which has no site and no hour. */
   estimates_excluded: number;
+  /**
+   * Always false: every hour is counted by the offset in force at its instant, so none is
+   * approximate. It is on the wire to say so. The screen does not read it.
+   */
+  dst_approximate: boolean;
   /** Present when the history could not be read, or the range was not one Cairn could place. */
   sealed: string | null;
 }
@@ -61,22 +80,25 @@ export interface Patterns {
 /**
  * `firstDay` and `lastDay` are local dates (`YYYY-MM-DD`); `rangeStart` is the
  * local midnight that begins the first, `rangeEnd` the local midnight after the
- * last, in epoch seconds. Returns what the command returns: a thrown error is
- * the screen's to turn into a sentence of its own.
+ * last, in epoch seconds. `offsets` are the offsets the computer's clock has across
+ * the range (`offsetChanges` in `localDays.ts`). Returns what the command returns: a
+ * thrown error is the screen's to turn into a sentence of its own.
  */
 export const summarizeReaches = (
   firstDay: string,
   lastDay: string,
   rangeStart: number,
   rangeEnd: number,
+  offsets: OffsetChange[],
 ) =>
   invoke<Patterns>('summarize_reaches', {
     firstDay,
     lastDay,
     rangeStart,
     rangeEnd,
+    offsets,
   });
 
-/** The largest count among the sites, never less than 1: what each bar is a share of. */
-export const largestCount = (sites: SiteCount[]): number =>
-  sites.reduce((largest, site) => Math.max(largest, site.count), 1);
+/** The largest count among the sites or hours, never less than 1: what each bar is a share of. */
+export const largestCount = <T extends { count: number }>(counts: T[]): number =>
+  counts.reduce((largest, one) => Math.max(largest, one.count), 1);
