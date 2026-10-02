@@ -178,10 +178,15 @@ list with `Date`, as it computes the bounds (`src/localDays.ts`, `offsetChanges`
 the same sealed sentence as for its bounds and nothing else returned, unless:
 
 - the list is not empty and has no more entries than the range has days, plus one;
-- the first `from` is `range_start`, and the first offset is the one in force there, within 3 hours of the one
-  `range_start` implies for `first_day` (amended 2026-10-02, convergence K23: where a zone puts its clocks forward
-  at 00:00, `range_start` is 01:00 at the new offset, so it implies the old one while the offset in force is the
-  new one; the two are one clock change apart, and no further);
+- the first `from` is `range_start`, and the first offset is the one in force there: the one `range_start` implies
+  for `first_day`, or up to 3 hours above it (amended 2026-10-02, convergence K23: where a zone puts its clocks
+  forward at 00:00, `range_start` is 01:00 at the new offset, so it implies the old one while the offset in force
+  is the new one, one clock change above. Narrowed 2026-10-02, adversary A3: the rule was "within 3 hours" in
+  either direction, and a first offset below the implied one is never the computer's, since a clock that skips
+  a midnight only puts the offset up. It is refused. What the core does not check, because the webview is the
+  clock's authority and the screen never sends it: an offset no zone has, and a staircase of changes that each
+  pass the neighbour rule. Neither is trivially false in every zone, and a rule for them would be a guess about
+  zones the core does not know);
 - the `from`s strictly increase and are all before `range_end`;
 - every offset lies between −12 h and +14 h;
 - neighbouring offsets differ, by no more than 3 hours;

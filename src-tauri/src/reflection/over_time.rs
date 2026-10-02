@@ -130,9 +130,9 @@ const HIGHEST_OFFSET: i64 = 14 * 3600;
 /// - the list is not empty and has no more entries than the range has days,
 ///   plus one;
 /// - the first begins at `range_start`, with the offset in force there, which
-///   is within a clock change of the one `range_start` implies for
-///   `first_day` (a clock that skips its first midnight begins the day at the
-///   new offset);
+///   is the one `range_start` implies for `first_day` or up to a clock change
+///   above it (a clock that skips its first midnight begins the day at the new,
+///   higher offset; none puts it lower);
 /// - the instants strictly increase and all come before `range_end`;
 /// - every offset lies between -12 h and +14 h;
 /// - neighbouring offsets differ, by no more than a clock change can;
@@ -172,6 +172,13 @@ fn within_a_clock_change(one: i64, other: i64) -> bool {
     })
 }
 
+/// `offset` is `implied` or up to a clock change above it, and not below.
+fn at_or_up_to_a_clock_change_above(offset: i64, implied: i64) -> bool {
+    offset
+        .checked_sub(implied)
+        .is_some_and(|difference| (0..=LARGEST_CLOCK_CHANGE).contains(&difference))
+}
+
 fn offsets_in_force(
     first_day: LocalDate,
     last_day: LocalDate,
@@ -187,7 +194,10 @@ fn offsets_in_force(
     let (first, rest) = offsets.split_first()?;
     if offsets.len() > most
         || first.0 != range_start
-        || !within_a_clock_change(first.1, implied_offset(first_day, range_start)?)
+        || !at_or_up_to_a_clock_change_above(
+            first.1,
+            implied_offset(first_day, range_start)?,
+        )
     {
         return None;
     }

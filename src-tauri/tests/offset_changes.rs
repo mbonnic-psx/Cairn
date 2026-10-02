@@ -215,14 +215,17 @@ fn the_first_entry_begins_at_range_start_to_the_second() {
 }
 
 #[test]
-fn the_first_offset_is_within_a_clock_change_of_the_one_range_start_implies() {
+fn the_first_offset_is_the_one_range_start_implies_or_up_to_a_clock_change_above_it() {
     // Amended in K23: a clock that skips its first midnight begins the day an
-    // hour late, at the new offset, so the offset in force is one change from
-    // the implied one, and no further.
+    // hour late, at the new offset, so the offset in force is up to one change
+    // above the implied one. Amended in A3: never below it, for a clock that
+    // skips a midnight only ever puts the offset up.
     let start = FOUR_DAYS.start(3600);
     accepted(FOUR_DAYS.check(3600, 3600, &[(start, 3600)]));
-    accepted(FOUR_DAYS.check(3600, 3600, &[(start, 3600 - 3 * HOUR)]));
     accepted(FOUR_DAYS.check(3600, 3600, &[(start, 3600 + 3 * HOUR)]));
+    refused(FOUR_DAYS.check(3600, 3600, &[(start, 3600 - 1)]));
+    refused(FOUR_DAYS.check(3600, 3600, &[(start, 3600 - HOUR)]));
+    refused(FOUR_DAYS.check(3600, 3600, &[(start, 3600 - 3 * HOUR)]));
     refused(FOUR_DAYS.check(3600, 3600, &[(start, 3600 - 3 * HOUR - 1)]));
     refused(FOUR_DAYS.check(3600, 3600, &[(start, 3600 + 3 * HOUR + 1)]));
     refused(FOUR_DAYS.check(3600, 3600, &[(start, 3600 + 5 * HOUR)]));

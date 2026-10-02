@@ -773,21 +773,16 @@ mod with_history {
         assert_eq!(occupied(&new), [(1, 1)], "in hour 01, not 00");
 
         // Every first offset the core accepts here, each with its hour.
-        for (offset, hour) in [
-            (3_600, 23),
-            (7_200, 0),
-            (10_800, 1),
-            (14_400, 2),
-            (18_000, 3),
-        ] {
+        for (offset, hour) in [(7_200, 0), (10_800, 1), (14_400, 2), (18_000, 3)] {
             let patterns = ask(offset);
             assert_eq!(patterns.sealed, None, "{offset} is placed");
             assert_eq!(patterns.by_site.len(), 1);
             assert_eq!(occupied(&patterns), [(hour, 1)], "{offset}");
         }
 
-        // One more than a clock change from the implied one is sealed.
-        for offset in [-1, 18_001] {
+        // Below the implied one is sealed, as is more than a clock change above
+        // it. Cairo's implied offset is 7 200, so 3 600 (hour 23) is sealed (A3).
+        for offset in [7_199, 3_600, 0, 18_001] {
             let patterns = ask(offset);
             assert!(patterns.sealed.is_some(), "{offset} is sealed");
             assert!(patterns.by_hour.is_empty(), "never 24 zeros");
