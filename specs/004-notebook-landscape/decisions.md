@@ -317,3 +317,36 @@ Every product decision a `/cruise` run took, in order. A person overrides one by
 - **Confidence:** high · **Would reverse if:** the owner reads D23 as open and sealed days only
 - **Written to:** `specs/003-reflection-and-history/tasks.md` (T080)
 - **Status:** standing
+
+## D29 — What does SC-002's "search of the released interface" search?
+- **Stage:** slice gaps · **Slice:** loose-ends · **When:** 2026-10-02T12:22:00Z · **Iteration:** 7
+- **Question:** SC-002 says a search of the released interface finds no control, label or announcement for the look switch. Today only a comment and `import.meta.env.DEV` stand behind it; nothing searches what ships.
+- **Options:** a test that makes a production build of the interface itself and searches every file it emits for the switch's words, its choices as the switch names them and its accessible name (recommended); a new check script run by CI; leave it to the guard on `import.meta.env.DEV`
+- **Decision:** A test that builds the interface in production mode into a scratch directory and searches every emitted file. None of the switch's words, choices or accessible name may appear. The test proves it has teeth by finding them in a development build.
+- **Why:** A person using a released Cairn must never meet a testing control. A test lives in the tree the slice owns; a new CI check would change the gate, which no slice may do.
+- **Decided by:** host (stage recommendation)
+- **Confidence:** high · **Would reverse if:** a production build inside the test suite proves too slow for `npm test`, and the owner prefers a CI step
+- **Written to:** `specs/004-notebook-landscape/spec.md` (Clarifications)
+- **Status:** standing
+
+## D30 — How does a keyboard reach What is protected's left page?
+- **Stage:** slice gaps · **Slice:** loose-ends · **When:** 2026-10-02T12:22:00Z · **Iteration:** 7
+- **Question:** The left page of What is protected stays put while the list scrolls, and scrolls inside itself when it is long (`protection-page.css`, `.nb-trail-sticky`). With no control on it, a keyboard cannot scroll it in every webview.
+- **Options:** on the page only, make the left page a tab stop of its own, named, with the page area's focus ring (D19) (recommended); let it grow and drop its own scroll, which loses the sticky leaf D8 chose; leave it
+- **Decision:** On the page only, the left page is a tab stop with a name and the page area's focus ring, so the arrow keys scroll it. Current is unchanged.
+- **Why:** FR-022 and FR-025 promise every part of every page by keyboard. A person reading the note on taking things out must be able to reach all of it. This is the same answer D19 gave the page area.
+- **Decided by:** host (standing decision D19)
+- **Confidence:** high · **Would reverse if:** the owner, at the reveal demo, wants the left page to scroll with the list
+- **Written to:** `specs/004-notebook-landscape/spec.md` (Clarifications)
+- **Status:** standing
+
+## D31 — What pins "each platform's own window frame MUST be kept"?
+- **Stage:** slice gaps · **Slice:** loose-ends · **When:** 2026-10-02T12:22:00Z · **Iteration:** 7
+- **Question:** FR-007 keeps the platform's own frame. Nothing holds it: a later change could turn decorations off and draw a frame of Cairn's own.
+- **Options:** a test over the window configuration and the interface code: decorations not turned off, no title bar overlay, no transparent window, and no call that turns decorations off at run time (recommended); a Rust test over the same file; leave it
+- **Decision:** A test over `tauri.conf.json`'s windows and a search of the interface code for a run-time call that turns decorations off.
+- **Why:** The person's own close, minimise and move controls are where they expect them on their platform. One file says so, and a test over it is the cheapest pin.
+- **Decided by:** host (stage recommendation)
+- **Confidence:** high · **Would reverse if:** a later feature chooses a frame of Cairn's own and the owner accepts it
+- **Written to:** `specs/004-notebook-landscape/spec.md` (Clarifications)
+- **Status:** standing
