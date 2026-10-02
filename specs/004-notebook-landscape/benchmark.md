@@ -1,14 +1,16 @@
 # Benchmark — 004-notebook-landscape
 
-Drawn 2026-10-02T13:45:44Z at `ae01fc5` from 8 record(s) under `specs/004-notebook-landscape/` by `scripts/agents/benchmark.py overview`; `/benchmark` redraws it, and so does closing a slice. Regenerated whole, never edited: the records beside each slice are the source.
+Drawn 2026-10-02T17:09:31Z at `d90af2f` from 10 record(s) under `specs/004-notebook-landscape/` by `scripts/agents/benchmark.py overview`; `/benchmark` redraws it, and so does closing a slice. Regenerated whole, never edited: the records beside each slice are the source.
 
 ## Slices
 
-7 slice(s) recorded, 7h09m+ in all.
+9 slice(s) recorded, 8h44m+ in all.
 
 | slice | delegate/cycle | wall | in | out | models | sessions | converge | +tasks | gaps | mutation | adversary | demo | verify✗ | rework | tasks | files | ±lines |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| (feature) | — | 3m31s | 1.1M | 4.6k | claude-opus-5-5 | 1 | 0 | 0 | 5/0 | — | 0 | — | 0 | 0 | — | — | — |
+| (feature) | — | 11m53s | 7.9M | 40.9k | claude-opus-5-5, claude-sonnet-5-5 | 2 | 0 | 0 | 5/0 | — | 0 | — | 0 | 0 | — | — | — |
+| board-scale | story/rule, task/rule | 53m54s+ | 34.9M (+4 unread) | 39.4k | claude-opus-5-5, claude-sonnet-5-5 | 1 | 1 | 3 | 2/3 | n/a (no mutable production code changed) | 0 | accepted | 1 | 0 | 15 | 94 | +2723/-404 |
+| fold-and-width | story/rule | 32m02s+ | 19.1M (+2 unread) | 42.6k | claude-opus-5-5, claude-sonnet-5-5 | 1 | 2 | 8 | 0/4 | 76.92 | 0 | accepted | 1 | 0 | — | — | — |
 | frame | rule/rule, story/rule, task/example | 1h01m | 28.3M (+1 unread) | 57.9k | claude-opus-5-5, claude-sonnet-5-5 | 2 | 1 | 9 | 0/0 | 90.39 | 5 | implementation | 0 | 0 | — | — | — |
 | looks | story/rule, task/rule | 33m07s+ | 19.9M (+3 unread) | 46.3k | claude-opus-5-5, claude-sonnet-5-5 | 1 | 2 | 6 | 2/0 | 95.07 | 0 | accepted | 0 | 0 | 24 | 48 | +2043/-92 |
 | loose-ends | task/rule | 59m02s+ | 32.7M (+1 unread) | 59.4k | claude-opus-5-5, claude-sonnet-5-5 | 1 | 2 | 8 | 3/6 | 100.00 | 0 | accepted | 0 | 0 | 19 | 84 | +104189/-12 |
@@ -21,11 +23,44 @@ delegate/cycle = how implementation was delegated and driven; in = input + cache
 
 ## Stages
 
-### The feature, above the slice loop — 3m31s
+### The feature, above the slice loop — 11m53s
 
 | stage | started (UTC) | wall | in | out | model | agent | delegated | reported |
 |---|---|---|---|---|---|---|---|---|
 | gaps | 2026-10-02 02:39 | 3m31s | 1.1M | 4.6k | claude-opus-5-5 | — | no | gaps=5 |
+| skipper | 2026-10-02 14:38 | 8m22s | 6.8M | 36.3k | claude-opus-5-5, claude-sonnet-5-5 | drive-implement, drive-skipper | yes | driver=cruise |
+
+### board-scale — 53m54s+
+
+| stage | started (UTC) | wall | in | out | model | agent | delegated | reported |
+|---|---|---|---|---|---|---|---|---|
+| gaps | 2026-10-02 16:07 | unbracketed | unknown | unknown | — | — | no | — |
+| skipper | 2026-10-02 16:07 | 1m48s | 1.1M | 8.2k | claude-opus-5-5 | drive-skipper | yes | driver=cruise |
+| gaps | 2026-10-02 16:08 | unbracketed | unknown | unknown | — | — | no | gaps=2, driver=cruise |
+| plan | 2026-10-02 16:14 | 2m05s | 1.2M | 65 | claude-opus-5-5 | drive-slice | yes | driver=cruise |
+| tasks | 2026-10-02 16:16 | 1m59s | 964.3k | 2.2k | claude-opus-5-5, claude-sonnet-5-5 | drive-slice, drive-tasks | yes | driver=cruise |
+| implement | 2026-10-02 16:18 | 22m22s | 13M | 8.2k | claude-opus-5-5, claude-sonnet-5-5 | drive-implement, drive-slice | yes | verify_failures=1, delegate=story, cycle=rule, split=0, driver=cruise |
+| converge | 2026-10-02 16:40 | 9m18s | 9.2M | 4.1k | claude-opus-5-5 | drive-converge, drive-slice | yes | driver=cruise |
+| gaps | 2026-10-02 16:50 | 7m09s | 4.9M | 2.4k | claude-opus-5-5 | drive-gaps, drive-slice | yes | gaps=3, driver=cruise |
+| demo | 2026-10-02 16:58 | 3m58s | 1.9M | 7.9k | claude-opus-5-5 | drive-hand | yes | outcome=accepted, driver=cruise |
+| adversary | 2026-10-02 17:02 | unbracketed | unknown | unknown | claude-opus-5-5 | — | no | findings=0, seams=0, driver=cruise |
+| implement | 2026-10-02 17:03 | 5m15s | 2.6M | 6.3k | claude-opus-5-5, claude-sonnet-5-5 | drive-implement | yes | verify_failures=0, delegate=task, cycle=rule, split=0, driver=cruise |
+| mutation | 2026-10-02 17:08 | unbracketed | unknown | unknown | — | — | no | mutation_score=n/a (no mutable production code changed), driver=cruise |
+
+### fold-and-width — 32m02s+
+
+| stage | started (UTC) | wall | in | out | model | agent | delegated | reported |
+|---|---|---|---|---|---|---|---|---|
+| implement | 2026-10-02 14:42 | 3m46s | 3.4M | 8.6k | claude-opus-5-5, claude-sonnet-5-5 | drive-implement | yes | verify_failures=0, delegate=story, cycle=rule, split=0, driver=cruise |
+| converge | 2026-10-02 14:46 | 7m45s | 3.9M | 10.3k | claude-opus-5-5 | drive-converge | yes | — |
+| implement | 2026-10-02 14:54 | 5m24s | 3M | 6.1k | claude-opus-5-5, claude-sonnet-5-5 | drive-implement | yes | verify_failures=1, delegate=story, cycle=rule, split=0, driver=cruise |
+| converge | 2026-10-02 14:59 | 4m51s | 1.6M | 2.7k | claude-opus-5-5 | drive-converge | yes | driver=cruise |
+| gaps | 2026-10-02 15:04 | 4m02s | 3.3M | 6.4k | claude-opus-5-5 | drive-gaps, drive-hand | yes | gaps=4, driver=cruise |
+| demo | 2026-10-02 15:11 | unbracketed | unknown | unknown | — | — | no | outcome=accepted, driver=cruise |
+| implement | 2026-10-02 15:11 | 26s | 886.2k | 2.1k | claude-opus-5-5, claude-sonnet-5-5 | drive-implement | yes | — |
+| implement | 2026-10-02 15:12 | 3m15s | 2M | 3.9k | claude-opus-5-5, claude-sonnet-5-5 | drive-implement | yes | verify_failures=0, delegate=story, cycle=rule, split=0, driver=cruise |
+| adversary | 2026-10-02 15:15 | unbracketed | unknown | unknown | — | — | no | findings=0, seams=0, driver=cruise |
+| mutation | 2026-10-02 15:15 | 2m33s | 969.3k | 2.3k | claude-opus-5-5 | — | no | mutation_score=76.92, driver=cruise |
 
 ### frame — 1h01m
 
@@ -149,11 +184,20 @@ delegate/cycle = how implementation was delegated and driven; in = input + cache
 
 ## Notes
 
+- board-scale: implemented as story/rule and task/rule — its wall compares with neither
 - frame: implemented as rule/rule and story/rule and task/example — its wall compares with neither
 - looks: implemented as story/rule and task/rule — its wall compares with neither
 - protection-page: implemented as story/rule and task/rule — its wall compares with neither
 - setup-pages: implemented as story/rule and task/rule — its wall compares with neither
 - tonight-page: implemented as story/rule and task/rule — its wall compares with neither
+- board-scale gaps: cut off — a new `skipper` entry started while it was open; its wall is real, its signals were never reported
+- board-scale gaps: not bracketed around its work — start and end were called in the same moment, so this stage's wall and tokens are missing, not zero.
+- board-scale gaps: not bracketed around its work — start and end were called in the same moment, so this stage's wall and tokens are missing, not zero.
+- board-scale adversary: not bracketed around its work — start and end were called in the same moment, so this stage's wall and tokens are missing, not zero.
+- board-scale mutation: not bracketed around its work — start and end were called in the same moment, so this stage's wall and tokens are missing, not zero.
+- fold-and-width converge: cut off — a new `implement` entry started while it was open; its wall is real, its signals were never reported
+- fold-and-width demo: not bracketed around its work — start and end were called in the same moment, so this stage's wall and tokens are missing, not zero.
+- fold-and-width adversary: not bracketed around its work — start and end were called in the same moment, so this stage's wall and tokens are missing, not zero.
 - looks plan: not bracketed around its work — start and end were called in the same moment, so this stage's wall and tokens are missing, not zero.
 - looks gaps: cut off — a new `demo` entry started while it was open; its wall is real, its signals were never reported
 - looks gaps: not bracketed around its work — start and end were called in the same moment, so this stage's wall and tokens are missing, not zero.

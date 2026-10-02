@@ -89,7 +89,8 @@ describe('the protection-page stylesheet', () => {
   });
 
   it('takes colour only from the five ink and rule tokens (and paper), each defined in every look', () => {
-    const used = [...css.matchAll(/var\((--[a-z0-9-]+)/g)].map((m) => m[1]!);
+    // --nb-u is the one length a page sheet sizes by, defined once for every look (boardScale.test.ts holds its use).
+    const used = [...css.matchAll(/var\((--[a-z0-9-]+)/g)].map((m) => m[1]!).filter((name) => name !== '--nb-u');
     expect(used.length).toBeGreaterThan(0);
     for (const name of used) expect([...COLOURS, ...FONTS], name).toContain(name);
     for (const look of ['morning', 'midday', 'night']) {
@@ -201,8 +202,8 @@ describe('the protection-page stylesheet', () => {
       expect(indent![1]! + indent![2]!).toBe(pad![1]! + pad![2]!);
     });
 
-    it('keeps the rule pitch: a line is 32px', () => {
-      expect(line).toMatch(/line-height:\s*32px/);
+    it('keeps the rule pitch: a line is 32 units, 32px at s = 1', () => {
+      expect(line).toMatch(/line-height:\s*calc\(32 \* var\(--nb-u\)\)/);
     });
 
     it('is a whole number of rules tall: items start-aligned, none with a block-axis box of its own (T018)', () => {
@@ -211,7 +212,7 @@ describe('the protection-page stylesheet', () => {
       for (const item of [address, body('.nb-trail-inventory__aside')]) {
         expect(item).not.toMatch(/(?:^|[;\s])(?:padding|margin)(?:-top|-bottom|-block(?:-start|-end)?)\s*:/);
         expect(item).not.toMatch(/border(-top|-bottom)?\s*:/);
-        expect(item).not.toMatch(/line-height:(?!\s*32px)/);
+        expect(item).not.toMatch(/line-height:(?!\s*calc\(32 \* var\(--nb-u\)\))/);
       }
     });
 

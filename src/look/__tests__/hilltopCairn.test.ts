@@ -32,6 +32,17 @@ const bodyOf = (selector: string): string => {
   }
   throw new Error(`notebook.css has no rule for ${selector}`);
 };
+/** s, the length `--nb-u` resolves to in px at a window, from the shared block's own declaration. */
+const scale = (() => {
+  const m = css.match(/--nb-u:\s*clamp\(([\d.]+)px, min\(100vw \/ ([\d.]+), 100vh \/ ([\d.]+)\), ([\d.]+)px\)/);
+  if (!m) throw new Error('notebook.css defines no --nb-u');
+  return (w: number, h: number) => Math.min(Math.max(Number(m[1]), Math.min(w / Number(m[2]), h / Number(m[3]))), Number(m[4]));
+})();
+/** N of a length written `calc(N * var(--nb-u))`: the length at s = 1, today's px. */
+const scaled = (selector: string, prop: string): number => {
+  const m = bodyOf(selector).match(new RegExp(`(?:^|[;\\s])${prop}:\\s*calc\\(([\\d.]+) \\* var\\(--nb-u\\)\\)\\s*;`));
+  return m ? Number(m[1]) : NaN; // NaN where the length is not written so: the first test below names it
+};
 const num = (selector: string, prop: string, unit: string): number => {
   const m = bodyOf(selector).match(new RegExp(`(?:^|[;\\s])${prop}:\\s*(-?[\\d.]+)${unit}\\s*;`));
   if (!m) throw new Error(`${selector} sets no ${prop} in ${unit}`);
@@ -82,10 +93,10 @@ const insideHill = (h: (typeof HILLS)[number], x: number, y: number, w: number, 
 // The cairn: a column at left/top (% of the window), stones centred on the widest, in a gap.
 const CAIRN_LEFT = num('.nb-cairn', 'left', '%');
 const CAIRN_TOP = num('.nb-cairn', 'top', '%');
-const GAP = num('.nb-cairn', 'gap', 'px');
+const GAP = scaled('.nb-cairn', 'gap');
 const STONE = [1, 2, 3, 4, 5].map((n) => ({
-  width: num(`.nb-stone--${n}`, 'width', 'px'),
-  height: num(`.nb-stone--${n}`, 'height', 'px'),
+  width: scaled(`.nb-stone--${n}`, 'width'),
+  height: scaled(`.nb-stone--${n}`, 'height'),
 }));
 const WIDEST = Math.max(...STONE.map((s) => s.width));
 
@@ -99,16 +110,22 @@ function outlineTokens(look: NotebookLook): string[] {
 }
 
 function stoneBox(index: number, w: number, h: number) {
-  const x0 = (CAIRN_LEFT / 100) * w + (WIDEST - STONE[index]!.width) / 2;
+  const s = scale(w, h); // every stone length is N x s
+  const x0 = (CAIRN_LEFT / 100) * w + ((WIDEST - STONE[index]!.width) * s) / 2;
   let y0 = (CAIRN_TOP / 100) * h;
-  for (let i = 0; i < index; i++) y0 += STONE[i]!.height + GAP;
-  return { x0, y0, x1: x0 + STONE[index]!.width, y1: y0 + STONE[index]!.height };
+  for (let i = 0; i < index; i++) y0 += (STONE[i]!.height + GAP) * s;
+  return { x0, y0, x1: x0 + STONE[index]!.width * s, y1: y0 + STONE[index]!.height * s };
 }
 
 const WINDOWS: Array<[number, number]> = [];
 for (let h = 600; h <= 1440; h += 20) for (let w = 800; w <= 2560; w += 40) WINDOWS.push([w, h]);
 
 describe('the hilltop cairn\'s outline stones hold 3:1 on what lies behind them (FR-021, SC-003; looks T022)', () => {
+  it('sizes every stone and the gap as calc(N * var(--nb-u)), so the model reads today\'s N', () => {
+    expect(GAP).toBe(4);
+    expect(STONE).toEqual([[18, 12], [30, 15], [44, 17], [58, 19], [74, 21]].map(([width, height]) => ({ width, height })));
+  });
+
   it('renders the first and last stone in the base tone, the outline', () => {
     for (const look of LOOKS) expect(outlineTokens(look)).toEqual(['--nb-stone-base', '--nb-stone-base']);
   });

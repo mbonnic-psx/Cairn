@@ -17,7 +17,7 @@
    (whose height is definite), so the ruled leaf reaches the foot of it; a longer left leaf grows both. */
 .nb-reaches-leaves,
 .nb-checkin-leaves {
-  column-gap: 48px;
+  column-gap: calc(48 * var(--nb-u));
   min-height: 100%;
 }
 /* Today: the Which days group is the top of the left column, the left page sits under it, and the ruled page
@@ -38,7 +38,7 @@
   grid-column: 2;
   grid-row: 1 / -1;
   /* The first line of writing sits on a rule: the ruling starts 22px into the 32px pitch. */
-  padding-top: 22px;
+  padding-top: calc(22 * var(--nb-u));
   overflow-wrap: anywhere;
 }
 /* Tonight: the right leaf is a column, so the quotes switch can take the foot. */
@@ -48,7 +48,7 @@
 .nb-checkin-leaves > .nb-page--ruled {
   display: flex;
   flex-direction: column;
-  padding-top: 22px;
+  padding-top: calc(22 * var(--nb-u));
 }
 
 /* The Which days buttons: small typewriter labels. The pressed one is marked by a line under it in the ink and
@@ -56,17 +56,17 @@
 .nb-reaches-which {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px 20px;
-  margin: 0 0 24px;
+  gap: calc(4 * var(--nb-u)) calc(20 * var(--nb-u));
+  margin: 0 0 calc(24 * var(--nb-u));
 }
 .nb-reaches-which__button {
-  min-height: 32px;
-  padding: 0 2px;
+  min-height: calc(32 * var(--nb-u));
+  padding: 0 calc(2 * var(--nb-u));
   border: 0;
   border-bottom: 1.5px solid transparent;
   background-color: transparent;
   font-family: var(--nb-font-mono);
-  font-size: 12.5px;
+  font-size: calc(12.5 * var(--nb-u));
   letter-spacing: 0.04em;
   color: var(--nb-ink-quiet);
   cursor: pointer;
@@ -84,7 +84,7 @@
 .nb-checkin-title {
   margin: 0;
   font-family: var(--nb-font-serif);
-  font-size: 30px;
+  font-size: calc(30 * var(--nb-u));
   font-weight: 500;
   line-height: 1.2;
   text-wrap: balance;
@@ -94,22 +94,22 @@
 /* A sentence that stands for the state: looking, could not read, sealed, and what was left out. */
 .nb-reaches-sentence,
 .nb-checkin-sentence {
-  margin: 16px 0 0;
+  margin: calc(16 * var(--nb-u)) 0 0;
   max-width: 34em;
-  font-size: 18px;
+  font-size: calc(18 * var(--nb-u));
   color: var(--nb-ink-body);
 }
 .nb-reaches-title + .nb-reaches-sentence,
 .nb-checkin-title + .nb-checkin-sentence {
-  margin-top: 12px;
+  margin-top: calc(12 * var(--nb-u));
 }
 
 /* The closing note: a hairline, then the quiet ink. It is the last thing on the left page. */
 .nb-reaches-note,
 .nb-checkin-note {
-  margin: 24px 0 0;
+  margin: calc(24 * var(--nb-u)) 0 0;
   max-width: 34em;
-  padding-top: 20px;
+  padding-top: calc(20 * var(--nb-u));
   border-top: 1px solid var(--nb-rule);
 }
 
@@ -118,11 +118,11 @@
 .nb-reaches-note,
 .nb-reaches-aside,
 .nb-checkin-note {
-  font-size: 16px;
+  font-size: calc(16 * var(--nb-u));
   color: var(--nb-ink-quiet);
 }
 .nb-reaches-aside {
-  margin: 16px 0 0;
+  margin: calc(16 * var(--nb-u)) 0 0;
   max-width: 34em;
 }
 
@@ -140,28 +140,28 @@
 .nb-reaches-range {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px 24px;
-  margin: 20px 0 0;
+  gap: calc(12 * var(--nb-u)) calc(24 * var(--nb-u));
+  margin: calc(20 * var(--nb-u)) 0 0;
 }
 /* The label column is as wide for From as for To, so the two boxes start at the same place. */
 .nb-reaches-field {
   display: grid;
   grid-template-columns: 5ch auto;
   align-items: center;
-  column-gap: 8px;
+  column-gap: calc(8 * var(--nb-u));
   font-family: var(--nb-font-mono);
-  font-size: 12.5px;
+  font-size: calc(12.5 * var(--nb-u));
   letter-spacing: 0.04em;
   color: var(--nb-ink-quiet);
 }
 .nb-reaches-date {
-  min-height: 36px;
-  padding: 4px 8px;
+  min-height: calc(36 * var(--nb-u));
+  padding: calc(4 * var(--nb-u)) calc(8 * var(--nb-u));
   border: 1px solid var(--nb-ink-quiet);
-  border-radius: 3px;
+  border-radius: calc(3 * var(--nb-u));
   background-color: transparent;
   font-family: var(--nb-font-serif);
-  font-size: 16px;
+  font-size: calc(16 * var(--nb-u));
   color: var(--nb-ink-body);
 }
 
@@ -174,7 +174,7 @@
   list-style: none;
 }
 .nb-checkin-log {
-  margin-top: 24px;
+  margin-top: calc(24 * var(--nb-u));
 }
 .nb-reaches-line,
 .nb-checkin-line {
@@ -182,8 +182,8 @@
   /* Centred, not on the baseline: the label's smaller face on a baseline would stretch the line past 32px. */
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  line-height: 32px;
+  gap: calc(12 * var(--nb-u));
+  line-height: calc(32 * var(--nb-u));
 }
 .nb-reaches-site,
 .nb-checkin-site {
@@ -201,7 +201,7 @@
 .nb-reaches-count {
   flex-shrink: 0;
   font-family: var(--nb-font-mono);
-  font-size: 12px;
+  font-size: calc(12 * var(--nb-u));
   font-variant-numeric: tabular-nums;
   color: var(--nb-ink-quiet);
 }
@@ -212,14 +212,14 @@
 /* "Nothing here…": where the first line of the log would begin. */
 .nb-reaches-empty {
   margin: 0;
-  font-size: 18px;
-  line-height: 32px;
+  font-size: calc(18 * var(--nb-u));
+  line-height: calc(32 * var(--nb-u));
   color: var(--nb-ink-body);
 }
 .nb-checkin-empty {
-  margin: 24px 0 0;
+  margin: calc(24 * var(--nb-u)) 0 0;
   max-width: 34em;
-  font-size: 18px;
+  font-size: calc(18 * var(--nb-u));
   color: var(--nb-ink-body);
 }
 
@@ -227,27 +227,27 @@
 .nb-reaches-bar {
   flex: 0 0 28%;
   align-self: center;
-  height: 6px;
-  border-radius: 3px;
+  height: calc(6 * var(--nb-u));
+  border-radius: calc(3 * var(--nb-u));
   background-color: var(--nb-rule);
   overflow: hidden;
 }
 .nb-reaches-bar__fill {
   height: 100%;
-  border-radius: 3px;
+  border-radius: calc(3 * var(--nb-u));
   background-color: var(--nb-ink-quiet);
 }
 
 /* The quote: italic serif in the quiet ink, on the same 32px pitch as the page's ruling. */
 .nb-checkin-quote {
-  margin: 0 0 32px;
+  margin: 0 0 calc(32 * var(--nb-u));
 }
 .nb-checkin-quote__line {
   margin: 0;
   max-width: 34em;
-  font-size: 18px;
+  font-size: calc(18 * var(--nb-u));
   font-style: italic;
-  line-height: 32px;
+  line-height: calc(32 * var(--nb-u));
   color: var(--nb-ink-quiet);
 }
 
@@ -258,8 +258,8 @@
 }
 .nb-checkin-label__text {
   display: block;
-  font-size: 20px;
-  line-height: 32px;
+  font-size: calc(20 * var(--nb-u));
+  line-height: calc(32 * var(--nb-u));
   color: var(--nb-ink);
 }
 /* The writing space: its rules are drawn here, at the pitch of its own line height, and travel with the text
@@ -269,25 +269,25 @@
 .nb-checkin-write {
   display: block;
   width: 100%;
-  min-height: calc(14rem + 2px);
+  min-height: calc(226 * var(--nb-u));
   margin: 0;
-  padding: 0 12px;
+  padding: 0 calc(12 * var(--nb-u));
   border: 1px solid var(--nb-ink-quiet);
-  border-radius: 3px;
+  border-radius: calc(3 * var(--nb-u));
   background-color: var(--nb-paper);
   background-image: repeating-linear-gradient(
     to bottom,
     transparent 0,
-    transparent 31px,
-    var(--nb-rule) 31px,
-    var(--nb-rule) 32px
+    transparent calc(32 * var(--nb-u) - 1px),
+    var(--nb-rule) calc(32 * var(--nb-u) - 1px),
+    var(--nb-rule) calc(32 * var(--nb-u))
   );
-  background-size: 100% 32px;
+  background-size: 100% calc(32 * var(--nb-u));
   background-position: 0 -1px;
   background-attachment: local;
   font-family: var(--nb-font-serif);
-  font-size: 18px;
-  line-height: 32px;
+  font-size: calc(18 * var(--nb-u));
+  line-height: calc(32 * var(--nb-u));
   color: var(--nb-ink);
   resize: vertical;
 }
@@ -296,15 +296,15 @@
    always there, so the button does not change size. */
 .nb-checkin-keep {
   align-self: flex-start;
-  min-height: 40px;
+  min-height: calc(40 * var(--nb-u));
   /* The space is 226px with its edge, so 30px puts the button on the pitch again. */
-  margin-top: 30px;
-  padding: 0 20px;
+  margin-top: calc(30 * var(--nb-u));
+  padding: 0 calc(20 * var(--nb-u));
   border: 1px solid var(--nb-button);
-  border-radius: 3px;
+  border-radius: calc(3 * var(--nb-u));
   background-color: var(--nb-button);
   font-family: var(--nb-font-mono);
-  font-size: 12.5px;
+  font-size: calc(12.5 * var(--nb-u));
   letter-spacing: 0.04em;
   color: var(--nb-button-ink);
   cursor: pointer;
@@ -322,28 +322,33 @@
 
 /* The save's sentence, one polite region that keeps its line when empty so nothing jumps. */
 .nb-checkin-status {
-  min-height: 32px;
+  min-height: calc(32 * var(--nb-u));
   /* 40px of button and 24px of margin are two pitches, so the sentence sits on a rule. */
-  margin: 24px 0 32px;
+  margin: calc(24 * var(--nb-u)) 0 calc(32 * var(--nb-u));
   max-width: 34em;
-  font-size: 18px;
-  line-height: 32px;
+  font-size: calc(18 * var(--nb-u));
+  line-height: calc(32 * var(--nb-u));
   /* The paper, so a rule of the page does not strike through the sentence when the writing space has been
      dragged to a height off the pitch. */
   background-color: var(--nb-paper);
   color: var(--nb-ink-body);
+}
+/* Its paper hides a rule of the page the whole leaf wide, so the shell's measure does not cut it short: a band
+   stopped at the measure would leave a stub of that rule beside it (T010). Same weight as the measure, read later. */
+.nb-checkin-leaves > .nb-page > .nb-checkin-status {
+  max-inline-size: none;
 }
 
 /* The quotes switch: a quiet typewriter label at the foot of the right page. */
 .nb-checkin-switch {
   align-self: flex-start;
   margin-top: auto;
-  padding: 4px 0;
+  padding: calc(4 * var(--nb-u)) 0;
   border: 0;
   /* The paper, so a rule of the page does not strike through its words. */
   background-color: var(--nb-paper);
   font-family: var(--nb-font-mono);
-  font-size: 12px;
+  font-size: calc(12 * var(--nb-u));
   letter-spacing: 0.04em;
   color: var(--nb-ink-quiet);
   cursor: pointer;

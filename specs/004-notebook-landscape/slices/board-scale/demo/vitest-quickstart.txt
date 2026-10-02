@@ -1,0 +1,8 @@
+   ✓ focus on the paper, in the morning look (T016) > Today, Today view: looking: every control is reached by Tab and carries an outline of its own  332ms
+   ✓ focus on the paper, in the morning look (T016) > names every control the spreads draw, so a new one with no rule fails  343ms
+
+ Test Files  35 passed (35)
+      Tests  1365 passed (1365)
+   Start at  12:01:24
+   Duration  9.49s (transform 4.82s, setup 5.67s, collect 18.02s, tests 45.07s, environment 31.32s, prepare 7.46s)
+

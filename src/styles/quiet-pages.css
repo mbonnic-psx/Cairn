@@ -12,7 +12,7 @@
    (whose height is definite), so the ruled leaf stretches to the foot of it; a longer left page grows both. */
 .nb-limits-leaves,
 .nb-teardown-leaves {
-  column-gap: 48px;
+  column-gap: calc(48 * var(--nb-u));
   min-height: 100%;
 }
 
@@ -21,7 +21,7 @@
 .nb-teardown-title {
   margin: 0;
   font-family: var(--nb-font-serif);
-  font-size: 30px;
+  font-size: calc(30 * var(--nb-u));
   font-weight: 500;
   line-height: 1.2;
   color: var(--nb-ink);
@@ -30,7 +30,7 @@
 /* A short list, one line to a mark. The mark hangs beside the first line of its words and never moves them. */
 .nb-limits-list,
 .nb-teardown-list {
-  margin: 24px 0 0;
+  margin: calc(24 * var(--nb-u)) 0 0;
   padding: 0;
   max-width: 34em;
   list-style: none;
@@ -38,7 +38,7 @@
 .nb-limits-line,
 .nb-teardown-line {
   display: flex;
-  gap: 14px;
+  gap: calc(14 * var(--nb-u));
   color: var(--nb-ink-body);
 }
 /* The words beside the mark may shrink below their longest unbroken run, so a long path wraps inside its page
@@ -50,7 +50,7 @@
 }
 .nb-limits-line + .nb-limits-line,
 .nb-teardown-line + .nb-teardown-line {
-  margin-top: 14px;
+  margin-top: calc(14 * var(--nb-u));
 }
 
 /* The marks: 8px, round, centred on the first line of the words beside them (0.58em of the 1.65 line).
@@ -59,8 +59,8 @@
 .nb-teardown-mark {
   box-sizing: border-box;
   flex-shrink: 0;
-  width: 8px;
-  height: 8px;
+  width: calc(8 * var(--nb-u));
+  height: calc(8 * var(--nb-u));
   margin-top: 0.58em;
   border-radius: 50%;
 }
@@ -82,38 +82,38 @@
 /* The section labels sit apart from the list above them, close to what they name. */
 .nb-limits-label,
 .nb-teardown-label {
-  margin: 40px 0 0;
+  margin: calc(40 * var(--nb-u)) 0 0;
 }
 .nb-limits-label + .nb-limits-list,
 .nb-teardown-label + .nb-teardown-list {
-  margin-top: 12px;
+  margin-top: calc(12 * var(--nb-u));
 }
 
 .nb-limits-kept {
-  margin: 12px 0 0;
+  margin: calc(12 * var(--nb-u)) 0 0;
   max-width: 34em;
   color: var(--nb-ink-body);
 }
 
 /* The note on administrators: a hairline, then the quiet ink. It is the last thing on the page. */
 .nb-limits-note {
-  margin: 36px 0 0;
+  margin: calc(36 * var(--nb-u)) 0 0;
   max-width: 34em;
-  padding-top: 22px;
+  padding-top: calc(22 * var(--nb-u));
   border-top: 1px solid var(--nb-rule);
   color: var(--nb-ink-quiet);
 }
 
 /* This machine is as it was: its sentence under the heading, then what was checked, then what is left. */
 .nb-teardown-sentence {
-  margin: 12px 0 0;
+  margin: calc(12 * var(--nb-u)) 0 0;
   max-width: 34em;
-  font-size: 18px;
+  font-size: calc(18 * var(--nb-u));
   color: var(--nb-ink-body);
 }
 .nb-teardown-checked {
-  margin-top: 28px;
+  margin-top: calc(28 * var(--nb-u));
 }
 .nb-teardown-residue {
-  margin-top: 12px;
+  margin-top: calc(12 * var(--nb-u));
 }

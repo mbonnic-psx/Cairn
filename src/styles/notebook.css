@@ -12,6 +12,14 @@
   --font-serif: var(--font-notebook-serif);
   --nb-font-serif: var(--font-notebook-serif);
   --nb-font-mono: var(--font-notebook-mono);
+
+  /* The board's two lengths (D39). --nb-u is the notebook's scale s as a length:
+   * everything inside the notebook, the sun and the stones are N x this. It is
+   * written in viewport units, not container units, because a page's own
+   * container would resolve them against itself. --nb-g is the greeting's own
+   * growth with the window's width, and is not for page sheets. */
+  --nb-u: clamp(1px, min(100vw / 1280, 100vh / 800), 2px);
+  --nb-g: max(1px, 100vw / 1280);
 }
 
 [data-look="morning"] {
@@ -33,7 +41,7 @@
   --nb-greeting-ink: #2a2119;
   --nb-greeting-body: #4a3d2f;
   --nb-greeting-quiet: #6b5440;
-  --nb-sun-size: 96px;
+  --nb-sun-size: calc(96 * var(--nb-u));
   --nb-sun-left: 15%;
   --nb-sun-top: 37%;
   --nb-sun: #eda95e;
@@ -86,7 +94,7 @@
   --nb-greeting-ink: #2a2119;
   --nb-greeting-body: #4a3d2f;
   --nb-greeting-quiet: #66503d;
-  --nb-sun-size: 84px;
+  --nb-sun-size: calc(84 * var(--nb-u));
   --nb-sun-left: 11.7%;
   --nb-sun-top: 7.5%;
   --nb-sun: #f5c374;
@@ -138,7 +146,7 @@
   --nb-greeting-ink: #f6ecdc;
   --nb-greeting-body: #d9cbb4;
   --nb-greeting-quiet: #d7c9b5;
-  --nb-sun-size: 56px;
+  --nb-sun-size: calc(56 * var(--nb-u));
   --nb-sun-left: 18%;
   --nb-sun-top: 41%;
   --nb-sun: #f3e6cf;
@@ -188,14 +196,14 @@
   position: relative;
   box-sizing: border-box;
   display: grid;
-  grid-template-columns: 250px minmax(0, min(1200px, max(830px, calc((100vh - 120px) * 830 / 680))));
-  column-gap: 44px;
-  justify-content: center;
+  grid-template-columns: 19.53125vw minmax(0, min(64.84375vw, 127.5vh));
+  column-gap: 3.4375vw;
+  justify-content: start;
   align-items: start;
   width: 100%;
   height: 100vh;
   min-height: 600px;
-  padding: 70px 100px 50px 56px;
+  padding: 8.75vh 0 0 4.375vw;
   overflow: hidden;
   font-family: var(--nb-font-serif);
   color: var(--nb-ink-body);
@@ -227,7 +235,7 @@
   top: var(--nb-sun-top);
   border-radius: 50%;
   background: var(--nb-sun);
-  box-shadow: 0 0 80px 30px var(--nb-sun-glow);
+  box-shadow: 0 0 calc(80 * var(--nb-u)) calc(30 * var(--nb-u)) var(--nb-sun-glow);
 }
 .nb-star {
   position: absolute;
@@ -274,22 +282,22 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: calc(4 * var(--nb-u));
 }
 /* The glow is night's alone: only that look sets --nb-stone-glow. */
 .nb-stone {
   border-radius: 999px;
-  box-shadow: 0 0 14px 2px var(--nb-stone-glow, transparent);
+  box-shadow: 0 0 calc(14 * var(--nb-u)) calc(2 * var(--nb-u)) var(--nb-stone-glow, transparent);
 }
 .nb-stone--base { background: var(--nb-stone-base); }
 .nb-stone--moss { background: var(--nb-stone-moss); }
 .nb-stone--amber { background: var(--nb-stone-amber); }
 .nb-stone--pale { background: var(--nb-stone-pale); }
-.nb-stone--1 { width: 18px; height: 12px; }
-.nb-stone--2 { width: 30px; height: 15px; }
-.nb-stone--3 { width: 44px; height: 17px; }
-.nb-stone--4 { width: 58px; height: 19px; }
-.nb-stone--5 { width: 74px; height: 21px; }
+.nb-stone--1 { width: calc(18 * var(--nb-u)); height: calc(12 * var(--nb-u)); }
+.nb-stone--2 { width: calc(30 * var(--nb-u)); height: calc(15 * var(--nb-u)); }
+.nb-stone--3 { width: calc(44 * var(--nb-u)); height: calc(17 * var(--nb-u)); }
+.nb-stone--4 { width: calc(58 * var(--nb-u)); height: calc(19 * var(--nb-u)); }
+.nb-stone--5 { width: calc(74 * var(--nb-u)); height: calc(21 * var(--nb-u)); }
 
 /* The testing switch sits over the sky, outside the shell, and wears the look
  * it shows (LookSwitch sets data-look). On Current it has no look, so its tokens
@@ -317,16 +325,16 @@
 /* The greeting. */
 .nb-aside {
   position: relative;
-  padding-top: 18px;
+  padding-top: 2.25vh;
 }
 .nb-greeting {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: calc(10 * var(--nb-g));
 }
 .nb-greeting__time {
   font-family: var(--nb-font-mono);
-  font-size: 12px;
+  font-size: calc(12 * var(--nb-g));
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--nb-greeting-quiet);
@@ -334,7 +342,7 @@
 .nb-greeting__words {
   margin: 0;
   font-weight: 400;
-  font-size: 40px;
+  font-size: calc(40 * var(--nb-g));
   line-height: 1.1;
   color: var(--nb-greeting-ink);
 }
@@ -345,11 +353,11 @@
   width: 100%;
   aspect-ratio: 830 / 680;
   container-type: size;
-  max-height: calc(100vh - 120px);
+  max-height: 85vh;
   min-height: 480px;
   background: var(--nb-paper);
-  border-radius: 6px;
-  box-shadow: 0 1px 0 var(--nb-shadow-edge), 0 24px 50px -20px var(--nb-shadow-soft), 0 0 90px 10px var(--nb-lamp-glow, transparent);
+  border-radius: calc(6 * var(--nb-u));
+  box-shadow: 0 1px 0 var(--nb-shadow-edge), 0 calc(24 * var(--nb-u)) calc(50 * var(--nb-u)) calc(-20 * var(--nb-u)) var(--nb-shadow-soft), 0 0 calc(90 * var(--nb-u)) calc(10 * var(--nb-u)) var(--nb-lamp-glow, transparent);
 }
 .nb-spread {
   display: grid;
@@ -364,8 +372,9 @@
   height: 100%;
   overflow-y: auto;
   margin: 0;
-  padding: 40px 48px 36px 60px;
+  padding: calc(40 * var(--nb-u)) calc(48 * var(--nb-u)) calc(36 * var(--nb-u)) calc(60 * var(--nb-u));
   font-family: var(--nb-font-serif);
+  font-size: calc(16 * var(--nb-u));
   color: var(--nb-ink-body);
   line-height: 1.65;
 }
@@ -373,19 +382,20 @@
   background-image: repeating-linear-gradient(
     to bottom,
     transparent 0,
-    transparent 31px,
-    var(--nb-rule) 31px,
-    var(--nb-rule) 32px
+    transparent calc(32 * var(--nb-u) - 1px),
+    var(--nb-rule) calc(32 * var(--nb-u) - 1px),
+    var(--nb-rule) calc(32 * var(--nb-u))
   );
-  /* One tile is one pitch, so the ruling has no seam; it starts 22px in, where the first line of writing sits. */
-  background-size: 100% 32px;
-  background-position: 0 22px;
+  /* One tile is one pitch, so the ruling has no seam; it starts 22 units in, where the first line of writing sits.
+   * The rule itself stays a 1px line. */
+  background-size: 100% calc(32 * var(--nb-u));
+  background-position: 0 calc(22 * var(--nb-u));
 }
 .nb-margin {
   position: absolute;
   top: 0;
   bottom: 0;
-  left: 38px;
+  left: calc(38 * var(--nb-u));
   width: 1px;
   background: var(--nb-margin);
   pointer-events: none;
@@ -395,27 +405,27 @@
   position: absolute;
   top: 0;
   bottom: 0;
-  left: calc(50% + 6px);
+  left: calc(50% + 6 * var(--nb-u));
   width: 0;
   border-left: 1px solid var(--nb-fold);
   pointer-events: none;
 }
 .nb-label {
   font-family: var(--nb-font-mono);
-  font-size: 12px;
+  font-size: calc(12 * var(--nb-u));
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--nb-ink-quiet);
 }
 .nb-button {
-  min-height: 40px;
-  padding: 0 16px;
+  min-height: calc(40 * var(--nb-u));
+  padding: 0 calc(16 * var(--nb-u));
   border: 0;
-  border-radius: 3px;
+  border-radius: calc(3 * var(--nb-u));
   background: var(--nb-button);
   color: var(--nb-button-ink);
   font-family: var(--nb-font-mono);
-  font-size: 12.5px;
+  font-size: calc(12.5 * var(--nb-u));
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
@@ -426,28 +436,28 @@
  * whole, inside the notebook and reachable at any window size. */
 .nb-tabs {
   position: absolute;
-  right: -44px;
-  top: 12px;
-  bottom: 12px;
+  right: calc(-44 * var(--nb-u));
+  top: calc(12 * var(--nb-u));
+  bottom: calc(12 * var(--nb-u));
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 4px;
+  gap: calc(4 * var(--nb-u));
 }
 .nb-tab {
   flex: 0 1 auto;
-  width: 38px;
+  width: calc(38 * var(--nb-u));
   min-height: min-content;
-  padding: 8px 0;
+  padding: calc(8 * var(--nb-u)) 0;
   border: 0;
-  border-radius: 0 6px 6px 0;
+  border-radius: 0 calc(6 * var(--nb-u)) calc(6 * var(--nb-u)) 0;
   background: var(--nb-tab-limits);
   color: var(--nb-tab-ink);
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: var(--nb-font-mono);
-  font-size: 11px;
+  font-size: calc(11 * var(--nb-u));
   line-height: 1.2;
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -459,17 +469,25 @@
  * follows its width. */
 @container (min-height: 580px) {
   .nb-tabs {
-    top: 40px;
-    gap: 6px;
+    top: calc(40 * var(--nb-u));
+    gap: calc(6 * var(--nb-u));
   }
   .nb-tabs .nb-tab-label {
     max-inline-size: none;
   }
   .nb-tab {
-    min-height: 80px;
-    padding: 10px 0;
-    font-size: 12px;
+    min-height: calc(80 * var(--nb-u));
+    padding: calc(10 * var(--nb-u)) 0;
+    font-size: calc(12 * var(--nb-u));
     letter-spacing: 0.08em;
+  }
+}
+/* A page's text column stops at a measure: today's leaf at 1280x800 is 337px, and 337 x 75/66 = 383 (D39). Only the
+ * writing stops; the leaf keeps its full width, so its ruling runs to the edge and the fold stays on the gap. The
+ * narrow layout, where the greeting sits above the notebook, takes no measure. */
+@media (min-width: 1100px) {
+  .nb-page-area .nb-spread > .nb-page > * {
+    max-inline-size: calc(383 * var(--nb-u));
   }
 }
 /* WebKitGTK (Tauri on Linux) ignores writing-mode on a <button>; the label
@@ -478,7 +496,7 @@
   writing-mode: vertical-rl;
   /* A long name wraps into a second column rather than pushing the tabs
    * past the notebook in a short window (T017). */
-  max-inline-size: 76px;
+  max-inline-size: calc(76 * var(--nb-u));
 }
 .nb-tab--protection { background: var(--nb-tab-protection); }
 .nb-tab--trail { background: var(--nb-tab-trail); }
@@ -489,7 +507,7 @@
   filter: brightness(1.04);
 }
 .nb-tab[aria-current='page'] {
-  width: 44px;
+  width: calc(44 * var(--nb-u));
   background: var(--nb-paper);
   color: var(--nb-ink);
 }
@@ -548,7 +566,7 @@
  * not kept there; the height is, so the pages still scroll. */
 @supports not (aspect-ratio: 1 / 1) {
   .nb-notebook {
-    height: calc(100vh - 120px);
+    height: 85vh;
   }
 }
 @supports not (aspect-ratio: 1 / 1) {

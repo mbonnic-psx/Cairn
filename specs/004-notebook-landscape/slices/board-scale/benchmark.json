@@ -1,0 +1,745 @@
+{
+  "_comment": "What each stage of /drive cost this slice and how well it did, one entry per stage run, appended by scripts/agents/benchmark.py at the stage's start and end. Tokens come from the harness's own transcript or are null with the reason; signals are what the stage reported. `make benchmark` reads every record. docs/agent-harnesses.md says what the numbers can and cannot be compared with.",
+  "feature": "004-notebook-landscape",
+  "slice": "board-scale",
+  "from": "ca5edaedbe77af4494c6f4cf303e006ff9fb200b",
+  "stages": [
+    {
+      "stage": "gaps",
+      "started": "2026-10-02T16:07:05Z",
+      "planned": "gaps: strong → host model — `strong` maps to the host model",
+      "tasks": {
+        "start": null,
+        "end": null
+      },
+      "ended": "2026-10-02T16:07:05Z",
+      "seconds": 0,
+      "span": {
+        "from": {
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac.jsonl": 1047817
+        },
+        "to": {
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac.jsonl": 1047817
+        }
+      },
+      "usage": {
+        "source": "claude",
+        "session": "1003b780-000d-494a-b94e-b40b3f8a8eac",
+        "read": "message.usage on each assistant line, once per requestId; read after the session that opened the entry had ended",
+        "host": {},
+        "subagents": {},
+        "agents": []
+      },
+      "ran": null,
+      "agents": null,
+      "delegated": false,
+      "signals": {},
+      "cut_off": "a new `skipper` entry started while it was open"
+    },
+    {
+      "stage": "skipper",
+      "started": "2026-10-02T16:07:05Z",
+      "planned": "skipper: skipper → host model — `skipper` maps to the host model",
+      "tasks": {
+        "start": null,
+        "end": null
+      },
+      "ended": "2026-10-02T16:08:53Z",
+      "seconds": 108,
+      "span": {
+        "from": {
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac.jsonl": 1047817
+        },
+        "to": {
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac.jsonl": 1233007,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-a84a53044efe98916.jsonl": 209720,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-aa0cd4b7671d6dbef.jsonl": 230742
+        }
+      },
+      "usage": {
+        "source": "claude",
+        "session": "1003b780-000d-494a-b94e-b40b3f8a8eac",
+        "read": "message.usage on each assistant line, once per requestId",
+        "host": {
+          "claude-opus-5-5": {
+            "input": 16,
+            "output": 7673,
+            "cache_read": 804472,
+            "cache_creation": 18438
+          }
+        },
+        "subagents": {
+          "claude-opus-5-5": {
+            "input": 16,
+            "output": 531,
+            "cache_read": 203573,
+            "cache_creation": 74734
+          }
+        },
+        "agents": [
+          "drive-skipper"
+        ]
+      },
+      "ran": [
+        "claude-opus-5-5"
+      ],
+      "agents": [
+        "drive-skipper"
+      ],
+      "delegated": true,
+      "signals": {
+        "driver": "cruise"
+      }
+    },
+    {
+      "stage": "gaps",
+      "started": "2026-10-02T16:08:53Z",
+      "planned": "gaps: strong → host model — `strong` maps to the host model",
+      "tasks": {
+        "start": null,
+        "end": null
+      },
+      "ended": "2026-10-02T16:08:53Z",
+      "seconds": 0,
+      "span": {
+        "from": {
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac.jsonl": 1233007,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-a84a53044efe98916.jsonl": 209720,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-aa0cd4b7671d6dbef.jsonl": 230742
+        },
+        "to": {
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac.jsonl": 1233007,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-a84a53044efe98916.jsonl": 209720,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-aa0cd4b7671d6dbef.jsonl": 230742
+        }
+      },
+      "usage": {
+        "source": "claude",
+        "session": "1003b780-000d-494a-b94e-b40b3f8a8eac",
+        "read": "message.usage on each assistant line, once per requestId",
+        "host": {},
+        "subagents": {},
+        "agents": []
+      },
+      "ran": null,
+      "agents": null,
+      "delegated": false,
+      "signals": {
+        "gaps": 2,
+        "driver": "cruise"
+      }
+    },
+    {
+      "stage": "plan",
+      "started": "2026-10-02T16:14:13Z",
+      "planned": "plan: strong → host model — `strong` maps to the host model",
+      "tasks": {
+        "start": null,
+        "end": null
+      },
+      "ended": "2026-10-02T16:16:18Z",
+      "seconds": 125,
+      "span": {
+        "from": {
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac.jsonl": 1262022,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-a5cce553484ff589f.jsonl": 972425,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-a84a53044efe98916.jsonl": 209720,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-aa0cd4b7671d6dbef.jsonl": 230742
+        },
+        "to": {
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac.jsonl": 1262022,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-a5cce553484ff589f.jsonl": 1089879,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-a84a53044efe98916.jsonl": 209720,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-aa0cd4b7671d6dbef.jsonl": 230742
+        }
+      },
+      "usage": {
+        "source": "claude",
+        "session": "1003b780-000d-494a-b94e-b40b3f8a8eac",
+        "read": "message.usage on each assistant line, once per requestId",
+        "host": {},
+        "subagents": {
+          "claude-opus-5-5": {
+            "input": 16,
+            "output": 65,
+            "cache_read": 1208340,
+            "cache_creation": 21525
+          }
+        },
+        "agents": [
+          "drive-slice"
+        ]
+      },
+      "ran": [
+        "claude-opus-5-5"
+      ],
+      "agents": [
+        "drive-slice"
+      ],
+      "delegated": true,
+      "signals": {
+        "driver": "cruise"
+      }
+    },
+    {
+      "stage": "tasks",
+      "started": "2026-10-02T16:16:18Z",
+      "planned": "tasks: fast → sonnet — Claude Code: the Agent tool's `model` parameter, set per call",
+      "tasks": {
+        "start": null,
+        "end": {
+          "open": 9,
+          "done": 0
+        }
+      },
+      "ended": "2026-10-02T16:18:17Z",
+      "seconds": 119,
+      "span": {
+        "from": {
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac.jsonl": 1262022,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-a5cce553484ff589f.jsonl": 1089879,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-a84a53044efe98916.jsonl": 209720,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-aa0cd4b7671d6dbef.jsonl": 230742
+        },
+        "to": {
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac.jsonl": 1262022,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-a5cce553484ff589f.jsonl": 1136265,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-a84a53044efe98916.jsonl": 209720,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-aa0cd4b7671d6dbef.jsonl": 230742,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-ae61d89faae4f3347.jsonl": 329978
+        }
+      },
+      "usage": {
+        "source": "claude",
+        "session": "1003b780-000d-494a-b94e-b40b3f8a8eac",
+        "read": "message.usage on each assistant line, once per requestId",
+        "host": {},
+        "subagents": {
+          "claude-opus-5-5": {
+            "input": 6,
+            "output": 1697,
+            "cache_read": 496681,
+            "cache_creation": 12245
+          },
+          "claude-sonnet-5-5": {
+            "input": 18,
+            "output": 477,
+            "cache_read": 381658,
+            "cache_creation": 73690
+          }
+        },
+        "agents": [
+          "drive-slice",
+          "drive-tasks"
+        ]
+      },
+      "ran": [
+        "claude-opus-5-5",
+        "claude-sonnet-5-5"
+      ],
+      "agents": [
+        "drive-slice",
+        "drive-tasks"
+      ],
+      "delegated": true,
+      "signals": {
+        "driver": "cruise"
+      }
+    },
+    {
+      "stage": "implement",
+      "started": "2026-10-02T16:18:35Z",
+      "planned": "implement: fast → sonnet — Claude Code: the Agent tool's `model` parameter, set per call",
+      "tasks": {
+        "start": {
+          "open": 8,
+          "done": 1
+        },
+        "end": {
+          "open": 0,
+          "done": 9
+        }
+      },
+      "ended": "2026-10-02T16:40:57Z",
+      "seconds": 1342,
+      "span": {
+        "from": {
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac.jsonl": 1262022,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-a5cce553484ff589f.jsonl": 1142910,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-a84a53044efe98916.jsonl": 209720,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-aa0cd4b7671d6dbef.jsonl": 230742,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-ae61d89faae4f3347.jsonl": 329978
+        },
+        "to": {
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac.jsonl": 1262022,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-a5cce553484ff589f.jsonl": 1252724,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-a84a53044efe98916.jsonl": 209720,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-aa0cd4b7671d6dbef.jsonl": 230742,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-aa4ab015eba35f15a.jsonl": 1082071,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-ae61d89faae4f3347.jsonl": 329978
+        }
+      },
+      "usage": {
+        "source": "claude",
+        "session": "1003b780-000d-494a-b94e-b40b3f8a8eac",
+        "read": "message.usage on each assistant line, once per requestId",
+        "host": {},
+        "subagents": {
+          "claude-opus-5-5": {
+            "input": 26,
+            "output": 2290,
+            "cache_read": 2276445,
+            "cache_creation": 196647
+          },
+          "claude-sonnet-5-5": {
+            "input": 144,
+            "output": 5923,
+            "cache_read": 10305964,
+            "cache_creation": 223604
+          }
+        },
+        "agents": [
+          "drive-implement",
+          "drive-slice"
+        ]
+      },
+      "ran": [
+        "claude-opus-5-5",
+        "claude-sonnet-5-5"
+      ],
+      "agents": [
+        "drive-implement",
+        "drive-slice"
+      ],
+      "delegated": true,
+      "signals": {
+        "verify_failures": 1,
+        "delegate": "story",
+        "cycle": "rule",
+        "split": 0,
+        "driver": "cruise"
+      }
+    },
+    {
+      "stage": "converge",
+      "started": "2026-10-02T16:40:57Z",
+      "planned": "converge: strong → host model — `strong` maps to the host model",
+      "tasks": {
+        "start": {
+          "open": 0,
+          "done": 9
+        },
+        "end": {
+          "open": 2,
+          "done": 10
+        }
+      },
+      "ended": "2026-10-02T16:50:15Z",
+      "seconds": 558,
+      "span": {
+        "from": {
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac.jsonl": 1262022,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-a5cce553484ff589f.jsonl": 1252724,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-a84a53044efe98916.jsonl": 209720,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-aa0cd4b7671d6dbef.jsonl": 230742,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-aa4ab015eba35f15a.jsonl": 1082071,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-ae61d89faae4f3347.jsonl": 329978
+        },
+        "to": {
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac.jsonl": 1262022,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-a5cce553484ff589f.jsonl": 1635661,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-a84a53044efe98916.jsonl": 209720,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-aa0cd4b7671d6dbef.jsonl": 230742,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-aa4ab015eba35f15a.jsonl": 1082071,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-aadf850603c224813.jsonl": 2874468,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-ae61d89faae4f3347.jsonl": 329978
+        }
+      },
+      "usage": {
+        "source": "claude",
+        "session": "1003b780-000d-494a-b94e-b40b3f8a8eac",
+        "read": "message.usage on each assistant line, once per requestId",
+        "host": {},
+        "subagents": {
+          "claude-opus-5-5": {
+            "input": 132,
+            "output": 4132,
+            "cache_read": 8849497,
+            "cache_creation": 394725
+          }
+        },
+        "agents": [
+          "drive-converge",
+          "drive-slice"
+        ]
+      },
+      "ran": [
+        "claude-opus-5-5"
+      ],
+      "agents": [
+        "drive-converge",
+        "drive-slice"
+      ],
+      "delegated": true,
+      "signals": {
+        "driver": "cruise"
+      }
+    },
+    {
+      "stage": "gaps",
+      "started": "2026-10-02T16:50:15Z",
+      "planned": "gaps: strong → host model — `strong` maps to the host model",
+      "tasks": {
+        "start": {
+          "open": 2,
+          "done": 10
+        },
+        "end": {
+          "open": 3,
+          "done": 12
+        }
+      },
+      "ended": "2026-10-02T16:57:24Z",
+      "seconds": 429,
+      "span": {
+        "from": {
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac.jsonl": 1262022,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-a5cce553484ff589f.jsonl": 1635661,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-a84a53044efe98916.jsonl": 209720,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-aa0cd4b7671d6dbef.jsonl": 230742,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-aa4ab015eba35f15a.jsonl": 1082071,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-aadf850603c224813.jsonl": 2874468,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-ae61d89faae4f3347.jsonl": 329978
+        },
+        "to": {
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac.jsonl": 1262022,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-a5cce553484ff589f.jsonl": 1665267,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-a730d7855ed1cf1d5.jsonl": 2669609,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-a84a53044efe98916.jsonl": 209720,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-aa0cd4b7671d6dbef.jsonl": 230742,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-aa4ab015eba35f15a.jsonl": 1082071,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-aadf850603c224813.jsonl": 2874468,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-ae61d89faae4f3347.jsonl": 329978
+        }
+      },
+      "usage": {
+        "source": "claude",
+        "session": "1003b780-000d-494a-b94e-b40b3f8a8eac",
+        "read": "message.usage on each assistant line, once per requestId",
+        "host": {},
+        "subagents": {
+          "claude-opus-5-5": {
+            "input": 86,
+            "output": 2405,
+            "cache_read": 4475907,
+            "cache_creation": 381202
+          }
+        },
+        "agents": [
+          "drive-gaps",
+          "drive-slice"
+        ]
+      },
+      "ran": [
+        "claude-opus-5-5"
+      ],
+      "agents": [
+        "drive-gaps",
+        "drive-slice"
+      ],
+      "delegated": true,
+      "signals": {
+        "gaps": 3,
+        "driver": "cruise"
+      }
+    },
+    {
+      "stage": "demo",
+      "started": "2026-10-02T16:58:35Z",
+      "planned": "demo: strong → host model — `strong` maps to the host model",
+      "tasks": {
+        "start": {
+          "open": 3,
+          "done": 12
+        },
+        "end": {
+          "open": 3,
+          "done": 12
+        }
+      },
+      "ended": "2026-10-02T17:02:33Z",
+      "seconds": 238,
+      "span": {
+        "from": {
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac.jsonl": 1302159,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-a5cce553484ff589f.jsonl": 1688822,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-a730d7855ed1cf1d5.jsonl": 2669609,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-a84a53044efe98916.jsonl": 209720,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-aa0cd4b7671d6dbef.jsonl": 230742,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-aa4ab015eba35f15a.jsonl": 1082071,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-aadf850603c224813.jsonl": 2874468,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-ae61d89faae4f3347.jsonl": 329978
+        },
+        "to": {
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac.jsonl": 1329617,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-a5baf4fb0f3a81550.jsonl": 4062308,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-a5cce553484ff589f.jsonl": 1688822,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-a730d7855ed1cf1d5.jsonl": 2669609,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-a84a53044efe98916.jsonl": 209720,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-aa0cd4b7671d6dbef.jsonl": 230742,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-aa4ab015eba35f15a.jsonl": 1082071,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-aadf850603c224813.jsonl": 2874468,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-ae61d89faae4f3347.jsonl": 329978
+        }
+      },
+      "usage": {
+        "source": "claude",
+        "session": "1003b780-000d-494a-b94e-b40b3f8a8eac",
+        "read": "message.usage on each assistant line, once per requestId",
+        "host": {
+          "claude-opus-5-5": {
+            "input": 4,
+            "output": 1491,
+            "cache_read": 248082,
+            "cache_creation": 741
+          }
+        },
+        "subagents": {
+          "claude-opus-5-5": {
+            "input": 50,
+            "output": 6406,
+            "cache_read": 1545482,
+            "cache_creation": 89068
+          }
+        },
+        "agents": [
+          "drive-hand"
+        ]
+      },
+      "ran": [
+        "claude-opus-5-5"
+      ],
+      "agents": [
+        "drive-hand"
+      ],
+      "delegated": true,
+      "signals": {
+        "outcome": "accepted",
+        "driver": "cruise"
+      }
+    },
+    {
+      "stage": "adversary",
+      "started": "2026-10-02T17:02:59Z",
+      "planned": "adversary: strong → host model — `strong` maps to the host model",
+      "tasks": {
+        "start": {
+          "open": 3,
+          "done": 12
+        },
+        "end": {
+          "open": 3,
+          "done": 12
+        }
+      },
+      "ended": "2026-10-02T17:02:59Z",
+      "seconds": 0,
+      "span": {
+        "from": {
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac.jsonl": 1886008,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-a5baf4fb0f3a81550.jsonl": 4062308,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-a5cce553484ff589f.jsonl": 1688822,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-a730d7855ed1cf1d5.jsonl": 2669609,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-a84a53044efe98916.jsonl": 209720,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-aa0cd4b7671d6dbef.jsonl": 230742,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-aa4ab015eba35f15a.jsonl": 1082071,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-aadf850603c224813.jsonl": 2874468,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-ae61d89faae4f3347.jsonl": 329978
+        },
+        "to": {
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac.jsonl": 1891210,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-a5baf4fb0f3a81550.jsonl": 4062308,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-a5cce553484ff589f.jsonl": 1688822,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-a730d7855ed1cf1d5.jsonl": 2669609,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-a84a53044efe98916.jsonl": 209720,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-aa0cd4b7671d6dbef.jsonl": 230742,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-aa4ab015eba35f15a.jsonl": 1082071,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-aadf850603c224813.jsonl": 2874468,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-ae61d89faae4f3347.jsonl": 329978
+        }
+      },
+      "usage": {
+        "source": "claude",
+        "session": "1003b780-000d-494a-b94e-b40b3f8a8eac",
+        "read": "message.usage on each assistant line, once per requestId",
+        "host": {
+          "claude-opus-5-5": {
+            "input": 2,
+            "output": 759,
+            "cache_read": 137013,
+            "cache_creation": 1296
+          }
+        },
+        "subagents": {},
+        "agents": []
+      },
+      "ran": [
+        "claude-opus-5-5"
+      ],
+      "agents": null,
+      "delegated": false,
+      "signals": {
+        "findings": 0,
+        "seams": 0,
+        "driver": "cruise"
+      }
+    },
+    {
+      "stage": "implement",
+      "started": "2026-10-02T17:03:08Z",
+      "planned": "implement: fast → sonnet — Claude Code: the Agent tool's `model` parameter, set per call",
+      "tasks": {
+        "start": {
+          "open": 3,
+          "done": 12
+        },
+        "end": {
+          "open": 0,
+          "done": 15
+        }
+      },
+      "ended": "2026-10-02T17:08:23Z",
+      "seconds": 315,
+      "span": {
+        "from": {
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac.jsonl": 1893347,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-a5baf4fb0f3a81550.jsonl": 4062308,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-a5cce553484ff589f.jsonl": 1688822,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-a730d7855ed1cf1d5.jsonl": 2669609,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-a84a53044efe98916.jsonl": 209720,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-aa0cd4b7671d6dbef.jsonl": 230742,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-aa4ab015eba35f15a.jsonl": 1082071,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-aadf850603c224813.jsonl": 2874468,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-ae61d89faae4f3347.jsonl": 329978
+        },
+        "to": {
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac.jsonl": 1948032,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-a5baf4fb0f3a81550.jsonl": 4062308,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-a5cce553484ff589f.jsonl": 1688822,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-a6558235ca1e1fcf1.jsonl": 497398,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-a730d7855ed1cf1d5.jsonl": 2669609,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-a84a53044efe98916.jsonl": 209720,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-aa0cd4b7671d6dbef.jsonl": 230742,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-aa4ab015eba35f15a.jsonl": 1082071,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-aadf850603c224813.jsonl": 2874468,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-ae61d89faae4f3347.jsonl": 329978
+        }
+      },
+      "usage": {
+        "source": "claude",
+        "session": "1003b780-000d-494a-b94e-b40b3f8a8eac",
+        "read": "message.usage on each assistant line, once per requestId",
+        "host": {
+          "claude-opus-5-5": {
+            "input": 10,
+            "output": 3842,
+            "cache_read": 704631,
+            "cache_creation": 6442
+          }
+        },
+        "subagents": {
+          "claude-sonnet-5-5": {
+            "input": 54,
+            "output": 2431,
+            "cache_read": 1831275,
+            "cache_creation": 100030
+          }
+        },
+        "agents": [
+          "drive-implement"
+        ]
+      },
+      "ran": [
+        "claude-opus-5-5",
+        "claude-sonnet-5-5"
+      ],
+      "agents": [
+        "drive-implement"
+      ],
+      "delegated": true,
+      "signals": {
+        "verify_failures": 0,
+        "delegate": "task",
+        "cycle": "rule",
+        "split": 0,
+        "driver": "cruise"
+      }
+    },
+    {
+      "stage": "mutation",
+      "started": "2026-10-02T17:08:32Z",
+      "planned": "mutation: fast → sonnet — Claude Code: the Agent tool's `model` parameter, set per call",
+      "tasks": {
+        "start": {
+          "open": 0,
+          "done": 15
+        },
+        "end": {
+          "open": 0,
+          "done": 15
+        }
+      },
+      "ended": "2026-10-02T17:08:32Z",
+      "seconds": 0,
+      "span": {
+        "from": {
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac.jsonl": 1958809,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-a5baf4fb0f3a81550.jsonl": 4062308,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-a5cce553484ff589f.jsonl": 1688822,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-a6558235ca1e1fcf1.jsonl": 497398,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-a730d7855ed1cf1d5.jsonl": 2669609,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-a84a53044efe98916.jsonl": 209720,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-aa0cd4b7671d6dbef.jsonl": 230742,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-aa4ab015eba35f15a.jsonl": 1082071,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-aadf850603c224813.jsonl": 2874468,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-ae61d89faae4f3347.jsonl": 329978
+        },
+        "to": {
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac.jsonl": 1958809,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-a5baf4fb0f3a81550.jsonl": 4062308,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-a5cce553484ff589f.jsonl": 1688822,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-a6558235ca1e1fcf1.jsonl": 497398,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-a730d7855ed1cf1d5.jsonl": 2669609,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-a84a53044efe98916.jsonl": 209720,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-aa0cd4b7671d6dbef.jsonl": 230742,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-aa4ab015eba35f15a.jsonl": 1082071,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-aadf850603c224813.jsonl": 2874468,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-ae61d89faae4f3347.jsonl": 329978
+        }
+      },
+      "usage": {
+        "source": "claude",
+        "session": "1003b780-000d-494a-b94e-b40b3f8a8eac",
+        "read": "message.usage on each assistant line, once per requestId",
+        "host": {},
+        "subagents": {},
+        "agents": []
+      },
+      "ran": null,
+      "agents": null,
+      "delegated": false,
+      "signals": {
+        "mutation_score": "n/a (no mutable production code changed)",
+        "driver": "cruise"
+      }
+    }
+  ],
+  "shape": {
+    "tasks": 15,
+    "files": 94,
+    "added": 2723,
+    "removed": 404,
+    "from": "ca5edaedbe77af4494c6f4cf303e006ff9fb200b",
+    "to": "d90af2fb8d38c002d5eb66ed09ab4f9c06ea0823"
+  }
+}

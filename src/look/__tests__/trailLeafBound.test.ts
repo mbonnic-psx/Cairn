@@ -18,6 +18,8 @@ const decl = (body: string, prop: string): string | undefined =>
 const ruleFor = (selector: string) => rules.find((r) => r.selector === selector);
 
 const LEAF = '.nb-trail-leaves > .nb-trail-sticky';
+/** N of a length written `calc(N * var(--nb-u))`: the length at s = 1, today's px. NaN where it is not written so. */
+const unitsOf = (length: string): number => Number(length.match(/^calc\((-?[\d.]+) \* var\(--nb-u\)\)$/)?.[1]);
 
 describe('What is protected: the left leaf is bounded by the page area (D30, D8, FR-025)', () => {
   const leaf = ruleFor(LEAF);
@@ -53,13 +55,13 @@ describe('What is protected: the left leaf gives its focus ring room (D30, D19)'
   it('pads the leaf on both inline sides past the inset and the ring, so the ring never crosses its text', () => {
     const padding = leaf && decl(leaf.body, 'padding-inline');
     expect(padding).toBeDefined();
-    expect(parseFloat(padding!)).toBeGreaterThanOrEqual(6);
+    expect(unitsOf(padding!)).toBeGreaterThanOrEqual(6);
   });
 
   it('keeps the text where it was: a margin takes back what the padding gives', () => {
     const padding = leaf && decl(leaf.body, 'padding-inline');
     const margin = leaf && decl(leaf.body, 'margin-inline');
     expect(margin).toBeDefined();
-    expect(parseFloat(margin!)).toBe(-parseFloat(padding!));
+    expect(unitsOf(margin!)).toBe(-unitsOf(padding!));
   });
 });

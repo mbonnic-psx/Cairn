@@ -38,12 +38,40 @@ function token(name: string, look: LookName): string {
   return m[1]!;
 }
 
-/** (left − right) / 2 from a `padding: top right bottom left` declaration. */
-function offsetOf(scope: string): number {
+/** The four values of a padding declaration, split outside the parentheses of a calc. */
+function fourValues(text: string): string[] {
+  const out: string[] = [];
+  let depth = 0;
+  let from = 0;
+  for (let i = 0; i <= text.length; i += 1) {
+    const c = text[i];
+    if (c === '(') depth += 1;
+    else if (c === ')') depth -= 1;
+    else if ((c === ' ' || c === undefined) && depth === 0) {
+      if (i > from) out.push(text.slice(from, i));
+      from = i + 1;
+    }
+  }
+  return out;
+}
+/** The unit and N of a length: `calc(N * var(--nb-u))` is N of the notebook's own unit, `Npx` is N of px. */
+function unitOf(length: string): { unit: 'u' | 'px'; n: number } {
+  const scaled = length.match(/^calc\((-?[\d.]+) \* var\(--nb-u\)\)$/);
+  if (scaled) return { unit: 'u', n: Number(scaled[1]) };
+  const plain = length.match(/^(-?[\d.]+)px$/);
+  if (plain) return { unit: 'px', n: Number(plain[1]) };
+  throw new Error(`cannot read the length ${length}`);
+}
+/** (left − right) / 2 from a `padding: top right bottom left` declaration, and the unit both sides are in. */
+function offsetOf(scope: string): { unit: 'u' | 'px'; n: number } {
   const body = ruleIn(scope, '.nb-page-area').find((r) => /padding:/.test(r.body))?.body ?? '';
-  const v = body.match(/padding:\s*(\d+)px\s+(\d+)px\s+(\d+)px\s+(\d+)px/);
-  if (!v) throw new Error('.nb-page-area has no four-value padding in this scope');
-  return (Number(v[4]) - Number(v[2])) / 2;
+  const v = body.match(/padding:\s*([^;]+);/);
+  const sides = v ? fourValues(v[1]!.trim()) : [];
+  if (sides.length !== 4) throw new Error('.nb-page-area has no four-value padding in this scope');
+  const left = unitOf(sides[3]!);
+  const right = unitOf(sides[1]!);
+  if (left.unit !== right.unit) throw new Error('.nb-page-area pads its two sides in different units');
+  return { unit: left.unit, n: (left.n - right.n) / 2 };
 }
 
 describe('the fold (FR-034)', () => {
@@ -70,12 +98,16 @@ describe('the fold (FR-034)', () => {
   });
 
   it('sits on the centre of the gap between the leaves, whatever the page area pads', () => {
-    const base = ruleIn(baseCss, '.nb-fold')[0]!.body.match(/left:\s*calc\(50%\s*\+\s*(\d+)px\)/);
-    expect(base, 'base .nb-fold left is calc(50% + Npx)').not.toBeNull();
-    expect(Number(base![1])).toBe(offsetOf(baseCss));
+    // Wide, both the padding and the fold's offset are N x s (D39), so the fold stays on the gap's centre at every s.
+    const base = ruleIn(baseCss, '.nb-fold')[0]!.body.match(/left:\s*calc\(50%\s*\+\s*(\d+) \* var\(--nb-u\)\)/);
+    expect(base, 'base .nb-fold left is calc(50% + N * var(--nb-u))').not.toBeNull();
+    expect(offsetOf(baseCss).unit).toBe('u');
+    expect(Number(base![1])).toBe(offsetOf(baseCss).n);
+    // Narrow, nothing scales: s is 1, and the block is as it was.
     const narrow = ruleIn(narrowBlock, '.nb-fold')[0]?.body.match(/left:\s*calc\(50%\s*\+\s*(\d+)px\)/);
     expect(narrow, 'narrow .nb-fold left is calc(50% + Npx)').toBeTruthy();
-    expect(Number(narrow![1])).toBe(offsetOf(narrowBlock));
+    expect(offsetOf(narrowBlock).unit).toBe('px');
+    expect(Number(narrow![1])).toBe(offsetOf(narrowBlock).n);
   });
 
   it('rests on equal columns, so the gap centre is the content centre (R1)', () => {

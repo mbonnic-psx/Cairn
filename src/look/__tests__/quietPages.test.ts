@@ -101,7 +101,8 @@ describe('the quiet-pages stylesheet', () => {
   });
 
   it('takes colour only from the ink, amber and rule tokens (and paper), each defined in every look', () => {
-    const used = [...css.matchAll(/var\((--[a-z0-9-]+)/g)].map((m) => m[1]!);
+    // --nb-u is the one length a page sheet sizes by, defined once for every look (boardScale.test.ts holds its use).
+    const used = [...css.matchAll(/var\((--[a-z0-9-]+)/g)].map((m) => m[1]!).filter((name) => name !== '--nb-u');
     expect(used.length).toBeGreaterThan(0);
     for (const name of used) expect([...COLOURS, ...FONTS], name).toContain(name);
     for (const look of ['morning', 'midday', 'night']) {
@@ -143,7 +144,9 @@ describe('the quiet-pages stylesheet', () => {
         expect(body).toMatch(/border-radius:\s*50%/);
         expect(body).toMatch(/flex-shrink:\s*0/);
       }
-      expect(dot.match(/width:\s*([\d.]+px)/)?.[1]).toBe(dotT.match(/width:\s*([\d.]+px)/)?.[1]);
+      const widthOf = (body: string) => body.match(/width:\s*(calc\([\d.]+ \* var\(--nb-u\)\))/)?.[1];
+      expect(widthOf(dot), 'a mark is N x the notebook\'s unit wide').toBeDefined();
+      expect(widthOf(dot)).toBe(widthOf(dotT));
     });
   });
 
