@@ -13,8 +13,8 @@
     "windows": [
       {
         "title": "Cairn",
-        "width": 1000,
-        "height": 720,
+        "width": 1280,
+        "height": 800,
         "minWidth": 800,
         "minHeight": 600,
         "resizable": true,

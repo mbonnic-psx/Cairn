@@ -7,6 +7,7 @@
 import { useEffect, useState } from 'react';
 
 import { Button } from './components/Button';
+import { tabsFor, type Step, type TabId } from './navigation';
 import { CheckIn, useCheckInSession } from './screens/CheckIn';
 import { Disclosure } from './screens/Disclosure';
 import { Limits } from './screens/Limits';
@@ -14,7 +15,11 @@ import { Protection } from './screens/Protection';
 import { Reaches } from './screens/Reaches';
 import { Categories } from './screens/Setup/Categories';
 import { CustomEntry } from './screens/Setup/CustomEntry';
-import { Trail, trailTitle } from './screens/Trail';
+import { Trail } from './screens/Trail';
+import { LookSwitch } from './look/LookSwitch';
+import type { Look } from './look/look';
+import { CurrentShell } from './shell/CurrentShell';
+import { NotebookShell } from './shell/NotebookShell';
 import {
   getDisclosures,
   getProtectionState,
@@ -29,9 +34,10 @@ import {
   type Trail as TrailData,
 } from './ipc';
 
-type Step = 'choosing' | 'disclosure' | 'protected' | 'trail' | 'limits' | 'reaches' | 'checkin';
-
-export default function App() {
+export default function App({ devBuild = import.meta.env.DEV }: { devBuild?: boolean }) {
+  // Chosen at the switch, kept nowhere, and always 'current' outside a dev build.
+  const [chosenLook, setLook] = useState<Look>('current');
+  const look: Look = devBuild ? chosenLook : 'current';
   const [step, setStep] = useState<Step>('choosing');
   const [categories, setCategories] = useState<CategoryPreset[]>([]);
   const [trail, setTrail] = useState<TrailData>();
@@ -42,8 +48,12 @@ export default function App() {
   const checkIn = useCheckInSession();
 
   useEffect(() => {
-    listCategories().then(setCategories).catch(() => undefined);
-    getDisclosures().then(setDisclosures).catch(() => undefined);
+    listCategories()
+      .then(setCategories)
+      .catch(() => undefined);
+    getDisclosures()
+      .then(setDisclosures)
+      .catch(() => undefined);
     getProtectionState()
       .then((current) => {
         setState(current);
@@ -72,6 +82,28 @@ export default function App() {
     }
   }
 
+  async function select(id: TabId) {
+    switch (id) {
+      case 'protection':
+        setStep(protectionOn ? 'protected' : 'choosing');
+        break;
+      case 'trail':
+        setTrail(await getTrail());
+        setStep('trail');
+        break;
+      case 'reaches':
+        setStep('reaches');
+        break;
+      case 'checkin':
+        checkIn.open();
+        setStep('checkin');
+        break;
+      case 'limits':
+        setStep('limits');
+        break;
+    }
+  }
+
   async function confirm() {
     try {
       const current = await turnProtectionOn();
@@ -84,65 +116,14 @@ export default function App() {
     }
   }
 
-  return (
-    <main className="min-h-screen px-6 py-12 sm:px-10">
-      <header className="mx-auto mb-10 flex max-w-3xl items-baseline justify-between">
-        <h1 className="reflective text-2xl text-ink-900">Cairn</h1>
-        <nav className="flex gap-1 text-sm">
-          {/* Always in the header, so it never changes shape (owner,
-              2026-10-01): to choosing what to protect before protection is
-              on, and to the protection screen once it is. Marked as the
-              current page while one of those is showing. */}
-          <Button
-            tone="quiet"
-            aria-current={
-              step === 'choosing' || step === 'disclosure' || step === 'protected'
-                ? 'page'
-                : undefined
-            }
-            className="aria-[current=page]:text-ink-900"
-            onClick={() => setStep(protectionOn ? 'protected' : 'choosing')}
-          >
-            Protection
-          </Button>
-          {protectionOn && (
-            <Button
-              tone="quiet"
-              onClick={async () => {
-                setTrail(await getTrail());
-                setStep('trail');
-              }}
-            >
-              {trailTitle(state?.status)}
-            </Button>
-          )}
-          {protectionOn && (
-            // Deliberate navigation, and nothing anywhere that draws someone
-            // here: no count, no badge, no hint that there is something new to
-            // look at (FR-030a, FR-030b).
-            <Button tone="quiet" onClick={() => setStep('reaches')}>
-              Today
-            </Button>
-          )}
-          {/* Reachable at any time (FR-010), and by navigation only: nothing
-              here says there is something to write, or that anything was
-              written (FR-033). */}
-          <Button
-            tone="quiet"
-            onClick={() => {
-              checkIn.open();
-              setStep('checkin');
-            }}
-          >
-            Tonight
-          </Button>
-          <Button tone="quiet" onClick={() => setStep('limits')}>
-            What Cairn covers
-          </Button>
-        </nav>
-      </header>
+  const Shell = look === 'morning' ? NotebookShell : CurrentShell;
+  const tabs = tabsFor(step, protectionOn, state?.status);
 
-      <div className="mx-auto flex max-w-3xl flex-col gap-6">
+  return (
+    <>
+      {/* `import.meta.env.DEV` is a build-time constant, so the bundler drops the switch from a production build. */}
+      {import.meta.env.DEV && devBuild && <LookSwitch look={look} onChange={setLook} />}
+      <Shell tabs={tabs} onSelect={(id) => void select(id)}>
         {step === 'choosing' && (
           <>
             <Categories categories={categories} onToggle={toggle} note={note} />
@@ -170,7 +151,7 @@ export default function App() {
         {step === 'checkin' && <CheckIn session={checkIn} />}
 
         {step === 'limits' && disclosures && <Limits disclosures={disclosures} />}
-      </div>
-    </main>
+      </Shell>
+    </>
   );
 }
