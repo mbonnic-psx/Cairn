@@ -59,6 +59,7 @@ Skipped: nothing widened, and the slice does not close the split. Covered by row
 | concurrency, idempotency, ordering, retention, or time | already covered | the add-then-read-back order in `CustomEntry.tsx` and the waiting untick are today's, unchanged (pinned by `SetupCurrentPin.test.tsx`); no time is read |
 
 Skipped: nothing widened, and the slice does not close the split. Covered by row `frame` · release gate on the notebook. The disclosure's yes before its details arrive is today's behaviour, handed to 002 (D20).
+
 ## quiet-pages · 716a7e7 · 2026-10-02
 
 | Trigger | Status | Evidence |
