@@ -29,8 +29,13 @@ function splitTop(text: string, separator: string): string[] {
   return parts.map((p) => p.trim()).filter(Boolean);
 }
 
-/** A property that draws a line or a ring: its px lengths are lines, and stay px (D39). */
-const LINE_OR_RING = /^(border(-[a-z-]+)?|outline(-[a-z-]+)?|box-shadow)$/;
+/**
+ * A property that draws a line: a border's width, style or colour (never its radius, which is a corner and grows),
+ * or an outline. Its px lengths are lines, and stay px (D39). A box-shadow is a line only layer by layer: see SHADOW_LINE.
+ */
+const LINE = /^(border(-(top|right|bottom|left|inline|block)(-(start|end))?)?(-(width|style|color))?|outline(-[a-z-]+)?)$/;
+/** A shadow layer that is a ring (`0 0 0 Npx`) or a 1px edge (`0 1px 0`): a line, and it stays px. A soft shadow or glow is not. */
+const SHADOW_LINE = /^(inset\s+)?0 (0 0 \d+px|1px 0)(\s|$)/;
 /** A scaled term: N * var(--nb-u), N signed and possibly fractional. */
 const SCALED = /-?[\d.]+ \* var\(--nb-u\)/g;
 /** The one px a scaled value may carry: the 1px rule at the end of a scaled pitch, in a background-image. */
@@ -43,7 +48,7 @@ export interface SweepOptions {
 
 /**
  * Every declaration in a rule whose selector matches `selector` that carries a px or rem length which is neither
- * a line or a ring (`border*`, `outline*`, `box-shadow`) nor written `calc(N * var(--nb-u))` (or 0). Each entry
+ * a line or a ring (a border's width, style or colour, an outline, a ring or 1px edge of a shadow) nor written `calc(N * var(--nb-u))` (or 0). Each entry
  * names the selector, the property and the value. Exported for the sweeps over the page sheets and the contract.
  */
 export function unscaledLengths(sheet: string, selector: RegExp, options: SweepOptions = {}): string[] {
@@ -56,8 +61,11 @@ export function unscaledLengths(sheet: string, selector: RegExp, options: SweepO
     for (const decl of splitTop(m[2]!, ';')) {
       const colon = decl.indexOf(':');
       const prop = decl.slice(0, colon).trim();
-      if (LINE_OR_RING.test(prop)) continue;
+      if (LINE.test(prop)) continue;
       let value = decl.slice(colon + 1).trim();
+      if (prop === 'box-shadow') value = splitTop(value, ',').filter((layer) => !SHADOW_LINE.test(layer)).join(', ');
+      // A pill's radius is "as round as it goes", not a size.
+      if (prop === 'border-radius' && value === '999px') continue;
       // A box one pixel wide or tall draws a 1px line (the margin line), and lines stay 1px (D39).
       if ((prop === 'width' || prop === 'height') && value === '1px') continue;
       if (prop === 'background-image') value = value.replace(RULING_LINE, '');
@@ -70,8 +78,30 @@ export function unscaledLengths(sheet: string, selector: RegExp, options: SweepO
   return found;
 }
 
-/** Interior classes of notebook.css: the rules that lay out what is inside the notebook (plan Summary 5). */
-export const NOTEBOOK_INTERIOR = /\.nb-(page-area|page--ruled|margin|fold|label|button|tabs|tab|tab-label)(?![\w-])/;
+/** Every `nb-` class a component writes, in the order it writes them; a trailing `-` is a prefix a template completes. */
+const classesIn = (text: string) => [...text.matchAll(/\bnb-[\w-]+/g)].map((m) => m[0]);
+const escapeRe = (t: string) => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const alternation = (tokens: string[]) =>
+  new RegExp(
+    `\\.(?:${[...new Set(tokens)]
+      .map((t) => (t.endsWith('-') ? `${escapeRe(t)}[\\w-]*` : `${escapeRe(t)}(?![\\w-])`))
+      .join('|')})`,
+  );
+const shellSource = readFileSync('src/shell/NotebookShell.tsx', 'utf8');
+const insideTheNotebook = shellSource.slice(shellSource.indexOf('nb-notebook') + 'nb-notebook'.length);
+/**
+ * The classes of what is inside the notebook, read from the markup that renders it: the shell's from the notebook
+ * element on (the page area, the margin, the fold, the tabs), the screens' own, and the scene's (the sun and the
+ * stones scale with the same factor). `.nb-notebook` itself is swept for its corner and shadow only.
+ */
+export const NOTEBOOK_INTERIOR = alternation([
+  ...classesIn(insideTheNotebook),
+  ...classesIn(readFileSync('src/shell/Landscape.tsx', 'utf8')),
+  ...classesIn(readFileSync('src/shell/CairnMark.tsx', 'utf8')),
+  'nb-page--ruled',
+  'nb-label',
+  'nb-button',
+]);
 
 describe('the sweep names an unscaled length and passes the scaled forms (the helper)', () => {
   const sweep = (css: string) => unscaledLengths(css, /\.x/);
@@ -85,7 +115,19 @@ describe('the sweep names an unscaled length and passes the scaled forms (the he
     expect(sweep('.x { width: calc(38 * var(--nb-u)); padding: 0 calc(16 * var(--nb-u)); font-size: calc(12.5 * var(--nb-u)); right: calc(-44 * var(--nb-u)); left: calc(50% + 6 * var(--nb-u)); top: 0; }')).toEqual([]);
   });
   it('passes the lines and rings, which keep their px', () => {
-    expect(sweep('.x { border: 1px solid red; border-radius: 0 6px 6px 0; outline: 2px solid; outline-offset: -4px; box-shadow: 0 0 0 2px red; }')).toEqual([]);
+    expect(sweep('.x { border: 1px solid red; border-top-width: 2px; outline: 2px solid; outline-offset: -4px; box-shadow: 0 0 0 2px red; }')).toEqual([]);
+    expect(sweep('.x { box-shadow: inset 0 0 0 1px red; }')).toEqual([]);
+    expect(sweep('.x { box-shadow: 0 1px 0 red, 0 0 0 2px blue; }')).toEqual([]);
+  });
+  it('names a corner and a soft shadow or glow, which grow, and passes a pill and the scaled forms', () => {
+    expect(sweep('.x { border-radius: 6px; }')).toEqual(['.x { border-radius: 6px }']);
+    expect(sweep('.x { border-radius: 0 6px 6px 0; }')).toHaveLength(1);
+    expect(sweep('.x { border-top-left-radius: 3px; }')).toHaveLength(1);
+    expect(sweep('.x { box-shadow: 0 24px 50px -20px red; }')).toHaveLength(1);
+    expect(sweep('.x { box-shadow: 0 0 14px 2px red; }')).toHaveLength(1);
+    expect(sweep('.x { box-shadow: 0 1px 0 red, 0 24px 50px -20px red; }')).toHaveLength(1);
+    expect(sweep('.x { border-radius: 999px; }')).toEqual([]);
+    expect(sweep('.x { border-radius: calc(6 * var(--nb-u)); box-shadow: 0 1px 0 red, 0 calc(24 * var(--nb-u)) calc(50 * var(--nb-u)) calc(-20 * var(--nb-u)) red; }')).toEqual([]);
   });
   it('passes the 1px rule at the end of a scaled pitch in a background-image, and only there', () => {
     const line = 'repeating-linear-gradient(to bottom, transparent 0, transparent calc(32 * var(--nb-u) - 1px), red calc(32 * var(--nb-u) - 1px), red calc(32 * var(--nb-u)))';
@@ -129,14 +171,28 @@ describe('everything inside the notebook grows by one factor (D39; notebook.css)
   it('writes every px length of an interior rule as calc(N * var(--nb-u)) or 0, apart from lines and rings', () => {
     expect(unscaledLengths(css, NOTEBOOK_INTERIOR, { without: [narrow, forced] }), 'unscaled lengths').toEqual([]);
   });
+
+  it('grows the notebook\'s own corner and shadow, which are not lines', () => {
+    const own = unscaledLengths(css, /\.nb-notebook$/, { without: [narrow, forced] }).filter((f) => /\{ (border-radius|box-shadow):/.test(f));
+    expect(own, 'unscaled corner or shadow').toEqual([]);
+  });
+
+  it('reads the interior from the markup: the shell\'s classes are in it, and the root, title bar and aside are not', () => {
+    for (const name of ['.nb-page-area', '.nb-margin', '.nb-fold', '.nb-tabs', '.nb-tab', '.nb-tab--protection', '.nb-tab-label', '.nb-stone', '.nb-sun']) {
+      expect(name, name).toMatch(NOTEBOOK_INTERIOR);
+    }
+    for (const name of ['.nb-root', '.nb-titlebar', '.nb-aside']) expect(name, name).not.toMatch(NOTEBOOK_INTERIOR);
+  });
 });
 
 /**
- * Lengths a page sheet may still write in px because the test that pins them is outside the slice's manifest. Empty:
- * the last one (Protection's "Keep things as they are", pinned in nothingFades.test.tsx) is scaled. An entry here must
+ * Lengths a page sheet may still write in px because the test that pins them is outside the slice's manifest. An entry here must
  * name a length that is still there: the test below fails while an entry is stale.
  */
-export const PENDING_OUTSIDE_MANIFEST: Array<{ sheet: string; found: string }> = [];
+export const PENDING_OUTSIDE_MANIFEST: Array<{ sheet: string; found: string }> = [
+  // nothingFades.test.tsx:312 pins `border-radius: 8px` and is outside board-scale's T012 manifest: scale it with that test.
+  { sheet: 'protection-page.css', found: '.nb-protection-note__button { border-radius: 8px }' },
+];
 
 // T006: the same factor sizes every page. Each page sheet is read from disk; a length added to one later fails here.
 describe.each(['protection-page.css', 'quiet-pages.css', 'setup-pages.css', 'tonight-page.css'])(

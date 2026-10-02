@@ -149,7 +149,7 @@
   min-height: calc(36 * var(--nb-u));
   padding: calc(4 * var(--nb-u)) calc(8 * var(--nb-u));
   border: 1px solid var(--nb-ink-quiet);
-  border-radius: 3px;
+  border-radius: calc(3 * var(--nb-u));
   background-color: transparent;
   font-family: var(--nb-font-serif);
   font-size: calc(16 * var(--nb-u));
@@ -219,13 +219,13 @@
   flex: 0 0 28%;
   align-self: center;
   height: calc(6 * var(--nb-u));
-  border-radius: 3px;
+  border-radius: calc(3 * var(--nb-u));
   background-color: var(--nb-rule);
   overflow: hidden;
 }
 .nb-reaches-bar__fill {
   height: 100%;
-  border-radius: 3px;
+  border-radius: calc(3 * var(--nb-u));
   background-color: var(--nb-ink-quiet);
 }
 
@@ -264,7 +264,7 @@
   margin: 0;
   padding: 0 calc(12 * var(--nb-u));
   border: 1px solid var(--nb-ink-quiet);
-  border-radius: 3px;
+  border-radius: calc(3 * var(--nb-u));
   background-color: var(--nb-paper);
   background-image: repeating-linear-gradient(
     to bottom,
@@ -292,7 +292,7 @@
   margin-top: calc(30 * var(--nb-u));
   padding: 0 calc(20 * var(--nb-u));
   border: 1px solid var(--nb-button);
-  border-radius: 3px;
+  border-radius: calc(3 * var(--nb-u));
   background-color: var(--nb-button);
   font-family: var(--nb-font-mono);
   font-size: calc(12.5 * var(--nb-u));

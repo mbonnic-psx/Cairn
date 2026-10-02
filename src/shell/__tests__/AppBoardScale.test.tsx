@@ -19,14 +19,14 @@ import { NotebookShell } from '../NotebookShell';
 
 /** A class that sets a size and would not grow with --nb-u: a width, height, size, spacing, line height or text size. */
 const SIZE_UTILITY =
-  /^-?(?:(?:min-|max-)?[wh]-|size-|(?:p|m)[xytblrse]?-(?:\d|\[|px\b)|(?:gap|space)-(?:[xy]-)?(?:\d|\[|px\b)|leading-|text-(?:xs|sm|base|lg|xl|\dxl|\[))/;
+  /^-?(?:(?:min-|max-)?[wh]-|size-|(?:p|m)[xytblrse]?-(?:\d|\[|px\b)|(?:gap|space)-(?:[xy]-)?(?:\d|\[|px\b)|leading-|(?:top|right|bottom|left|start|end)-(?:\d|\[|px\b|full|1\/2)|inset(?:-[xy])?-(?:\d|\[|px\b|full|1\/2)|translate-[xy]-|basis-|text-(?:xs|sm|base|lg|xl|\dxl|\[))/;
 
 describe('the helper recognises a Tailwind size utility', () => {
-  it.each(['w-4', 'h-12', 'size-6', 'min-w-0', 'max-w-md', 'min-h-screen', 'max-h-64', 'p-4', 'px-5', 'py-2.5', 'mt-3', 'gap-2', 'gap-x-4', 'space-y-3', 'leading-6', 'text-sm', 'text-2xl', 'text-[13px]', 'w-[40px]', '-mt-2'])(
+  it.each(['w-4', 'h-12', 'size-6', 'min-w-0', 'max-w-md', 'min-h-screen', 'max-h-64', 'p-4', 'px-5', 'py-2.5', 'mt-3', 'gap-2', 'gap-x-4', 'space-y-3', 'leading-6', 'text-sm', 'text-2xl', 'text-[13px]', 'w-[40px]', '-mt-2', 'top-4', 'left-1/2', '-right-2', 'bottom-[10px]', 'inset-0', 'inset-x-4', '-translate-x-1/2', 'translate-y-2', 'basis-1/3', 'basis-[40px]'])(
     'names %s',
     (name) => expect(name).toMatch(SIZE_UTILITY),
   );
-  it.each(['nb-protection-title', 'text-ink-500', 'text-amber-600', 'font-medium', 'flex', 'items-center', 'rounded-lg', 'p', 'nb-page--ruled', 'underline', 'hidden'])(
+  it.each(['nb-protection-title', 'text-ink-500', 'text-amber-600', 'font-medium', 'flex', 'items-center', 'rounded-lg', 'p', 'nb-page--ruled', 'underline', 'hidden', 'top', 'left', 'inset', 'translate-none', 'start'])(
     'leaves %s',
     (name) => expect(name).not.toMatch(SIZE_UTILITY),
   );

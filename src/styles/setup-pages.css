@@ -97,7 +97,7 @@
   height: calc(18 * var(--nb-u));
   margin: 0;
   border: 1.5px solid var(--nb-ink-quiet);
-  border-radius: 3px;
+  border-radius: calc(3 * var(--nb-u));
   background-color: transparent;
   cursor: pointer;
 }
@@ -142,7 +142,7 @@
   min-width: 0;
   padding: calc(8 * var(--nb-u)) calc(12 * var(--nb-u));
   border: 1px solid var(--nb-ink-quiet);
-  border-radius: 3px;
+  border-radius: calc(3 * var(--nb-u));
   background-color: transparent;
   font-family: var(--nb-font-serif);
   font-size: calc(18 * var(--nb-u));
@@ -156,7 +156,7 @@
   min-height: calc(40 * var(--nb-u));
   padding: 0 calc(20 * var(--nb-u));
   border: 1px solid var(--nb-ink);
-  border-radius: 3px;
+  border-radius: calc(3 * var(--nb-u));
   background-color: transparent;
   font-family: var(--nb-font-mono);
   font-size: calc(12.5 * var(--nb-u));
@@ -201,7 +201,7 @@
   min-height: calc(40 * var(--nb-u));
   padding: 0 calc(20 * var(--nb-u));
   border: 0;
-  border-radius: 3px;
+  border-radius: calc(3 * var(--nb-u));
   background-color: transparent;
   font-family: var(--nb-font-mono);
   font-size: calc(12.5 * var(--nb-u));

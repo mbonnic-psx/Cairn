@@ -287,7 +287,7 @@
 /* The glow is night's alone: only that look sets --nb-stone-glow. */
 .nb-stone {
   border-radius: 999px;
-  box-shadow: 0 0 14px 2px var(--nb-stone-glow, transparent);
+  box-shadow: 0 0 calc(14 * var(--nb-u)) calc(2 * var(--nb-u)) var(--nb-stone-glow, transparent);
 }
 .nb-stone--base { background: var(--nb-stone-base); }
 .nb-stone--moss { background: var(--nb-stone-moss); }
@@ -356,8 +356,8 @@
   max-height: 85vh;
   min-height: 480px;
   background: var(--nb-paper);
-  border-radius: 6px;
-  box-shadow: 0 1px 0 var(--nb-shadow-edge), 0 24px 50px -20px var(--nb-shadow-soft), 0 0 90px 10px var(--nb-lamp-glow, transparent);
+  border-radius: calc(6 * var(--nb-u));
+  box-shadow: 0 1px 0 var(--nb-shadow-edge), 0 calc(24 * var(--nb-u)) calc(50 * var(--nb-u)) calc(-20 * var(--nb-u)) var(--nb-shadow-soft), 0 0 calc(90 * var(--nb-u)) calc(10 * var(--nb-u)) var(--nb-lamp-glow, transparent);
 }
 .nb-spread {
   display: grid;
@@ -421,7 +421,7 @@
   min-height: calc(40 * var(--nb-u));
   padding: 0 calc(16 * var(--nb-u));
   border: 0;
-  border-radius: 3px;
+  border-radius: calc(3 * var(--nb-u));
   background: var(--nb-button);
   color: var(--nb-button-ink);
   font-family: var(--nb-font-mono);
@@ -450,7 +450,7 @@
   min-height: min-content;
   padding: calc(8 * var(--nb-u)) 0;
   border: 0;
-  border-radius: 0 6px 6px 0;
+  border-radius: 0 calc(6 * var(--nb-u)) calc(6 * var(--nb-u)) 0;
   background: var(--nb-tab-limits);
   color: var(--nb-tab-ink);
   display: flex;
