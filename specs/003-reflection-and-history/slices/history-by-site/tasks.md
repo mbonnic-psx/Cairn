@@ -90,7 +90,7 @@ its phase touches.
 - [ ] S18 [US2] [W13, refactor] `src/screens/CheckIn.tsx`: replace its own `today()` with `localDays`, with
   every `CheckIn*.test.tsx` green before and after. `quote` also edits this file, so whichever lands second
   rebases. Depends on S15.
-- [ ] S19 [P] [US2] [H1, guard] `scripts/check-no-ambient-counts.mjs`: remove `History.tsx` from
+- [X] S19 [P] [US2] [H1, guard] `scripts/check-no-ambient-counts.mjs`: remove `History.tsx` from *(Done on `main` by the host in #21, 2026-10-01: a slice may not edit `scripts/` or `eslint.config.js`. Planted `History.tsx` refused by both.)*
   `NAVIGATED_TO`, and say why in its header. `eslint.config.js`: remove it from the reaches block. Verify by
   planting: reach data in a planted `src/screens/History.tsx` fails both, in `Reaches.tsx` it passes, and in
   `App.tsx` it fails. Remove the planted files and record the runs in *Done notes*.
@@ -102,7 +102,7 @@ its phase touches.
   `cargo clippy --all-targets -- -D warnings` clean. Run by the host. This stage builds nothing.
 - [ ] S21 `contracts/ui-ipc.md`, as amended, matches `Patterns` in Rust (`ipc/state.rs`) and TypeScript
   (`src/ipc/reaches.ts`) field for field, and S3's wire-shape test holds it.
-- [ ] S22 After the merge, on `main` (the feature's `tasks.md` and `pinned.md` are the host's): append the two
+- [ ] S22 After the merge, on `main` (the feature's `tasks.md` and `pinned.md` are the host's): append the two *(The two pin rows landed early, in #21; the feature `tasks.md` ticks remain for after the merge.)*
   pinned rows if S2 has not already; tick T039, T040 and T047 if their by-site halves are all they still owe,
   and otherwise note T039–T045, T047 and T049 as partly done, naming what remains and for which slice (5b–5d,
   `one-day`). Tick W13 in `../write-tonight/tasks.md`, and note W14 as done for `summarizeReaches` only.
