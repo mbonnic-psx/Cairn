@@ -1,7 +1,9 @@
 //! Counts are never presented as complete for time nobody watched (FR-030).
 #![allow(clippy::unwrap_used, clippy::expect_used)]
 
-use cairn::store::gaps::{coverage_note, infer, overlapping, Gap, WORTH_MENTIONING};
+use cairn::store::gaps::{
+    coverage_note, infer, merged, overlapping, Gap, WORTH_MENTIONING,
+};
 
 #[test]
 fn a_period_the_machine_was_off_becomes_a_gap() {
@@ -61,4 +63,16 @@ fn the_note_says_what_is_missing_without_guessing_at_it() {
 #[test]
 fn a_day_with_no_gaps_gets_no_note() {
     assert!(coverage_note(&[]).is_none());
+}
+
+#[test]
+fn gaps_that_only_touch_stay_two_and_gaps_that_overlap_become_one() {
+    let touching = merged(&[Gap { from: 10, to: 20 }, Gap { from: 20, to: 30 }]);
+    assert_eq!(
+        touching,
+        vec![Gap { from: 10, to: 20 }, Gap { from: 20, to: 30 }]
+    );
+
+    let overlapping = merged(&[Gap { from: 10, to: 21 }, Gap { from: 20, to: 30 }]);
+    assert_eq!(overlapping, vec![Gap { from: 10, to: 30 }]);
 }

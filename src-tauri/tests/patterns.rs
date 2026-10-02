@@ -66,7 +66,7 @@
 use proptest::prelude::*;
 
 use cairn::domain::dates::LocalDate;
-use cairn::domain::patterns::{summarize, Reach};
+use cairn::domain::patterns::{by_site, summarize, Reach};
 
 // --- Strategies ----------------------------------------------------------
 
@@ -446,4 +446,29 @@ fn a_three_day_range_with_no_reaches_lists_all_three_local_days_at_zero() {
     assert_eq!(patterns.by_day.first().unwrap().0, expected_first);
     assert_eq!(patterns.by_day.last().unwrap().0, expected_last);
     assert!(patterns.by_day.iter().all(|(_, count)| *count == 0));
+}
+
+#[test]
+fn by_site_takes_the_half_open_range_and_nothing_either_side() {
+    let at = |domain: &str, at: i64| Reach {
+        domain: domain.to_string(),
+        at,
+    };
+    let reaches = [
+        at("before.example", 99),
+        at("first.example", 100),
+        at("inside.example", 150),
+        at("at-the-end.example", 200),
+        at("after.example", 300),
+    ];
+
+    let sites = by_site(&reaches, 100, 200);
+
+    assert_eq!(
+        sites,
+        vec![
+            ("first.example".to_string(), 1),
+            ("inside.example".to_string(), 1)
+        ]
+    );
 }

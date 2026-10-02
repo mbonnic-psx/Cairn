@@ -204,3 +204,14 @@ fn an_instant_at_either_extreme_is_refused_not_a_panic() {
         );
     }
 }
+
+#[test]
+fn the_end_may_be_a_day_and_a_clock_change_past_now_and_no_more() {
+    // The latest an end can be: the next midnight is at most a day and the
+    // largest clock change (two hours) after now.
+    let end = midnight(after_last()) + 2 * HOUR;
+    let now = end - DAY - 2 * HOUR;
+    let start = midnight(first());
+    assert!(check_range(first(), last(), start, end, now).is_ok());
+    assert!(check_range(first(), last(), start, end, now - 1).is_err());
+}

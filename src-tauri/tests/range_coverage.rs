@@ -230,3 +230,14 @@ fn clipped_gaps_that_overlap_are_one_gap() {
         .collect();
     assert_eq!(cut, vec![(100, 1_200), (2_000, 2_100)]);
 }
+
+#[test]
+fn a_minute_is_the_edge_between_brief_and_minutes() {
+    let just_under = note(MINUTE - 1);
+    assert!(just_under.contains("less than a minute"), "{just_under}");
+    let exactly = note(MINUTE);
+    assert!(exactly.contains("1 minute"), "{exactly}");
+    assert!(!exactly.contains("less than"), "{exactly}");
+    let day = coverage_note(&gap_of(MINUTE)).unwrap();
+    assert!(day.contains("about 1 minute of today"), "{day}");
+}
