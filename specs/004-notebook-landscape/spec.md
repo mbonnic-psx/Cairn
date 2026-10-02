@@ -43,6 +43,13 @@ and buttons that this design uses, and forbids it for body text read at length.
 
 - Q: The look is fixed on morning in a released build, so the greeting would say "Good morning." in the evening. What should the greeting do until the clock arrives? → A: Keep showing it. The greeting always follows the look the toggle is on. The toggle is temporary: before Cairn's first release, the toggle is removed and the clock chooses the look, so the greeting never disagrees with the time of day in a shipped Cairn (owner, 2026-10-01).
 
+- Gaps reviewed 2026-10-01, before the split. The owner answered:
+  - Q: The mockups are 1280×800, but Cairn opens at 1000×720 and can shrink to 800×600. → A: Cairn opens at 1280×800. The smallest window stays 800×600. In a narrow window the greeting moves into the sky above the notebook instead of beside it (FR-028, FR-029).
+  - Q: The greeting shows a time. Does it keep up? → A: It shows the weekday and the time, keeps up within a minute, and uses the computer's own 12- or 24-hour format (FR-030).
+  - Q: Some screens hold little (What Cairn covers, teardown). What fills the second page? → A: The content goes on the left page, and the right page is a blank ruled page. Nothing is invented to fill it (FR-031).
+  - Q: Where does the testing switch sit? → A: Small, at the top right of the sky, labelled "Look (testing)", so it never reads as part of the product (FR-011).
+  - Q: The 003 slice `history-by-site` may touch the Today screen. → A: It lands before this feature's Tonight-and-Today slice (story split, parking lot).
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - The window becomes a notebook in a landscape (Priority: P1)
@@ -175,7 +182,7 @@ still present and still works, now laid out as a notebook page.
 
 - **FR-009**: The interface MUST support exactly three looks: morning, midday and night, as described in User Story 2 and on the reference canvas.
 - **FR-010**: Changing the look MUST change the sky, hills, sun or moon, cairn colours, greeting and notebook together. It MUST keep the current screen and anything typed on it.
-- **FR-011**: A development build MUST offer a three-way switch at the top of the window to choose the look. It MUST start on morning.
+- **FR-011**: A development build MUST offer a three-way switch, small, at the top right of the sky, labelled "Look (testing)", to choose the look. It MUST start on morning.
 - **FR-012**: A released build MUST contain no look switch: not shown, not reachable by keyboard or any key combination, and not announced to assistive technology. It MUST show the morning look.
 - **FR-013**: Choosing the look by time of day MUST NOT be part of this feature. Nothing in this feature reads the clock to choose a look.
 - **FR-013a**: The look switch, and the fixed morning look in released builds, are temporary. Before Cairn's first release, the time-of-day feature MUST remove the switch and let the clock choose the look. This feature records that obligation and does not meet it.
@@ -201,6 +208,13 @@ still present and still works, now laid out as a notebook page.
 - **FR-023**: When the system asks for reduced motion, the interface MUST show no animation or transition.
 - **FR-024**: The scenery MUST be silent to assistive technology. The greeting and all notebook content MUST be readable by it.
 - **FR-025**: Content MUST stay reachable, without overlap or clipping, at window sizes down to the smallest window Cairn allows today, scrolling inside the notebook where needed.
+
+**Window and greeting**
+
+- **FR-028**: Cairn MUST open at 1280×800. The smallest window MUST stay 800×600.
+- **FR-029**: When the window is too narrow for the greeting to sit beside the notebook, the greeting MUST move into the sky above the notebook. It is never hidden behind the notebook or cut off.
+- **FR-030**: The greeting MUST show the weekday and the time in the computer's own 12- or 24-hour format, and MUST keep up with the clock to within a minute while Cairn is open. Showing the time MUST NOT change the look (FR-013).
+- **FR-031**: A screen whose content fits on one page MUST put it on the left page and leave the right page as a blank ruled page. Nothing may be invented to fill it.
 
 **What must not change**
 
