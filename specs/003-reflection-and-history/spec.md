@@ -370,6 +370,15 @@ recommendation"):
   counted toward its weekday: what Cairn did not count is not recorded as though it had been. The exclusion is
   stated as in the other views ("…not counted here"), extending FR-023 to the day-of-week breakdown.
 
+- **W7 — a weekday the range does not hold (owner, 2026-10-02: "do the recommended").** Shown by name with "not in
+  these days", no count and no bar: a zero would read as a day with no reaches when the range had no such day
+  (FR-022).
+- **W8 — "across N Mondays" in English only, for now (owner: "leave it").** All of Cairn's copy is English;
+  plural forms in other languages belong to a translation slice.
+- **W9 — "the computer's settings" means its region (owner: "use the region").** The first day of the week comes
+  from the computer's locale, Monday when it does not say. A separate operating-system first-day setting is not
+  read; reading it would need a platform service of its own.
+
 Already stated, and held by this slice as written: the time Cairn did not see is stated above the days (H4, H5); no
 ranking word, no colour that means good or bad (B3).
 
