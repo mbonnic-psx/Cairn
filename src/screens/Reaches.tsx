@@ -200,8 +200,34 @@ function TodayView({
     );
   }
 
+  if (onPage) {
+    return (
+      <>
+        <div className="nb-page">
+          <h2 className="nb-reaches-title">{TODAY}</h2>
+          <p className="nb-reaches-note">{day.coverage_note ?? COUNTED_ONLY_TODAY}</p>
+        </div>
+        <div className="nb-page nb-page--ruled">
+          {day.reaches.length > 0 && (
+            <ul className="nb-reaches-log">
+              {day.reaches.map((reach, index) => (
+                <li
+                  key={`${reach.domain}-${reach.at}-${index}`}
+                  className="nb-reaches-line"
+                >
+                  <span className="nb-reaches-site">{reach.domain}</span>
+                  <span className="nb-reaches-time">{timeOfDay(reach.at)}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </>
+    );
+  }
+
   return (
-    <Frame onPage={onPage}>
+    <Frame onPage={false}>
       <h2 className="reflective text-3xl text-ink-900">{TODAY}</h2>
 
       {day.reaches.length === 0 ? (

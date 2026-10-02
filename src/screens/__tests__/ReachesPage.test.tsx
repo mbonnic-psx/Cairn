@@ -50,6 +50,12 @@ function wordsOutside(ui: React.ReactElement): string[] {
 
 const now = evening;
 
+/** The time as Current writes it: the same call. */
+const timeOf = (seconds: number) =>
+  new Date(seconds * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+const FALLBACK_NOTE = 'Cairn counts only while it is running. This is what it saw today.';
+
 describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (name) => {
   beforeEach(() => {
     look = name;
@@ -153,5 +159,75 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (name) 
       await user.click(screen.getByRole('button', { name: 'Over time' }));
       expect(words(spread!)).toEqual(expected);
     });
+  });
+
+  describe('Today with a log on a notebook page', () => {
+    const logCases = ['a log, a coverage note', 'a log, the fallback note'] as const;
+
+    it.each(logCases)(
+      'left page: "Today", then the note last, set off by its rule: %s',
+      (state) => {
+        const today = todayCases[state]!;
+        const { left } = onPage(<Reaches today={today} now={now} />);
+        const heading = within(left!).getByRole('heading', { level: 2, name: 'Today' });
+        expect(left!.firstElementChild).toBe(heading);
+        const note = left!.lastElementChild as HTMLElement;
+        expect(note).toHaveTextContent(today.coverage_note ?? FALLBACK_NOTE);
+        expect(note).toHaveClass('nb-reaches-note');
+        expect(left!.children).toHaveLength(2);
+      },
+    );
+
+    it('right page: ruled, one line a reach in the core order, the site then its time', () => {
+      const today = todayCases['a log, a coverage note']!;
+      const { right } = onPage(<Reaches today={today} now={now} />);
+      expect(right).toHaveClass('nb-page--ruled');
+      const lines = within(right!).getAllByRole('listitem');
+      expect(lines).toHaveLength(today.reaches.length);
+      lines.forEach((line, i) => {
+        const reach = today.reaches[i]!;
+        const [site, time] = Array.from(line.children);
+        expect(site).toHaveTextContent(reach.domain);
+        expect(site).toHaveClass('nb-reaches-site');
+        expect(time).toHaveTextContent(timeOf(reach.at));
+        expect(time).toHaveClass('nb-reaches-time');
+        expect(line.children).toHaveLength(2);
+      });
+    });
+
+    it('keeps the note off the right page', () => {
+      const today = todayCases['a log, a coverage note']!;
+      const { right } = onPage(<Reaches today={today} now={now} />);
+      expect(within(right!).queryByText(today.coverage_note!)).toBeNull();
+    });
+
+    it('lets forty reaches scroll the page area, with no inline height or overflow', () => {
+      const reaches = Array.from({ length: 40 }, (_, i) => ({
+        domain: `site-${i}.example`,
+        at: 1_790_756_100 + i * 60,
+      }));
+      const today = { ...todayCases['a log, the fallback note']!, reaches };
+      const { right, main } = onPage(<Reaches today={today} now={now} />);
+      expect(within(right!).getAllByRole('listitem')).toHaveLength(40);
+      for (const el of [main, ...Array.from(main.querySelectorAll<HTMLElement>('*'))]) {
+        expect(el.style.height).toBe('');
+        expect(el.style.overflow).toBe('');
+      }
+    });
+
+    it.each(logCases)(
+      'says the same words as outside any shell, the note moved: %s',
+      (state) => {
+        const today = todayCases[state];
+        const outside = wordsOutside(
+          <Reaches today={today} read={silentReader} now={now} />,
+        );
+        const { spread } = onPage(
+          <Reaches today={today} read={silentReader} now={now} />,
+        );
+        // The words are compared as a sorted set, so where the note sits is the one thing allowed to differ.
+        expect(words(spread!)).toEqual(outside);
+      },
+    );
   });
 });
