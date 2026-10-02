@@ -1,6 +1,6 @@
 /**
  * Protection and What is protected keep every word, control and state they had before the notebook became the only
- * layout (slice `reveal`, Increment 1a, D43, FR-018). The baseline is the markup the screens gave outside any shell,
+ * layout (slice `reveal`, Increment 1a, D43, FR-018). The baseline is the markup the screens gave in the one-column layout,
  * kept in `beforeTheReveal.ts`; each case is rendered inside `NotebookShell`, in each look, and its words, controls
  * and states must equal the baseline's. The core is a fake written in this tree.
  */

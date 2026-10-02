@@ -1,7 +1,7 @@
 /**
  * What the screens said before slice 004 `reveal` took the one-column layout away (D43, research R2).
  *
- * Each record is the markup a screen gave outside any shell, captured by the pin slices from the code as it stood
+ * Each record is the markup a screen gave in the one-column layout, captured by the pin slices from the code as it stood
  * before they changed it and held unchanged since: moved here verbatim, never re-typed, never re-captured. The
  * WordsKept tests read its words, controls and states and hold the notebook page to them. A change here is a change
  * to what Cairn says and needs its own decision, never a re-capture to make a test pass.
@@ -148,7 +148,7 @@ export const TEARDOWN: Record<string, string> = {
 };
 
 /**
- * Captured for slice `reveal` while the one-column branch still existed, by rendering `Teardown` outside any shell once
+ * Captured for slice `reveal` while the one-column branch still existed, by rendering `Teardown` in the one-column layout once
  * and writing its output here, never retyped. Shapes the pin did not hold: a partial report with what is left set aside
  * (its residue emptied), and a complete report that still carries residue.
  */
@@ -206,7 +206,7 @@ export const PIN: Record<string, string> = {
 };
 
 /**
- * Captured for slice `reveal` while the one-column branch still existed, by rendering the screen outside any shell once
+ * Captured for slice `reveal` while the one-column branch still existed, by rendering the screen in the one-column layout once
  * and writing its output here, never retyped: the choosing step as `Choosing` composes it, with the waiting note.
  */
 export const CHOOSING_WITH_NOTE_TEXT =
@@ -311,7 +311,7 @@ export const TONIGHT: Record<string, string> = {
 
 /**
  * Captured for slice `reveal` while the one-column branch still existed, by rendering Today's Over time, by hour,
- * outside any shell once per case of `ReachesByHourPage.test.tsx` and writing its words (as `wordsOf` reads them)
+ * in the one-column layout once per case of `ReachesByHourPage.test.tsx` and writing its words (as `wordsOf` reads them)
  * here, never retyped.
  */
 export const BY_HOUR_WORDS: Record<string, string[]> = {
@@ -322,7 +322,7 @@ export const BY_HOUR_WORDS: Record<string, string[]> = {
 
 /**
  * Captured for slice `reveal` while the one-column branch still existed, by running the comparisons of
- * `CheckInPage.test.tsx` outside any shell once and writing what they saw here, never retyped. Shapes the pin did not
+ * `CheckInPage.test.tsx` in the one-column layout once and writing what they saw here, never retyped. Shapes the pin did not
  * hold: a screen with both refusals heard, a kept entry on a day that ended, text typed on a day that ended, a sealed
  * day with the quotes setting unknown, with a refused switch and ended, and the session crossings.
  */
@@ -335,7 +335,7 @@ export const TONIGHT_EXTRA_WORDS: Record<string, string[]> = {
   "sealed, ended": ["Cairn cannot open your history just now. Protection is unaffected, and nothing has been lost.", "Hide quotes", "The path is made by walking.", "Wednesday 30 September"],
 };
 
-/** What `Tonight` asked the core, outside any shell, when the entry was typed and "Keep this" pressed. */
+/** What `Tonight` asked the core, in the one-column layout, when the entry was typed and "Keep this" pressed. */
 export const SAVE_CALLS_OUTSIDE: Array<{ cmd: string; args?: unknown }> = [
   {
     "cmd": "save_journal_entry",
@@ -348,7 +348,7 @@ export const SAVE_CALLS_OUTSIDE: Array<{ cmd: string; args?: unknown }> = [
   }
 ];
 
-/** What `Tonight` asked the core, outside any shell, when "Hide quotes" was pressed. */
+/** What `Tonight` asked the core, in the one-column layout, when "Hide quotes" was pressed. */
 export const SWITCH_CALLS_OUTSIDE: Array<{ cmd: string; args?: unknown }> = [
   {
     "cmd": "set_quotes_shown",
