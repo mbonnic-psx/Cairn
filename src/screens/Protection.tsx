@@ -5,10 +5,11 @@
  * write that returned success — and `not_verified` is its own state with its
  * own words, never rendered as protected (FR-011, FR-012).
  */
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
+import { useNotebookPage } from '../shell/notebookPage';
 import {
   cancelPendingChange,
   getProtectionState,
@@ -34,6 +35,7 @@ export function Protection({
 }) {
   const [current, setCurrent] = useState<ProtectionState | undefined>(state);
   const [trouble, setTrouble] = useState<string>();
+  const onPage = useNotebookPage();
 
   useEffect(() => {
     if (state) return;
@@ -57,6 +59,30 @@ export function Protection({
   }
 
   const words = protectionWords[current.status];
+
+  if (onPage) {
+    return (
+      <Spread>
+        <span className={`nb-state ${toneClasses[words.tone]}`}>{words.title}</span>
+        <h2 className="nb-state-title">{words.title}</h2>
+        <p className="nb-state-detail">{words.detail}</p>
+        {current.status !== 'off' && (
+          <dl className="nb-figures">
+            <div className="nb-figure">
+              <dt className="nb-figure__label">Addresses in force</dt>
+              <dd className="nb-figure__value">{current.entry_count_verified}</dd>
+            </div>
+            <div className="nb-figure">
+              <dt className="nb-figure__label">Last checked</dt>
+              <dd className="nb-figure__value">
+                {current.verified_at ? whenWas(current.verified_at) : 'not yet'}
+              </dd>
+            </div>
+          </dl>
+        )}
+      </Spread>
+    );
+  }
 
   return (
     <Card>
@@ -86,6 +112,16 @@ export function Protection({
         </dl>
       )}
     </Card>
+  );
+}
+
+/** The notebook's two pages: what is said on the left, a blank ruled page (or a note) on the right. */
+function Spread({ children, right }: { children: ReactNode; right?: ReactNode }) {
+  return (
+    <div className="nb-spread">
+      <div className="nb-page">{children}</div>
+      <div className="nb-page nb-page--ruled">{right}</div>
+    </div>
   );
 }
 
