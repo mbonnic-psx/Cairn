@@ -460,3 +460,40 @@ proptest! {
         );
     }
 }
+
+/// Y23, the limit stated in a test (adversary A3): `check_offsets` accepts a list the
+/// computer could not send, so a reach can land on a weekday the range does not hold.
+/// London, 2026-09-15 (a Tuesday) alone: `range_start` is 23:00 UTC the day before, and a
+/// first offset of +4 h is 3 hours above the implied +1 h, inside the rule. A reach 30
+/// minutes before `range_end` is 02:30 on Wednesday by that offset, though `days` holds
+/// Tuesday alone. The contract says no more than this.
+#[cfg(feature = "history")]
+#[test]
+fn an_accepted_offset_list_can_place_a_reach_on_a_weekday_the_range_does_not_hold() {
+    use cairn::reflection::over_time::check_offsets;
+
+    let day = date(2026, 9, 15);
+    let range_start = utc(day, 0) - HOUR;
+    let range_end = utc(date(2026, 9, 16), 0) - HOUR;
+    let (first, changes) = check_offsets(
+        day,
+        day,
+        range_start,
+        range_end,
+        &[(range_start, 4 * HOUR)],
+    )
+    .expect("accepted: 3 hours above the implied offset");
+
+    let counts = by_weekday(
+        &reaches(&[range_end - 1_800]),
+        first,
+        &changes,
+        range_start,
+        range_end,
+    );
+    let held = weekdays_in(day, day);
+
+    assert_eq!(counts, [0, 0, 1, 0, 0, 0, 0]);
+    assert_eq!(held, [0, 1, 0, 0, 0, 0, 0]);
+    assert_eq!(held[WED], 0, "a reach on a weekday whose days is 0");
+}

@@ -240,8 +240,12 @@ This supersedes the original `[{ weekday, count }]` above by one field, `days`. 
 - `days` is how many of that weekday the dates `first_day..=last_day` hold (W4). It is calendar arithmetic on the
   two dates, with no offset: a 23-hour or 25-hour day is still one Sunday. It counts the range's days, not the days
   Cairn watched, and the coverage note states what Cairn did not see, as for sites and hours. The values sum to the
-  range's length in days, saturating at `u32::MAX`. A weekday the range does not hold has `days` 0 and `count` 0,
-  and the interface does not show that `0` as a day with no reaches.
+  range's length in days, saturating at `u32::MAX`. For the offsets the interface sends, a weekday the range does
+  not hold has `days` 0 and `count` 0, and the interface does not show that `0` as a day with no reaches. The core
+  does not guarantee the pair: `check_offsets` accepts a list the computer could not send (the limit stated under
+  *What the core does not check* above, adversary A3), and a reach can then fall on a date outside the range, so a
+  weekday with `days` 0 can hold a `count`. The interface draws every count the core sends: a weekday is shown as
+  *not in these days* only when both are 0.
 - A quiet range is seven entries with `count` 0 and the range's `days` (FR-024). A sealed answer is `[]`, never seven
   zeros, which would read as a quiet range.
 - `movement` (`history-movement`) is still absent.

@@ -281,3 +281,30 @@ describe('the same words as outside any shell', () => {
     expect(words(spread)).toEqual(expected);
   });
 });
+
+describe('a count the core sent is never hidden, on the page (Y23; W3, W7)', () => {
+  it('draws the count and the bar of a weekday that holds 0 days but 1 reach', async () => {
+    const { user, pages } = await byDayOnPage(
+      answer({ by_weekday: week({ 2: 1 }, [0, 1, 0, 0, 0, 0, 0]) }),
+    );
+    await user.click(choose('By day'));
+    const [, right] = pages();
+
+    const wednesday = within(right!).getAllByRole('listitem')[2];
+    // name, bar, count: no clause, for it would say "not in these days" beside a reach.
+    expect(wednesday.children).toHaveLength(3);
+    expect(wednesday).not.toHaveTextContent('not in these days');
+    expect(within(wednesday).getByText('1')).toBeInTheDocument();
+    expect(within(wednesday).getByTestId('bar')).toBeInTheDocument();
+  });
+
+  it('draws all seven days when the answer holds only some of them', async () => {
+    const { user, pages } = await byDayOnPage(
+      answer({ by_weekday: [{ weekday: 2, count: 3, days: 4 }] }),
+    );
+    await user.click(choose('By day'));
+    const [, right] = pages();
+
+    expect(within(right!).getAllByRole('listitem')).toHaveLength(7);
+  });
+});

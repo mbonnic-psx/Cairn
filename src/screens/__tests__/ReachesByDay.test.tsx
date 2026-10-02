@@ -468,3 +468,46 @@ describe('voice and the wall (US2 scenario 5, SC-010, Principle I)', () => {
     expect(text()).not.toMatch(/\b(unblock|pause|turn off|allow|snooze|disable)\b/i);
   });
 });
+
+describe('a count the core sent is never hidden (Y23; W3, W7)', () => {
+  it('draws the count and the bar of a weekday that holds 0 days but 1 reach', async () => {
+    const { read } = fakeRead(async () =>
+      patterns({ by_weekday: week({ 2: 1 }, [0, 1, 0, 0, 0, 0, 0]) }),
+    );
+    await openByDay(read);
+    await waitFor(() => expect(lines()).toHaveLength(7));
+
+    const wednesday = lines()[2];
+    expect(within(wednesday).getByText('1')).toBeInTheDocument();
+    expect(within(wednesday).getByTestId('bar')).toBeInTheDocument();
+    expect(wednesday).not.toHaveTextContent('not in these days');
+  });
+
+  it('still draws no count and no bar for a weekday with 0 days and 0 reaches', async () => {
+    const { read } = fakeRead(async () =>
+      patterns({ by_weekday: week({ 1: 1 }, [0, 1, 0, 0, 0, 0, 0]) }),
+    );
+    await openByDay(read);
+    await waitFor(() => expect(lines()).toHaveLength(7));
+
+    expect(within(lines()[0]).queryByTestId('bar')).toBeNull();
+    expect(lines()[0]).toHaveTextContent('not in these days');
+  });
+
+  it('draws all seven days when the answer holds only some of them', async () => {
+    const { read } = fakeRead(async () =>
+      patterns({
+        by_weekday: [
+          { weekday: 2, count: 3, days: 4 },
+          { weekday: 5, count: 1, days: 4 },
+        ],
+      }),
+    );
+    await openByDay(read);
+    await waitFor(() => expect(lines()).toHaveLength(7));
+
+    expect(within(lines()[2]).getByText('3')).toBeInTheDocument();
+    expect(within(lines()[5]).getByText('1')).toBeInTheDocument();
+    expect(lines()[0]).toHaveTextContent(weekdayInWords(0));
+  });
+});

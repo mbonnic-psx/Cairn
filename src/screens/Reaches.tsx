@@ -76,9 +76,7 @@ const BY_DAY = 'By day';
  */
 const estimatesSentence = (days: number, view: Seen) => {
   const reason =
-    view === 'weekday'
-      ? 'Cairn counts only what it saw'
-      : `an estimate has no ${view}`;
+    view === 'weekday' ? 'Cairn counts only what it saw' : `an estimate has no ${view}`;
   return days === 1
     ? `Your own estimate for 1 day is not counted here, because ${reason}.`
     : `Your own estimates for ${days} days are not counted here, because ${reason}.`;
@@ -118,20 +116,26 @@ const rowsOf = (answer: Patterns, seen: Seen, weekStart: number): Row[] => {
       count: one.count,
     }));
   }
-  return Array.from({ length: 7 }, (_, place) => (weekStart + place) % 7).flatMap((weekday) => {
-    const day = answer.by_weekday.find((one) => one.weekday === weekday);
-    return day
-      ? [
-          {
-            key: String(weekday),
-            name: weekdayInWords(weekday),
-            count: day.count,
-            clause: acrossInWords(weekday, day.days),
-            absent: day.days === 0,
-          },
-        ]
-      : [];
-  });
+  // An answer with no days at all (sealed) draws none; otherwise all seven are drawn (W3), a weekday
+  // the answer left out as a name with no count known.
+  if (answer.by_weekday.length === 0) return [];
+  return Array.from({ length: 7 }, (_, place) => (weekStart + place) % 7).map(
+    (weekday) => {
+      const day = answer.by_weekday.find((one) => one.weekday === weekday);
+      return {
+        key: String(weekday),
+        name: weekdayInWords(weekday),
+        count: day?.count ?? 0,
+        // Nor is a reach called "not in these days": with no days to count by, the name stands with its count.
+        clause:
+          day && (day.days > 0 || day.count === 0)
+            ? acrossInWords(weekday, day.days)
+            : undefined,
+        // Only a weekday that holds no days and no reach is "not in these days": a count is never hidden (Y23).
+        absent: day !== undefined && day.days === 0 && day.count === 0,
+      };
+    },
+  );
 };
 
 /** Whether the view has nothing to count: no sites, or no reach in any hour. */
