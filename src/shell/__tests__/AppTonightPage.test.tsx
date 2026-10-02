@@ -4,7 +4,7 @@
  * typed in the writing space survives a trip to another tab and a change of look, and Current is unchanged.
  * The core is a fake written in the test tree at the one seam the interface calls it through.
  */
-import { act, render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
@@ -129,12 +129,18 @@ describe('Current through App', () => {
     await screen.findByText('video.example');
     expect(container.querySelector('.nb-spread')).toBeNull();
     // The same fake core answers both; each screen is rendered once more on its own and found whole in the page.
-    const reachesHtml = await settled(<Reaches />);
+    const reachesHtml = await settled(<Reaches />, async (root) => {
+      await within(root).findByText('video.example');
+    });
     expect(container.innerHTML).toContain(reachesHtml);
 
     await tab('Tonight');
     await writingSpace();
-    const tonightHtml = await settled(<CheckIn />);
+    const tonightHtml = await settled(<CheckIn />, async (root) => {
+      // The writing space is the day loaded; the switch is the quotes setting read, the last thing it waits for.
+      await within(root).findByRole('textbox');
+      await within(root).findByRole('button', { name: 'Show quotes' });
+    });
     expect(container.innerHTML).toContain(tonightHtml);
   });
 
@@ -163,10 +169,13 @@ describe('Current through App', () => {
   });
 });
 
-/** A screen rendered on its own, once its answers have arrived, as the markup it settles into. */
-async function settled(ui: React.ReactElement): Promise<string> {
+/** A screen rendered on its own, once it shows the loaded state `ready` waits for, as the markup it settles into. */
+async function settled(
+  ui: React.ReactElement,
+  ready: (root: HTMLElement) => Promise<void>,
+): Promise<string> {
   const view = render(ui);
-  await act(() => new Promise<void>((resolve) => setTimeout(resolve, 50)));
+  await ready(view.container);
   const html = view.container.innerHTML;
   view.unmount();
   return html;
