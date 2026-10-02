@@ -36,4 +36,7 @@ npx vitest run src/look/__tests__/fold.test.ts src/look/__tests__/notebookSize.t
 - On macOS 11 or older (WebKit before Safari 15) `aspect-ratio` is not read; the notebook's proportion is not kept
   there, but it keeps a definite height (the window's, less 120px; the room left when narrow), so its pages still
   scroll and nothing on them is out of reach (research R3, assumed). Tauri on this machine and on current systems is unaffected.
+- On macOS 11 and 12 running Safari 15.x WebKit, container queries are not read (`aspect-ratio` is), so the tabs
+  stay at their small size at every window height, where elsewhere they are large from a notebook 580px tall. They
+  stay whole and legible: the small rules shrink and wrap. Only their size is lost.
 - Current is unchanged; the notebook stays behind the development switch until `reveal` (D1).
