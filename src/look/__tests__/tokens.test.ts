@@ -230,6 +230,14 @@ describe('the shell contract in the stylesheet (contracts/ui-shell.md)', () => {
     expect(body).toMatch(/var\(--nb-rule\)/);
   });
 
+  it('tiles the rules at exactly one pitch, so no seam skips or doubles a rule (T025)', () => {
+    const body = ruleFor('.nb-page--ruled')[0]!.body;
+    expect(body).toMatch(/background-size:\s*100%\s+32px/);
+    expect(body).toMatch(/var\(--nb-rule\)\s+31px,\s*var\(--nb-rule\)\s+32px/);
+    const y = Number(body.match(/background-position:\s*0\s+(\d+)px/)?.[1]);
+    expect(y % 32, 'the ruling starts 22px into the pitch, where the first line of writing sits').toBe(22);
+  });
+
   it('names no fold: the spread is two equal columns and nothing more', () => {
     expect(notebook).not.toMatch(/--nb-fold/);
     expect(ruleFor('.nb-spread')[0]!.body).toMatch(/grid-template-columns:\s*1fr 1fr/);

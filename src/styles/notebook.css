@@ -371,7 +371,9 @@
     var(--nb-rule) 31px,
     var(--nb-rule) 32px
   );
-  background-position: 0 150px;
+  /* One tile is one pitch, so the ruling has no seam; it starts 22px in, where the first line of writing sits. */
+  background-size: 100% 32px;
+  background-position: 0 22px;
 }
 .nb-margin {
   position: absolute;
