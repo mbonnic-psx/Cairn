@@ -530,6 +530,8 @@ fn an_unreadable_configuration_is_no_line_and_is_left_alone() {
     assert_eq!(std::fs::read(store.path()).unwrap(), unreadable);
 }
 
+// Unix permissions plant the failing write; Windows has no mode bits to set.
+#[cfg(unix)]
 #[test]
 fn a_line_that_cannot_be_saved_is_still_shown() {
     let machine = a_machine();
