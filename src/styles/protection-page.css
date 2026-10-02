@@ -97,6 +97,11 @@
   font-size: 12.5px;
   color: var(--nb-ink-quiet);
 }
+/* Hover from the look's ink, on the paper: the shell does not re-point the theme's sand fill the button hovers to. */
+.nb-protection-note__button:hover {
+  background-color: transparent;
+  color: var(--nb-ink);
+}
 /* A focus indicator of its own, from the ink every look holds at 3:1 on its paper (look/__tests__/tokens.test.ts). */
 .nb-protection-note__button:focus-visible {
   outline: 2px solid var(--nb-ink);

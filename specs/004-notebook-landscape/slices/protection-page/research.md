@@ -71,8 +71,10 @@ App-level tests use `vi.mock`; this slice's new tests do not add to that.
 `--nb-ink-body` (sentences), `--nb-ink-quiet` (labels, captions) and `--nb-accent-amber` (the not-confirmed note
 and the waiting note's edge); lines take `--nb-rule`. Each of these is already proved at its floor on every
 look's paper by `src/look/__tests__/tokens.test.ts`. The state badge keeps today's palette classes
-(`bg-moss-100 text-moss-600` and its siblings), which the shell re-points inside `[data-look]` and whose pairs the
-same test proves on every look. Mono (`--nb-font-mono`) only on the badge, the figures' labels, the list's caption
+(`bg-moss-100 text-moss-600` and its siblings). Correction (T022, 2026-10-02): the shell re-points only the darker
+*text* shades inside `[data-look]` (`ink-500`, `ink-400`, `amber-600`, `amber-500`, `moss-600`), never a fill
+(`moss-100`, `amber-100`, `sand-100`), so the badge's fill and a quiet button's hover fill are today's, the same on
+every look, and no test proved them; T026 and T022 draw them from the look tokens instead. Mono (`--nb-font-mono`) only on the badge, the figures' labels, the list's caption
 and the button; everything else is the page's serif. No `animation` or `transition` in the stylesheet.
 
 **Why amber, not a tint**: today's waiting box is an `amber-100` fill. On the paper the note keeps the amber

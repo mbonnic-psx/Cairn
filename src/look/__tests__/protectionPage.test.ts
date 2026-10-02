@@ -238,6 +238,26 @@ describe('the protection-page stylesheet', () => {
     });
   });
 
+  describe('every control takes its hover colours from the look tokens (T022)', () => {
+    const controls = [
+      ...(protection + trail).matchAll(
+        /<(?:Button|button|a|input|select|textarea)\b[^>]*?className="([^"]*\bnb-[^"]*)"/g,
+      ),
+    ].flatMap((m) => m[1]!.split(/\s+/).filter((c) => c.startsWith('nb-')));
+
+    it.each(controls)('.%s has a :hover rule whose colours are --nb-* tokens', (name) => {
+      const own = rules
+        .filter((r) => r.selector.split(',').map((x) => x.trim()).includes(`.${name}:hover`))
+        .map((r) => r.body)
+        .join('');
+      expect(own, `no :hover rule for .${name}`).not.toBe('');
+      expect(own).toMatch(/(?:^|[;\s])color:\s*var\(--nb-ink\)/);
+      for (const m of own.matchAll(/background(?:-color)?:\s*([^;]+);/g)) {
+        expect(m[1]!.trim(), 'a hover fill').toMatch(/^(transparent|var\(--nb-[a-z-]+\))$/);
+      }
+    });
+  });
+
   it('has a rule for every slice class the screens name, and names no class they do not', () => {
     for (const name of named) {
       if (SHELL.includes(name)) continue;
