@@ -1,7 +1,8 @@
 /**
  * The morning greeting: the words, then the true weekday and time in the
- * computer's own locale. It keeps up by waking on each minute boundary, and
- * holds nothing else: nothing that counts or accumulates.
+ * computer's own locale. It keeps up by waking on each minute boundary,
+ * re-reading the clock on every wake, on focus and when shown again, and holds
+ * nothing else: nothing that counts or accumulates.
  */
 import { useEffect, useState } from 'react';
 
@@ -11,16 +12,28 @@ export function Greeting() {
   const [now, setNow] = useState(() => new Date());
 
   useEffect(() => {
-    let interval: ReturnType<typeof setInterval> | undefined;
-    const current = new Date();
-    const untilNextMinute = 60_000 - (current.getSeconds() * 1000 + current.getMilliseconds());
-    const first = setTimeout(() => {
-      setNow(new Date());
-      interval = setInterval(() => setNow(new Date()), 60_000);
-    }, untilNextMinute);
+    let timer: ReturnType<typeof setTimeout> | undefined;
+
+    // Read the clock, show it, and aim the next wake at the next :00 of the
+    // clock as it is now, so a sleep or a hand-set clock never leaves it off.
+    const sync = () => {
+      if (timer !== undefined) clearTimeout(timer);
+      const current = new Date();
+      setNow(current);
+      const untilNextMinute = 60_000 - (current.getSeconds() * 1000 + current.getMilliseconds());
+      timer = setTimeout(sync, untilNextMinute);
+    };
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible') sync();
+    };
+
+    sync();
+    document.addEventListener('visibilitychange', onVisibility);
+    window.addEventListener('focus', sync);
     return () => {
-      clearTimeout(first);
-      if (interval !== undefined) clearInterval(interval);
+      if (timer !== undefined) clearTimeout(timer);
+      document.removeEventListener('visibilitychange', onVisibility);
+      window.removeEventListener('focus', sync);
     };
   }, []);
 
