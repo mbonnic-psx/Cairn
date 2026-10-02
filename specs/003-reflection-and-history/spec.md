@@ -366,9 +366,11 @@ recommendation"):
 - **W5 — the day is the computer's.** A reach belongs to the local day its own instant falls in, with the offset
   in force then, exactly as by hour (B4, B4 clarified): exact across clock changes, read in the zone set now.
 
-Already stated, and held by this slice as written: estimates are day-level and *do* have a day, but FR-023
-excludes them only from site and hour breakdowns, so whether an estimate counts toward its weekday is a question
-for the plan to raise rather than assume; the time Cairn did not see is stated above the days (H4, H5); no
+- **W6 — estimates stay out (owner: "leave it out if its not on dont record").** A day-level estimate is not
+  counted toward its weekday: what Cairn did not count is not recorded as though it had been. The exclusion is
+  stated as in the other views ("…not counted here"), extending FR-023 to the day-of-week breakdown.
+
+Already stated, and held by this slice as written: the time Cairn did not see is stated above the days (H4, H5); no
 ranking word, no colour that means good or bad (B3).
 
 ## Requirements *(mandatory)*
