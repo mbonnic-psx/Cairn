@@ -332,6 +332,21 @@ describe('the lined writing space (D24)', () => {
   });
 });
 
+describe('what follows the writing space is legible however tall it is dragged (T026, FR-019, D24)', () => {
+  const resize = last(bodyOf('.nb-checkin-write', base), 'resize');
+
+  // Dragged to a height that is not a multiple of 32px, the page's ruling no longer meets these elements on
+  // a line, so each takes its own ground (the paper, or the button's fill) unless the drag keeps the pitch.
+  it.each(['.nb-checkin-keep', '.nb-checkin-status', '.nb-checkin-switch'])(
+    '%s has a ground of its own, or the writing space keeps the pitch',
+    (selector) => {
+      if (resize === 'none') return;
+      const ground = tokenOf(last(bodyOf(selector, base), 'background-color'));
+      expect(['--nb-paper', '--nb-button'], `${selector} has no ground`).toContain(ground);
+    },
+  );
+});
+
 describe('focus on the paper (the sweep is T016)', () => {
   const CONTROLS = [
     '.nb-reaches-which__button',
