@@ -62,7 +62,7 @@ export function Protection({
 
   if (onPage) {
     return (
-      <Spread>
+      <Spread right={pending && <Waiting pending={pending} onCancelled={onCancelled} />}>
         <span className={`nb-state ${toneClasses[words.tone]}`}>{words.title}</span>
         <h2 className="nb-state-title">{words.title}</h2>
         <p className="nb-state-detail">{words.detail}</p>
@@ -139,21 +139,35 @@ function Waiting({
   pending: PendingChange;
   onCancelled?: () => void;
 }) {
+  const onPage = useNotebookPage();
+  const sentence = pending.eligible_now
+    ? 'This is ready to take effect.'
+    : `This takes effect in ${pending.time_remaining}. Until then, nothing changes.`;
+  const cancel = async () => {
+    await cancelPendingChange(pending.id);
+    onCancelled?.();
+  };
+
+  if (onPage) {
+    return (
+      <div className="nb-note">
+        <p className="nb-note__what">{pending.what}</p>
+        <p className="nb-note__sentence">{sentence}</p>
+        <Button tone="quiet" className="nb-note__button" onClick={cancel}>
+          Keep things as they are
+        </Button>
+      </div>
+    );
+  }
+
   return (
     <div className="mt-8 rounded-xl bg-amber-100 p-6">
       <p className="text-ink-900">{pending.what}</p>
-      <p className="reflective mt-2 text-ink-700">
-        {pending.eligible_now
-          ? 'This is ready to take effect.'
-          : `This takes effect in ${pending.time_remaining}. Until then, nothing changes.`}
-      </p>
+      <p className="reflective mt-2 text-ink-700">{sentence}</p>
       <Button
         tone="quiet"
         className="mt-4 -ml-2"
-        onClick={async () => {
-          await cancelPendingChange(pending.id);
-          onCancelled?.();
-        }}
+        onClick={cancel}
       >
         Keep things as they are
       </Button>

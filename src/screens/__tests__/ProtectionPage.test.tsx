@@ -2,14 +2,14 @@
  * Protection told it is on a notebook page (slice `protection-page`, T004–T006): the same words as outside
  * any shell, laid out as a spread. Rendered inside `NotebookShell`; the core is a fake written in this tree.
  */
-import { render, within } from '@testing-library/react';
+import { fireEvent, render, waitFor, within } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { protectionWords } from '../../ipc';
 import { NotebookShell } from '../../shell/NotebookShell';
 import { Protection } from '../Protection';
-import type { FakeCore } from './fakeCore';
-import { cases } from './pinCases';
+import { installFakeCore, type FakeCore } from './fakeCore';
+import { cases, ready, waiting } from './pinCases';
 
 let core: FakeCore | undefined;
 afterEach(() => {
@@ -36,6 +36,21 @@ function outside(ui: React.ReactElement): string {
   const text = view.container.textContent ?? '';
   view.unmount();
   return text;
+}
+
+/** The words, one per leaf element, in a fixed order: the waiting note moves page, its words do not change. */
+function words(root: HTMLElement): string[] {
+  return Array.from(root.querySelectorAll('*'))
+    .filter((el) => el.children.length === 0 && el.textContent)
+    .map((el) => el.textContent as string)
+    .sort();
+}
+
+function wordsOutside(ui: React.ReactElement): string[] {
+  const view = render(ui);
+  const found = words(view.container);
+  view.unmount();
+  return found;
 }
 
 describe('Protection on a notebook page, with a state', () => {
@@ -87,5 +102,60 @@ describe('Protection on a notebook page, with a state', () => {
     const { left } = onPage(<Protection state={cases['off']!.state} />);
     expect(within(left!).queryByText('Addresses in force')).toBeNull();
     expect(within(left!).queryByText('Last checked')).toBeNull();
+  });
+});
+
+describe('Protection on a notebook page, with a change waiting', () => {
+  for (const name of ['off', 'in force', 'not confirmed']) {
+    const { state } = cases[name]!;
+
+    it(`${name}: the waiting note sits on the right page, in the amber language`, () => {
+      const { left, right } = onPage(<Protection state={state} pending={waiting} />);
+      expect(within(right!).getByText('Turn protection off')).toBeInTheDocument();
+      expect(
+        within(right!).getByText('This takes effect in 23 hours. Until then, nothing changes.'),
+      ).toBeInTheDocument();
+      expect(within(right!).getByRole('button', { name: 'Keep things as they are' })).toBeInTheDocument();
+      expect(within(left!).queryByText('Turn protection off')).toBeNull();
+      const note = right!.querySelector('.nb-note');
+      expect(note).not.toBeNull();
+      expect(right!.innerHTML).not.toMatch(/red/i);
+    });
+
+    it(`${name}: says the same words as outside any shell`, () => {
+      const { main } = onPage(<Protection state={state} pending={waiting} />);
+      expect(words(main)).toEqual(wordsOutside(<Protection state={state} pending={waiting} />));
+    });
+  }
+
+  it('a change that is ready says so', () => {
+    const { right } = onPage(<Protection state={cases['in force']!.state} pending={ready} />);
+    expect(within(right!).getByText('This is ready to take effect.')).toBeInTheDocument();
+    expect(within(right!).queryByText(/This takes effect in/)).toBeNull();
+  });
+
+  it('with no change waiting, the right page stays blank and ruled', () => {
+    const { right } = onPage(<Protection state={cases['in force']!.state} pending={null} />);
+    expect(right).toHaveClass('nb-page--ruled');
+    expect(right!.textContent).toBe('');
+  });
+
+  it('"Keep things as they are" asks the core once, then says it is cancelled', async () => {
+    core = installFakeCore({ cancel_pending_change: () => null });
+    const onCancelled = vi.fn();
+    const { right } = onPage(
+      <Protection state={cases['in force']!.state} pending={waiting} onCancelled={onCancelled} />,
+    );
+    fireEvent.click(within(right!).getByRole('button', { name: 'Keep things as they are' }));
+    await waitFor(() => expect(onCancelled).toHaveBeenCalledTimes(1));
+    expect(core.calls).toEqual([{ cmd: 'cancel_pending_change', args: { id: 'abc' } }]);
+  });
+
+  it('the button is reachable by keyboard', () => {
+    const { right } = onPage(<Protection state={cases['in force']!.state} pending={waiting} />);
+    const button = within(right!).getByRole('button', { name: 'Keep things as they are' });
+    button.focus();
+    expect(button).toHaveFocus();
+    expect(button.tabIndex).toBeGreaterThanOrEqual(0);
   });
 });
