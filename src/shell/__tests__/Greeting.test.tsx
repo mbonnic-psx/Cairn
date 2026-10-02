@@ -22,6 +22,29 @@ describe('Greeting', () => {
     expect(screen.getByText(formatWeekdayTime(START))).toBeInTheDocument();
   });
 
+  it.each([
+    ['morning', 'Good morning.'],
+    ['midday', 'Midday.'],
+    ['night', 'Good evening.'],
+  ] as const)('shows the words of the %s look, with the same weekday and time', (look, words) => {
+    render(<Greeting look={look} />);
+    expect(screen.getByText(words)).toBeInTheDocument();
+    expect(screen.getByText(formatWeekdayTime(START))).toBeInTheDocument();
+  });
+
+  it('changes the words on a new look without resetting the clock tick', () => {
+    const { rerender } = render(<Greeting look="morning" />);
+    const timers = vi.getTimerCount();
+    rerender(<Greeting look="night" />);
+    expect(screen.getByText('Good evening.')).toBeInTheDocument();
+    expect(vi.getTimerCount()).toBe(timers);
+    act(() => {
+      vi.advanceTimersByTime(60_000);
+    });
+    expect(screen.getByText(formatWeekdayTime(new Date(2026, 9, 1, 7, 49, 20)))).toBeInTheDocument();
+    expect(vi.getTimerCount()).toBe(timers);
+  });
+
   it('first updates at the next minute boundary', () => {
     render(<Greeting />);
     const before = formatWeekdayTime(START);
