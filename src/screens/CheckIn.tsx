@@ -32,6 +32,7 @@ import {
   type DayView,
 } from '../ipc/journal';
 import { dayBounds, localToday } from '../localDays';
+import { useNotebookPage } from '../shell/notebookPage';
 
 /**
  * Text that shows nothing is empty (G4), here as in the store: the same
@@ -60,6 +61,18 @@ const NOTHING_VISIBLE = new RegExp(
     ']*$',
   'u',
 );
+
+// The words, once: Current and the notebook page both read them.
+const TONIGHT = 'Tonight';
+const LOOKING = 'Looking…';
+const HOW_THE_DAY_WENT = 'How the day went';
+const KEEP_THIS = 'Keep this';
+const HIDE_QUOTES = 'Hide quotes';
+const SHOW_QUOTES = 'Show quotes';
+const COULD_NOT_CHANGE =
+  'Cairn could not change that just now. The quotes are as they were.';
+const nothingHereFor = (thisDay: string) => `Nothing here for ${thisDay}.`;
+const keptFor = (thisDay: string) => `Kept for ${thisDay}.`;
 
 export function showsNothing(text: string): boolean {
   return NOTHING_VISIBLE.test(text);
@@ -214,6 +227,7 @@ export function useCheckInSession(): CheckInSession {
 }
 
 export function CheckIn({ session }: { session?: CheckInSession }) {
+  const onPage = useNotebookPage();
   const own = useCheckInSession();
   const {
     opened,
@@ -313,7 +327,7 @@ export function CheckIn({ session }: { session?: CheckInSession }) {
       setSwitchNote(
         typeof problem === 'string'
           ? problem
-          : 'Cairn could not change that just now. The quotes are as they were.',
+          : COULD_NOT_CHANGE,
       );
       return;
     } finally {
@@ -331,7 +345,7 @@ export function CheckIn({ session }: { session?: CheckInSession }) {
     quotesShown === undefined ? null : (
       <div className="mt-10">
         <Button tone="quiet" className="px-0" onClick={() => switchQuotes(!quotesShown)}>
-          {quotesShown ? 'Hide quotes' : 'Show quotes'}
+          {quotesShown ? HIDE_QUOTES : SHOW_QUOTES}
         </Button>
       </div>
     );
@@ -343,10 +357,21 @@ export function CheckIn({ session }: { session?: CheckInSession }) {
       </figure>
     ) : null;
 
+  if (!view && onPage) {
+    return (
+      <div className="nb-spread nb-checkin-leaves">
+        <div className="nb-page">
+          <p className="nb-checkin-sentence">{loadNote ?? LOOKING}</p>
+        </div>
+        <div className="nb-page nb-page--ruled" />
+      </div>
+    );
+  }
+
   if (!view) {
     return (
       <Card>
-        <p className="text-ink-400">{loadNote ?? 'Looking…'}</p>
+        <p className="text-ink-400">{loadNote ?? LOOKING}</p>
       </Card>
     );
   }
@@ -355,7 +380,7 @@ export function CheckIn({ session }: { session?: CheckInSession }) {
     return (
       <Card>
         <h2 className="reflective text-3xl text-ink-900">
-          {ended ? thisDay : 'Tonight'}
+          {ended ? thisDay : TONIGHT}
         </h2>
         {line}
         <p className="reflective mt-4 max-w-prose text-lg text-ink-700">{view.sealed}</p>
@@ -373,12 +398,12 @@ export function CheckIn({ session }: { session?: CheckInSession }) {
 
   return (
     <Card>
-      <h2 className="reflective text-3xl text-ink-900">{ended ? thisDay : 'Tonight'}</h2>
+      <h2 className="reflective text-3xl text-ink-900">{ended ? thisDay : TONIGHT}</h2>
       {line}
 
       {view.reaches.length === 0 ? (
         <p className="reflective mt-4 max-w-prose text-lg text-ink-700">
-          Nothing here for {thisDay}.
+          {nothingHereFor(thisDay)}
         </p>
       ) : (
         <ul className="mt-8 divide-y divide-sand-200">
@@ -399,7 +424,7 @@ export function CheckIn({ session }: { session?: CheckInSession }) {
       )}
 
       <label className="mt-10 block">
-        <span className="reflective text-xl text-ink-700">How the day went</span>
+        <span className="reflective text-xl text-ink-700">{HOW_THE_DAY_WENT}</span>
         <textarea
           className="reflective mt-3 block min-h-48 w-full rounded-lg border border-sand-200 bg-sand-50 p-4 text-lg leading-relaxed text-ink-900 focus:border-clay-500 focus:outline-none"
           value={draft}
@@ -414,7 +439,7 @@ export function CheckIn({ session }: { session?: CheckInSession }) {
           onClick={() => keep(opened, draft).then((after) => after && setView(after))}
           disabled={keeping || showsNothing(draft)}
         >
-          Keep this
+          {KEEP_THIS}
         </Button>
       </div>
 
@@ -426,7 +451,7 @@ export function CheckIn({ session }: { session?: CheckInSession }) {
         aria-live="polite"
         className="reflective mt-4 max-w-prose text-ink-700"
       >
-        {note ?? (kept ? `Kept for ${thisDay}.` : '')}
+        {note ?? (kept ? keptFor(thisDay) : '')}
       </p>
 
       {quoteSwitch}
