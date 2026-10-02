@@ -1,6 +1,8 @@
 /// <reference types="vite/client" />
 import { describe, expect, it } from 'vitest';
 
+import { contrastRatio } from '../contrast';
+
 // As `protectionPage.test.ts` does: the stylesheets and sources are read from disk through a module name
 // TypeScript cannot see, because this project carries no Node typings.
 const nodeFs = 'node:' + 'fs';
@@ -168,6 +170,72 @@ describe('the setup-pages stylesheet', () => {
     for (const { selector, body } of rules.filter((r) => /:hover/.test(r.selector))) {
       for (const m of body.matchAll(/var\((--[a-z0-9-]+)/g)) expect(m[1], selector).toMatch(/^--nb-/);
     }
+  });
+});
+
+const LOOKS = ['morning', 'midday', 'night'] as const;
+/** A colour token from a named look's block of notebook.css. */
+function token(name: string, look: (typeof LOOKS)[number]): string {
+  const m = lookBlock(look).match(new RegExp(`${name}:\\s*(#[0-9a-fA-F]{3,8})\\s*;`));
+  if (!m) throw new Error(`token ${name} is not a hex colour in the ${look} block of notebook.css`);
+  return m[1]!;
+}
+/** The token a rule's `border` (or `border-color`) names, and its width. */
+function edgeOf(selector: string): { width: number; token: string } {
+  const m = own(selector).match(/border:\s*([\d.]+)px solid var\((--[a-z-]+)\)/);
+  if (!m) throw new Error(`${selector} draws no edge from a token`);
+  return { width: Number(m[1]), token: m[2]! };
+}
+
+describe('the edge of every control on the paper meets 3:1 in every look (D15, T012)', () => {
+  it.each(LOOKS)('%s: the address box and each checkbox draw an edge held at 3:1 against the paper', (look) => {
+    for (const selector of ['.nb-custom-input', '.nb-categories-box']) {
+      const edge = edgeOf(selector);
+      expect(contrastRatio(token(edge.token, look), token('--nb-paper', look)), selector).toBeGreaterThanOrEqual(3);
+    }
+  });
+
+  it('sits the address box on the paper: its ground is transparent, its edge 1px', () => {
+    expect(own('.nb-custom-input')).toMatch(/background-color:\s*transparent/);
+    expect(edgeOf('.nb-custom-input').width).toBe(1);
+  });
+
+  it('draws the checkbox itself: appearance none, an 18px box, a 1.5px edge', () => {
+    const box = own('.nb-categories-box');
+    expect(box).toMatch(/(?:^|[;\s])appearance:\s*none/);
+    expect(box).toMatch(/(?:^|[;\s])width:\s*18px/);
+    expect(box).toMatch(/(?:^|[;\s])height:\s*18px/);
+    expect(edgeOf('.nb-categories-box').width).toBe(1.5);
+  });
+
+  it('fills a checked box with --nb-ink and draws its tick in --nb-paper', () => {
+    expect(own('.nb-categories-box:checked')).toMatch(/background-color:\s*var\(--nb-ink\)/);
+    expect(own('.nb-categories-box:checked::after')).toMatch(/border-color:\s*var\(--nb-paper\)/);
+  });
+
+  it('keeps a disabled "Protect it" legible: quiet words and a quiet edge', () => {
+    const disabled = own('.nb-custom-button:disabled');
+    expect(disabled).toMatch(/(?:^|[;\s])color:\s*var\(--nb-ink-quiet\)/);
+    expect(disabled).toMatch(/border-color:\s*var\(--nb-ink-quiet\)/);
+    expect(disabled).toMatch(/cursor:\s*not-allowed/);
+  });
+
+  it('draws "Protect it" in ink: an --nb-ink edge, no fill', () => {
+    expect(edgeOf('.nb-custom-button').token).toBe('--nb-ink');
+    expect(own('.nb-custom-button')).toMatch(/background-color:\s*transparent/);
+  });
+
+  it('fills the way forward from --nb-button with --nb-button-ink words, and quiets "Not yet"', () => {
+    for (const selector of ['.nb-choosing-turn-on', '.nb-disclosure-confirm']) {
+      expect(own(selector), selector).toMatch(/background-color:\s*var\(--nb-button\)/);
+      expect(own(selector), selector).toMatch(/(?:^|[;\s])color:\s*var\(--nb-button-ink\)/);
+    }
+    expect(own('.nb-disclosure-back')).toMatch(/(?:^|[;\s])color:\s*var\(--nb-ink-quiet\)/);
+    expect(own('.nb-disclosure-back')).toMatch(/border:\s*0/);
+  });
+
+  it.each(LOOKS)('%s: --nb-button-ink on --nb-button holds 4.5:1', (look) => {
+    expect(contrastRatio(token('--nb-button-ink', look), token('--nb-button', look))).toBeGreaterThanOrEqual(4.5);
   });
 });
 

@@ -86,9 +86,35 @@
   column-gap: 12px;
   min-width: 0;
 }
+/* Drawn here, because a native checkbox's edge is a colour no token sets and nothing could hold it to 3:1
+   (D15): an 18px box with a 1.5px quiet edge; checked, it fills with ink and shows a tick in the paper. */
 .nb-categories-box {
+  appearance: none;
+  position: relative;
   flex-shrink: 0;
+  width: 18px;
+  height: 18px;
   margin: 0;
+  border: 1.5px solid var(--nb-ink-quiet);
+  border-radius: 3px;
+  background-color: transparent;
+  cursor: pointer;
+}
+.nb-categories-box:checked {
+  border-color: var(--nb-ink);
+  background-color: var(--nb-ink);
+}
+.nb-categories-box:checked::after {
+  content: '';
+  position: absolute;
+  left: 4.5px;
+  top: 0.5px;
+  width: 5px;
+  height: 10px;
+  border-style: solid;
+  border-color: var(--nb-paper);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
 }
 .nb-categories-name {
   color: var(--nb-ink);
@@ -114,6 +140,8 @@
   flex: 1;
   min-width: 0;
   padding: 8px 12px;
+  border: 1px solid var(--nb-ink-quiet);
+  border-radius: 3px;
   background-color: transparent;
   font-family: var(--nb-font-serif);
   font-size: 18px;
@@ -126,12 +154,24 @@
 .nb-custom-button {
   min-height: 40px;
   padding: 0 20px;
+  border: 1px solid var(--nb-ink);
+  border-radius: 3px;
   background-color: transparent;
   font-family: var(--nb-font-mono);
   font-size: 12.5px;
   letter-spacing: 0.04em;
   color: var(--nb-ink);
   cursor: pointer;
+}
+/* On the paper the hover is the look's own rule colour, never a palette shade the shell does not re-point. */
+.nb-custom-button:hover {
+  background-color: var(--nb-rule);
+}
+.nb-custom-button:disabled {
+  border-color: var(--nb-ink-quiet);
+  background-color: transparent;
+  color: var(--nb-ink-quiet);
+  cursor: not-allowed;
 }
 .nb-custom-added {
   margin: 16px 0 0;
@@ -153,12 +193,31 @@
 .nb-disclosure-back {
   min-height: 40px;
   padding: 0 20px;
+  border: 0;
+  border-radius: 3px;
   background-color: transparent;
   font-family: var(--nb-font-mono);
   font-size: 12.5px;
   letter-spacing: 0.04em;
   color: var(--nb-ink);
   cursor: pointer;
+}
+/* The way forward is the page's one filled button: the look's button fill, its words in the button ink. */
+.nb-choosing-turn-on,
+.nb-disclosure-confirm {
+  background-color: var(--nb-button);
+  color: var(--nb-button-ink);
+}
+.nb-choosing-turn-on:hover,
+.nb-disclosure-confirm:hover {
+  background-color: var(--nb-ink);
+}
+/* "Not yet" is quiet: words only, no edge, no fill. */
+.nb-disclosure-back {
+  color: var(--nb-ink-quiet);
+}
+.nb-disclosure-back:hover {
+  color: var(--nb-ink);
 }
 
 /* Before Cairn changes anything: what changes on the left, what it does not cover on the right. */
