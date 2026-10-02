@@ -176,8 +176,8 @@
       "axis": "structure",
       "rung": "named",
       "target": "typed",
-      "evidence": "cairn: tool, src-tauri: tool; not under apps/: ., src-tauri",
-      "provenance": "detected",
+      "evidence": "Owner, 2026-10-01: confirmed. Both applications are recorded as what they are (cairn: tool, src-tauri: tool), the kinds chosen at adoption; not under apps/: ., src-tauri",
+      "provenance": "confirmed",
       "planned": null
     },
     {
@@ -216,8 +216,8 @@
       "axis": "strategy",
       "rung": "done",
       "target": "done",
-      "evidence": "ADR delivery/docs/adr/0002-leave-the-architecture-where-it-is.md: leave-it",
-      "provenance": "detected",
+      "evidence": "Owner, 2026-10-01: confirmed. ADR delivery/docs/adr/0002-leave-the-architecture-where-it-is.md, leave-it, accepted by the owner 2026-09-30",
+      "provenance": "confirmed",
       "planned": null
     }
   ],

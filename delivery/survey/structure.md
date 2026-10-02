@@ -15,10 +15,11 @@ Experimental: see `../docs/adoption.md`.
 
 | Directory | Files | Mostly |
 |---|---|---|
-| `scripts/` | 10 | shell, javascript |
-| `specs/` | 22 | markdown |
-| `src/` | 21 | typescript, css |
-| `src-tauri/` | 128 | json |
+| `prototype/` | 1 | html |
+| `scripts/` | 11 | javascript, shell |
+| `specs/` | 36 | markdown, json |
+| `src/` | 40 | typescript, css |
+| `src-tauri/` | 142 | json |
 
 ### What it declares it depends on
 
@@ -59,11 +60,11 @@ Not read: not indexed: `./init --extension codegraph` builds the index, then `/s
 | Directory | Files | Mostly |
 |---|---|---|
 | `src-tauri/capabilities/` | 1 | json |
-| `src-tauri/helper/` | 18 | other |
+| `src-tauri/helper/` | 19 | other |
 | `src-tauri/icons/` | 15 | other |
 | `src-tauri/resources/` | 10 | json |
-| `src-tauri/src/` | 49 | other |
-| `src-tauri/tests/` | 29 | other |
+| `src-tauri/src/` | 53 | other |
+| `src-tauri/tests/` | 38 | json |
 
 ### What it declares it depends on
 
@@ -96,7 +97,7 @@ Not read: not indexed: `./init --extension codegraph` builds the index, then `/s
 ## What this means for the map
 
 The Structure row of `delivery/docs/convergence.md` stands at `named`
-(detected; cairn: tool, src-tauri: tool; not under apps/: ., src-tauri). The ladder, and what
+(confirmed; Owner, 2026-10-01: confirmed. Both applications are recorded as what they are (cairn: tool, src-tauri: tool), the kinds chosen at adoption; not under apps/: ., src-tauri). The ladder, and what
 each rung asks of this repository:
 
 - `as-found`: to move on, record what each application is — the entry points above say it: a `start` script, a main package or a web SDK is a service, a `bin` a tool, a test directory a suite — as `kind` on its record in `project.json` with provenance `confirmed`, then `/survey`; the row moves to `named`
