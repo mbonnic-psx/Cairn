@@ -315,25 +315,27 @@ function OverTimeView({
         : answer === 'unreadable'
           ? COULD_NOT_READ
           : answer.sealed;
-    const sites = typeof answer === 'string' || sentence ? [] : answer.by_site;
+    // The answer to draw as a list: none while looking, unreadable or sealed.
+    const list = typeof answer === 'string' || answer.sealed ? null : answer;
+    const sites = list?.by_site ?? [];
     const largest = largestCount(sites);
     return (
       <>
         <div className="nb-page">
           <h2 className="nb-reaches-title">{rangeInWords(firstDay, lastDay)}</h2>
           {boxes}
-          {sentence || typeof answer === 'string' ? (
+          {!list ? (
             <p className="nb-reaches-sentence">{sentence}</p>
           ) : (
             <>
-              {answer.coverage_note && (
-                <p className="nb-reaches-sentence">{answer.coverage_note}</p>
+              {list.coverage_note && (
+                <p className="nb-reaches-sentence">{list.coverage_note}</p>
               )}
-              {answer.estimates_excluded > 0 && (
+              {list.estimates_excluded > 0 && (
                 <p className="nb-reaches-sentence">
-                  {answer.estimates_excluded === 1
+                  {list.estimates_excluded === 1
                     ? ESTIMATE_ONE
-                    : estimatesMany(answer.estimates_excluded)}
+                    : estimatesMany(list.estimates_excluded)}
                 </p>
               )}
               <p className="nb-reaches-note">{COUNTED_ONLY_WHILE_RUNNING}</p>
@@ -341,7 +343,9 @@ function OverTimeView({
           )}
         </div>
         <div className="nb-page nb-page--ruled">
-          {sites.length > 0 && (
+          {!list ? null : sites.length === 0 ? (
+            <p className="nb-reaches-empty">{NOTHING_THESE_DAYS}</p>
+          ) : (
             <ul className="nb-reaches-log">
               {sites.map((site) => (
                 <li key={site.domain} className="nb-reaches-line">

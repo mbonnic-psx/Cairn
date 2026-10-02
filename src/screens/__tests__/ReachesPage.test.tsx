@@ -577,4 +577,111 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (name) 
       },
     );
   });
+
+  describe('Over time with no sites on a notebook page', () => {
+    const CLOSING =
+      'Cairn counts only while it is running. This is what it saw over these days.';
+    const RANGE = rangeInWords('2026-09-03', '2026-09-30');
+    const emptyCases: Array<[string, string[]]> = [
+      ['nothing here', [CLOSING]],
+      [
+        'nothing here, a coverage note and several estimates',
+        [
+          rangeCoverageNote,
+          'Your own estimates for 2 days are not counted here, because an estimate has no site.',
+          CLOSING,
+        ],
+      ],
+    ];
+
+    async function empty(state: string) {
+      const user = userEvent.setup();
+      const answer = overTimeCases[state] as Patterns;
+      const read = {
+        listTodaysReaches: silentReader.listTodaysReaches,
+        summarizeReaches: async () => answer,
+      };
+      const view = onPage(<Reaches today={todayCases.sealed} read={read} now={now} />);
+      await user.click(
+        within(view.spread!.firstElementChild as HTMLElement).getByRole('button', {
+          name: 'Over time',
+        }),
+      );
+      const pages = Array.from(
+        view.spread!.querySelectorAll<HTMLElement>(':scope > .nb-page'),
+      );
+      await waitFor(() => expect(pages[0]!.textContent).toContain(CLOSING));
+      return { ...view, left: pages[0]!, right: pages[1]! };
+    }
+
+    it.each(emptyCases)(
+      'left page: range, From and To, the notes, the closing sentence last: %s',
+      async (state, notes) => {
+        const { left } = await empty(state);
+        const [heading, range, ...rest] = Array.from(left.children) as HTMLElement[];
+        expect(heading).toHaveTextContent(RANGE);
+        expect(range).toHaveClass('nb-reaches-range');
+        expect(rest.map((el) => el.textContent)).toEqual(notes);
+        expect(rest[rest.length - 1]).toHaveClass('nb-reaches-note');
+      },
+    );
+
+    it.each(emptyCases)(
+      'right page: ruled, the sentence first and only, no site line, no bar: %s',
+      async (state) => {
+        const { right, left } = await empty(state);
+        expect(right).toHaveClass('nb-page--ruled');
+        expect(right.textContent).toBe('Nothing here for these days.');
+        expect(right.firstElementChild).toHaveClass('nb-reaches-empty');
+        expect(within(right).queryAllByRole('listitem')).toHaveLength(0);
+        expect(within(right).queryAllByTestId('bar')).toHaveLength(0);
+        expect(within(left).queryByText('Nothing here for these days.')).toBeNull();
+      },
+    );
+
+    it('leaves the date boxes the same nodes as when it was looking', async () => {
+      const user = userEvent.setup();
+      let answer!: (patterns: Patterns) => void;
+      const read = {
+        listTodaysReaches: silentReader.listTodaysReaches,
+        summarizeReaches: () => new Promise<Patterns>((resolve) => (answer = resolve)),
+      };
+      const { spread } = onPage(
+        <Reaches today={todayCases.sealed} read={read} now={now} />,
+      );
+      await user.click(
+        within(spread!.firstElementChild as HTMLElement).getByRole('button', {
+          name: 'Over time',
+        }),
+      );
+      const left = spread!.querySelector<HTMLElement>(':scope > .nb-page')!;
+      const from = within(left).getByLabelText('From');
+      const to = within(left).getByLabelText('To');
+      answer(overTimeCases['nothing here'] as Patterns);
+      await waitFor(() => expect(left.textContent).toContain(CLOSING));
+      expect(within(left).getByLabelText('From')).toBe(from);
+      expect(within(left).getByLabelText('To')).toBe(to);
+    });
+
+    it.each(emptyCases)(
+      'says the same words as outside any shell, notes moved: %s',
+      async (state) => {
+        const user = userEvent.setup();
+        const answer = overTimeCases[state] as Patterns;
+        const read = {
+          listTodaysReaches: silentReader.listTodaysReaches,
+          summarizeReaches: async () => answer,
+        };
+        const outside = render(
+          <Reaches today={todayCases.sealed} read={read} now={now} />,
+        );
+        await user.click(screen.getByRole('button', { name: 'Over time' }));
+        await screen.findByText(CLOSING);
+        const expected = words(outside.container);
+        outside.unmount();
+        const { spread } = await empty(state);
+        expect(words(spread!)).toEqual(expected);
+      },
+    );
+  });
 });
