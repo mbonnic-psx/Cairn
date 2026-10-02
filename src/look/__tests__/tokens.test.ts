@@ -463,3 +463,13 @@ describe('focus is visible on every sky and on the paper (FR-022, FR-021; resear
     }
   });
 });
+
+describe('the switch is readable on every look\'s sky (FR-021, FR-011, FR-012; research L5)', () => {
+  it('takes its text colour from the greeting body token', () => {
+    expect(ruleFor('.nb-switch').some((r) => /color:\s*var\(--nb-greeting-body\)/.test(r.body))).toBe(true);
+  });
+
+  it.each(['morning', 'midday', 'night'] as const)('%s: that colour holds 4.5:1 on the top of the sky, where the switch sits', (look) => {
+    expect(contrastRatio(token('--nb-greeting-body', look), token('--nb-sky-top', look))).toBeGreaterThanOrEqual(TEXT);
+  });
+});

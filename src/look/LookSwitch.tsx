@@ -21,6 +21,7 @@ export function LookSwitch({
   return (
     <label
       className="nb-switch"
+      data-look={look === 'current' ? undefined : look}
       style={{
         position: 'fixed',
         top: 8,
