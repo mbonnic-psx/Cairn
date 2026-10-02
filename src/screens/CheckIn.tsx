@@ -396,6 +396,33 @@ export function CheckIn({ session }: { session?: CheckInSession }) {
     );
   }
 
+  if (onPage) {
+    return (
+      <div className="nb-spread nb-checkin-leaves">
+        <div className="nb-page">
+          <h2 className="nb-checkin-title">{ended ? thisDay : TONIGHT}</h2>
+          {view.reaches.length === 0 ? (
+            <p className="nb-checkin-empty">{nothingHereFor(thisDay)}</p>
+          ) : (
+            <ul className="nb-checkin-log">
+              {view.reaches.map((reach, index) => (
+                <li
+                  key={`${reach.domain}-${reach.at}-${index}`}
+                  className="nb-checkin-line"
+                >
+                  <span className="nb-checkin-site">{reach.domain}</span>
+                  <span className="nb-checkin-time">{timeOfDay(reach.at)}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+          {view.coverage_note && <p className="nb-checkin-note">{view.coverage_note}</p>}
+        </div>
+        <div className="nb-page nb-page--ruled" />
+      </div>
+    );
+  }
+
   return (
     <Card>
       <h2 className="reflective text-3xl text-ink-900">{ended ? thisDay : TONIGHT}</h2>

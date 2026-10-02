@@ -13,8 +13,10 @@ import { NotebookShell } from '../../shell/NotebookShell';
 import { CheckIn } from '../CheckIn';
 import { installFakeCore, type FakeCore } from './fakeCore';
 import {
+  dayCoverageNote,
   evening,
   loadRefusal,
+  reachesOfTheDay,
   tonightCases,
   tonightCore,
   type TonightCase,
@@ -70,6 +72,26 @@ async function wordsOutside(c: TonightCase): Promise<string[]> {
   core?.remove();
   return found;
 }
+
+/** The time as Current writes it: the same call. */
+const timeOf = (seconds: number) =>
+  new Date(seconds * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+/** What an open day's right page says in the cases of the left page's tests, with quotes hidden. */
+const RIGHT_WORDS = ['How the day went', 'Keep this', 'Show quotes'];
+
+const withoutRight = (found: string[]) => {
+  const rest = [...found];
+  for (const word of RIGHT_WORDS) rest.splice(rest.indexOf(word), 1);
+  return rest;
+};
+
+const OPEN_DAYS = [
+  'reaches, no coverage note, quotes hidden',
+  'no reaches, no coverage note, quotes hidden',
+  'reaches, a coverage note, quotes hidden',
+  'no reaches, a coverage note, quotes hidden',
+];
 
 describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (name) => {
   beforeEach(() => {
@@ -127,5 +149,61 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (name) 
         expect(outside.container.querySelector('[class*="nb-"]')).toBeNull();
       },
     );
+  });
+
+  describe('an open day, the left page', () => {
+    it.each(OPEN_DAYS)('%s: the heading, then the log or the empty sentence, then the coverage note', async (key) => {
+      const c = tonightCases[key]!;
+      const { spread, left, right, main } = await show(c, true);
+      expect(spread).not.toBeNull();
+      const day = c.day as Exclude<TonightCase['day'], string | { refused: string }>;
+      const heading = within(left!).getByRole('heading', { level: 2, name: 'Tonight' });
+      expect(left!.firstElementChild).toBe(heading);
+      expect(within(main).getAllByRole('heading', { level: 2 })).toEqual([heading]);
+      expect(right).toHaveClass('nb-page--ruled');
+
+      if (day.reaches.length > 0) {
+        const lines = Array.from(left!.querySelectorAll('li'));
+        expect(lines.map((li) => li.parentElement!.tagName)).toEqual(
+          lines.map(() => 'UL'),
+        );
+        expect(
+          lines.map((li) => Array.from(li.children).map((el) => el.textContent)),
+        ).toEqual(reachesOfTheDay.map((r) => [r.domain, timeOf(r.at)]));
+        for (const li of lines) {
+          expect(li).toHaveClass('nb-checkin-line');
+          expect(li.children[0]).toHaveClass('nb-checkin-site');
+          expect(li.children[1]).toHaveClass('nb-checkin-time');
+        }
+        expect(left!.textContent).not.toContain('Nothing here');
+      } else {
+        const empty = within(left!).getByText('Nothing here for today.');
+        expect(empty).toHaveClass('nb-checkin-empty');
+        expect(left!.querySelector('li')).toBeNull();
+      }
+      if (day.coverage_note) {
+        const note = within(left!).getByText(dayCoverageNote);
+        expect(left!.lastElementChild).toBe(note);
+        expect(note).toHaveClass('nb-checkin-note');
+      } else {
+        expect(left!.querySelector('.nb-checkin-note')).toBeNull();
+      }
+    });
+
+    it.each(OPEN_DAYS)('%s: the left page\u2019s words equal the same part outside any shell', async (key) => {
+      const c = tonightCases[key]!;
+      const onPage = await show(c, true);
+      expect(onPage.left).toBeDefined();
+      const found = words(onPage.left!);
+      onPage.unmount();
+      core?.remove();
+      expect(found).toEqual(withoutRight(await wordsOutside(c)));
+    });
+
+    it('outside any shell the open day is the Pin\u2019s card', async () => {
+      const outside = await show(tonightCases[OPEN_DAYS[0]!]!, false);
+      expect(outside.container.querySelector('section.settle')).not.toBeNull();
+      expect(outside.container.querySelector('[class*="nb-"]')).toBeNull();
+    });
   });
 });
