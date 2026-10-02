@@ -1,0 +1,2227 @@
+
+ RUN  v3.2.7 /home/mbonnic/Cairn-worktrees/loose-ends
+
+ ✓ src/shell/__tests__/windowFrame.test.ts (5 tests) 9ms
+ ✓ src/look/__tests__/tabFocusRing.test.ts (27 tests) 10ms
+ ✓ src/look/__tests__/tokens.test.ts (167 tests) 91ms
+ ✓ src/screens/__tests__/ProtectionCurrentPin.test.tsx (20 tests) 116ms
+ ✓ src/screens/__tests__/TrailPageKeyboard.test.tsx (22 tests) 324ms
+ ✓ src/screens/__tests__/SetupCurrentPin.test.tsx (18 tests) 554ms
+ ✓ src/look/__tests__/hilltopCairn.test.ts (14 tests) 821ms
+   ✓ the hilltop cairn's outline stones hold 3:1 on what lies behind them (FR-021, SC-003; looks T022) > morning: each outline stone holds 3:1 on the topmost surface at its corners and centre, from 800x600 up  302ms
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > in the morning look > CheckIn, looking
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > in the morning look > CheckIn, a load that could not be made
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > in the morning look > CheckIn, reaches, no coverage note, quotes hidden
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > in the morning look > CheckIn, no reaches, no coverage note, quotes hidden
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > in the morning look > CheckIn, reaches, a coverage note, quotes hidden
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > in the morning look > CheckIn, no reaches, a coverage note, quotes hidden
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > in the morning look > CheckIn, reaches, with a quote
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > in the morning look > CheckIn, reaches, with a quote
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > in the morning look > CheckIn, reaches, quotes shown and none to be had
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > in the morning look > CheckIn, reaches, quotes shown and none to be had
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > in the morning look > CheckIn, reaches, the quotes setting unknown
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > in the morning look > CheckIn, an entry written before
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > in the morning look > CheckIn, an entry kept
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > in the morning look > CheckIn, a refused save
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+ ✓ src/shell/__tests__/AppLook.test.tsx (10 tests) 1165ms
+   ✓ the look switch in a dev build > keeps the step and the text typed in Tonight across every pair of looks  407ms
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > in the morning look > CheckIn, a refused switch
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > in the morning look > CheckIn, a refused switch
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > in the morning look > CheckIn, sealed, quotes hidden
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > in the morning look > CheckIn, sealed, with a quote
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > in the morning look > CheckIn, sealed, with a quote
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > in the morning look > CheckIn, a day that ended while open
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+ ✓ src/shell/__tests__/AppSetupConfirm.test.tsx (6 tests) 1400ms
+   ✓ "Yes, set this up" on the notebook page, in Morning (T004) > opens the Protection spread and reads the trail when the core turns protection on  424ms
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > in the midday look > CheckIn, looking
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > in the midday look > CheckIn, a load that could not be made
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > in the midday look > CheckIn, reaches, no coverage note, quotes hidden
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > in the midday look > CheckIn, no reaches, no coverage note, quotes hidden
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > in the midday look > CheckIn, reaches, a coverage note, quotes hidden
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > in the midday look > CheckIn, no reaches, a coverage note, quotes hidden
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > in the midday look > CheckIn, reaches, with a quote
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > in the midday look > CheckIn, reaches, with a quote
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > in the midday look > CheckIn, reaches, quotes shown and none to be had
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > in the midday look > CheckIn, reaches, quotes shown and none to be had
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > in the midday look > CheckIn, reaches, the quotes setting unknown
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > in the midday look > CheckIn, an entry written before
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > in the midday look > CheckIn, an entry kept
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > in the midday look > CheckIn, a refused save
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > in the midday look > CheckIn, a refused switch
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > in the midday look > CheckIn, a refused switch
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > in the midday look > CheckIn, sealed, quotes hidden
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > in the midday look > CheckIn, sealed, with a quote
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > in the midday look > CheckIn, sealed, with a quote
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > in the midday look > CheckIn, a day that ended while open
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+ ✓ src/shell/__tests__/releasedBuild.test.ts (2 tests) 3011ms
+   ✓ the released interface (SC-002) > carries none of the look switch in a production build, and all of it in a development build  3006ms
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > in the night look > CheckIn, looking
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > in the night look > CheckIn, a load that could not be made
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > in the night look > CheckIn, reaches, no coverage note, quotes hidden
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > in the night look > CheckIn, no reaches, no coverage note, quotes hidden
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > in the night look > CheckIn, reaches, a coverage note, quotes hidden
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > in the night look > CheckIn, no reaches, a coverage note, quotes hidden
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > in the night look > CheckIn, reaches, with a quote
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > in the night look > CheckIn, reaches, with a quote
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > in the night look > CheckIn, reaches, quotes shown and none to be had
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > in the night look > CheckIn, reaches, quotes shown and none to be had
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > in the night look > CheckIn, reaches, the quotes setting unknown
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > in the night look > CheckIn, an entry written before
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > in the night look > CheckIn, an entry kept
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > in the night look > CheckIn, a refused save
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > in the night look > CheckIn, a refused switch
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > in the night look > CheckIn, a refused switch
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > in the night look > CheckIn, sealed, quotes hidden
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > in the night look > CheckIn, sealed, with a quote
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > in the night look > CheckIn, sealed, with a quote
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > in the night look > CheckIn, a day that ended while open
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > sees controls to hold: the sweep finds the spreads' buttons and inputs
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > sees controls to hold: the sweep finds the spreads' buttons and inputs
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > sees controls to hold: the sweep finds the spreads' buttons and inputs
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > sees controls to hold: the sweep finds the spreads' buttons and inputs
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > sees controls to hold: the sweep finds the spreads' buttons and inputs
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > sees controls to hold: the sweep finds the spreads' buttons and inputs
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > sees controls to hold: the sweep finds the spreads' buttons and inputs
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > sees controls to hold: the sweep finds the spreads' buttons and inputs
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+ ✓ src/look/__tests__/nothingFades.test.tsx (187 tests) 3648ms
+   ✓ no sheet the app loads declares a fade > holds no inline transition or animation on a rendered element  1130ms
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > sees controls to hold: the sweep finds the spreads' buttons and inputs
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > sees controls to hold: the sweep finds the spreads' buttons and inputs
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > sees controls to hold: the sweep finds the spreads' buttons and inputs
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > sees controls to hold: the sweep finds the spreads' buttons and inputs
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > sees controls to hold: the sweep finds the spreads' buttons and inputs
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > sees controls to hold: the sweep finds the spreads' buttons and inputs
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > sees controls to hold: the sweep finds the spreads' buttons and inputs
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > sees controls to hold: the sweep finds the spreads' buttons and inputs
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > sees controls to hold: the sweep finds the spreads' buttons and inputs
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > sees controls to hold: the sweep finds the spreads' buttons and inputs
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > sees controls to hold: the sweep finds the spreads' buttons and inputs
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+stderr | src/look/__tests__/forcedColoursEdges.test.tsx > forced colours keep every control an edge > sees controls to hold: the sweep finds the spreads' buttons and inputs
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+Warning: An update to CheckIn inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at CheckIn (/home/mbonnic/Cairn-worktrees/loose-ends/src/screens/CheckIn.tsx:128:20)
+    at main
+    at div
+    at div
+    at NotebookShell (/home/mbonnic/Cairn-worktrees/loose-ends/src/shell/NotebookShell.tsx:9:3)
+
+ ✓ src/look/__tests__/forcedColoursEdges.test.tsx (179 tests) 3878ms
+   ✓ forced colours keep every control an edge > sees controls to hold: the sweep finds the spreads' buttons and inputs  820ms
+
+ Test Files  12 passed (12)
+      Tests  657 passed (657)
+   Start at  08:06:45
+   Duration  5.38s (transform 1.10s, setup 1.04s, collect 3.04s, tests 15.03s, environment 4.88s, prepare 1.93s)
+
