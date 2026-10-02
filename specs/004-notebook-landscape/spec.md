@@ -56,6 +56,10 @@ and buttons that this design uses, and forbids it for body text read at length.
 
 - Gaps reviewed for slice `frame`, 2026-10-01. Checked: the tab set before and after protection is on (it follows today's header, US1 scenarios 1–2); a tab for an unbuilt part (scenario 4); unsaved check-in text across tabs (scenario 5); where the mark sits under each platform's own frame (FR-007, the top left of the sky); the greeting at narrow widths and keeping time (FR-029, FR-030); morning contrast for text on the sky as well as on paper (FR-021); scrolling inside the notebook while the scenery stays put (edge cases); the window opening at 1280×800 (FR-028). Added: in `frame`, an existing screen keeps its current single-column layout on the notebook's paper, across the spread. Its two-page layout arrives with its own page slice (story split, slices 3–6). Nothing else was missing.
 
+- Gaps reviewed for slice `looks`, 2026-10-02 (cruise, iteration 2). Checked: the switch's four choices and their order (FR-011); moving between any two looks, and to and from Current, keeps the screen and the text typed on it (US2 scenario 1; frame's round-trip test covers Current and Morning); the greeting's words per look (FR-013b); the amber "not confirmed" and "waiting" text and the focus ring on night's lamp-lit paper (FR-016, FR-021, FR-022); forced colours in every look (edge cases); a released build still has no switch (FR-012). Two gaps, answered (decisions D3, D4):
+  - Q: Does a change of look fade, or happen at once? → A: At once, with no transition, whether or not reduced motion is asked for. Scenario 1 already says "at once" (US2 scenario 1, FR-010).
+  - Q: The Cairn mark and the hilltop cairn are drawn in ink-coloured stones. On the night sky they would vanish. → A: In every look, the mark's base and top stones MUST stand out from the sky behind them by at least 3:1, so its shape reads. The middle stones may stay soft, as in the accepted morning look (FR-033).
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - The window becomes a notebook in a landscape (Priority: P1)
@@ -107,7 +111,7 @@ together. Build a release version and confirm no switch exists anywhere in it.
 
 **Acceptance Scenarios**:
 
-1. **Given** a development build, **When** the tester chooses morning, midday or night on the switch, **Then** the whole scene, the greeting and the notebook take that look at once, and the current screen and anything typed on it are kept.
+1. **Given** a development build, **When** the tester chooses morning, midday or night on the switch, **Then** the whole scene, the greeting and the notebook take that look at once, with no transition, and the current screen and anything typed on it are kept.
 2. **Given** a development build, **When** Cairn starts, **Then** the switch is on Current and Cairn looks exactly as it does today, until the tester chooses a look.
 3. **Given** a released build before the reveal, **When** the person uses Cairn in any way, **Then** no look switch is present, reachable or announced, and Cairn looks exactly as it does today.
 4. **Given** the night look, **When** the person reads any text in the notebook or in the sky, **Then** the text is as readable as in the morning look (see SC-003).
@@ -215,6 +219,7 @@ still present and still works, now laid out as a notebook page.
 - **FR-022**: Every tab and control MUST be reachable and usable by keyboard alone, with a visible focus indicator in every look.
 - **FR-023**: When the system asks for reduced motion, the interface MUST show no animation or transition.
 - **FR-024**: The scenery MUST be silent to assistive technology. The greeting and all notebook content MUST be readable by it.
+- **FR-033**: The Cairn mark MUST keep its shape visible in every look: its base stone and its top stone, which carry the outline, each meet a contrast of at least 3:1 against the sky directly behind them. The middle stones may be soft, as they are in the morning look.
 - **FR-025**: Content MUST stay reachable, without overlap or clipping, at window sizes down to the smallest window Cairn allows today, scrolling inside the notebook where needed.
 
 **Window and greeting**

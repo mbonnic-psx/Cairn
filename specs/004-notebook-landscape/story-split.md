@@ -17,7 +17,7 @@ page that follows is built and checked in all three. Then one group of screens a
 | # | Slice | What the person sees afterwards | Specification | Depends on |
 |---|---|---|---|---|
 | 1 | `frame` | Behind the switch (Current or Morning): the landscape in its morning look, the notebook, the paper tabs, the greeting and the Cairn mark. Every existing screen already sits inside the notebook, unchanged in content. Fonts ship in the app. Works from the smallest window to the largest | US1; FR-001–FR-008, FR-014, FR-015, FR-017, FR-022, FR-024–FR-027 | — |
-| 2 | `looks` | Midday and night, and the testing switch that moves between the three looks, present only in development builds | US2; FR-009–FR-013b, FR-016, FR-021, FR-023 | `frame` |
+| 2 | `looks` | Midday and night, and the testing switch that moves between the three looks, present only in development builds | US2; FR-009–FR-013b, FR-016, FR-021, FR-023, FR-033 | `frame` |
 | 3 | `protection-page` | Protection (including "not confirmed" and a waiting change) and What is protected, laid out as notebook spreads | US3 (Protection, What is protected); FR-018, FR-020 | `looks` |
 | 4 | `tonight-page` | Tonight and Today, laid out as notebook spreads: the typed log and the lined journal page | US3 (Tonight, Today); FR-018, FR-019 | `looks` |
 | 5 | `setup-pages` | What would you like to protect?, Anywhere else? and Before Cairn changes anything, as notebook spreads | US3 (setup, disclosure); FR-018 | `looks` |

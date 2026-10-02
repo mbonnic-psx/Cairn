@@ -23,3 +23,25 @@ Every product decision a `/cruise` run took, in order. A person overrides one by
 - **Confidence:** high · **Would reverse if:** the owner asks for released builds to keep today's window until the reveal
 - **Written to:** `specs/004-notebook-landscape/adversary-log.md` (R2)
 - **Status:** standing
+
+## D3 — Does a change of look fade, or happen at once?
+- **Stage:** slice gaps · **Slice:** looks · **When:** 2026-10-02T04:33:00Z · **Iteration:** 2
+- **Question:** Choosing a look on the switch could cross-fade the scene or change it at once.
+- **Options:** at once, no transition (recommended: the scenario says "at once"); a soft cross-fade, none under reduced motion
+- **Decision:** At once, with no transition, in every case.
+- **Why:** US2 scenario 1 says the look changes "at once". The switch is a testing aid, and an instant change makes each look easy to compare.
+- **Decided by:** host (stage recommendation)
+- **Confidence:** high · **Would reverse if:** the owner asks for a soft change between looks when the clock feature arrives
+- **Written to:** `specs/004-notebook-landscape/spec.md` (Clarifications, US2 scenario 1)
+- **Status:** standing
+
+## D4 — Must the Cairn mark stay visible on the night sky?
+- **Stage:** slice gaps · **Slice:** looks · **When:** 2026-10-02T04:33:00Z · **Iteration:** 2
+- **Question:** The mark is drawn in ink-coloured stones. FR-021 covers text only, so nothing stops the mark vanishing on the dark night sky.
+- **Options:** the base and top stones at least 3:1 against the sky, the WCAG floor for graphics, applied to the stones that carry the shape (recommended); every stone at 3:1, which the accepted morning mark's pale stone does not meet; leave it to the owner's eye at the demo
+- **Decision:** The mark's base and top stones each meet at least 3:1 against the sky behind them, in every look. The middle stones may stay soft (FR-033).
+- **Why:** The mark is how the person knows the window is Cairn. Lost on the night sky, it would read as a broken screen.
+- **Decided by:** host (stage recommendation)
+- **Confidence:** high · **Would reverse if:** the owner, seeing the night look, wants the mark softer than 3:1
+- **Written to:** `specs/004-notebook-landscape/spec.md` (FR-033, Clarifications), `specs/004-notebook-landscape/story-split.md` (row 2)
+- **Status:** standing
