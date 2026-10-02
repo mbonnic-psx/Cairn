@@ -98,9 +98,9 @@ describe('leaving the check-in and coming back', () => {
     get.mockResolvedValue(empty);
     const user = userEvent.setup();
     render(<App />);
-    const before = screen.getByRole('banner').textContent;
+    const before = screen.getByRole('navigation', { name: 'Pages' }).textContent;
     const box = await toTonight(user);
     await user.type(box, 'not sent yet');
-    expect(screen.getByRole('banner').textContent).toBe(before);
+    expect(screen.getByRole('navigation', { name: 'Pages' }).textContent).toBe(before);
   });
 });

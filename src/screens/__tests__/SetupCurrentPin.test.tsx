@@ -12,7 +12,6 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it } from 'vitest';
 
-import App from '../../App';
 import { Disclosure } from '../Disclosure';
 import { Categories } from '../Setup/Categories';
 import { CustomEntry } from '../Setup/CustomEntry';
@@ -95,22 +94,14 @@ export const states: Record<string, () => Promise<string>> = {
     await screen.findByText(disclosures.administrator);
     return view.container.innerHTML;
   },
-  'the choosing step through App, in Current': async () => {
-    core = installFakeCore({
-      get_protection_state: () => readBack('off'),
-      list_categories: () => categories,
-      get_disclosures: () => disclosures,
-    });
-    const view = render(<App devBuild />);
-    await screen.findByText('Gambling');
-    const column = view.container.querySelector('main > div.mx-auto.flex.max-w-3xl') as HTMLElement;
-    return column.innerHTML;
-  },
 };
 
 describe("the setup screens outside a notebook page render today's markup (SC-009)", () => {
   it('pins every state it names, and no other', () => {
-    expect(Object.keys(PIN).sort()).toEqual(Object.keys(states).sort());
+    // The composition `App` drew in Current left the app with Current (slice reveal, T005); its record stays
+    // in `beforeTheReveal.ts`, where the words-kept test still reads it.
+    const gone = 'the choosing step through App, in Current';
+    expect(Object.keys(PIN).filter((name) => name !== gone).sort()).toEqual(Object.keys(states).sort());
   });
 
   it.each(Object.keys(states))('%s', async (name) => {

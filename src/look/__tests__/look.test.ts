@@ -11,15 +11,14 @@ describe('greetingFor', () => {
     expect(greetingFor('morning')).toBe('Good morning.')
   })
 
-  it('greets midday and night in their own words, and says nothing for Current', () => {
+  it('greets midday and night in their own words', () => {
     expect(greetingFor('midday')).toBe('Midday.')
     expect(greetingFor('night')).toBe('Good evening.')
-    expect(greetingFor('current')).toBe('')
   })
 
   describe('does not read the clock to choose the words', () => {
     afterEach(() => vi.useRealTimers())
-    it.each(['current', 'morning', 'midday', 'night'] as const)('%s at 06:00, 12:00 and 23:00', (look) => {
+    it.each(['morning', 'midday', 'night'] as const)('%s at 06:00, 12:00 and 23:00', (look) => {
       vi.useFakeTimers()
       const words = [6, 12, 23].map((hour) => {
         vi.setSystemTime(new Date(2026, 9, 1, hour, 0))

@@ -9,8 +9,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import App from '../../App';
 import type { CategoryPreset } from '../../ipc';
-import { Disclosure } from '../../screens/Disclosure';
-import { Choosing } from '../../screens/Setup/Choosing';
 import { SETUP_CALLS_CURRENT } from '../../screens/__tests__/beforeTheReveal';
 import { installFakeCore, type FakeCore } from '../../screens/__tests__/fakeCore';
 import {
@@ -47,21 +45,13 @@ beforeEach(() => {
 });
 afterEach(() => core.remove());
 
-const noop = () => undefined;
 const switchControl = () => screen.getByLabelText('Look (testing)');
 const headings = () => screen.getAllByRole('heading').map((h) => h.textContent);
 
-function outside(ui: React.ReactElement): string {
-  const view = render(ui);
-  const html = view.container.innerHTML;
-  view.unmount();
-  return html;
-}
-
-async function choosing(look: 'Morning' | 'Midday' | 'Night' | 'Current' = 'Morning') {
+async function choosing(look: 'Morning' | 'Midday' | 'Night' = 'Morning') {
   const view = render(<App devBuild />);
   await screen.findByText('Gambling');
-  if (look !== 'Current') await userEvent.selectOptions(switchControl(), look);
+  await userEvent.selectOptions(switchControl(), look);
   const pagesOf = () =>
     Array.from(view.container.querySelectorAll<HTMLElement>('.nb-page-area > .nb-spread > .nb-page'));
   return { ...view, pagesOf };
@@ -209,17 +199,7 @@ describe.each(['Morning', 'Midday', 'Night'] as const)(
   },
 );
 
-describe('Current is unchanged', () => {
-  it("shows today's markup for both steps", async () => {
-    const { container } = await choosing('Current');
-    expect(container.querySelector('.nb-root')).toBeNull();
-    const shown = () => (container.querySelector('main > div.mx-auto') as HTMLElement).innerHTML;
-    expect(shown()).toBe(outside(<Choosing categories={cases} onToggle={noop} onTurnOn={noop} />));
-    await userEvent.click(screen.getByRole('button', { name: 'Turn protection on' }));
-    await screen.findByRole('heading', { level: 2, name: 'Before Cairn changes anything' });
-    expect(shown()).toBe(outside(<Disclosure disclosures={disclosures} onConfirm={noop} onBack={noop} />));
-  });
-
+describe('the core is asked nothing new', () => {
   it('asks the core nothing the screens did not ask before', async () => {
     await choosing('Morning');
     await userEvent.click(screen.getByRole('button', { name: 'Turn protection on' }));

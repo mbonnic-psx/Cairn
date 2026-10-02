@@ -2,7 +2,6 @@ import { render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
 import type { Tab } from '../../navigation';
-import { CurrentShell } from '../CurrentShell';
 import { NotebookShell } from '../NotebookShell';
 import { useNotebookPage } from '../notebookPage';
 
@@ -24,18 +23,6 @@ describe('useNotebookPage', () => {
       expect(screen.getByTestId('probe')).toHaveTextContent('boolean:true');
     });
   }
-
-  it('reads false inside CurrentShell, and CurrentShell renders what it did', () => {
-    const { container } = render(
-      <CurrentShell tabs={tabs} onSelect={vi.fn()}>
-        <Probe />
-      </CurrentShell>,
-    );
-    expect(screen.getByTestId('probe')).toHaveTextContent('boolean:false');
-    expect(container.querySelector('.nb-root')).toBeNull();
-    expect(container.querySelector('main > div.mx-auto')).toContainElement(screen.getByTestId('probe'));
-    expect(screen.getByRole('heading', { level: 1, name: 'Cairn' })).toBeInTheDocument();
-  });
 
   it('reads false with no shell at all', () => {
     render(<Probe />);

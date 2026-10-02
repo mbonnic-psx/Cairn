@@ -98,9 +98,9 @@ function found(text: string): string[] {
 describe('the released interface (SC-002)', () => {
   const TIMEOUT = 180_000;
 
-  it('reads the switch label and all four choices from the switch', () => {
+  it('reads the switch label and all three choices from the switch', () => {
     expect(label).toBe('Look (testing)');
-    expect(words.length).toBeGreaterThanOrEqual(5);
+    expect(words.length).toBe(4);
   });
 
   it(
@@ -112,6 +112,13 @@ describe('the released interface (SC-002)', () => {
         [...words].sort(),
       );
       expect(found(prod), 'the released build must carry none').toEqual([]);
+      expect(prod, 'the released build wears the morning notebook').toContain('Good morning.');
+      expect(prod).toContain('nb-root');
+      expect(prod).toContain('data-look');
+      // The one-column shell's own class strings (research R4), written as constants: it no longer ships.
+      for (const current of ['min-h-screen px-6 py-12', 'mx-auto mb-10 flex max-w-3xl']) {
+        expect(prod, `the released build must not carry ${current}`).not.toContain(current);
+      }
     },
     TIMEOUT,
   );
