@@ -7,28 +7,24 @@
  * Everything a person reads is the page's serif.
  */
 
-/* Two leaves inside the shell's one scrolling page area. */
+/* Two leaves inside the shell's one scrolling page area. The spread is at least as tall as the page area
+   (whose height is definite), so the ruled leaf stretches to the foot of it; a longer list grows both. */
 .nb-protection-leaves,
 .nb-trail-leaves {
   column-gap: 48px;
-  align-items: start;
-}
-.nb-protection-leaves > .nb-page,
-.nb-trail-leaves > .nb-page {
-  /* The page area already carries the margins; a leaf is only its own column. */
   min-height: 100%;
 }
 .nb-protection-leaves > .nb-page--ruled,
 .nb-trail-leaves > .nb-page--ruled {
   /* The first line of writing sits on a rule: the ruling starts 22px into the 32px pitch. */
   padding-top: 22px;
-  min-height: 420px;
   overflow-wrap: anywhere;
 }
-/* What is protected: its left leaf stays put while the list scrolls past on the right. */
+/* What is protected: its left leaf keeps its own height and stays put while the list scrolls past. */
 .nb-trail-leaves > .nb-trail-sticky {
   position: sticky;
   top: 0;
+  align-self: start;
 }
 
 /* The state of protection, on the left leaf. */

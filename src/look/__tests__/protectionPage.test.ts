@@ -154,6 +154,43 @@ describe('the protection-page stylesheet', () => {
     });
   });
 
+  describe('the leaves fill the page area and the sticky one keeps its own height (T014)', () => {
+    const withMinHeight = rules.filter((r) => /min-height/.test(r.body));
+    const sticky = rules.filter((r) => r.selector.includes('.nb-trail-sticky')).map((r) => r.body).join('');
+
+    it('sizes no leaf from a fixed pixel figure', () => {
+      expect(css).not.toMatch(/min-height:\s*[\d.]+px/);
+      expect(css).not.toMatch(/(^|[^-])height:\s*[\d.]+px/m);
+    });
+
+    it('takes the spread\'s height from the page area, never a leaf\'s', () => {
+      expect(withMinHeight.length).toBeGreaterThan(0);
+      for (const { selector, body } of withMinHeight) {
+        for (const one of selector.split(',').map((x) => x.trim())) {
+          expect(one, 'min-height only on a spread').toMatch(/^\.nb-(protection|trail)-leaves$/);
+        }
+        expect(body).toMatch(/min-height:\s*100%/);
+      }
+    });
+
+    it('lets the sticky leaf keep its own height and stick', () => {
+      expect(sticky).toMatch(/position:\s*sticky/);
+      expect(sticky).toMatch(/top:\s*0/);
+      expect(sticky).toMatch(/align-self:\s*start/);
+      expect(sticky).not.toMatch(/min-height|(^|[^-])height:/);
+    });
+
+    it('leaves the ruled leaf to stretch to the foot of the spread', () => {
+      const ruled = rules.filter((r) => r.selector.includes('.nb-page--ruled')).map((r) => r.body).join('');
+      expect(ruled).not.toMatch(/align-self:\s*start|(^|[^-])height:/);
+      const spreads = rules
+        .filter((r) => /^\.nb-(protection|trail)-leaves$/.test(r.selector.split(',')[0]!.trim()))
+        .map((r) => r.body)
+        .join('');
+      expect(spreads).not.toMatch(/align-items:\s*start/);
+    });
+  });
+
   it('has a rule for every slice class the screens name, and names no class they do not', () => {
     for (const name of named) {
       if (SHELL.includes(name)) continue;
