@@ -125,3 +125,44 @@ its phase touches.
 - **Across slices:** `quote` edits `CheckIn.tsx`, and so does S18. Run S18 after `quote` lands, or rebase it
   then. `one-day` and `theirs` touch none of this slice's files except `ipc/state.rs`, `commands.rs`, `main.rs`
   and `ipc_surface.rs`, each by adding entries, which merge cleanly.
+
+## Phase 4: Convergence (pass 1)
+
+Appended by converge pass 1 at `eb3468f`. Graded; none is `CRITICAL` or `HIGH`, so none re-opens the loop.
+
+- [ ] S23 [US2] [MEDIUM] [Principle III] **A coverage note never states less unobserved time than the gaps
+  hold.** Seen: `range_coverage_note` floors (`store/gaps.rs`), so a recorded gap clipped to 30 s at a range
+  edge reads *about 0 minutes of these days* while `gaps` is non-empty, and 71 h reads *about 2 days*
+  (probe run at `eb3468f` and removed). RED in `src-tauri/tests/range_coverage.rs`: a 30 s gap never says
+  *0*, and 71 h says no fewer than the hours it holds (or *nearly 3 days*); *of these days* is not preceded by
+  *days* (*about 2 days of these days*). GREEN, the sweep: **every sentence that states a gap's length** —
+  `range_coverage_note` and the day's `coverage_note` beside it (same floor, same *0 minutes* after
+  `clipped`) — rounds toward admitting more blindness, never less (*less than a minute* below one). The day
+  note is pinned (`gaps`, `delivery/survey/pinned.md`): the host adds the row before it changes.
+- [ ] S24 [US2] [MEDIUM] [Principle III, W14] **The screen turns only a real calendar date into a range, and
+  a refused date is never told as an unreadable history.** Seen: `Reaches.tsx:194-199` accepts any non-empty
+  string the date input yields that compares below the other bound (a text-field fallback in a webview gives
+  `"2026-09-0"` or `"1"`); `rangeBounds` then makes `NaN` or a different day, `LocalDate` deserialisation
+  refuses it, `invoke` throws, and the view says *Cairn could not read your history just now*
+  (`Reaches.tsx:166,186`), which is untrue. RED in `ReachesOverTime.test.tsx`: a malformed or impossible date
+  (`2026-02-30`, a two-digit year) keeps the last good range and never calls the reader. GREEN, the sweep:
+  **every place a day string enters `localDays`** (`addDays`, `dayBounds`, `rangeBounds`, and the two
+  `change*` handlers) goes through one `isLocalDate(s)` that round-trips `format(parse(s)) === s` with a
+  four-digit year; the core's refusal sentence stays the only answer for a date it cannot place.
+- [ ] S25 [US2] [LOW] [Principle III] **Bound arithmetic cannot overflow.** Seen: `check_range(d, d,
+  i64::MIN, 0, 0)` panics at `reflection/over_time.rs:29` in a debug build (probe run and removed); in
+  release it wraps. RED in `range_bounds.rs` and `bounds_and_clipping.rs`: `i64::MIN`/`i64::MAX` at each bound
+  are refused, not panicked. GREEN, the sweep: **every subtraction on a caller-supplied instant in the
+  bounds rules** — `could_begin` and `check_bounds` (`reflection/checkin.rs`), `check_range`'s two offsets and
+  their difference — uses `checked_sub`, a `None` being a refusal.
+- [ ] S26 [US2] [LOW] [plan, *The screen*] **The over-time heading names the range in words**, as the plan
+  says and `Reaches.tsx:203` does not (it reads *Over time*). RED in `ReachesOverTime.test.tsx`: on
+  30 September 2026 the heading names 3 to 30 September, and follows a change of *From* or *To*. GREEN: the
+  heading, with dates in words from the local calendar and no count, *day N* or ranking word in it; the
+  standing sentence reads *over these days*, as the plan's Q1 quotes it, not *in these days*.
+
+## Convergence
+
+**Converged at pass 1** (2026-10-01, `drive-converge` · host model · delegated, fresh context), against every level: domain, use case, delivery adapter, screen and the published contract. No CRITICAL or HIGH. S23 and S24 (MEDIUM, Principle III wording) and S25 and S26 (LOW) are Phase 4, after the demo; none re-opens the loop.
+
+Principles the diff touches, with what satisfies each: **I**, no protection control on the screen (`ReachesOverTime.test.tsx`), `summarize_reaches` classified `Reads` (`tests/ipc_surface.rs`), only `Reaches.tsx` imports it (`eslint.config.js` reaches block, `check-no-ambient-counts`); **II**, no new dependency, the range read from the encrypted history through `open_history` and sealed when the key is unavailable (`ipc/state.rs`, `tests/us2_by_site.rs`); **III**, gaps clipped to the range and stated above the list, estimates excluded and stated, the standing sentence under the list, a refused or unreadable range sealed and never empty (`reflection/over_time.rs`, `src/screens/Reaches.tsx`) — S23 and S24 are its open parts; **VI**, no ranking word, comparison, praise, streak or banned word in any state (`ReachesOverTime.test.tsx`, `tests/range_coverage.rs`, `npm run check`).
