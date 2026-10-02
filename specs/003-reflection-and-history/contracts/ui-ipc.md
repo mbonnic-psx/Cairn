@@ -157,6 +157,54 @@ an absent field as not yet known.
 Classified `Effect::Reads`. The frontend wrapper is `summarizeReaches` in `src/ipc/reaches.ts`,
 and the reaches screen is its only caller (spec, gaps review H1).
 
+#### Amended in slice `history-by-hour` (2026-10-02)
+
+**The command takes the offsets in force across the range.** This adds one parameter to the signature of
+2026-10-01. Gaps review B4 decides a reach counts in the hour the computer's clock showed at its own instant, and
+the two ends of a range cannot say what happened between them. A range from January to December has the same
+offset at both ends and a summer inside it.
+
+```
+summarize_reaches(first_day, last_day, range_start, range_end, offsets) -> Patterns
+
+offsets: [{ from, offset }]   // from: epoch seconds; offset: seconds east of UTC, whole seconds
+```
+
+`offsets[0]` is `{ from: range_start, offset: the offset in force there }`. Each later entry is an instant inside
+the range at which the computer's clock changes its offset, and the offset from then on. The interface computes the
+list with `Date`, as it computes the bounds (`src/localDays.ts`, `offsetChanges`). The core refuses the range, with
+the same sealed sentence as for its bounds and nothing else returned, unless:
+
+- the list is not empty and has no more entries than the range has days, plus one;
+- the first `from` is `range_start`, and the first offset is the one `range_start` implies for `first_day`;
+- the `from`s strictly increase and are all before `range_end`;
+- every offset lies between −12 h and +14 h;
+- neighbouring offsets differ, by no more than 2 hours;
+- the last offset is within 2 hours of the one `range_end` implies for the day after `last_day`.
+
+**Fields.** Slice `history-by-hour` adds two, so the answer holds seven keys:
+
+```
+  by_hour:          [{ hour, count }],  // exactly 24, hour 0–23 ascending, zeros included; [] when sealed
+  dst_approximate:  bool,               // false: every hour is bucketed by the offset in force at its instant
+```
+
+- `by_hour` is built from reaches alone (FR-023). An estimate has no hour. `estimates_excluded` is the same count
+  by site states. A quiet range is 24 zeros (FR-024). A sealed answer is `[]`, never 24 zeros, which would read as a
+  quiet range.
+- **`dst_approximate` changes meaning.** It was R4's flag for one offset applied across a change. Under this
+  signature no hour is approximate, so it is always `false`. It stays on the wire, rather than being removed, so
+  that it says what B4 says ("`dst_approximate` stays false whenever the hours are exact"). The interface does not
+  read it, and T046's notice is not built. `domain::patterns::crosses_offset_change` no longer feeds it.
+- **A time-zone change.** The core keeps no zone. The hour follows the offsets the interface sends, so after the
+  computer moves to another zone, every reach is read in the zone it has now, as the *Today* log prints it. Whether
+  a reach should instead keep the hour from before the move is the owner's question
+  (`slices/history-by-hour/plan.md`, Q1). Answering yes would need more than domain and timestamp to be recorded
+  (Principle II).
+
+`by_weekday` (`history-by-weekday`) and `movement` (`history-movement`) are still absent. Each will take the same
+`offsets` when it is built.
+
 ### `get_quote(day) -> string | null`
 
 A quote from the bundled set, or nothing. Never fetched. Null is a valid, complete answer —
