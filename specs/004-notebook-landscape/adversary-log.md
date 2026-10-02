@@ -114,3 +114,30 @@ Skipped: nothing widened, and the slice does not close the split (`reveal` remai
 | concurrency, idempotency, ordering, retention, or time | not present | nothing reads time, retries or orders anything |
 
 Skipped: nothing widened, and the slice does not close the split (`reveal` remains). Covered by row `frame` · release gate on the notebook.
+
+## reveal · fe35e8f · 2026-10-02
+
+Closes the feature's split, so a full pass is owed whatever the triggers say, and this is the release: no skip may accumulate into it.
+
+| Trigger | Status | Evidence |
+|---|---|---|
+| driving adapter (HTTP route, CLI command, queue consumer) | widened | the interface a person drives: `src/App.tsx` (default look, the dev gate), `src/shell/NotebookShell.tsx` (tab order, D47), every screen under `src/screens/` now only a spread |
+| driven adapter or the provider types behind one | already covered | `src/ipc/` and `src-tauri/` untouched; the calls each screen makes held by the frozen call logs (`beforeTheReveal.ts`); frame and 003 rows |
+| authorisation decision (who can reach one that already exists) | widened | who can reach the testing switch: a released build must offer it to nobody (`src/App.tsx`, `src/look/LookSwitch.tsx`, `releasedBuild.test.ts`; FR-012, D45) |
+| concurrency, idempotency, ordering, retention, or time | already covered | the greeting's clock (frame T1, T2); "morning whatever the hour" held by `AppLook.test.tsx` (T018); nothing is remembered (D44) |
+
+Spawned: released build gate · `drive-adversary` · claude-opus-5-5[1m] · delegated, fresh context · manifest: `src/App.tsx`, `src/main.tsx`, `src/look/look.ts`, `src/look/LookSwitch.tsx`, `src/shell/NotebookShell.tsx`, `src/shell/Greeting.tsx`, `vite.config.ts`, `index.html`, `src/styles/theme.css`, `src/styles/notebook.css`, `src/shell/__tests__/releasedBuild.test.ts`, `src/shell/__tests__/AppLook.test.tsx`, `src-tauri/tauri.conf.json`
+Spawned: screens as spreads and keyboard order · `drive-adversary` · claude-opus-5-5[1m] · delegated, fresh context · manifest: `src/shell/NotebookShell.tsx`, `src/navigation.ts`, `src/App.tsx`, `src/screens/*.tsx`, `src/screens/Setup/*.tsx`, `src/styles/*.css`, `src/screens/__tests__/*WordsKept.test.tsx`, `src/screens/__tests__/beforeTheReveal.ts`, `src/shell/__tests__/NotebookShell.test.tsx`
+Omitted: driven adapter (IPC) · `src/ipc/` and `src-tauri/` untouched; covered by the frame and 003 rows and the frozen call logs
+Findings:
+
+| # | Severity | Triage | State | Finding |
+|---|---|---|---|---|
+| A1 | LOW | confirmed | open | Today's one-column utilities still ship in the released CSS (`.min-h-screen`, `.max-w-3xl`, `.rounded-2xl`, `.bg-sand-50`, `.text-sand-50`), unused by any element: Tailwind 4 scans every file in the project, and the frozen markup in `beforeTheReveal.ts`, the tests, `specs/**/*.md` and `prototype/` feed it. Scratch build without them: CSS 48,378 → 34,871 bytes. `releasedBuild.test.ts` searches only whole class strings, so it misses them. The rest of R1. |
+| A2 | LOW | confirmed | open | A test blind spot, not a product defect: a scratch copy with `App` reading the chosen look in production and a Ctrl+Alt+N listener setting night passed every test. Nothing presses a key combination in a production render (FR-012 "not reachable by any key combination"). |
+| A3 | LOW | confirmed | open | `wordsOf` (`beforeTheReveal.ts`) reads only elements without child elements, so text beside a child element is invisible on both sides: `<p>Nothing here for today. <span>x</span></p>` and `<p>You failed again. <span>x</span></p>` compare equal. Every Over time record loses "From" and "To" this way (held today only by `controlsOf`). |
+| A4 | LOW | confirmed | open | `controlsOf` compares native controls only: a group's accessible name ("Which days", "Seen by"), `role="status"`/`aria-live` regions (an empty one drops out entirely) and the named `role="region"` left page are never compared. Held today by `CheckInPage`, `ReachesPage` and `tonightPageControls`, not by the words-kept guard. |
+| A5 | LOW | declined | declined | The three looks run the same DOM in jsdom (no CSS). Cheap, and it holds that no look changes the page's markup. |
+| A6 | LOW | declined | declined | Midday and night tokens, greetings and the landscape's night branch ship unreachable in a released build. Intended until the clock chooses the look (FR-013a). |
+
+Seen, not caused by this slice (the deleted branch drew the same screen); for the completion audit: What Cairn covers is blank when `get_disclosures` fails; What is protected's tab does nothing when `getTrail` throws; Today stays on "Looking…" when `listTodaysReaches` throws; `App` never passes `pending` to Protection (002, D11).
