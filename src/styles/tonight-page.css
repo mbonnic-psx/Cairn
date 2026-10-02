@@ -107,7 +107,7 @@
 /* The closing note: a hairline, then the quiet ink. It is the last thing on the left page. */
 .nb-reaches-note,
 .nb-checkin-note {
-  margin: 32px 0 0;
+  margin: 24px 0 0;
   max-width: 34em;
   padding-top: 20px;
   border-top: 1px solid var(--nb-rule);
@@ -122,10 +122,12 @@
   gap: 12px 24px;
   margin: 20px 0 0;
 }
+/* The label column is as wide for From as for To, so the two boxes start at the same place. */
 .nb-reaches-field {
-  display: flex;
+  display: grid;
+  grid-template-columns: 5ch auto;
   align-items: center;
-  gap: 8px;
+  column-gap: 8px;
   font-family: var(--nb-font-mono);
   font-size: 12.5px;
   letter-spacing: 0.04em;
@@ -156,9 +158,10 @@
 .nb-reaches-line,
 .nb-checkin-line {
   display: flex;
-  align-items: baseline;
+  /* Centred, not on the baseline: the label's smaller face on a baseline would stretch the line past 32px. */
+  align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: 12px;
   line-height: 32px;
 }
 .nb-reaches-site,
@@ -167,12 +170,18 @@
   color: var(--nb-ink);
   overflow-wrap: anywhere;
 }
+/* The site takes what the others leave, so in Over time every bar starts at the same place and ends at the
+   same place, whatever the names' lengths; in Today it is what keeps the time at the right. */
+.nb-reaches-site {
+  flex: 1 1 0;
+}
 .nb-reaches-time,
 .nb-checkin-time,
 .nb-reaches-count {
   flex-shrink: 0;
   font-family: var(--nb-font-mono);
   font-size: 12px;
+  font-variant-numeric: tabular-nums;
   color: var(--nb-ink-quiet);
 }
 .nb-reaches-count {
@@ -195,9 +204,8 @@
 
 /* A soft bar between a site and its count: a share of the largest, warm and quiet in every look. */
 .nb-reaches-bar {
-  flex: 1 1 3rem;
+  flex: 0 0 28%;
   align-self: center;
-  min-width: 3rem;
   height: 6px;
   border-radius: 3px;
   background-color: var(--nb-rule);
@@ -268,7 +276,8 @@
 .nb-checkin-keep {
   align-self: flex-start;
   min-height: 40px;
-  margin-top: 32px;
+  /* The space is 226px with its edge, so 30px puts the button on the pitch again. */
+  margin-top: 30px;
   padding: 0 20px;
   border: 1px solid var(--nb-button);
   border-radius: 3px;
@@ -284,7 +293,8 @@
 }
 .nb-checkin-keep:disabled {
   border-color: var(--nb-ink-quiet);
-  background-color: transparent;
+  /* The paper, not nothing: a rule of the page would otherwise strike through its words. */
+  background-color: var(--nb-paper);
   color: var(--nb-ink-quiet);
   cursor: not-allowed;
 }
@@ -292,7 +302,8 @@
 /* The save's sentence, one polite region that keeps its line when empty so nothing jumps. */
 .nb-checkin-status {
   min-height: 32px;
-  margin: 8px 0 32px;
+  /* 40px of button and 24px of margin are two pitches, so the sentence sits on a rule. */
+  margin: 24px 0 32px;
   max-width: 34em;
   font-size: 18px;
   line-height: 32px;
@@ -305,7 +316,8 @@
   margin-top: auto;
   padding: 4px 0;
   border: 0;
-  background-color: transparent;
+  /* The paper, so a rule of the page does not strike through its words. */
+  background-color: var(--nb-paper);
   font-family: var(--nb-font-mono);
   font-size: 12px;
   letter-spacing: 0.04em;

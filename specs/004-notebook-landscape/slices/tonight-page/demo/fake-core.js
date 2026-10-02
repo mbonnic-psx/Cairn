@@ -35,17 +35,18 @@
   const RANGE_NOTE =
     'Cairn was not running for about 3 hours of these days, so anything you reached for then is not here. This is what Cairn saw, not everything that happened.';
 
-  // Today's reaches, set back from now so they fall inside the day asked for.
-  const reachesFor = (dayStart) =>
-    [
-      ['example-social.com', 40 * 60],
-      ['news.example', 2 * 3600 + 5 * 60],
-      ['example-social.com', 3 * 3600 + 20 * 60],
-      ['video.example', 5 * 3600 + 48 * 60],
-      ['example-social.com', 7 * 3600 + 11 * 60],
-    ]
-      .map(([domain, back]) => ({ domain, at: Math.max(dayStart + 60, now - back) }))
-      .sort((a, b) => a.at - b.at);
+  // Today's reaches, spread over the part of the day already gone so they fall inside the day asked for,
+  // however early it is.
+  const reachesFor = (dayStart) => {
+    const span = Math.max(now - dayStart - 120, 0);
+    return [
+      ['example-social.com', 0.08],
+      ['news.example', 0.31],
+      ['example-social.com', 0.47],
+      ['video.example', 0.72],
+      ['example-social.com', 0.95],
+    ].map(([domain, at]) => ({ domain, at: dayStart + 60 + Math.round(span * at) }));
+  };
 
   let entry = null;
   let quotesShown = state !== 'quotes-off';
