@@ -8,6 +8,8 @@
  * The list is what the person chose. It is called protected only while the
  * machine shows it in force (Principle III).
  */
+import { useId } from 'react';
+
 import { Card } from '../components/Card';
 import { useNotebookPage } from '../shell/notebookPage';
 import type { ProtectionStatus, Trail as TrailData } from '../ipc';
@@ -20,12 +22,14 @@ export function trailTitle(status: ProtectionStatus | undefined): string {
 export function Trail({ trail, status }: { trail: TrailData; status?: ProtectionStatus }) {
   const inForce = status === 'in_force';
   const onPage = useNotebookPage();
+  const titleId = useId();
 
   if (onPage) {
     return (
       <div className="nb-spread nb-trail-leaves">
-        <div className="nb-page nb-trail-sticky">
-          <h2 className="nb-trail-title">
+        {/* It scrolls inside itself, so it is a tab stop of its own and the arrow keys reach it. */}
+        <div className="nb-page nb-trail-sticky" tabIndex={0} role="region" aria-labelledby={titleId}>
+          <h2 id={titleId} className="nb-trail-title">
             {inForce ? 'What you are protecting' : 'What you have chosen'}
           </h2>
           <p className="nb-trail-count">
