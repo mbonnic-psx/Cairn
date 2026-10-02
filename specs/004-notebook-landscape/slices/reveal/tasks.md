@@ -43,13 +43,13 @@ After T005 the one-column branches are unreachable in the app but still rendered
 ## Design review
 
 Designed: <!-- written by /drive's Screen design rung. This slice adds no screen and no style: it removes the interface a released build showed and makes the morning notebook the only one. The design pass in T005 confirms nothing is added. -->
-Reviewed: <!-- written by /drive's Design review rung: the rendered released build (morning, no switch) and the development build (Morning, Midday, Night, with "Look (testing)") at 1280x800 and 800x600, checked against delivery/skills/web-interface-guidelines and quickstart.md's "What to see", before the demo -->
+Reviewed: 2026-10-02, from the hand's rendered runs (`demo/`, `demo-log.md`): the released build (morning, no switch, first paint the sky's top colour) and the development build (Morning, Midday, Night under "Look (testing)") at 1280×800, 1920×1080 and 800×600, against `delivery/skills/web-interface-guidelines` and quickstart's "What to see". Nothing changed to the eye but the switch's empty corner. Notes carried to the next feature: in a development build the switch is the first Tab stop; Midday's sun behind the greeting; Over time spells dates two ways; the page area's square focus ring on rounded paper; "Protection is on" heard twice; the fixed morning page background under Night.
 
 Committed mockups of the white-box states: not applicable here. This repository has no event model (`delivery/docs/event-model/` does not exist and `check-model` does not run), and the slice adds no state; the states are recorded on the design canvas (boards `G-Morning`, `G-Midday`, `G-Night`).
 
 ## Final verification
 
-- [ ] T013 Guard and gate: the vacuity check `grep -rn "outside any shell\|wordsOutside\|function outside" src` finds nothing (plan, "The vacuity check"; research R3); `grep -rn "CurrentShell\|useNotebookPage\|NotebookPageContext\|components/Card\|components/Button" src` finds nothing but retired-pin fixture text in `beforeTheReveal.ts`; `git diff --stat main -- src-tauri scripts package.json package-lock.json Makefile .github project.json src/main.tsx src/navigation.ts` is empty; then the verify commands below pass. Before the demo, the design review above is written from the rendered screens (released and development), per `quickstart.md`. Depends on T001–T012.
+- [x] T013 Guard and gate: the vacuity check `grep -rn "outside any shell\|wordsOutside\|function outside" src` finds nothing (plan, "The vacuity check"; research R3); `grep -rn "CurrentShell\|useNotebookPage\|NotebookPageContext\|components/Card\|components/Button" src` finds nothing but retired-pin fixture text in `beforeTheReveal.ts`; `git diff --stat main -- src-tauri scripts package.json package-lock.json Makefile .github project.json src/main.tsx src/navigation.ts` is empty; then the verify commands below pass. Before the demo, the design review above is written from the rendered screens (released and development), per `quickstart.md`. Depends on T001–T012.
 
 ### Verify commands (from `quickstart.md`)
 

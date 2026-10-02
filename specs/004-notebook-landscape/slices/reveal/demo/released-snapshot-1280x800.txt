@@ -1,0 +1,32 @@
+- generic [ref=e1] clickable [onclick]
+  - generic
+    - heading "Cairn" [level=1, ref=e2]
+    - complementary
+      - StaticText "FRIDAY 1:33 PM"
+      - paragraph
+        - StaticText "Good morning."
+    - generic
+      - navigation "Pages" [ref=e3]
+        - button "PROTECTION" [ref=e5]
+          - StaticText "PROTECTION"
+        - button "WHAT IS PROTECTED" [ref=e6]
+          - StaticText "WHAT IS PROTECTED"
+        - button "TODAY" [ref=e7]
+          - StaticText "TODAY"
+        - button "TONIGHT" [ref=e8]
+          - StaticText "TONIGHT"
+        - button "WHAT CAIRN COVERS" [ref=e9]
+          - StaticText "WHAT CAIRN COVERS"
+      - main [ref=e4] focusable [tabindex]
+        - generic
+          - StaticText "Protection is on"
+          - heading "Protection is on" [level=2, ref=e10]
+          - paragraph
+            - StaticText "Cairn checked the system itself, and what you chose is in force."
+          - DescriptionList
+            - term "Addresses in force"
+            - definition
+              - StaticText "4"
+            - term "Last checked"
+            - definition
+              - StaticText "5 minutes ago"
