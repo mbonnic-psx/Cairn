@@ -479,6 +479,11 @@
   outline: 2px solid var(--nb-focus-sky);
   outline-offset: 2px;
 }
+/* A tab's left edge lies on the paper and its other sides on the sky: two contiguous bands, the ink one
+ * filling the 2px between the tab and the outline, so one of them holds 3:1 on whatever is under it. */
+.nb-tab:focus-visible {
+  box-shadow: 0 0 0 2px var(--nb-ink);
+}
 /* On Current --nb-focus-sky is unset, which would leave the focused select with no outline at all. */
 .nb-switch:not([data-look]) select:focus-visible {
   outline: auto;
@@ -529,6 +534,10 @@
   }
   .nb-landscape {
     forced-color-adjust: none;
+  }
+  /* The outline alone takes the system colour. */
+  .nb-tab:focus-visible {
+    box-shadow: none;
   }
   /* The scene keeps its own colours, so text laid over it sits on the
    * system's own ground and takes the system's own ink. */
