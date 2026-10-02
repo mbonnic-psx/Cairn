@@ -11,13 +11,13 @@
    (whose height is definite), so the ruled leaf stretches to the foot of it; a longer list grows both. */
 .nb-protection-leaves,
 .nb-trail-leaves {
-  column-gap: 48px;
+  column-gap: calc(48 * var(--nb-u));
   min-height: 100%;
 }
 .nb-protection-leaves > .nb-page--ruled,
 .nb-trail-leaves > .nb-page--ruled {
   /* The first line of writing sits on a rule: the ruling starts 22px into the 32px pitch. */
-  padding-top: 22px;
+  padding-top: calc(22 * var(--nb-u));
   overflow-wrap: anywhere;
 }
 /* What is protected: its left leaf keeps its own height and stays put while the list scrolls past.
@@ -38,9 +38,9 @@
   max-height: 100cqh;
   overflow-y: auto;
   /* Room for the ring below: 4px inset plus its 2px line, and a little air, so the ring never crosses the text. */
-  padding-inline: 12px;
+  padding-inline: calc(12 * var(--nb-u));
   /* The same width back again, so the text keeps its place and its measure; the box reaches into the gutters. */
-  margin-inline: -12px;
+  margin-inline: calc(-12 * var(--nb-u));
 }
 /* Inside the leaf's edge, as the page area's own ring is: the ink every look holds at 3:1 on its paper. */
 .nb-trail-leaves > .nb-trail-sticky:focus-visible {
@@ -51,14 +51,14 @@
 /* The state of protection, on the left leaf. */
 .nb-protection-badge {
   display: inline-block;
-  padding: 3px 12px;
+  padding: calc(3 * var(--nb-u)) calc(12 * var(--nb-u));
   border-radius: 999px;
   /* A pill the paper does not swallow: the rule colour is a different surface from the paper in every look,
      and the ink on it is held at the text floor (look/__tests__/tokens.test.ts). */
   background-color: var(--nb-rule);
   color: var(--nb-ink);
   font-family: var(--nb-font-mono);
-  font-size: 12px;
+  font-size: calc(12 * var(--nb-u));
   letter-spacing: 0.04em;
 }
 /* One fill, three tones: the words say the state, and the not-confirmed tone keeps the amber of its note as an edge. */
@@ -70,17 +70,17 @@
   box-shadow: inset 0 0 0 1px var(--nb-accent-amber);
 }
 .nb-protection-title {
-  margin: 24px 0 0;
+  margin: calc(24 * var(--nb-u)) 0 0;
   font-family: var(--nb-font-serif);
-  font-size: 30px;
+  font-size: calc(30 * var(--nb-u));
   font-weight: 500;
   line-height: 1.2;
   color: var(--nb-ink);
 }
 .nb-protection-detail {
-  margin: 12px 0 0;
+  margin: calc(12 * var(--nb-u)) 0 0;
   max-width: 34em;
-  font-size: 18px;
+  font-size: calc(18 * var(--nb-u));
   color: var(--nb-ink-body);
 }
 
@@ -88,9 +88,9 @@
 .nb-protection-figures {
   display: flex;
   flex-wrap: wrap;
-  gap: 16px 40px;
-  margin: 32px 0 0;
-  padding-top: 20px;
+  gap: calc(16 * var(--nb-u)) calc(40 * var(--nb-u));
+  margin: calc(32 * var(--nb-u)) 0 0;
+  padding-top: calc(20 * var(--nb-u));
   border-top: 1px solid var(--nb-rule);
 }
 .nb-protection-figure {
@@ -98,12 +98,12 @@
 }
 .nb-protection-figure__label {
   font-family: var(--nb-font-mono);
-  font-size: 12px;
+  font-size: calc(12 * var(--nb-u));
   color: var(--nb-ink-quiet);
 }
 .nb-protection-figure__value {
-  margin: 4px 0 0;
-  font-size: 24px;
+  margin: calc(4 * var(--nb-u)) 0 0;
+  font-size: calc(24 * var(--nb-u));
   line-height: 1.3;
   color: var(--nb-ink);
   white-space: nowrap;
@@ -112,7 +112,7 @@
 /* A note in the amber language: an edge, with its words left on the paper. */
 .nb-protection-note {
   margin: 0;
-  padding: 2px 0 2px 16px;
+  padding: calc(2 * var(--nb-u)) 0 calc(2 * var(--nb-u)) calc(16 * var(--nb-u));
   border-left: 3px solid var(--nb-accent-amber);
   color: var(--nb-accent-amber);
 }
@@ -121,18 +121,18 @@
   color: var(--nb-ink);
 }
 .nb-protection-note__sentence {
-  margin: 8px 0 0;
+  margin: calc(8 * var(--nb-u)) 0 0;
   color: var(--nb-ink-body);
 }
 .nb-protection-note__button {
-  margin: 12px 0 0 -8px;
+  margin: calc(12 * var(--nb-u)) 0 0 calc(-8 * var(--nb-u));
   /* The box the shared button gave it (px-5, py-2.5, rounded-lg, text-sm's line, font-medium), now without its fade. */
   padding: 10px 20px;
   border-radius: 8px;
   font-weight: 500;
   line-height: calc(1.25 / 0.875);
   font-family: var(--nb-font-mono);
-  font-size: 12.5px;
+  font-size: calc(12.5 * var(--nb-u));
   color: var(--nb-ink-quiet);
 }
 /* Hover from the look's ink, on the paper: the shell does not re-point the theme's sand fill the button hovers to. */
@@ -148,24 +148,24 @@
 .nb-trail-title {
   margin: 0;
   font-family: var(--nb-font-serif);
-  font-size: 30px;
+  font-size: calc(30 * var(--nb-u));
   font-weight: 500;
   line-height: 1.2;
   color: var(--nb-ink);
 }
 .nb-trail-count {
-  margin: 12px 0 0;
+  margin: calc(12 * var(--nb-u)) 0 0;
   max-width: 34em;
-  font-size: 18px;
+  font-size: calc(18 * var(--nb-u));
   color: var(--nb-ink-body);
 }
 .nb-trail-count + .nb-trail-note {
-  margin-top: 16px;
+  margin-top: calc(16 * var(--nb-u));
 }
 .nb-trail-taking-out {
-  margin: 32px 0 0;
+  margin: calc(32 * var(--nb-u)) 0 0;
   max-width: 34em;
-  padding-top: 20px;
+  padding-top: calc(20 * var(--nb-u));
   border-top: 1px solid var(--nb-rule);
   color: var(--nb-ink-quiet);
 }
@@ -173,7 +173,7 @@
 /* What is protected's not-confirmed note: the same amber edge, its own rule. */
 .nb-trail-note {
   margin: 0;
-  padding: 2px 0 2px 16px;
+  padding: calc(2 * var(--nb-u)) 0 calc(2 * var(--nb-u)) calc(16 * var(--nb-u));
   border-left: 3px solid var(--nb-accent-amber);
   color: var(--nb-accent-amber);
 }
@@ -189,8 +189,8 @@
   flex-wrap: wrap;
   align-items: flex-start;
   justify-content: space-between;
-  column-gap: 16px;
-  line-height: 32px;
+  column-gap: calc(16 * var(--nb-u));
+  line-height: calc(32 * var(--nb-u));
 }
 /* An address is never split to make room for its aside: the aside moves to its own line first. A
    name breaks only when it alone is wider than the page, and a continuation hangs under the first line. */
@@ -205,7 +205,7 @@
   /* Alone on its line it sits to the right, never in the address column, so it reads as a note. */
   margin-left: auto;
   font-family: var(--nb-font-mono);
-  font-size: 12px;
+  font-size: calc(12 * var(--nb-u));
   color: var(--nb-ink-quiet);
 }
 

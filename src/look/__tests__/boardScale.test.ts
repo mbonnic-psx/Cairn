@@ -59,6 +59,8 @@ export function unscaledLengths(sheet: string, selector: RegExp, options: SweepO
       if (LINE_OR_RING.test(prop)) continue;
       let value = decl.slice(colon + 1).trim();
       if (prop === 'background-image') value = value.replace(RULING_LINE, '');
+      // A box with a 1px edge tiles a ruling one pixel off; the position puts it back by that edge's own 1px.
+      if (prop === 'background-position') value = value.replace(/(?<![\w.-])-1px\b/, '');
       value = value.replace(SCALED, '');
       if (/(?<![\w.-])-?[\d.]+(px|rem)\b/.test(value)) found.push(`${selectors.join(', ')} { ${prop}: ${decl.slice(colon + 1).trim()} }`);
     }
@@ -88,6 +90,11 @@ describe('the sweep names an unscaled length and passes the scaled forms (the he
     expect(sweep(`.x { background-image: ${line}; }`)).toEqual([]);
     expect(sweep('.x { width: calc(32 * var(--nb-u) - 1px); }')).toHaveLength(1);
   });
+  it('passes the -1px that puts a 1px-edged box\'s ruling back, in a background-position only', () => {
+    expect(sweep('.x { background-position: 0 -1px; }')).toEqual([]);
+    expect(sweep('.x { background-position: 0 -2px; }')).toHaveLength(1);
+    expect(sweep('.x { margin-top: -1px; }')).toHaveLength(1);
+  });
   it('reads only the rules whose selector matches, and not the text it is told to leave out', () => {
     expect(unscaledLengths('.y { width: 3px; } .x { width: 4px; }', /\.x/)).toEqual(['.x { width: 4px }']);
     expect(unscaledLengths('.x { width: 4px; } @media (max-width: 1099px) { .x { width: 5px; } }', /\.x/, { without: ['@media (max-width: 1099px) { .x { width: 5px; } }'] })).toHaveLength(1);
@@ -109,5 +116,42 @@ describe('everything inside the notebook grows by one factor (D39; notebook.css)
 
   it('writes every px length of an interior rule as calc(N * var(--nb-u)) or 0, apart from lines and rings', () => {
     expect(unscaledLengths(css, NOTEBOOK_INTERIOR, { without: [narrow, forced] }), 'unscaled lengths').toEqual([]);
+  });
+});
+
+/**
+ * Lengths a page sheet still writes in px because the test that pins them is outside this slice's manifest
+ * (nothingFades.test.tsx asserts `padding: 10px 20px` on Protection's "Keep things as they are" button). Scale the
+ * declaration, update that one assertion, and delete the entry: the test below fails while an entry is stale.
+ */
+const PENDING_OUTSIDE_MANIFEST: Array<{ sheet: string; found: string }> = [
+  { sheet: 'protection-page.css', found: '.nb-protection-note__button { padding: 10px 20px }' },
+];
+
+// T006: the same factor sizes every page. Each page sheet is read from disk; a length added to one later fails here.
+describe.each(['protection-page.css', 'quiet-pages.css', 'setup-pages.css', 'tonight-page.css'])(
+  'every length in %s grows with the notebook (D39)',
+  (name) => {
+    const css = sheetText(name);
+    it('writes every px length as calc(N * var(--nb-u)) or 0, apart from lines and rings', () => {
+      const pending = PENDING_OUTSIDE_MANIFEST.filter((entry) => entry.sheet === name).map((entry) => entry.found);
+      expect(unscaledLengths(css, /./).filter((found) => !pending.includes(found)), 'unscaled lengths').toEqual([]);
+    });
+    it('lists no pending length that is no longer there, so the list empties as the lengths are scaled', () => {
+      const now = unscaledLengths(css, /./);
+      for (const entry of PENDING_OUTSIDE_MANIFEST.filter((e) => e.sheet === name)) expect(now, entry.found).toContain(entry.found);
+    });
+    it('has no rem length, which would not follow the notebook (an em follows the scaled font it sits in)', () => {
+      expect(css.match(/[\d.]+rem\b/g) ?? [], 'rem lengths').toEqual([]);
+    });
+    it('reads rules, so the sweep is never vacuous', () => {
+      expect(css.match(/\{/g)!.length).toBeGreaterThan(5);
+    });
+  },
+);
+
+describe('the writing space\'s minimum is the notebook\'s unit, not the root font (D39)', () => {
+  it('is calc(226 * var(--nb-u)): 14rem and 2px at today\'s 16px root', () => {
+    expect(sheetText('tonight-page.css')).toMatch(/\.nb-checkin-write\s*\{[^}]*min-height:\s*calc\(226 \* var\(--nb-u\)\)\s*;/);
   });
 });

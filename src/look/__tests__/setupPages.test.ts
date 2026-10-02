@@ -107,7 +107,8 @@ describe('the setup-pages stylesheet', () => {
   });
 
   it('takes colour only from the look tokens (and the re-pointed moss), each defined in every look', () => {
-    const used = [...css.matchAll(/var\((--[a-z0-9-]+)/g)].map((m) => m[1]!);
+    // --nb-u is the one length a page sheet sizes by, defined once for every look (boardScale.test.ts holds its use).
+    const used = [...css.matchAll(/var\((--[a-z0-9-]+)/g)].map((m) => m[1]!).filter((name) => name !== '--nb-u');
     expect(used.length).toBeGreaterThan(0);
     for (const name of used) expect([...COLOURS, ...FONTS], name).toContain(name);
     for (const look of ['morning', 'midday', 'night']) {
@@ -206,11 +207,11 @@ describe('the edge of every control on the paper meets 3:1 in every look (D15, T
     expect(edgeOf('.nb-custom-input').width).toBe(1);
   });
 
-  it('draws the checkbox itself: appearance none, an 18px box, a 1.5px edge', () => {
+  it('draws the checkbox itself: appearance none, an 18-unit box, a 1.5px edge', () => {
     const box = own('.nb-categories-box');
     expect(box).toMatch(/(?:^|[;\s])appearance:\s*none/);
-    expect(box).toMatch(/(?:^|[;\s])width:\s*18px/);
-    expect(box).toMatch(/(?:^|[;\s])height:\s*18px/);
+    expect(box).toMatch(/(?:^|[;\s])width:\s*calc\(18 \* var\(--nb-u\)\)/);
+    expect(box).toMatch(/(?:^|[;\s])height:\s*calc\(18 \* var\(--nb-u\)\)/);
     expect(edgeOf('.nb-categories-box').width).toBe(1.5);
   });
 

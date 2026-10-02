@@ -137,7 +137,8 @@ describe('the tonight-page stylesheet', () => {
   });
 
   it('takes colour only from the look tokens, each defined in every look', () => {
-    const used = [...css.matchAll(/var\((--[a-z0-9-]+)/g)].map((m) => m[1]!);
+    // --nb-u is the one length a page sheet sizes by, defined once for every look (boardScale.test.ts holds its use).
+    const used = [...css.matchAll(/var\((--[a-z0-9-]+)/g)].map((m) => m[1]!).filter((name) => name !== '--nb-u');
     expect(used.length).toBeGreaterThan(0);
     for (const name of used) expect([...COLOURS, ...FONTS], name).toContain(name);
     for (const look of LOOKS) {
@@ -202,7 +203,7 @@ describe('the spreads', () => {
   it('gives the Tonight spread the height of the page area, and a ruled page whose first line sits on a rule', () => {
     expect(bodyOf('.nb-checkin-leaves')).toMatch(/min-height:\s*100%/);
     for (const selector of ['.nb-reaches-leaves > .nb-page--ruled', '.nb-checkin-leaves > .nb-page--ruled']) {
-      expect(bodyOf(selector), selector).toMatch(/padding-top:\s*22px/);
+      expect(bodyOf(selector), selector).toMatch(/padding-top:\s*calc\(22 \* var\(--nb-u\)\)/);
     }
   });
 
@@ -225,9 +226,9 @@ describe('the spreads', () => {
     }
   });
 
-  it('sets each typed line on the notebook\'s 32px pitch', () => {
+  it('sets each typed line on the notebook\'s pitch, 32 units', () => {
     for (const selector of ['.nb-reaches-line', '.nb-checkin-line']) {
-      expect(bodyOf(selector), selector).toMatch(/line-height:\s*32px/);
+      expect(bodyOf(selector), selector).toMatch(/line-height:\s*calc\(32 \* var\(--nb-u\)\)/);
     }
   });
 });
@@ -294,21 +295,21 @@ describe('the lined writing space (D24)', () => {
     expect(shellPitch).toBe(32);
   });
 
-  it('is the page\'s serif at 18px on a 32px line', () => {
+  it('is the page\'s serif at 18 units on a 32-unit line', () => {
     expect(write()).toMatch(/font-family:\s*var\(--nb-font-serif\)/);
-    expect(write()).toMatch(/font-size:\s*18px/);
-    expect(last(write(), 'line-height')).toBe('32px');
+    expect(write()).toMatch(/font-size:\s*calc\(18 \* var\(--nb-u\)\)/);
+    expect(last(write(), 'line-height')).toBe('calc(32 * var(--nb-u))');
   });
 
   it('draws its own rules in --nb-rule at the same pitch as its line height and the notebook\'s ruling', () => {
     const image = last(write(), 'background-image') ?? '';
     expect(image).toMatch(/^repeating-linear-gradient\(/);
     expect(image).toMatch(/var\(--nb-rule\)/);
-    const lengths = [...image.matchAll(/([\d.]+)px/g)].map((m) => Number(m[1]));
+    const lengths = [...image.matchAll(/calc\(([\d.]+) \* var\(--nb-u\)/g)].map((m) => Number(m[1]));
     const pitch = Math.max(...lengths);
-    expect(pitch).toBe(parseFloat(last(write(), 'line-height')!));
+    expect(pitch).toBe(Number(last(write(), 'line-height')!.match(/^calc\(([\d.]+) \* var\(--nb-u\)\)$/)?.[1]));
     expect(pitch).toBe(shellPitch);
-    expect(last(write(), 'background-size')).toMatch(new RegExp(`^100%\\s+${pitch}px$`));
+    expect(last(write(), 'background-size')).toMatch(new RegExp(`^100%\\s+calc\\(${pitch} \\* var\\(--nb-u\\)\\)$`));
   });
 
   it('moves its rules with its text and sits on a --nb-paper ground, so the page\'s ruling does not show through', () => {
@@ -316,8 +317,8 @@ describe('the lined writing space (D24)', () => {
     expect(tokenOf(last(write(), 'background-color'))).toBe('--nb-paper');
   });
 
-  it('is never given a fixed height: its minimum is in rem', () => {
-    expect(last(write(), 'min-height')).toMatch(/\d\s*rem\b/);
+  it('is never given a fixed height: its minimum is in the notebook\'s unit, 14rem and its edge at today\'s size', () => {
+    expect(last(write(), 'min-height')).toBe('calc(226 * var(--nb-u))');
     expect(write()).not.toMatch(/(?:^|[;\s])height:/);
     expect(write()).not.toMatch(/(?:^|[;\s])max-height:/);
   });
