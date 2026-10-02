@@ -274,3 +274,12 @@ describe('the fold (FR-034)', () => {
     expect(container.querySelectorAll('[class*="fold"]')).toHaveLength(1);
   });
 });
+
+describe('each tab wears its own colour class (mutation, fold-and-width)', () => {
+  it('names every tab by its id, so the look gives each its own paper', () => {
+    shell();
+    for (const tab of fakeTabs) {
+      expect(screen.getByRole('button', { name: tab.label })).toHaveClass('nb-tab', `nb-tab--${tab.id}`);
+    }
+  });
+});
