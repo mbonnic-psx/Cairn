@@ -668,4 +668,85 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (name) 
       expect(outside.container.querySelector('[class*="nb-"]')).toBeNull();
     });
   });
+
+  describe('every state of Tonight crossed with every state the session holds', () => {
+    const REGION = '[role="status"], [aria-live]';
+    const views: Record<string, TonightCase> = {
+      looking: tonightCases.looking!,
+      'a load that could not be made': tonightCases['a load that could not be made']!,
+      'open, with reaches': tonightCases['reaches, no coverage note, quotes hidden']!,
+      'open, without reaches': tonightCases['no reaches, no coverage note, quotes hidden']!,
+      sealed: tonightCases['sealed, quotes hidden']!,
+      'open, ended while open': tonightCases['a day that ended while open']!,
+      'sealed, ended while open': {
+        ...tonightCases['sealed, quotes hidden']!,
+        endsWhileOpen: true,
+      },
+    };
+    type Held = Pick<CheckInSession, 'draft' | 'note' | 'kept' | 'keeping'>;
+    const held: Record<string, Held> = {
+      fresh: { draft: undefined, note: undefined, kept: false, keeping: false },
+      'a draft typed': { draft: 'Held draft.', note: undefined, kept: false, keeping: false },
+      kept: { draft: 'Back on the trail.', note: undefined, kept: true, keeping: false },
+      'kept, then typed again': {
+        draft: 'Back on the trail. More.',
+        note: undefined,
+        kept: false,
+        keeping: false,
+      },
+      'a refused save': { draft: 'Held draft.', note: saveRefusal, kept: false, keeping: false },
+      keeping: { draft: 'Held draft.', note: undefined, kept: false, keeping: true },
+    };
+
+    /** The words of the whole screen and the text of its status region, on a page or outside any shell. */
+    async function seen(c: TonightCase, h: Held, shell: boolean) {
+      const session: CheckInSession = {
+        opened: { day: '2026-09-30', start: 1_790_722_800, end: 1_790_809_200 },
+        open: () => undefined,
+        ...h,
+        quote: undefined,
+        holdQuote: () => undefined,
+        type: () => undefined,
+        keep: () => Promise.resolve(undefined),
+      };
+      vi.setSystemTime(c.endsWhileOpen ? lateEvening() : evening());
+      core = installFakeCore(tonightCore(c));
+      const view = render(
+        shell ? (
+          <NotebookShell tabs={tabs} onSelect={vi.fn()} look={look}>
+            <CheckIn session={session} />
+          </NotebookShell>
+        ) : (
+          <CheckIn session={session} />
+        ),
+      );
+      await settle();
+      if (c.endsWhileOpen) {
+        await act(async () => {
+          await vi.advanceTimersByTimeAsync(11 * 60 * 1000);
+        });
+      }
+      // On a page, the screen is the notebook's main; the shell's own words are not Tonight's.
+      const shown = (view.container.querySelector('main') ?? view.container) as HTMLElement;
+      const regions = shown.querySelectorAll(REGION);
+      const found = {
+        words: words(shown),
+        status: Array.from(regions).map((el) => el.textContent),
+      };
+      view.unmount();
+      core?.remove();
+      return found;
+    }
+
+    for (const [viewName, c] of Object.entries(views)) {
+      for (const [heldName, h] of Object.entries(held)) {
+        it(`${viewName} x ${heldName}: the page says what Current says, status region and all`, async () => {
+          const onPage = await seen(c, h, true);
+          const outside = await seen(c, h, false);
+          expect(onPage.status).toEqual(outside.status);
+          expect(onPage.words).toEqual(outside.words);
+        });
+      }
+    }
+  });
 });

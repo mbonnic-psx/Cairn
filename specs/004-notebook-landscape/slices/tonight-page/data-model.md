@@ -47,9 +47,10 @@ and "Your own estimates for N days are not counted here, because an estimate has
 |---|---|---|---|
 | looking | no `view`, no `loadNote` | "Looking…" | blank, ruled |
 | could not load | no `view`, `loadNote` | the core's sentence | blank, ruled |
-| sealed | `view.sealed` | heading, sealed sentence | quote?, status, switch? |
+| sealed | `view.sealed` | heading, sealed sentence | quote?, status (the refusal or nothing), switch? |
 | open | otherwise | heading, log or "Nothing here for {thisDay}.", coverage note? | quote?, "How the day went" + writing space, "Keep this", status, switch? |
 
 The heading is "Tonight" until the opened day ends, then the date in words ("Wednesday 30 September"). The quote shows
 when `quotesShown && quote`; the switch when `quotesShown !== undefined`, reading "Hide quotes" or "Show quotes". The
-status reads the joined refusal, else "Kept for {thisDay}." when kept, else nothing.
+open day's status reads the joined refusal, else "Kept for {thisDay}." when kept, else nothing; the sealed day's reads the
+joined refusal or nothing, never "Kept for …", whatever the session holds (Current's sealed branch reads the same).

@@ -375,10 +375,14 @@ export function CheckIn({ session }: { session?: CheckInSession }) {
       </button>
     );
 
+  // What the status region says, once, read by Current and by the page alike: an open day says what happened
+  // to the save, else that it was kept; a sealed day has nothing kept to speak of, so only a refusal.
+  const openStatus = note ?? (kept ? keptFor(thisDay) : '');
+  const sealedStatus = note ?? '';
   // One polite region, where the open day and the sealed day both have it.
-  const pageStatus = (
+  const pageStatus = (text: string) => (
     <p role="status" aria-live="polite" className="nb-checkin-status">
-      {note ?? (kept ? keptFor(thisDay) : '')}
+      {text}
     </p>
   );
 
@@ -410,7 +414,7 @@ export function CheckIn({ session }: { session?: CheckInSession }) {
         </div>
         <div className="nb-page nb-page--ruled">
           {pageQuote}
-          {pageStatus}
+          {pageStatus(sealedStatus)}
           {pageSwitch}
         </div>
       </div>
@@ -431,7 +435,7 @@ export function CheckIn({ session }: { session?: CheckInSession }) {
           aria-live="polite"
           className="reflective mt-4 max-w-prose text-ink-700"
         >
-          {note ?? ''}
+          {sealedStatus}
         </p>
       </Card>
     );
@@ -479,7 +483,7 @@ export function CheckIn({ session }: { session?: CheckInSession }) {
           >
             {KEEP_THIS}
           </button>
-          {pageStatus}
+          {pageStatus(openStatus)}
           {pageSwitch}
         </div>
       </div>
@@ -541,7 +545,7 @@ export function CheckIn({ session }: { session?: CheckInSession }) {
         aria-live="polite"
         className="reflective mt-4 max-w-prose text-ink-700"
       >
-        {note ?? (kept ? keptFor(thisDay) : '')}
+        {openStatus}
       </p>
 
       {quoteSwitch}
