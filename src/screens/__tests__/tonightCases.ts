@@ -77,6 +77,7 @@ const range = (over: Partial<Patterns>): Patterns => ({
   by_site: sites,
   by_hour: [],
   by_weekday: week(),
+  movement: [],
   gaps: [],
   coverage_note: null,
   estimates_excluded: 0,

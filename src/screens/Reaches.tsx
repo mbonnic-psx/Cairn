@@ -70,20 +70,21 @@ const SEEN_BY = 'Seen by';
 const BY_SITE = 'By site';
 const BY_HOUR = 'By hour';
 const BY_DAY = 'By day';
+const DAY_BY_DAY = 'Day by day';
 /**
  * Why an estimate is left out of the view it is left out of: it has no site and no hour, and it is not
  * something Cairn saw, which is all a day of the week is counted from (W6).
  */
 const estimatesSentence = (days: number, view: Seen) => {
   const reason =
-    view === 'weekday' ? 'Cairn counts only what it saw' : `an estimate has no ${view}`;
+    view === 'weekday' || view === 'movement' ? 'Cairn counts only what it saw' : `an estimate has no ${view}`;
   return days === 1
     ? `Your own estimate for 1 day is not counted here, because ${reason}.`
     : `Your own estimates for ${days} days are not counted here, because ${reason}.`;
 };
 
-/** The three ways to see a range: by the sites reached, the hours of the day, or the days of the week. */
-type Seen = 'site' | 'hour' | 'weekday';
+/** The four ways to see a range: by the sites reached, the hours of the day, the days of the week, or day by day. */
+type Seen = 'site' | 'hour' | 'weekday' | 'movement';
 
 /** One line of a range's list: a site, an hour or a day of the week, with its count. */
 interface Row {
@@ -116,6 +117,8 @@ const rowsOf = (answer: Patterns, seen: Seen, weekStart: number): Row[] => {
       count: one.count,
     }));
   }
+  // Day by day: the rows come from the answer; the names and clauses are V13 onward.
+  if (seen === 'movement') return [];
   // An answer with no days at all (sealed) draws none; otherwise all seven are drawn (W3), a weekday
   // the answer left out as a name with no count known.
   if (answer.by_weekday.length === 0) return [];
@@ -404,7 +407,7 @@ function OverTimeView({
   );
 }
 
-/** By site | By hour | By day, under the date boxes in every state, so it never moves when an answer arrives. */
+/** By site | By hour | By day | Day by day, under the date boxes in every state, so it never moves when an answer arrives. */
 function SeenByChoice({
   seen,
   onChoose,
@@ -422,6 +425,9 @@ function SeenByChoice({
       </ViewButton>
       <ViewButton current={seen === 'weekday'} onClick={() => onChoose('weekday')}>
         {BY_DAY}
+      </ViewButton>
+      <ViewButton current={seen === 'movement'} onClick={() => onChoose('movement')}>
+        {DAY_BY_DAY}
       </ViewButton>
     </div>
   );

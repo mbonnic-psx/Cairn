@@ -54,6 +54,7 @@ const patterns = (over: Partial<Patterns> = {}): Patterns => ({
   ],
   by_hour: hours({ 14: 6 }),
   by_weekday: week({ 0: 2, 2: 1 }),
+  movement: [],
   gaps: [],
   coverage_note: null,
   estimates_excluded: 0,
@@ -115,6 +116,7 @@ describe('Seen by: By site | By hour | By day', () => {
       ['By site', 'true'],
       ['By hour', 'false'],
       ['By day', 'false'],
+      ['Day by day', 'false'],
     ]);
   });
 
@@ -489,7 +491,7 @@ describe('voice and the wall (US2 scenario 5, SC-010, Principle I)', () => {
     await waitFor(() => expect(lines()).toHaveLength(7));
 
     const names = screen.getAllByRole('button').map((b) => b.textContent);
-    expect(names).toEqual(['Today', 'Over time', 'By site', 'By hour', 'By day']);
+    expect(names).toEqual(['Today', 'Over time', 'By site', 'By hour', 'By day', 'Day by day']);
     expect(text()).not.toMatch(/\b(unblock|pause|turn off|allow|snooze|disable)\b/i);
   });
 });

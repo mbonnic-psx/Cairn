@@ -40,6 +40,7 @@ const answer = (over: Partial<Patterns> = {}): Patterns => ({
   ],
   by_hour: hours({ 14: 6 }),
   by_weekday: week({ 0: 4, 2: 2 }),
+  movement: [],
   gaps: [],
   coverage_note: null,
   estimates_excluded: 0,
@@ -89,7 +90,7 @@ const choose = (name: 'By site' | 'By hour' | 'By day') =>
   screen.getByRole('button', { name });
 
 describe('Seen by, with By day, on a notebook page', () => {
-  it('sits on the left page under the date boxes, three buttons in the Which days classes', async () => {
+  it('sits on the left page under the date boxes, four buttons in the Which days classes', async () => {
     const { pages } = await byDayOnPage(answer());
     const [left] = pages();
 
@@ -102,6 +103,7 @@ describe('Seen by, with By day, on a notebook page', () => {
       ['By site', 'true'],
       ['By hour', 'false'],
       ['By day', 'false'],
+      ['Day by day', 'false'],
     ]);
     for (const button of buttons) expect(button).toHaveClass('nb-reaches-which__button');
   });

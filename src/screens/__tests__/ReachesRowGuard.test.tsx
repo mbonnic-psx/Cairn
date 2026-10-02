@@ -34,6 +34,7 @@ const patterns = (over: Partial<Patterns>): Patterns => ({
   by_site: [{ domain: 'a.example', count: 5 }],
   by_hour: hours({ 14: 6 }),
   by_weekday: week({ 2: 3 }),
+  movement: [],
   gaps: [],
   coverage_note: null,
   estimates_excluded: 0,

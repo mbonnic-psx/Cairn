@@ -1,5 +1,5 @@
 /**
- * Today's reaches, and a range of days by site, by hour and by day of week.
+ * Today's reaches, and a range of days by site, by hour, by day of week and day by day.
  *
  * In a file of its own so the restriction can be stated where it is enforced:
  * **the Reaches screen is the only thing that may import this** (FR-030a). An
@@ -65,9 +65,27 @@ export interface OffsetChange {
   offset: number;
 }
 
+/** Whether Cairn counted for a whole row, part of it, or none of it (the core's `seen`). */
+export type SeenOf = 'whole' | 'part' | 'none';
+
+/** One row of a range day by day: a date, or a week of dates when the range is long. */
+export interface MovementRow {
+  /** The row's first date, `YYYY-MM-DD`. */
+  day: string;
+  /** How many dates the row holds: 1 for a day, 7 for a week, fewer for a last short week. */
+  days: number;
+  /** `day` when the range holds 56 dates or fewer, `week` when it holds more. The screen reads it, never re-derives it. */
+  span: 'day' | 'week';
+  count: number;
+  /** Whether Cairn was counting for the row. A `none` row is shown as not seen, never as a zero. */
+  seen: SeenOf;
+  /** True for the row holding the present, and any row after it. */
+  so_far: boolean;
+}
+
 /**
- * A range of days, by site, by hour and by day of week. Only what Cairn can state truthfully is
- * here: movement joins it when a slice computes it.
+ * A range of days, by site, by hour, by day of week and day by day. Only what Cairn can state
+ * truthfully is here.
  */
 export interface Patterns {
   /** Most first; equal counts by domain name. */
@@ -76,6 +94,8 @@ export interface Patterns {
   by_hour: HourCount[];
   /** Exactly 7, weekday 0 (Monday) to 6 (Sunday) ascending, zeros included; empty only when `sealed`. */
   by_weekday: WeekdayCount[];
+  /** Oldest first, contiguous over the range; empty only when `sealed`. */
+  movement: MovementRow[];
   /** Each cut to the part inside the range. */
   gaps: Gap[];
   /** The gaps in one sentence, about the range. */

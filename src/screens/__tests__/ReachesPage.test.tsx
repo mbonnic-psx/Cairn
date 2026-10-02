@@ -23,7 +23,14 @@ import {
   silentReader,
   todayCases,
 } from './tonightCases';
-import { baseline, wordsOf, BY_DAY_DELTA, OVER_TIME, TODAY } from './beforeTheReveal';
+import {
+  baseline,
+  wordsOf,
+  BY_DAY_DELTA,
+  DAY_BY_DAY_DELTA,
+  OVER_TIME,
+  TODAY,
+} from './beforeTheReveal';
 
 const tabs = [{ id: 'reaches' as const, label: 'Today', current: true }];
 
@@ -167,7 +174,7 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (name) 
       );
       await user.click(screen.getByRole('button', { name: 'Over time' }));
       expect(words(spread!)).toEqual(
-        wordsOf(baseline(OVER_TIME['looking']!), [BY_DAY_DELTA]),
+        wordsOf(baseline(OVER_TIME['looking']!), [BY_DAY_DELTA, DAY_BY_DAY_DELTA]),
       );
     });
   });
@@ -402,7 +409,7 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (name) 
           expect(left!.lastElementChild).toHaveTextContent(sentenceFor[state]!),
         );
         expect(words(spread!)).toEqual(
-          wordsOf(baseline(OVER_TIME[state]!), [BY_DAY_DELTA]),
+          wordsOf(baseline(OVER_TIME[state]!), [BY_DAY_DELTA, DAY_BY_DAY_DELTA]),
         );
       },
     );
@@ -560,7 +567,7 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (name) 
         const answer = overTimeCases[state] as Patterns;
         const { spread } = await listed(answer);
         expect(words(spread!)).toEqual(
-          wordsOf(baseline(OVER_TIME[state]!), [BY_DAY_DELTA]),
+          wordsOf(baseline(OVER_TIME[state]!), [BY_DAY_DELTA, DAY_BY_DAY_DELTA]),
         );
       },
     );
@@ -659,7 +666,7 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (name) 
       async (state) => {
         const { spread } = await empty(state);
         expect(words(spread!)).toEqual(
-          wordsOf(baseline(OVER_TIME[state]!), [BY_DAY_DELTA]),
+          wordsOf(baseline(OVER_TIME[state]!), [BY_DAY_DELTA, DAY_BY_DAY_DELTA]),
         );
       },
     );

@@ -39,6 +39,7 @@ const patterns = (over: Partial<Patterns> = {}): Patterns => ({
   ],
   by_hour: hours({ 2: 2, 14: 6, 15: 3 }),
   by_weekday: [],
+  movement: [],
   gaps: [],
   coverage_note: null,
   estimates_excluded: 0,
@@ -100,6 +101,7 @@ describe('Seen by: By site | By hour | By day', () => {
       ['By site', 'true'],
       ['By hour', 'false'],
       ['By day', 'false'],
+      ['Day by day', 'false'],
     ]);
     // Under the date boxes, and not in the header.
     const boxes = screen.getByLabelText('To').closest('div') as HTMLElement;
@@ -413,6 +415,7 @@ describe('what it never says', () => {
       'By site',
       'By hour',
       'By day',
+      'Day by day',
     ]);
   });
 });
