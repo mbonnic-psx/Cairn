@@ -45,6 +45,70 @@
       "signals": {
         "gaps": 5
       }
+    },
+    {
+      "stage": "skipper",
+      "started": "2026-10-02T14:38:21Z",
+      "planned": "skipper: skipper → host model — `skipper` maps to the host model",
+      "tasks": {
+        "start": null,
+        "end": null
+      },
+      "ended": "2026-10-02T14:46:43Z",
+      "seconds": 502,
+      "span": {
+        "from": {
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/71633336-496b-4252-a9a5-d1d3a2247a72.jsonl": 736266
+        },
+        "to": {
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/71633336-496b-4252-a9a5-d1d3a2247a72.jsonl": 1230223,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/71633336-496b-4252-a9a5-d1d3a2247a72/subagents/agent-a0ce3d896fdef3c91.jsonl": 331825,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/71633336-496b-4252-a9a5-d1d3a2247a72/subagents/agent-af66e7d9df42fc9de.jsonl": 234423
+        }
+      },
+      "usage": {
+        "source": "claude",
+        "session": "71633336-496b-4252-a9a5-d1d3a2247a72",
+        "read": "message.usage on each assistant line, once per requestId",
+        "host": {
+          "claude-opus-5-5": {
+            "input": 68,
+            "output": 31868,
+            "cache_read": 5819859,
+            "cache_creation": 65506
+          }
+        },
+        "subagents": {
+          "claude-sonnet-5-5": {
+            "input": 28,
+            "output": 2653,
+            "cache_read": 666823,
+            "cache_creation": 63283
+          },
+          "claude-opus-5-5": {
+            "input": 12,
+            "output": 1789,
+            "cache_read": 168663,
+            "cache_creation": 42642
+          }
+        },
+        "agents": [
+          "drive-implement",
+          "drive-skipper"
+        ]
+      },
+      "ran": [
+        "claude-opus-5-5",
+        "claude-sonnet-5-5"
+      ],
+      "agents": [
+        "drive-implement",
+        "drive-skipper"
+      ],
+      "delegated": true,
+      "signals": {
+        "driver": "cruise"
+      }
     }
   ]
 }
