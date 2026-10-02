@@ -60,7 +60,7 @@ const DAY_START = Math.round(new Date(2026, 8, 30, 0, 0, 0).getTime() / 1000);
 const DAY_END = Math.round(new Date(2026, 9, 1, 0, 0, 0).getTime() / 1000);
 
 const COVERAGE_NOTE =
-  'Cairn was not running for about 1 hour(s) of today, so anything you reached for then is not here. This is what Cairn saw, not everything that happened.';
+  'Cairn was not running for about 1 hour of today, so anything you reached for then is not here. This is what Cairn saw, not everything that happened.';
 
 const SEALED =
   'Your keychain is locked, so your history stays sealed until it is unlocked. Protection is unaffected, and Cairn keeps recording.';

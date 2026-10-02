@@ -249,7 +249,7 @@ describe('how it reads', () => {
 describe('what Cairn did not see, above the list', () => {
   it('states the coverage note above the list', async () => {
     const note =
-      'Cairn was not running for about 3 hour(s) of these days, so anything you reached for then is not here.';
+      'Cairn was not running for about 3 hours of these days, so anything you reached for then is not here.';
     const { read } = fakeRead(async () => patterns({ coverage_note: note }));
     await openOverTime(read);
     const list = await screen.findByRole('list');
@@ -327,7 +327,7 @@ describe('what the view never holds', () => {
     [
       'a note and estimates',
       patterns({
-        coverage_note: 'Cairn was not running for about 2 day(s) of these days.',
+        coverage_note: 'Cairn was not running for about 2 days across these days.',
         estimates_excluded: 3,
       }),
     ],

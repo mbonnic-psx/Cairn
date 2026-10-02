@@ -67,8 +67,8 @@ fn an_hour_is_the_edge_between_minutes_and_hours() {
 fn a_span_under_two_days_is_in_hours() {
     let text = note(9 * HOUR);
     assert!(text.contains("9 hours"), "{text}");
-    let longest = note(2 * DAY - MINUTE);
-    assert!(longest.contains("47 hours"), "{longest}");
+    let longest = note(2 * DAY - 2 * HOUR);
+    assert!(longest.contains("46 hours"), "{longest}");
     assert!(
         !longest.contains("1 days") && !longest.contains("2 days"),
         "{longest}"
@@ -80,7 +80,7 @@ fn two_days_is_the_edge_between_hours_and_days() {
     let exactly = note(2 * DAY);
     assert!(exactly.contains("2 days"), "{exactly}");
     let more = note(5 * DAY + 3 * HOUR);
-    assert!(more.contains("5 days"), "{more}");
+    assert!(more.contains("6 days"), "{more}");
 }
 
 #[test]
@@ -123,4 +123,46 @@ fn it_states_the_limit_and_does_not_guess() {
 fn the_note_for_a_single_day_still_says_what_it_says() {
     let text = coverage_note(&gap_of(3 * HOUR)).unwrap();
     assert!(text.contains("of today"), "{text}");
+}
+
+#[test]
+fn a_clipped_sliver_never_says_zero() {
+    for text in [note(30), coverage_note(&gap_of(30)).unwrap()] {
+        assert!(text.contains("less than a minute"), "{text}");
+        assert!(!text.contains(" 0 "), "{text}");
+        assert!(!text.contains("about less"), "{text}");
+    }
+}
+
+#[test]
+fn a_span_is_rounded_toward_more_blindness() {
+    // 71 hours is held; "about 2 days" (48 hours) would say less.
+    let text = note(71 * HOUR);
+    assert!(text.contains("3 days"), "{text}");
+    // 47 h 59 m is no fewer than 48 hours.
+    let edge = note(2 * DAY - MINUTE);
+    assert!(edge.contains("2 days"), "{edge}");
+    // 61 minutes is more than an hour.
+    let over = note(HOUR + MINUTE);
+    assert!(over.contains("2 hours"), "{over}");
+    // 90 seconds is more than a minute.
+    let minute = note(90);
+    assert!(minute.contains("2 minutes"), "{minute}");
+}
+
+#[test]
+fn the_day_note_is_rounded_the_same_way_and_has_no_hour_parenthesis() {
+    let text = coverage_note(&gap_of(2 * HOUR + MINUTE)).unwrap();
+    assert!(text.contains("about 3 hours of today"), "{text}");
+    assert!(!text.contains("(s)"), "{text}");
+    let one = coverage_note(&gap_of(HOUR)).unwrap();
+    assert!(one.contains("about 1 hour of today"), "{one}");
+}
+
+#[test]
+fn of_these_days_never_follows_days() {
+    for seconds in [30, 20 * MINUTE, 71 * HOUR, 4 * DAY] {
+        let text = note(seconds);
+        assert!(!text.contains("days of these days"), "{text}");
+    }
 }

@@ -67,6 +67,34 @@ pub fn clipped(gaps: &[Gap], from: i64, to: i64) -> Vec<Gap> {
         .collect()
 }
 
+/// A length of unobserved time in words, rounded toward admitting more
+/// blindness: never fewer minutes, hours or days than the seconds hold, and
+/// never "0" for time that was recorded (Principle III).
+fn span_in_words(seconds: i64) -> Span {
+    let seconds = seconds.max(0);
+    let minutes = (seconds + 59) / 60;
+    let hours = (seconds + 3599) / 3600;
+    let days = (seconds + 86_399) / 86_400;
+    let plural =
+        |n: i64, unit: &str| format!("{n} {unit}{}", if n == 1 { "" } else { "s" });
+    if seconds < 60 {
+        Span::Brief
+    } else if hours >= 48 {
+        Span::Days(plural(days, "day"))
+    } else if minutes >= 60 {
+        Span::Hours(plural(hours, "hour"))
+    } else {
+        Span::Minutes(plural(minutes, "minute"))
+    }
+}
+
+enum Span {
+    Brief,
+    Minutes(String),
+    Hours(String),
+    Days(String),
+}
+
 /// What is said above a day's reaches when part of that day was not observed.
 ///
 /// It states the limit rather than apologising for it, and it never guesses at
@@ -75,49 +103,34 @@ pub fn coverage_note(gaps: &[Gap]) -> Option<String> {
     if gaps.is_empty() {
         return None;
     }
-
-    let total_minutes = gaps.iter().map(Gap::seconds).sum::<i64>() / 60;
-    let hours = total_minutes / 60;
-
-    let span = if hours >= 1 {
-        format!("{hours} hour(s)")
-    } else {
-        format!("{total_minutes} minutes")
+    let total = gaps.iter().map(Gap::seconds).sum::<i64>();
+    let lead = match span_in_words(total) {
+        Span::Brief => "less than a minute".to_string(),
+        Span::Minutes(s) | Span::Hours(s) | Span::Days(s) => format!("about {s}"),
     };
-
     Some(format!(
-        "Cairn was not running for about {span} of today, so anything you reached for \
+        "Cairn was not running for {lead} of today, so anything you reached for \
          then is not here. This is what Cairn saw, not everything that happened."
     ))
 }
 
 /// What is said above a range's reaches when part of it was not observed.
 ///
-/// Beside [`coverage_note`], which speaks of a single day and is unchanged.
-/// The span is in minutes, hours or days, and the sentence states the limit
-/// and guesses at nothing.
+/// Beside [`coverage_note`], which speaks of a single day. The span is in
+/// minutes, hours or days, and the sentence states the limit and guesses at
+/// nothing.
 pub fn range_coverage_note(gaps: &[Gap]) -> Option<String> {
     if gaps.is_empty() {
         return None;
     }
-
-    let minutes = gaps.iter().map(Gap::seconds).sum::<i64>() / 60;
-    let hours = minutes / 60;
-    let days = hours / 24;
-
-    let span = if hours >= 48 {
-        format!("{days} days")
-    } else if hours >= 1 {
-        format!("{hours} {}", if hours == 1 { "hour" } else { "hours" })
-    } else {
-        format!(
-            "{minutes} {}",
-            if minutes == 1 { "minute" } else { "minutes" }
-        )
+    let total = gaps.iter().map(Gap::seconds).sum::<i64>();
+    let lead = match span_in_words(total) {
+        Span::Brief => "for less than a minute of these days".to_string(),
+        Span::Minutes(s) | Span::Hours(s) => format!("for about {s} of these days"),
+        Span::Days(s) => format!("for about {s} across these days"),
     };
-
     Some(format!(
-        "Cairn was not running for about {span} of these days, so anything you reached \
-         for then is not here. This is what Cairn saw, not everything that happened."
+        "Cairn was not running {lead}, so anything you reached for then is not here. \
+         This is what Cairn saw, not everything that happened."
     ))
 }

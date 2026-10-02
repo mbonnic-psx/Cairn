@@ -68,7 +68,7 @@ describe('the reaches screen', () => {
           ...today,
           gaps: [{ from: 1_700_000_000, to: 1_700_010_000 }],
           coverage_note:
-            'Cairn was not running for about 2 hour(s) of today, so anything you reached for then is not here. This is what Cairn saw, not everything that happened.',
+            'Cairn was not running for about 2 hours of today, so anything you reached for then is not here. This is what Cairn saw, not everything that happened.',
         }}
       />,
     );
