@@ -52,7 +52,8 @@ the step out as one spread, otherwise it renders exactly today's elements in tod
 it keep their own components and state.
 
 Prefixes, one per screen: `setup-pages` uses `.nb-choosing-`, `.nb-categories-`, `.nb-custom-` and `.nb-disclosure-`;
-`quiet-pages` uses `.nb-limits-` and `.nb-teardown-`.
+`quiet-pages` uses `.nb-limits-` and `.nb-teardown-`; `tonight-page` uses `.nb-reaches-` (the Today screen, both views)
+and `.nb-checkin-` (Tonight).
 
 ## Headings
 
