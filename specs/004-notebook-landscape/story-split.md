@@ -51,3 +51,6 @@ the frame's page-spread layout and the look tokens, both settled by `frame` and 
   build them.
 - `protection-page` lands the notebook context and heading outline (D6, D9) before `setup-pages` and `quiet-pages`
   start; they build against it. Carried tasks are owned as D10 says.
+- A waiting change is never shown in the running app (`App` never fetches it). That is 002's to fix, as a task in
+  `specs/002-machine-wide-protection/tasks.md` (D11). When it lands, Current's Protection shows it too; that is 002's
+  change, not a break of SC-009.

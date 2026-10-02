@@ -111,3 +111,14 @@ Every product decision a `/cruise` run took, in order. A person overrides one by
 - **Confidence:** high · **Would reverse if:** the owner adopts a browser test runner, which frees frame T024 to ride with a page slice
 - **Written to:** `specs/004-notebook-landscape/story-split.md` (Parking lot)
 - **Status:** standing
+
+## D11 — Where is the missing waiting change on Protection fixed?
+- **Stage:** convergence · **Slice:** protection-page · **When:** 2026-10-02T07:12:00Z · **Iteration:** 3
+- **Question:** No screen in the running app shows a waiting change. `App` never asks the core for one (`getPendingChange` has no caller) and never passes `pending` to Protection. Yet What is protected tells the person they can cancel a change "at any time in that day".
+- **Options:** (a) leave it, since 004 changes nothing Cairn does (D7); (b) a separate piece of work outside 004, owned by the feature that owns the waiting period, in which `App` asks for the waiting change and passes it to Protection (recommended by the slice delegate); (c) fix it inside 004's `protection-page`
+- **Decision:** (b). It is a gap in 002-machine-wide-protection and is fixed there, as an unchecked task appended to `specs/002-machine-wide-protection/tasks.md`: ask the core for the waiting change when protection state is shown, and after any change that protects less or a cancel, and pass it to Protection, in `src/App.tsx` (FR-047c, FR-047e). Its test shows a waiting change and its cancel in the running app's shell. `protection-page` is unaffected: its spread already puts a waiting change on the right page (D7, FR-020).
+- **Why:** A person who asked to take something out is told they can call it off, and today cannot find the change or see how long is left. 002 promised both, and Principle III says the screen reports real state, so (a) is out. (c) would change what Cairn does inside 004 and make Current differ from today (SC-009).
+- **Decided by:** drive-skipper (claude-opus-5-5)
+- **Confidence:** high · **Would reverse if:** a caller elsewhere in the running app already fetches the waiting change and shows it where protection state is shown
+- **Written to:** `specs/002-machine-wide-protection/tasks.md` (task appended on the trunk after this slice merges), `specs/004-notebook-landscape/story-split.md` (Parking lot), `specs/004-notebook-landscape/slices/protection-page/plan.md` (Open questions)
+- **Status:** standing
