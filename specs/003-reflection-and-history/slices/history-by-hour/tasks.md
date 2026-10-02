@@ -129,13 +129,13 @@ the owner decides otherwise, Q1 changes K4's scenario 7, and Q2 changes K9's sce
 
 ## Phase 3 — Hold it
 
-- [ ] K19 `contracts/ui-ipc.md` and `contracts/patterns.md`, as amended on 2026-10-02, match `Patterns`, `HourCount`
+- [X] K19 `contracts/ui-ipc.md` and `contracts/patterns.md`, as amended on 2026-10-02, match `Patterns`, `HourCount`
   and `OffsetChange` in Rust (`ipc/state.rs`, `domain/patterns.rs`) and TypeScript (`src/ipc/reaches.ts`) field for
   field, and K4's wire-shape test holds the seven keys.
-- [ ] K20 `make verify` green; `npm run check` (every guard), `npm test` and `npm run lint` green; `cargo fmt --all`
+- [X] K20 `make verify` green; `npm run check` (every guard), `npm test` and `npm run lint` green; `cargo fmt --all`
   and `cargo clippy --all-targets -- -D warnings` clean; the K1 runs green again. `make smoke` is not required:
   `main.rs` and the composition do not change.
-- [ ] K21 [demo] In the running app, on every platform at hand: a reach's hour on *By hour* is the hour *Today*
+- [X] K21 [demo] In the running app, on every platform at hand: a reach's hour on *By hour* is the hour *Today*
   prints for it; and a range across the last clock change, set by moving *From*, places a reach recorded after it
   by the clock as it then read. This is where the plan's *assumed* (that the webview's `Date` applies the zone's
   rules as Node's does) is seen or refuted. Record the platforms seen and those not seen in the demo log.
