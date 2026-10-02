@@ -160,6 +160,28 @@
       "signals": {
         "driver": "cruise"
       }
+    },
+    {
+      "stage": "implement",
+      "started": "2026-10-02T17:49:59Z",
+      "planned": "implement: fast → sonnet — Claude Code: the Agent tool's `model` parameter, set per call",
+      "tasks": {
+        "start": {
+          "open": 13,
+          "done": 0
+        }
+      },
+      "cursor": {
+        "source": "claude",
+        "session": "7953f214-69ad-494c-97da-cb3203c107d8",
+        "files": {
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/7953f214-69ad-494c-97da-cb3203c107d8.jsonl": 854387
+        },
+        "subagents": {
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/7953f214-69ad-494c-97da-cb3203c107d8/subagents/agent-a1bfc3b586128a8e1.jsonl": 364912,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/7953f214-69ad-494c-97da-cb3203c107d8/subagents/agent-a848c0cb576de9ebf.jsonl": 1223295
+        }
+      }
     }
   ]
 }
