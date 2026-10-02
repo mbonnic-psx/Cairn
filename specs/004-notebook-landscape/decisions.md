@@ -394,7 +394,8 @@ Every product decision a `/cruise` run took, in order. A person overrides one by
 - **Decided by:** drive-skipper (claude-opus-5-5[1m])
 - **Confidence:** high · **Would reverse if:** in the slice's demo on a large screen, the owner says the 1200 notebook looks small in the scene or the lines read long. The cap then moves; the rule stays the same.
 - **Written to:** `specs/004-notebook-landscape/spec.md` (Clarifications, FR-035)
-- **Status:** overridden by D36
+- **Status:** overridden by D37
+- **Note, 2026-10-02:** first overridden by D36 (the width below the cap), then wholly by D37.
 - **Note:** D36 overrides only the width rule below the cap; the 1200×983 cap and the centring stand. D34's answer was recommended by its own question's options and answered outright by the constitution and the specification.
 - **Note, 2026-10-02 (converge T009):** the cap's height is 1200 × 680/830 = 983, not 982; FR-035 and the tests say 983.
 
@@ -407,5 +408,40 @@ Every product decision a `/cruise` run took, in order. A person overrides one by
 - **Decided by:** drive-skipper (claude-opus-5-5[1m])
 - **Confidence:** medium · **Would reverse if:** in the demo, the owner wants a short wide window (such as 1920×800) to widen the notebook too. That is option (a).
 - **Written to:** `specs/004-notebook-landscape/spec.md` (Clarifications, FR-035)
-- **Status:** standing
+- **Status:** overridden by D37
+- **Note, 2026-10-02 (D37):** overridden where the greeting sits beside the notebook; the rule stands in the narrow layout.
 - **Note, 2026-10-02 (converge T009):** the cap's height is 1200 × 680/830 = 983, not 982; FR-035 and the tests say 983.
+
+## D37 — Does the run scale the whole composition to the window, as the G board, before the reveal?
+- **Stage:** split · **Slice:** board-scale · **When:** 2026-10-02T20:30:00Z · **Iteration:** 10
+- **Question:** The owner's message, after their own demo of fold-and-width, 2026-10-02: "It looks better. We need to scale the notebook to fill a lot more of the page, and the Good Morning needs to be moved over to the left and scale up." With the canvas board G-Morning at 1280×800 as "the scale of how I would want the app to look in full screen mode". At any landscape window size the composition is the board scaled to the window: the notebook's left edge at 350/1280 of the width, its top at 70/800 of the height, 830/1280 wide and 680/800 tall, the tabs about 44px past its right edge at 1280, scaled; the greeting hard left in the sky at 56/1280 from the left and about 88/800 from the top, a column about 250/1280 wide, "Good morning." 40px at 1280×800 and growing with the window (about 60px at 1920×1080), the time line and the sentence under it growing with it; the sun, hills and cairn keeping their places relative to the window; type and spacing inside the notebook scaling with it, never below today's sizes, growth capped so a page's line stays comfortable. The 800×600 minimum and the narrow layout under 1100px stay as now. A small slice of its own before the reveal; park on `reveal` afterwards (D1 stands). It supersedes the width rule from fold-and-width where they conflict.
+- **Options:** slice 10, `board-scale`, depending on `fold-and-width`, with `reveal` waiting on it (the owner's answer)
+- **Decision:** As the owner said. Slice 10, `board-scale`, runs now; `reveal` depends on it and stays the owner's (D1). FR-036 states the composition; FR-035's width rule, its 1200px cap and the centring of the group above it (D35, D36) give way to it wherever the greeting sits beside the notebook. FR-035's "never taller than it is wide" and the narrow layout stand.
+- **Why:** At 1920×1080 and above the fold-and-width notebook still sits small in the window, with the greeting tucked beside it; the owner chose the board's composition, and wants that composition at every size, larger, not a fixed notebook in a bigger window.
+- **Decided by:** human
+- **Confidence:** high · **Would reverse if:** the owner withdraws the change
+- **Written to:** `specs/004-notebook-landscape/story-split.md` (slice 10, graph), `specs/004-notebook-landscape/spec.md` (FR-035, FR-036)
+- **Status:** standing
+
+## D38 — How does the composition hold in a window whose shape is not the board's?
+- **Stage:** slice gaps · **Slice:** board-scale · **When:** 2026-10-02T20:40:00Z · **Iteration:** 10
+- **Question:** FR-036 (the owner's numbers, D37) puts the notebook at 64.8% of the window's width and 85% of its height, measured on the 1280×800 board. In a window of another shape, that gives a notebook of another shape: 1920×1080 gives 1244×918 (1.36:1); 2560×1080 gives 1659×918 (1.81:1), a long band; 1280×1024 gives 830×870, taller than wide, which FR-035 still forbids. How does the composition hold where the greeting sits beside the notebook?
+- **Options:** (a) each measure on its own axis, the height the smaller of 85% of the window's height and width × 680/830, the rest to the landscape (recommended by the host); (b) scale the whole board by min(W/1280, H/800) and centre it; (c) (a), plus a limit so the notebook is never wider than 1.5 times its height, the rest open sky to its right
+- **Decision:** (c). Left edge 27.3% of the width, top 8.75% of the height. Width = the smaller of 64.8% of the window's width and 1.5 × the height. Height = the smaller of 85% of the window's height and width × 680/830. The tabs hang off the notebook's right edge wherever it is; the greeting, sun, hills and cairn keep their places relative to the window. 1280×800 gives 830×680 at (350, 70), the board exactly; 1920×1080 gives 1245×918; 2560×1440 gives 1660×1224; 1100×700 gives 713×584; 1280×1024 gives 830×680, landscape, the extra height to the landscape; 2560×1080 gives 1377×918. Only windows more than about 1.97 times as wide as tall meet the limit. 800×600 and the narrow layout are untouched.
+- **Why:** The owner chose the notebook for its shape (D33), and D36 already turned down a 1.76:1 band. (c) keeps the owner's numbers on every window they named and every ordinary screen, and limits only far-from-board shapes, where (a) grows without bound into a strip of mostly empty paper. (b) is ruled out by FR-036, which measures every place against the window, and by the owner's "moved over to the left". Decided from FR-035, FR-036, D33, D36, D37 and the constitution's "generous whitespace", since the brief's Taste and Priorities sections are placeholders.
+- **Decided by:** drive-skipper (claude-opus-5-5[1m])
+- **Confidence:** medium · **Would reverse if:** the owner, at the demo, wants an ultrawide window to widen the notebook too. That is (a): drop the 1.5 limit.
+- **Written to:** `specs/004-notebook-landscape/spec.md` (Clarifications, FR-036)
+- **Status:** standing
+- **Note:** at 1920×1080 the notebook is 918px tall, a little less than fold-and-width's 960. The owner's 85% sets that; type inside never gets smaller (D39). A line for the demo.
+
+## D39 — How much do type and spacing inside the notebook grow, and what caps it?
+- **Stage:** slice gaps · **Slice:** board-scale · **When:** 2026-10-02T20:40:00Z · **Iteration:** 10
+- **Question:** FR-036 says type and spacing inside the notebook grow with it, "never below today's sizes; cap growth so a page's line stays comfortable", and the owner wants 1920×1080 and 2560×1440 to "look like the board, larger". At 1280×800 the notebook is 830×680 and the body serif 16.5px, about 66 characters to a page's line. How much do type and spacing grow, and what caps it?
+- **Options:** (a) one factor s = the smaller of notebook width/830 and height/680, at least 1, at most 2, for type, spacing, ruled-line pitch and tabs; past the cap each page's text column held to its measure at the cap (recommended by the host); (b) the same, capped at 1.5, the column held to about 66 characters; (c) type grows with width only, uncapped
+- **Decision:** (a), with one change. Everything inside the notebook grows by s = the smaller of notebook width/830 and notebook height/680, never below 1 and never above 2: type in every face, page padding, gaps, the ruled-line pitch and where it starts, the margin line's inset, buttons and tabs. 1px lines (fold, rules, margin) stay 1px. The change: at every size, a page's text column is never wider than today's column × s × 75/66, about 75 characters at its type size; paper beyond that stays margin. 1280×800 is exactly today; 1920×1080 gives s ≈ 1.35 (body ≈ 22px); 2560×1440 s ≈ 1.8 (body ≈ 30px). Between 1100 and 1280 wide the notebook is under 830, so type stays at today's size there.
+- **Why:** The owner asked for the board, larger; one factor is the only way the inside keeps the board's proportions, and the smaller ratio keeps content from running off the bottom sooner than on the board. Type growing with the page holds a reading line at D35's comfortable 65–75 characters; the column limit holds it on 16:9 and wide windows too. (b) would show 2560×1440 as the board with its writing shrunk; (c) has no cap, which FR-036 rules out. The floor keeps "never below today's sizes". Decided from FR-036, D35's measure arithmetic and the constitution's "generous whitespace".
+- **Decided by:** drive-skipper (claude-opus-5-5[1m])
+- **Confidence:** medium · **Would reverse if:** at the demo at 2560×1440 the owner says the writing reads too large or a page holds too little; the cap then drops toward 1.5.
+- **Written to:** `specs/004-notebook-landscape/spec.md` (Clarifications, FR-036)
+- **Status:** standing
