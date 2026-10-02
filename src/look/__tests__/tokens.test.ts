@@ -430,3 +430,36 @@ describe('night\'s scene: moon, stars, glow and lamp, all static (FR-001, FR-023
     for (const r of rulesOf(block![1]!)) for (const one of r.selector.split(',')) expect(one.trim()).toMatch(/^\[data-look\]/);
   });
 });
+
+describe('focus is visible on every sky and on the paper (FR-022, FR-021; research L5)', () => {
+  const looks: LookName[] = ['morning', 'midday', 'night'];
+  it.each(looks.flatMap((look) => SKIES.map((sky) => [look, sky] as const)))(
+    '%s: --nb-focus-sky holds 3:1 on %s',
+    (look, sky) => {
+      expect(contrastRatio(token('--nb-focus-sky', look), token(sky, look))).toBeGreaterThanOrEqual(3);
+    },
+  );
+
+  it('is dark by day and light at night', () => {
+    const lightness = (hex: string) => contrastRatio(hex, '#000000');
+    expect(lightness(token('--nb-focus-sky', 'night'))).toBeGreaterThan(lightness(token('--nb-sky-top', 'night')));
+    for (const look of ['morning', 'midday'] as const) {
+      expect(lightness(token('--nb-focus-sky', look))).toBeLessThan(lightness(token('--nb-sky-top', look)));
+    }
+  });
+
+  it.each(['.nb-tab:focus-visible', '.nb-switch select:focus-visible'])('%s draws its outline from --nb-focus-sky', (selector) => {
+    expect(ruleFor(selector).some((r) => /outline:\s*2px solid var\(--nb-focus-sky\)/.test(r.body))).toBe(true);
+  });
+
+  it.each(looks)('%s: focus inside the paper keeps --nb-ink, at 3:1 on the paper', (look) => {
+    expect(contrastRatio(token('--nb-ink', look), token('--nb-paper', look))).toBeGreaterThanOrEqual(3);
+    expect(rules.filter((r) => /:focus-visible/.test(r.selector) && /\.nb-page/.test(r.selector) && !/--nb-ink\b/.test(r.body))).toEqual([]);
+  });
+
+  it('keeps the forced-colors block covering every selector with text outside the notebook', () => {
+    for (const root of ['.nb-titlebar', '.nb-greeting', '.nb-switch']) {
+      expect(forcedBlock).toContain(root);
+    }
+  });
+});

@@ -28,6 +28,7 @@
   --nb-sky-top: #f7e7cc;
   --nb-sky-mid: #f4d9b2;
   --nb-sky-bottom: #efcd9f;
+  --nb-focus-sky: #2a2119;
   --nb-greeting-ink: #2a2119;
   --nb-greeting-body: #4a3d2f;
   --nb-greeting-quiet: #6b5440;
@@ -79,6 +80,7 @@
   --nb-sky-top: #f6e6c4;
   --nb-sky-mid: #f1d8a4;
   --nb-sky-bottom: #ecca8a;
+  --nb-focus-sky: #2a2119;
   --nb-greeting-ink: #2a2119;
   --nb-greeting-body: #4a3d2f;
   --nb-greeting-quiet: #6b5440;
@@ -129,6 +131,7 @@
   --nb-sky-top: #221c22;
   --nb-sky-mid: #3a2b2a;
   --nb-sky-bottom: #7a4a38;
+  --nb-focus-sky: #f6ecdc;
   --nb-greeting-ink: #f6ecdc;
   --nb-greeting-body: #d9cbb4;
   --nb-greeting-quiet: #d7c9b5;
@@ -464,7 +467,7 @@
 }
 .nb-tab:focus-visible,
 .nb-switch select:focus-visible {
-  outline: 2px solid var(--nb-ink);
+  outline: 2px solid var(--nb-focus-sky);
   outline-offset: 2px;
 }
 
