@@ -184,6 +184,65 @@ describe('the range it opens on', () => {
   });
 });
 
+describe('the heading', () => {
+  it('names the range in words, from the local calendar', async () => {
+    const { read } = fakeRead();
+    await openOverTime(read);
+
+    expect(
+      await screen.findByRole('heading', { name: 'From 3 September to 30 September' }),
+    ).toBeInTheDocument();
+  });
+
+  it('follows a change of From or To', async () => {
+    const { calls, read } = fakeRead();
+    await openOverTime(read);
+    await screen.findByText('a.example');
+
+    fireEvent.change(screen.getByLabelText('From'), { target: { value: '2026-08-04' } });
+    fireEvent.change(screen.getByLabelText('To'), { target: { value: '2026-09-01' } });
+
+    await waitFor(() => expect(calls).toHaveLength(3));
+    expect(
+      screen.getByRole('heading', { name: 'From 4 August to 1 September' }),
+    ).toBeInTheDocument();
+  });
+
+  it('names the years where the range crosses one', async () => {
+    const { calls, read } = fakeRead();
+    await openOverTime(read);
+    await screen.findByText('a.example');
+
+    fireEvent.change(screen.getByLabelText('From'), { target: { value: '2025-12-20' } });
+
+    await waitFor(() => expect(calls).toHaveLength(2));
+    expect(
+      screen.getByRole('heading', { name: 'From 20 December 2025 to 30 September 2026' }),
+    ).toBeInTheDocument();
+  });
+
+  it('holds no year, count or ranking word inside one year', async () => {
+    const { read } = fakeRead();
+    await openOverTime(read);
+    await screen.findByText('a.example');
+    const heading = screen.getByRole('heading', { name: /^From / });
+
+    expect(heading.textContent).not.toMatch(/\d+ days?|day \d|top|most|worst|best/i);
+    expect(heading.textContent).not.toMatch(/2026/);
+  });
+
+  it('says the standing sentence over these days, not in them', async () => {
+    const { read } = fakeRead();
+    await openOverTime(read);
+
+    expect(
+      await screen.findByText(
+        'Cairn counts only while it is running. This is what it saw over these days.',
+      ),
+    ).toBeInTheDocument();
+  });
+});
+
 describe('a date that is not a real calendar date', () => {
   // What a text field standing in for a date input can hand over.
   const notDates = [

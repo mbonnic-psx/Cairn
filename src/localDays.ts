@@ -63,3 +63,30 @@ export function rangeBounds(firstDay: string, lastDay: string): Bounds {
     end: seconds(new Date(ly, lm, ld + 1)),
   };
 }
+
+const MONTHS = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
+];
+
+/** A day in words, `3 September`, with the year (`3 September 2026`) when asked. */
+export function dayInWords(day: string, withYear = false): string {
+  const [y, m, d] = parse(day);
+  return `${d} ${MONTHS[m]}${withYear ? ` ${y}` : ''}`;
+}
+
+/** A range in words: `From 3 September to 30 September`, the years named only across one. */
+export function rangeInWords(firstDay: string, lastDay: string): string {
+  const crossesYears = firstDay.slice(0, 4) !== lastDay.slice(0, 4);
+  return `From ${dayInWords(firstDay, crossesYears)} to ${dayInWords(lastDay, crossesYears)}`;
+}

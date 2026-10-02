@@ -12,7 +12,14 @@
 import { useEffect, useState } from 'react';
 
 import { Card } from '../components/Card';
-import { addDays, dayBounds, isLocalDate, localToday, rangeBounds } from '../localDays';
+import {
+  addDays,
+  dayBounds,
+  isLocalDate,
+  localToday,
+  rangeBounds,
+  rangeInWords,
+} from '../localDays';
 import {
   listTodaysReaches,
   summarizeReaches,
@@ -162,7 +169,7 @@ function TodayView({
 }
 
 const COUNTED_ONLY_WHILE_RUNNING =
-  'Cairn counts only while it is running. This is what it saw in these days.';
+  'Cairn counts only while it is running. This is what it saw over these days.';
 const COULD_NOT_READ =
   'Cairn could not read your history just now. Protection is unaffected.';
 
@@ -200,7 +207,9 @@ function OverTimeView({ read, now }: { read: ReachesReader; now: () => Date }) {
 
   return (
     <Card>
-      <h2 className="reflective text-3xl text-ink-900">Over time</h2>
+      <h2 className="reflective text-3xl text-ink-900">
+        {rangeInWords(firstDay, lastDay)}
+      </h2>
 
       <div className="mt-6 flex flex-wrap gap-6 text-sm text-ink-500">
         <label className="flex items-center gap-2">
