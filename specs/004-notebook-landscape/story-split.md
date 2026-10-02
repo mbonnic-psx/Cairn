@@ -23,7 +23,8 @@ page that follows is built and checked in all three. Then one group of screens a
 | 5 | `setup-pages` | What would you like to protect?, Anywhere else? and Before Cairn changes anything, as notebook spreads | US3 (setup, disclosure); FR-018 | `looks` |
 | 6 | `quiet-pages` | What Cairn covers and This machine is as it was, as notebook spreads | US3 (limits, teardown); FR-018 | `looks` |
 | 8 | `loose-ends` | Nothing new to look at: what the completion audit found the pages promise but no test holds, held now — the release build carries no look switch, What is protected's left page scrolls from the keyboard, the setup and Protection buttons keep their edge in forced colours, a look change never fades a button, the focus and contrast guards read every rule, the platform frame is pinned, and Yes, set this up is pressed on the page (D26) | FR-007, FR-010, FR-021, FR-022, FR-025; SC-002, SC-004 | `protection-page`, `setup-pages`, `quiet-pages` |
-| 7 | `reveal` | The notebook becomes Cairn's interface: morning by default, today's interface and the Current choice removed, a three-way switch left for testing. Runs only after the owner accepts all three looks in a demo | FR-012, FR-032; SC-008, SC-009 | `protection-page`, `tonight-page`, `setup-pages`, `quiet-pages`, `loose-ends` |
+| 9 | `fold-and-width` | The fold, a thin line between the two pages in every look and on every screen, as the canvas draws it; and on a large or full-screen window the notebook grows wider, staying landscape (never taller than wide), up to a width where lines stay comfortable to read, centred on the scene. Asked by the owner after their own demo of all three looks (D33) | FR-034, FR-035 | `loose-ends` |
+| 7 | `reveal` | The notebook becomes Cairn's interface: morning by default, today's interface and the Current choice removed, a three-way switch left for testing. Runs only after the owner accepts all three looks in a demo | FR-012, FR-032; SC-008, SC-009 | `protection-page`, `tonight-page`, `setup-pages`, `quiet-pages`, `loose-ends`, `fold-and-width` |
 
 ## Slice graph
 
@@ -32,14 +33,15 @@ frame ── looks ──┬── protection-page
                  ├── tonight-page
                  ├── setup-pages
                  └── quiet-pages
-                              (all four) ── loose-ends ── reveal
+                              (all four) ── loose-ends ── fold-and-width ── reveal
 ```
 
 - `frame`: depends_on none
 - `looks`: depends_on frame
 - `protection-page`, `tonight-page`, `setup-pages`, `quiet-pages`: depends_on looks
 - `loose-ends`: depends_on protection-page, setup-pages, quiet-pages (added by the completion audit, D26)
-- `reveal`: depends_on protection-page, tonight-page, setup-pages, quiet-pages, loose-ends
+- `fold-and-width`: depends_on loose-ends (the owner's message after their demo of all three looks, D33)
+- `reveal`: depends_on protection-page, tonight-page, setup-pages, quiet-pages, loose-ends, fold-and-width
 
 Once `looks` is done, the four page slices are ready together. Each edits its own screen files. They share only
 the frame's page-spread layout and the look tokens, both settled by `frame` and `looks`.
