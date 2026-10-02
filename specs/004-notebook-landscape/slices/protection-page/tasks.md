@@ -47,9 +47,9 @@ Reviewed: <!-- written by /drive's Design review rung: both spreads in morning, 
 
 ## Final verification
 
-- [ ] T010 [US3] Guard: every existing test under `src/screens/__tests__/` passes unchanged, `git diff --stat main -- src/screens/__tests__` shows only added files (`ProtectionCurrentPin`, `ProtectionPage`, `TrailPage`), and `src/shell/__tests__/AppLook.test.tsx` (production-equals-Current) is unedited and green (SC-009). Quickstart "Check it", step 1: `npx vitest run src/shell src/screens src/look`. Depends on T003, T008, T009.
-- [ ] T011 [US3] Quickstart "Check it", step 2: `npm test && npm run lint && npm run check`. All eight guards and the linter pass with no guard edited; `check-banned-words`, `check-no-streaks` and `check-no-ambient-counts` stay clean (the shell imports nothing from `src/ipc`). Depends on T010.
-- [ ] T012 [US3] Quickstart "Check it", step 3: `npm run build && ! grep -rl "Look (testing)" dist/`. The build succeeds and a released bundle has no switch (FR-012, SC-002). If the string survives, stop and hand it back. Depends on T011.
+- [x] T010 [US3] Guard: every existing test under `src/screens/__tests__/` passes unchanged, `git diff --stat main -- src/screens/__tests__` shows only added files (`ProtectionCurrentPin`, `ProtectionPage`, `TrailPage`), and `src/shell/__tests__/AppLook.test.tsx` (production-equals-Current) is unedited and green (SC-009). Quickstart "Check it", step 1: `npx vitest run src/shell src/screens src/look`. Depends on T003, T008, T009.
+- [x] T011 [US3] Quickstart "Check it", step 2: `npm test && npm run lint && npm run check`. All eight guards and the linter pass with no guard edited; `check-banned-words`, `check-no-streaks` and `check-no-ambient-counts` stay clean (the shell imports nothing from `src/ipc`). Depends on T010.
+- [x] T012 [US3] Quickstart "Check it", step 3: `npm run build && ! grep -rl "Look (testing)" dist/`. The build succeeds and a released bundle has no switch (FR-012, SC-002). If the string survives, stop and hand it back. Depends on T011.
 
 ## Handed back
 
