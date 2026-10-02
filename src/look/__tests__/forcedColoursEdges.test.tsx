@@ -1,6 +1,6 @@
 /// <reference types="vite/client" />
 /**
- * Under forced colours every control the setup and Protection spreads draw keeps a visible edge (loose-ends
+ * Under forced colours every control any notebook page draws (T008 the setup and Protection spreads; T013 the rest) keeps a visible edge (loose-ends
  * T008; setup-pages T025, FR-022): each button, input, select and textarea either sets a border of at least
  * 1px in its sheet's base rules, or is named in that sheet's `@media (forced-colors: active)` block with one.
  * WebKit has no forced-colours mode, so this is a Windows promise held on every platform's CSS.
@@ -9,13 +9,26 @@ import { cleanup, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it } from 'vitest';
 
+import { CheckIn } from '../../screens/CheckIn';
 import { Disclosure } from '../../screens/Disclosure';
+import { Limits } from '../../screens/Limits';
 import { Protection } from '../../screens/Protection';
+import { Reaches } from '../../screens/Reaches';
 import { Choosing } from '../../screens/Setup/Choosing';
+import { Teardown } from '../../screens/Teardown';
 import { Trail } from '../../screens/Trail';
 import { installFakeCore, never, type FakeCore } from '../../screens/__tests__/fakeCore';
 import { cases as protectionCases, trailCases } from '../../screens/__tests__/pinCases';
+import { disclosureCases, teardownCases } from '../../screens/__tests__/quietCases';
 import { categories, disclosures, localhostReason, waitingNote } from '../../screens/__tests__/setupCases';
+import {
+  evening,
+  overTimeCases,
+  overTimeReader,
+  todayCases,
+  tonightCases,
+  tonightCore,
+} from '../../screens/__tests__/tonightCases';
 import { NotebookShell } from '../../shell/NotebookShell';
 import type { NotebookLook } from '../look';
 
@@ -65,7 +78,15 @@ function readSheet(path: string): Sheet {
   return sheet;
 }
 
-const SHEETS = [readSheet('src/styles/setup-pages.css'), readSheet('src/styles/protection-page.css')];
+/**
+ * Every sheet a page screen draws a control from. A forced 1px side border (`.nb-reaches-which__button`'s
+ * transparent `border-bottom`, which forced colours paints as a line under one side) does NOT count as an
+ * edge: the T008 bar is a full border, because one painted side leaves a control reading as a word with an
+ * underline, which is what a link looks like, not what a button looks like. `borderPx` therefore reads only
+ * `border` and `border-width`, never a side's.
+ */
+const SHEET_FILES = ['setup-pages', 'protection-page', 'tonight-page', 'quiet-pages', 'notebook'];
+const SHEETS = SHEET_FILES.map((f) => readSheet(`src/styles/${f}.css`));
 
 /** The widest border a rule body sets with `border` or `border-width` (never a side's), in px; 0 when none. */
 const borderPx = (body: string): number => {
@@ -158,10 +179,63 @@ const scenes: Record<string, (look: NotebookLook) => Promise<HTMLElement>> = {
       async (look: NotebookLook) => onPage(<Protection state={c.state} pending={c.pending} />, look),
     ]),
   ),
-  'What is protected': async (look) => onPage(<Trail {...trailCases['list in force']!} />, look),
+  ...Object.fromEntries(
+    Object.entries(trailCases).map(([name, c]) => [
+      `What is protected, ${name}`,
+      async (look: NotebookLook) => onPage(<Trail {...c} />, look),
+    ]),
+  ),
+  ...Object.fromEntries(
+    Object.entries(todayCases).map(([name, today]) => [
+      `Reaches, Today, ${name}`,
+      async (look: NotebookLook) =>
+        onPage(<Reaches today={today} read={overTimeReader('looking')} now={evening} />, look),
+    ]),
+  ),
+  ...Object.fromEntries(
+    Object.entries(overTimeCases).map(([name, answer]) => [
+      `Reaches, Over time, ${name}`,
+      async (look: NotebookLook) => {
+        const main = onPage(<Reaches today={todayCases.sealed} read={overTimeReader(answer)} now={evening} />, look);
+        await userEvent.click(screen.getByRole('button', { name: 'Over time' }));
+        await settle();
+        return main;
+      },
+    ]),
+  ),
+  ...Object.fromEntries(
+    Object.entries(tonightCases).map(([name, c]) => [
+      `CheckIn, ${name}`,
+      async (look: NotebookLook) => {
+        core = installFakeCore(tonightCore(c));
+        const main = onPage(<CheckIn />, look);
+        await settle();
+        return main;
+      },
+    ]),
+  ),
+  ...Object.fromEntries(
+    Object.entries(disclosureCases).map(([name, c]) => [
+      `Limits, ${name}`,
+      async (look: NotebookLook) => onPage(<Limits disclosures={c} />, look),
+    ]),
+  ),
+  ...Object.fromEntries(
+    Object.entries(teardownCases).map(([name, c]) => [
+      `Teardown, ${name}`,
+      async (look: NotebookLook) => onPage(<Teardown report={c} />, look),
+    ]),
+  ),
 };
 
 const CONTROLS = 'button, input, select, textarea';
+
+it('sweeps every screen with a page branch', () => {
+  const screens = new Set(Object.keys(scenes).map((n) => n.split(',')[0]!.toLowerCase()));
+  for (const s of ['choosing', 'disclosure', 'protection', 'what is protected', 'reaches', 'checkin', 'limits', 'teardown']) {
+    expect(screens.has(s), `${s} is swept`).toBe(true);
+  }
+});
 
 describe('forced colours keep every control an edge', () => {
   describe.each(LOOKS)('in the %s look', (look) => {
@@ -201,6 +275,7 @@ describe('forced colours keep every control an edge', () => {
       'nb-custom-input',
       'nb-custom-button',
       'nb-categories-box',
+      'nb-checkin-switch',
     ]) {
       expect(found.has(needed), `${needed} is rendered by a scene`).toBe(true);
     }

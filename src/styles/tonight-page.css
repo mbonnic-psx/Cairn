@@ -378,4 +378,9 @@
   .nb-reaches-bar__fill {
     background-color: CanvasText;
   }
+  /* The check-in's switch and the Reaches view toggle would otherwise read as bare words. */
+  .nb-checkin-switch,
+  .nb-reaches-which__button {
+    border: 1px solid CanvasText;
+  }
 }
