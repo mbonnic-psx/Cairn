@@ -91,6 +91,8 @@ what Cairn does, outside this feature (D7), and is not made here.
 `state` undefined, protection reads as off, and the Protection tab opens setup. **Neither spread can be reached in
 a browser alone, in any state.** Both need `npm run tauri dev` with protection on.
 
+**Since (2026-10-02, after implementation)**: the slice's demo fake core, `demo/fake-core.js`, loaded as a browser init script before the page, answers the read calls in the page itself, so a browser on `npm run dev` reaches both spreads, in force and not confirmed, with a short or a 120-address list (`quickstart.md`, *See it*). What stays out of reach in any browser or build: a waiting change (above), "Checking this machine…" and a read that could not be made (`App` renders Protection only once it holds a state), and an empty list (the fake core has no flag for it). The tests carry those.
+
 **Found**: "not confirmed" comes from the core's read-back of the hosts file: anything short of an exact match of
 Cairn's section, or a read that fails, while protection is meant to be on
 (`src-tauri/src/enforcement/state.rs:44-70`, `src-tauri/src/enforcement/apply.rs:84-101`). A person sees it by
