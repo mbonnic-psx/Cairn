@@ -456,6 +456,9 @@ export function CheckIn({ session }: { session?: CheckInSession }) {
           >
             {KEEP_THIS}
           </button>
+          <p role="status" aria-live="polite" className="nb-checkin-status">
+            {note ?? (kept ? keptFor(thisDay) : '')}
+          </p>
           {pageSwitch}
         </div>
       </div>

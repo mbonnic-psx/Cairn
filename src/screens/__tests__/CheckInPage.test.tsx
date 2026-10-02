@@ -17,6 +17,8 @@ import {
   evening,
   loadRefusal,
   quoteLine,
+  saveRefusal,
+  switchRefusal,
   reachesOfTheDay,
   tonightCases,
   tonightCore,
@@ -36,7 +38,7 @@ const settle = () =>
   });
 
 /** Renders a case, on a page when `shell` is true, and does what the person does in it. */
-async function show(c: TonightCase, shell: boolean) {
+async function show(c: TonightCase, shell: boolean, perform = false) {
   vi.setSystemTime(evening());
   core = installFakeCore(tonightCore(c));
   const ui = <CheckIn />;
@@ -50,6 +52,15 @@ async function show(c: TonightCase, shell: boolean) {
     ),
   );
   await settle();
+  if (perform && c.keep) {
+    fireEvent.change(screen.getByRole('textbox'), { target: { value: c.keep.typed } });
+    fireEvent.click(screen.getByRole('button', { name: 'Keep this' }));
+    await settle();
+  }
+  if (perform && c.switchRefused) {
+    fireEvent.click(screen.getByRole('button', { name: 'Hide quotes' }));
+    await settle();
+  }
   const main = (view.container.querySelector('main') ?? view.container) as HTMLElement;
   const spread = main.querySelector<HTMLElement>('.nb-spread');
   const pages = spread
@@ -66,8 +77,8 @@ function words(root: HTMLElement): string[] {
     .sort();
 }
 
-async function wordsOutside(c: TonightCase): Promise<string[]> {
-  const view = await show(c, false);
+async function wordsOutside(c: TonightCase, perform = false): Promise<string[]> {
+  const view = await show(c, false, perform);
   const found = words(view.container);
   view.unmount();
   core?.remove();
@@ -349,6 +360,7 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (name) 
         'nb-checkin-quote',
         'nb-checkin-label',
         'nb-checkin-keep',
+        'nb-checkin-status',
         'nb-checkin-switch',
       ]);
       const quote = right!.firstElementChild as HTMLElement;
@@ -365,6 +377,7 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (name) 
       expect(order(right!)).toEqual([
         'nb-checkin-label',
         'nb-checkin-keep',
+        'nb-checkin-status',
         'nb-checkin-switch',
       ]);
       expect(right!.lastElementChild).toHaveTextContent('Show quotes');
@@ -374,7 +387,7 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (name) 
       const { right } = await show(tonightCases['reaches, the quotes setting unknown']!, true);
       expect(right).toBeDefined();
       expect(right!.querySelector('figure')).toBeNull();
-      expect(order(right!)).toEqual(['nb-checkin-label', 'nb-checkin-keep']);
+      expect(order(right!)).toEqual(['nb-checkin-label', 'nb-checkin-keep', 'nb-checkin-status']);
     });
 
     it('the setting unknown, still being read: no quote and no switch', async () => {
@@ -392,7 +405,7 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (name) 
         .querySelectorAll<HTMLElement>(':scope > .nb-page')[1];
       expect(right).toBeDefined();
       expect(right!.querySelector('figure')).toBeNull();
-      expect(order(right!)).toEqual(['nb-checkin-label', 'nb-checkin-keep']);
+      expect(order(right!)).toEqual(['nb-checkin-label', 'nb-checkin-keep', 'nb-checkin-status']);
     });
 
     it('shown with no quote: no quote, the switch present', async () => {
@@ -402,6 +415,7 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (name) 
       expect(order(right!)).toEqual([
         'nb-checkin-label',
         'nb-checkin-keep',
+        'nb-checkin-status',
         'nb-checkin-switch',
       ]);
       expect(right!.lastElementChild).toHaveTextContent('Hide quotes');
@@ -445,6 +459,71 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (name) 
       onPage.unmount();
       core?.remove();
       expect(right).toEqual(without(await wordsOutside(c), left));
+    });
+  });
+
+  describe('the status sentence on an open day', () => {
+    const bothRefused: TonightCase = {
+      ...tonightCases['a refused save']!,
+      quotesShown: true,
+      quote: quoteLine,
+      switchRefused: switchRefusal,
+    };
+    const REGION = '[role="status"], [aria-live]';
+
+    /** The one region, and the order of the right page's controls around it. */
+    function region(right: HTMLElement) {
+      const found = right.querySelectorAll<HTMLElement>(REGION);
+      expect(found).toHaveLength(1);
+      return found[0]!;
+    }
+
+    it.each([
+      ['an entry kept', 'Kept for today.'],
+      ['a refused save', saveRefusal],
+      ['a refused switch', switchRefusal],
+      ['both refused', `${saveRefusal} ${switchRefusal}`],
+      ['neither', ''],
+    ])('%s: one polite region, below "Keep this" and above the switch, reading %j', async (which, text) => {
+      const c =
+        which === 'both refused'
+          ? bothRefused
+          : tonightCases[which === 'neither' ? 'reaches, with a quote' : which]!;
+      const { spread, right } = await show(c, true, true);
+      expect(right).toBeDefined();
+      const status = region(right!);
+      expect(spread!.querySelectorAll(REGION)).toHaveLength(1);
+      expect(status).toHaveAttribute('role', 'status');
+      expect(status).toHaveAttribute('aria-live', 'polite');
+      expect(status).toHaveClass('nb-checkin-status');
+      expect(status.textContent).toBe(text);
+      const keep = within(right!).getByRole('button', { name: 'Keep this' });
+      const toggle = within(right!).getByRole('button', { name: /quotes$/ });
+      expect(keep.nextElementSibling).toBe(status);
+      expect(status.nextElementSibling).toBe(toggle);
+      expect(right!.lastElementChild).toBe(toggle);
+    });
+
+    it('is present, and the only live region, on a day with no switch yet', async () => {
+      const { spread, right } = await show(tonightCases['reaches, the quotes setting unknown']!, true);
+      expect(region(right!).textContent).toBe('');
+      expect(spread!.querySelectorAll(REGION)).toHaveLength(1);
+      expect(right!.lastElementChild).toBe(region(right!));
+    });
+
+    it.each([
+      ['an entry kept', tonightCases['an entry kept']!],
+      ['a refused save', tonightCases['a refused save']!],
+      ['a refused switch', tonightCases['a refused switch']!],
+      ['both refused', bothRefused],
+    ])('%s: the right page\u2019s words equal the same part outside any shell', async (_name, c) => {
+      const onPage = await show(c, true, true);
+      expect(onPage.right).toBeDefined();
+      const left = words(onPage.left!);
+      const right = words(onPage.right!);
+      onPage.unmount();
+      core?.remove();
+      expect(right).toEqual(without(await wordsOutside(c, true), left));
     });
   });
 });
