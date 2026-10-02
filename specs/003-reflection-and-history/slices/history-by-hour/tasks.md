@@ -148,7 +148,7 @@ the owner decides otherwise, Q1 changes K4's scenario 7, and Q2 changes K9's sce
 
 Appended by converge pass 1 at `28982cd`. Graded; K23 is `HIGH` and re-opens the loop, K24 rides with it.
 
-- [ ] K23 [US2] [HIGH] [Principle III] **A range whose first midnight the clock skips is placed, not sealed.**
+- [X] K23 [US2] [HIGH] [Principle III] **A range whose first midnight the clock skips is placed, not sealed.**
   Seen: in a zone that puts its clocks forward at 00:00 (Africa/Cairo 2026-04-24, America/Santiago 2026-09-06,
   America/Havana 2026-03-08, Asia/Beirut 2026-03-29; found with Node under each `TZ`), `new Date(y, m, d)` is
   01:00 at the new offset, so `rangeBounds(...).start` implies the old offset (Cairo +7 200) while
@@ -167,7 +167,7 @@ Appended by converge pass 1 at `28982cd`. Graded; K23 is `HIGH` and re-opens the
   (`over_time.rs`, `within_a_clock_change(previous.1, implied_offset(day_after_last, range_end)?)`), and
   `check_range`'s two ends — each held at a skipped midnight and at a repeated one (a zone falling back at 01:00 to
   00:00, America/Havana 2026-11-01), at the start and at the end of a range. Record in the verdict what each gave.
-- [ ] K24 [US2] [MEDIUM] [Principle III] **A clock change exactly at the range's end is pinned as outside it.**
+- [X] K24 [US2] [MEDIUM] [Principle III] **A clock change exactly at the range's end is pinned as outside it.**
   Seen: `localDays.ts:139` (`if (high < end)`) excludes a change at `end`, which is right (the core refuses an
   entry at or after `range_end`), but no test reaches it: the London and Lord Howe cases change away from midnight.
   Mutating it to `high <= end` left all 79 frontend files green (2 488 tests) at `28982cd`; mutation restored.
