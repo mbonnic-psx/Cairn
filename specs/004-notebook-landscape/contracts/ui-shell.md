@@ -1,7 +1,8 @@
 # Contract — the notebook shell
 
 What the page slices (`protection-page`, `tonight-page`, `setup-pages`, `quiet-pages`) build against. Settled by
-slice `frame`, extended by slice `looks` (more `Look` values and tokens) and by nothing else.
+slice `frame`, extended by slice `looks` (more `Look` values and tokens) and by `protection-page` (knowing it is on a
+page, headings), and by nothing else.
 
 ## Navigation
 
@@ -25,6 +26,28 @@ slice `frame`, extended by slice `looks` (more `Look` values and tokens) and by 
   The margin line is the shell's, drawn once as a single `.nb-margin` element inside the notebook; it does not
   scroll with the page. A page slice never adds a `.nb-margin` of its own.
   A screen whose content fits one page leaves the right page as `.nb-page--ruled` and empty (FR-031).
+
+## Knowing it is on a page
+
+Added by `protection-page` (D6), before the other page slices build against it.
+
+- `NotebookShell` tells the screens it wraps that they are on a notebook page, through React context; it is not a
+  prop, so the rule above holds. `CurrentShell` provides nothing, and a screen rendered outside any shell (as the
+  existing screen tests render it) reads the same as Current.
+- A screen asks with one hook exported from `src/shell/`. When it is told it is on a page, it may lay its content
+  out with the spread classes above. Otherwise it renders exactly what it renders today, element for element, so
+  Current and every existing screen test are unchanged (SC-009).
+- Both layouts come from the one component and the one set of state and handlers. A page slice never copies a
+  screen into a second component.
+- A page slice's own styles live in a stylesheet of its own under `src/styles/`, imported once from `src/main.tsx`.
+  Every selector in it starts with one prefix per screen, `.nb-<screen>-` (`protection-page` uses `.nb-protection-`
+  and `.nb-trail-`), so two page slices never edit or override each other's rules. The spread classes above stay
+  the shell's; a page slice uses them and never restyles them.
+
+## Headings
+
+Added by `protection-page` (D9, frame T025). The notebook supplies one `h1`, "Cairn", visually hidden and read by
+assistive technology. The greeting is not a heading. A screen's own heading is the next heading in the outline.
 
 ## Look tokens
 

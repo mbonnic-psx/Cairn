@@ -40,7 +40,7 @@ export function Greeting({ look }: { look: NotebookLook }) {
   return (
     <div className="nb-greeting">
       <span className="nb-greeting__time">{formatWeekdayTime(now)}</span>
-      <h2 className="nb-greeting__words">{greetingFor(look)}</h2>
+      <p className="nb-greeting__words">{greetingFor(look)}</p>
     </div>
   );
 }

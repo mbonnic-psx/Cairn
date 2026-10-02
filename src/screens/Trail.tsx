@@ -9,6 +9,7 @@
  * machine shows it in force (Principle III).
  */
 import { Card } from '../components/Card';
+import { useNotebookPage } from '../shell/notebookPage';
 import type { ProtectionStatus, Trail as TrailData } from '../ipc';
 
 /** The way to this screen, named for what is verified. */
@@ -18,6 +19,46 @@ export function trailTitle(status: ProtectionStatus | undefined): string {
 
 export function Trail({ trail, status }: { trail: TrailData; status?: ProtectionStatus }) {
   const inForce = status === 'in_force';
+  const onPage = useNotebookPage();
+
+  if (onPage) {
+    return (
+      <div className="nb-spread nb-trail-leaves">
+        <div className="nb-page nb-trail-sticky">
+          <h2 className="nb-trail-title">
+            {inForce ? 'What you are protecting' : 'What you have chosen'}
+          </h2>
+          <p className="nb-trail-count">
+            {trail.entries.length} addresses, across {trail.enabled_categories.length} lists
+            and whatever you have added yourself.
+          </p>
+          {status === 'not_verified' && (
+            <p className="nb-trail-note">
+              Cairn has not confirmed this is in force just now. It keeps trying, and it keeps
+              what you chose.
+            </p>
+          )}
+          <p className="nb-trail-taking-out">
+            Taking something out protects you less, so it waits a day before it takes
+            effect. You can ask for that here, and cancel it at any time in that day.
+          </p>
+        </div>
+        <div className="nb-page nb-page--ruled">
+          <ul className="nb-trail-inventory">
+            {trail.entries.map((entry) => (
+              <li key={entry.domain} className="nb-trail-inventory__line">
+                <span className="nb-trail-inventory__address">{entry.domain}</span>
+                {entry.auto_www && (
+                  <span className="nb-trail-inventory__aside">added with its root address</span>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <Card>
       <h2 className="reflective text-3xl text-ink-900">
