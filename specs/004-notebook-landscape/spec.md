@@ -50,6 +50,10 @@ and buttons that this design uses, and forbids it for body text read at length.
   - Q: Where does the testing switch sit? → A: Small, at the top right of the sky, labelled "Look (testing)", so it never reads as part of the product (FR-011).
   - Q: The 003 slice `history-by-site` may touch the Today screen. → A: It lands before this feature's Tonight-and-Today slice (story split, parking lot).
 
+- Q: Should the redesign live on a long-lived Design branch and be merged at the end? → A: No. Every slice lands on `main` within a day (constitution, Continuous Integration on Trunk), behind the testing switch. The switch gets a fourth choice, **Current**, which is today's interface and its default. The new design stays off until it is whole (owner, 2026-10-01: "option 1", "yes").
+- Q: Does the switch remember the choice between restarts? → A: No. It starts on Current every time (owner, 2026-10-01).
+- Q: What ends the hidden period? → A: A final slice, `reveal`, makes the notebook the default and removes today's interface and the Current choice. It runs only after the owner has accepted all three looks in a demo (SC-008; owner, 2026-10-01).
+
 - Gaps reviewed for slice `frame`, 2026-10-01. Checked: the tab set before and after protection is on (it follows today's header, US1 scenarios 1–2); a tab for an unbuilt part (scenario 4); unsaved check-in text across tabs (scenario 5); where the mark sits under each platform's own frame (FR-007, the top left of the sky); the greeting at narrow widths and keeping time (FR-029, FR-030); morning contrast for text on the sky as well as on paper (FR-021); scrolling inside the notebook while the scenery stays put (edge cases); the window opening at 1280×800 (FR-028). Added: in `frame`, an existing screen keeps its current single-column layout on the notebook's paper, across the spread. Its two-page layout arrives with its own page slice (story split, slices 3–6). Nothing else was missing.
 
 ## User Scenarios & Testing *(mandatory)*
@@ -104,8 +108,8 @@ together. Build a release version and confirm no switch exists anywhere in it.
 **Acceptance Scenarios**:
 
 1. **Given** a development build, **When** the tester chooses morning, midday or night on the switch, **Then** the whole scene, the greeting and the notebook take that look at once, and the current screen and anything typed on it are kept.
-2. **Given** a development build, **When** Cairn starts, **Then** it shows the morning look until the tester changes it.
-3. **Given** a released build, **When** the person uses Cairn in any way, **Then** no look switch is present, reachable or announced, and Cairn shows the morning look.
+2. **Given** a development build, **When** Cairn starts, **Then** the switch is on Current and Cairn looks exactly as it does today, until the tester chooses a look.
+3. **Given** a released build before the reveal, **When** the person uses Cairn in any way, **Then** no look switch is present, reachable or announced, and Cairn looks exactly as it does today.
 4. **Given** the night look, **When** the person reads any text in the notebook or in the sky, **Then** the text is as readable as in the morning look (see SC-003).
 
 ---
@@ -184,11 +188,13 @@ still present and still works, now laid out as a notebook page.
 
 - **FR-009**: The interface MUST support exactly three looks: morning, midday and night, as described in User Story 2 and on the reference canvas.
 - **FR-010**: Changing the look MUST change the sky, hills, sun or moon, cairn colours, greeting and notebook together. It MUST keep the current screen and anything typed on it.
-- **FR-011**: A development build MUST offer a three-way switch, small, at the top right of the sky, labelled "Look (testing)", to choose the look. It MUST start on morning.
-- **FR-012**: A released build MUST contain no look switch: not shown, not reachable by keyboard or any key combination, and not announced to assistive technology. It MUST show the morning look.
+- **FR-011**: A development build MUST offer a switch, small, at the top right of the window, labelled "Look (testing)", with four choices: Current, Morning, Midday, Night. Current is today's interface, unchanged. The switch MUST start on Current every time Cairn starts, and MUST NOT remember the last choice.
+- **FR-012**: A released build MUST contain no look switch: not shown, not reachable by keyboard or any key combination, and not announced to assistive technology. Until the reveal (FR-032), it MUST show today's interface, unchanged.
 - **FR-013**: Choosing the look by time of day MUST NOT be part of this feature. Nothing in this feature reads the clock to choose a look.
-- **FR-013a**: The look switch, and the fixed morning look in released builds, are temporary. Before Cairn's first release, the time-of-day feature MUST remove the switch and let the clock choose the look. This feature records that obligation and does not meet it.
+- **FR-013a**: The look switch is temporary. Before Cairn's first release, the time-of-day feature MUST remove the switch and let the clock choose the look. This feature records that obligation and does not meet it.
 - **FR-013b**: The greeting MUST always follow the look on screen. Morning shows "Good morning.", midday shows "Midday.", night shows "Good evening." It is never hidden.
+
+- **FR-032**: Until every page slice is done and the owner has accepted all three looks in a demo, the notebook MUST be reachable only through the switch in a development build. The `reveal` slice then makes the notebook the default (morning in a released build), removes today's interface and the Current choice, and leaves a three-way switch for development builds until the clock replaces it (FR-013a).
 
 **Type and voice**
 
@@ -225,7 +231,7 @@ still present and still works, now laid out as a notebook page.
 
 ### Key Entities
 
-- **Look**: one of morning, midday or night. It decides the sky, hills, sun or moon, cairn colours, greeting words and how the notebook is lit. In this feature only the development switch chooses it. Released builds show morning.
+- **Look**: one of morning, midday or night. It decides the sky, hills, sun or moon, cairn colours, greeting words and how the notebook is lit. In this feature only the development switch chooses it. Beside the three looks, the switch offers Current, today's interface, until the reveal.
 
 ## Success Criteria *(mandatory)*
 
@@ -239,11 +245,12 @@ still present and still works, now laid out as a notebook page.
 - **SC-006**: All eight constitutional guards and every existing interface test pass, with no guard changed. Tests are changed only where they asserted the old appearance, never what a screen says or does.
 - **SC-007**: With reduced motion requested, nothing in the interface moves.
 - **SC-008**: The owner, comparing each look against the reference canvas boards, accepts it as the chosen design.
+- **SC-009**: Until the reveal, a released build, and a development build with the switch on Current, look and behave exactly as before this feature. Every existing interface test passes against them unchanged.
 
 ## Assumptions
 
 - The reference canvas is a guide to look and layout, not a pixel specification. Small departures are fine where they serve readability or accessibility.
-- Released builds show the morning look, with "Good morning.", until the clock feature arrives. Morning is the look the owner first approved, and the closest to today's light interface. No release is planned before the clock feature replaces the switch (FR-013a).
+- Before the reveal, released builds show today's interface. After it, they show the morning look, with "Good morning.", until the clock feature arrives. No release is planned before the clock feature replaces the switch (FR-013a).
 - "Today's header" means the navigation as it stands on `main` when this feature starts: Protection, What is protected (once protection is on), Today (once protection is on), Tonight, What Cairn covers. A Settings tab appears only once a Settings screen exists. The canvas shows one for illustration.
 - Teardown ("This machine is as it was") is restyled now, though it is not yet reachable from the app, so it matches when it is wired in.
 - Screens planned by other features but not yet built (Settings, Over time, One day, a partner, streaks) are out of scope. When they are built, they adopt this style.
