@@ -31,6 +31,10 @@ page, headings) and by `fold-and-width` (the fold), and by nothing else.
   fold of its own, never gives a spread unequal columns or any horizontal padding or margin, and never restyles
   `.nb-page-area`, whose padding is the shell's.
 
+  The notebook is a size container (`container-type: size`); the tab column queries it. A page that queries a
+  container sets and names its own, and nothing on a page is fixed to the window (`position: fixed` is placed by the
+  notebook).
+
   A screen whose content fits one page leaves the right page as `.nb-page--ruled` and empty (FR-031).
 
 ## Knowing it is on a page

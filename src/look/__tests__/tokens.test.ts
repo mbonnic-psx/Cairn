@@ -275,6 +275,14 @@ describe('the published shell contract says what the stylesheet and the shell do
   it('does not say the notebook draws no fold', () => {
     expect(contract).not.toContain('draws no fold');
   });
+
+  it('says the notebook is a size container whenever the stylesheet makes it one', () => {
+    const containing = [...noComments(notebook).matchAll(/([^{};]+)\{([^{}]*container-type\s*:[^{}]*)\}/g)];
+    expect(containing.some((m) => m[1]!.trim() === '.nb-notebook')).toBe(true);
+    expect(contract, 'the contract does not name container-type').toContain('container-type');
+    expect(contract).toMatch(/size container/);
+    expect(contract).toMatch(/names? its own/);
+  });
 });
 
 describe.each(['morning', 'midday', 'night'] as const)('the state badge\'s pill in the %s look (T026)', (look) => {
