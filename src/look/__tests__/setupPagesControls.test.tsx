@@ -160,3 +160,48 @@ describe.each(LOOKS)('focus on the paper, in the %s look (T013)', (look) => {
     expect([...found].sort()).toEqual([...CONTROLS].sort());
   });
 });
+
+const FADES = /transition|duration-|animate-|settle/;
+
+describe('nothing the setup spreads draw fades (T014)', () => {
+  it('declares no transition, animation or keyframes anywhere in the sheet, nor a rule for a fading class', () => {
+    expect(sheet).not.toMatch(/transition|animation|@keyframes/);
+    for (const { selector } of rules) expect(selector).not.toMatch(FADES);
+  });
+
+  describe.each(LOOKS)('in the %s look', (look) => {
+    it.each(Object.keys(scenes))('%s: no element carries a fading class', async (name) => {
+      const main = await scenes[name]!(look);
+      const all = Array.from(main.querySelectorAll('*'));
+      expect(all.length).toBeGreaterThan(0);
+      for (const el of all) {
+        expect(el.getAttribute('class') ?? '', el.outerHTML.slice(0, 80)).not.toMatch(FADES);
+      }
+    });
+  });
+
+  it('leaves every element the same node, with no fading class added, when the look changes', async () => {
+    for (const make of [
+      () => <Choosing categories={categories} onToggle={noop} note={waitingNote} onTurnOn={noop} />,
+      () => <Disclosure disclosures={disclosures} onConfirm={noop} onBack={noop} />,
+    ]) {
+      core = installFakeCore({});
+      const { main, rerender } = onPage(make(), 'morning');
+      const before = Array.from(main.querySelectorAll('*'));
+      for (const look of ['midday', 'night', 'morning'] as const) {
+        rerender(
+          <NotebookShell tabs={tabs} onSelect={noop} look={look}>
+            {make()}
+          </NotebookShell>,
+        );
+        const after = Array.from(main.querySelectorAll('*'));
+        expect(after).toHaveLength(before.length);
+        after.forEach((el, i) => {
+          expect(el, `${look}: element ${i}`).toBe(before[i]);
+          expect(el.getAttribute('class') ?? '').not.toMatch(FADES);
+        });
+      }
+      cleanup();
+    }
+  });
+});
