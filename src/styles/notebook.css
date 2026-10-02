@@ -21,6 +21,7 @@
   --nb-ink-quiet: #6b5a47;
   --nb-rule: #ebe0cb;
   --nb-margin: #c99a83;
+  --nb-fold: #e3d6bf;
   --nb-accent-amber: #7d5a22;
   --nb-button: #33291f;
   --nb-button-ink: #f8f1e3;
@@ -73,6 +74,7 @@
   --nb-ink-quiet: #6b5a47;
   --nb-rule: #e3d6bf;
   --nb-margin: #c99a83;
+  --nb-fold: #e3d6bf;
   --nb-accent-amber: #7d5a22;
   --nb-button: #33291f;
   --nb-button-ink: #f8f1e3;
@@ -124,6 +126,7 @@
   --nb-ink-quiet: #6b5a47;
   --nb-rule: #dccdb1;
   --nb-margin: #c99a83;
+  --nb-fold: #dccdb1;
   --nb-accent-amber: #7d5a22;
   --nb-button: #33291f;
   --nb-button-ink: #f1e6d0;
@@ -384,6 +387,16 @@
   background: var(--nb-margin);
   pointer-events: none;
 }
+/* The fold: one line on the centre of the gap between the leaves, drawn by the shell, fixed while the pages scroll. */
+.nb-fold {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(50% + 6px);
+  width: 0;
+  border-left: 1px solid var(--nb-fold);
+  pointer-events: none;
+}
 .nb-label {
   font-family: var(--nb-font-mono);
   font-size: 12px;
@@ -518,6 +531,9 @@
   .nb-page-area {
     padding: 28px 32px 28px 52px;
   }
+  .nb-fold {
+    left: calc(50% + 10px);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -536,6 +552,9 @@
   }
   .nb-tab[aria-current='page'] {
     border-width: 3px;
+  }
+  .nb-fold {
+    border-left-color: GrayText;
   }
   .nb-landscape {
     forced-color-adjust: none;

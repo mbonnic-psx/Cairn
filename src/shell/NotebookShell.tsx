@@ -46,6 +46,7 @@ export function NotebookShell({
       </aside>
       <div className="nb-notebook nb-spread">
         <span className="nb-margin" aria-hidden="true" />
+        <span className="nb-fold" aria-hidden="true" />
         <main ref={pageArea} className="nb-page-area nb-page" tabIndex={0}>
           <NotebookPageContext.Provider value={true}>{children}</NotebookPageContext.Provider>
         </main>

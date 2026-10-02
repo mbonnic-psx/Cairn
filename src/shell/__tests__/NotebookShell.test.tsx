@@ -261,3 +261,16 @@ describe('NotebookShell looks', () => {
     );
   });
 });
+
+describe('the fold (FR-034)', () => {
+  it.each(['morning', 'midday', 'night'] as const)('draws one silent fold in the notebook, outside the scrolling page, in the %s look', (look) => {
+    const { container } = shell(fakeTabs, vi.fn(), look);
+    const folds = container.querySelectorAll('.nb-fold');
+    expect(folds).toHaveLength(1);
+    const fold = folds[0]!;
+    expect(fold).toHaveAttribute('aria-hidden', 'true');
+    expect(fold.parentElement).toHaveClass('nb-notebook');
+    expect(fold.closest('main.nb-page-area')).toBeNull();
+    expect(container.querySelectorAll('[class*="fold"]')).toHaveLength(1);
+  });
+});

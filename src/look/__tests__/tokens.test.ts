@@ -238,8 +238,10 @@ describe('the shell contract in the stylesheet (contracts/ui-shell.md)', () => {
     expect(y % 32, 'the ruling starts 22px into the pitch, where the first line of writing sits').toBe(22);
   });
 
-  it('names no fold: the spread is two equal columns and nothing more', () => {
-    expect(notebook).not.toMatch(/--nb-fold/);
+  it('draws the fold in one place, .nb-fold, from --nb-fold', () => {
+    const reading = rules.filter((r) => /var\(--nb-fold\)/.test(r.body));
+    expect(reading).toHaveLength(1);
+    expect(reading[0]!.selector).toBe('.nb-fold');
     expect(ruleFor('.nb-spread')[0]!.body).toMatch(/grid-template-columns:\s*1fr 1fr/);
   });
 });
