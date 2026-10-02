@@ -17,8 +17,6 @@
  */
 import { useState, type FormEvent } from 'react';
 
-import { Button } from '../../components/Button';
-import { Card } from '../../components/Card';
 import {
   addCustomEntry,
   getProtectionState,
@@ -26,7 +24,6 @@ import {
   type ProtectionStatus,
   type Rejection,
 } from '../../ipc';
-import { useNotebookPage } from '../../shell/notebookPage';
 
 export function CustomEntry({
   onAdded,
@@ -42,7 +39,6 @@ export function CustomEntry({
   const [added, setAdded] = useState<string[]>([]);
   const [status, setStatus] = useState<ProtectionStatus>('not_verified');
   const [reason, setReason] = useState<string>();
-  const onPage = useNotebookPage();
 
   async function submit(event: FormEvent) {
     event.preventDefault();
@@ -61,58 +57,14 @@ export function CustomEntry({
     }
   }
 
-  if (onPage) {
-    return (
-      <section className="nb-custom-section">
-        <h2 className="nb-custom-title">Anywhere else?</h2>
-        <p className="nb-custom-lead">
-          Type an address and Cairn will protect it, along with its www. form.
-        </p>
-
-        <form onSubmit={submit} className="nb-custom-form">
-          <label className="sr-only" htmlFor="address">
-            Address to protect
-          </label>
-          <input
-            id="address"
-            value={input}
-            onChange={(event) => setInput(event.target.value)}
-            placeholder="example.com"
-            name="address"
-            autoComplete="off"
-            spellCheck={false}
-            className="nb-custom-input"
-          />
-          <button type="submit" className="nb-custom-button" disabled={!input.trim()}>
-            Protect it
-          </button>
-        </form>
-
-        {added.length > 0 && (
-          <p
-            className={`nb-custom-added ${status === 'in_force' ? 'nb-custom-added--in-force' : 'nb-custom-added--waiting'}`}
-          >
-            {addedSentence(status, added)}
-          </p>
-        )}
-
-        {reason && (
-          <p role="status" className="nb-custom-reason">
-            {reason}
-          </p>
-        )}
-      </section>
-    );
-  }
-
   return (
-    <Card>
-      <h2 className="reflective text-3xl text-ink-900">Anywhere else?</h2>
-      <p className="reflective mt-3 max-w-prose text-lg text-ink-700">
+    <section className="nb-custom-section">
+      <h2 className="nb-custom-title">Anywhere else?</h2>
+      <p className="nb-custom-lead">
         Type an address and Cairn will protect it, along with its www. form.
       </p>
 
-      <form onSubmit={submit} className="mt-8 flex gap-3">
+      <form onSubmit={submit} className="nb-custom-form">
         <label className="sr-only" htmlFor="address">
           Address to protect
         </label>
@@ -121,25 +73,30 @@ export function CustomEntry({
           value={input}
           onChange={(event) => setInput(event.target.value)}
           placeholder="example.com"
-          className="flex-1 rounded-lg border border-sand-300 bg-white/70 px-4 py-2.5 text-ink-900 placeholder:text-ink-400 focus:border-clay-500 focus:outline-none"
+          name="address"
+          autoComplete="off"
+          spellCheck={false}
+          className="nb-custom-input"
         />
-        <Button type="submit" disabled={!input.trim()}>
+        <button type="submit" className="nb-custom-button" disabled={!input.trim()}>
           Protect it
-        </Button>
+        </button>
       </form>
 
       {added.length > 0 && (
-        <p className="mt-4 text-moss-600">
+        <p
+          className={`nb-custom-added ${status === 'in_force' ? 'nb-custom-added--in-force' : 'nb-custom-added--waiting'}`}
+        >
           {addedSentence(status, added)}
         </p>
       )}
 
       {reason && (
-        <p role="status" className="mt-4 text-amber-600">
+        <p role="status" className="nb-custom-reason">
           {reason}
         </p>
       )}
-    </Card>
+    </section>
   );
 }
 

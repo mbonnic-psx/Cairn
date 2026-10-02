@@ -38,6 +38,15 @@ function onPage(ui: React.ReactElement, look: NotebookLook = 'morning') {
 /** The words the screen said before the notebook, from the baseline (`beforeTheReveal.ts`), never from a render. */
 const wasText = (name: string) => baseline(PIN[name]!).textContent ?? '';
 
+describe('Disclosure rendered alone', () => {
+  it('is its one spread of two pages, whatever the details', () => {
+    const view = render(<Disclosure disclosures={disclosures} onConfirm={noop} onBack={noop} />);
+    const spread = view.container.querySelector(':scope > .nb-spread');
+    expect(spread).not.toBeNull();
+    expect(spread!.querySelectorAll(':scope > .nb-page')).toHaveLength(2);
+  });
+});
+
 describe.each(['morning', 'midday', 'night'] as const)('Disclosure on a notebook page, in the %s look (T008)', (look) => {
   const given = (onConfirm = noop, onBack = noop) => (
     <Disclosure disclosures={disclosures} onConfirm={onConfirm} onBack={onBack} />

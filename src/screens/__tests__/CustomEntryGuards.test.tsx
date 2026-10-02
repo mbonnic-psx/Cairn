@@ -1,5 +1,5 @@
 /**
- * The guards on adding an address by hand, in both layouts: whitespace is not an address, a submit never
+ * The guards on adding an address by hand, once, rendered alone: whitespace is not an address, a submit never
  * navigates the page, and a reason that no longer applies does not sit beside a success. The core is a fake
  * written here.
  */
@@ -8,7 +8,6 @@ import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 
 import type { ProtectionState } from '../../ipc';
-import { NotebookPageContext } from '../../shell/notebookPage';
 import { CustomEntry } from '../Setup/CustomEntry';
 
 const inForce: ProtectionState = {
@@ -32,18 +31,9 @@ function fakeAdd(answers: Array<{ reject: unknown } | { domains: string[] }>) {
 
 const check = async () => inForce;
 
-const layouts = [
-  { name: 'on a notebook page', onPage: true },
-  { name: 'outside any shell', onPage: false },
-];
-
-describe.each(layouts)('adding an address $name', ({ onPage }) => {
+describe('adding an address', () => {
   function show(add: (input: string) => Promise<string[]>) {
-    return render(
-      <NotebookPageContext.Provider value={onPage}>
-        <CustomEntry add={add} check={check} />
-      </NotebookPageContext.Provider>,
-    );
+    return render(<CustomEntry add={add} check={check} />);
   }
 
   it('treats whitespace as no address: the button is disabled', async () => {

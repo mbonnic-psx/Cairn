@@ -6,7 +6,6 @@ import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
-import { Button } from '../../components/Button';
 import { NotebookShell } from '../../shell/NotebookShell';
 import type { NotebookLook } from '../../look/look';
 import { Categories } from '../Setup/Categories';
@@ -33,24 +32,14 @@ function onPage(ui: React.ReactElement, look: NotebookLook = 'morning') {
 /** The words the screen said before the notebook, from the baseline (`beforeTheReveal.ts`), never from a render. */
 const wasText = (html: string) => baseline(html).textContent ?? '';
 
-describe('Choosing outside any shell (T003)', () => {
-  it("renders today's elements in today's order, with no wrapper", () => {
+describe('Choosing rendered alone (T003)', () => {
+  it('is its one spread of two pages', () => {
     const view = render(
       <Choosing categories={categories} onToggle={noop} note={waitingNote} onTurnOn={noop} />,
     );
-    const mine = view.container.innerHTML;
-    view.unmount();
-
-    const by = render(
-      <>
-        <Categories categories={categories} onToggle={noop} note={waitingNote} />
-        <CustomEntry />
-        <div className="flex justify-end">
-          <Button>Turn protection on</Button>
-        </div>
-      </>,
-    );
-    expect(mine).toBe(by.container.innerHTML);
+    const spread = view.container.querySelector(':scope > .nb-spread');
+    expect(spread).not.toBeNull();
+    expect(spread!.querySelectorAll(':scope > .nb-page')).toHaveLength(2);
   });
 
   it('calls onTurnOn once when "Turn protection on" is chosen', async () => {
