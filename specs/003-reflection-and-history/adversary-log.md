@@ -103,3 +103,23 @@ Findings (triaged by the host):
 | A3 | LOW | confirmed | fixed `ae0cf5c` (first offset one-directional; staircases left to the webview, noted in the contract) | A hostile caller may send a first offset up to 2 h *below* the implied one, offsets no zone has, or a staircase of changes, and every reach is bucketed up to 12 h off; counts are conserved. The screen never sends these |
 
 Held: every malformed offsets list (unsorted, duplicated, at `range_end`, empty, a wrong first instant, i64 extremes, days + 2 entries) refused with the one sentence, no panic; 4.4M entries checked in 40 ms; `by_hour` conserves every count; a reach at a change instant takes the new offset, as `Date` does; `offsetChanges` matches a 15-minute ground truth in all 419 zones, every two-year window 1900–today; 24 hours always, no ranking word; hours equal `Date.getHours()` for every whole-minute offset (1972 on).
+
+## history-by-weekday · ce9ca05 · 2026-10-02
+
+| Trigger | Status | Evidence |
+|---|---|---|
+| driving adapter (HTTP route, CLI command, queue consumer) | widened | `src-tauri/src/ipc/state.rs`: `Patterns` gains `by_weekday` (`WeekdayCount { weekday, count, days }`); `summarize_reaches`'s parameters unchanged |
+| driven adapter or the provider types behind one | already covered | range reads unchanged since `history-by-site` |
+| authorisation decision (who can reach one that already exists) | not present | single local user; `Reads` |
+| concurrency, idempotency, ordering, retention, or time | widened | a reach's local weekday by the offset in force (`domain/patterns.rs` `by_weekday`, `weekdays_in`), the week's first day from the locale (`src/localDays.ts`) |
+
+Spawned: reaches by day of the week · `drive-adversary` · host (Opus 5.5) · delegated, fresh context · manifest: `src-tauri/src/domain/patterns.rs`, `src-tauri/src/reflection/over_time.rs`, `src-tauri/src/ipc/state.rs`, `src-tauri/tests/patterns_by_weekday.rs`, `us2_by_weekday.rs`, `patterns_by_hour.rs`, `us2_by_hour.rs`, `us2_by_site.rs`, `patterns_at_scale.rs`, `src/localDays.ts`, `src/screens/Reaches.tsx`, `src/ipc/reaches.ts`, and the slice's screen tests
+Omitted: authorisation · not present; driven adapter · already covered by the `history-by-site` row
+
+Findings (triaged by the host):
+
+| # | Severity | Triage | State | Finding |
+|---|---|---|---|---|
+| W-A1 | LOW | confirmed (bundled `localDays.ts` under `TZ=America/Goose_Bay`, then the core) | fixed (contract amended, example pinned in `tests/patterns_by_weekday.rs`; Y23 already draws such a count) | Where a clock change crosses midnight (Goose Bay and Moncton put clocks back at 00:01 until 2010), a reach inside the range's instants falls on a local date outside `[first_day, last_day]`, so a weekday with `days` 0 holds a count even for the offsets the screen sends. None in tzdata from 2026 to 2100 |
+
+Held: placement at Santiago's 24:00 change, Sao Paulo and Asuncion midnight changes, Apia's skipped day refused plainly; `weekdays_in` matched brute force over 140 start/length pairs including 0000–9999, no saturation reachable; known weekdays right (proleptic Gregorian, as `Date`); week order right for Sunday-, Monday-, Saturday- and Friday-first locales, `und`/C/POSIX → en-US; card and page share one order; "across 1 Monday", "across 2 Mondays"; no ranking word; constant-time counts; no new error text. Noted, unconfirmed: `resolvedOptions().locale` strips a `-u-fw-` extension, which would lose a first-day choice carried that way (W9 does not read an OS setting).

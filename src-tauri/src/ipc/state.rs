@@ -150,6 +150,22 @@ pub struct HourCount {
     pub count: u32,
 }
 
+/// One day of the week, how many times a site was reached for on it, and how
+/// many of that day the range holds (gaps review W4).
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Serialize, Deserialize)]
+pub struct WeekdayCount {
+    /// 0 (Monday) to 6 (Sunday), as `LocalDate::weekday` numbers them: not
+    /// `Date.getDay`'s Sunday-first. Which day a week begins on is the
+    /// interface's to choose, and is never sent (W2).
+    pub weekday: u8,
+    /// Reaches on this weekday, by the computer's clock at each reach's own
+    /// instant.
+    pub count: u32,
+    /// How many days of this weekday the range holds, so that the count and
+    /// its evenness describe the same range. 0 when the range holds none.
+    pub days: u32,
+}
+
 /// The offset the computer's clock takes from `from` on, as the interface
 /// sends it (`contracts/ui-ipc.md`, amended in slice `history-by-hour`). Whole
 /// seconds east of UTC. Wide integers, so that a value no zone has is refused
@@ -160,13 +176,13 @@ pub struct OffsetChange {
     pub offset: i64,
 }
 
-/// A range of days, by site and by hour (`contracts/ui-ipc.md`,
-/// `summarize_reaches`, as amended in slices `history-by-site` and
-/// `history-by-hour`).
+/// A range of days, by site, by hour and by day of the week
+/// (`contracts/ui-ipc.md`, `summarize_reaches`, as amended in slices
+/// `history-by-site`, `history-by-hour` and `history-by-weekday`).
 ///
-/// It carries only what this build can state truthfully. `by_weekday` and
-/// `movement` join it when a slice computes them; until then their absence
-/// says nothing was computed, where an empty list would claim it had been.
+/// It carries only what this build can state truthfully. `movement` joins it
+/// when a slice computes it; until then its absence says nothing was
+/// computed, where an empty list would claim it had been.
 #[derive(Clone, PartialEq, Eq, Debug, Serialize, Deserialize)]
 pub struct Patterns {
     /// Most first; equal counts by domain name, A to Z.
@@ -174,6 +190,10 @@ pub struct Patterns {
     /// Exactly 24, hour 0 to 23 ascending, zeros included; empty only when
     /// `sealed`, where 24 zeros would read as a quiet range.
     pub by_hour: Vec<HourCount>,
+    /// Exactly 7, `weekday` 0 (Monday) to 6 (Sunday) ascending, zeros
+    /// included; empty only when `sealed`, where seven zeros would read as a
+    /// quiet range (W6, FR-024).
+    pub by_weekday: Vec<WeekdayCount>,
     /// Each cut to the part inside the range.
     pub gaps: Vec<Gap>,
     /// The gaps in one sentence, about the range.
@@ -196,6 +216,7 @@ impl Patterns {
         Patterns {
             by_site: Vec::new(),
             by_hour: Vec::new(),
+            by_weekday: Vec::new(),
             gaps: Vec::new(),
             coverage_note: None,
             estimates_excluded: 0,
@@ -798,7 +819,7 @@ impl AppState {
         }
     }
 
-    /// A range of days, by site and by hour.
+    /// A range of days, by site, by hour and by day of the week.
     ///
     /// **Called only by the Reaches screen** (FR-030a), as `list_todays_reaches`
     /// is. The bounds are checked first, as `get_day`'s are, then the offsets
@@ -860,6 +881,17 @@ impl AppState {
                         .into_iter()
                         .zip(0u8..)
                         .map(|(count, hour)| HourCount { hour, count })
+                        .collect(),
+                    by_weekday: range
+                        .by_weekday
+                        .into_iter()
+                        .zip(range.weekdays)
+                        .zip(0u8..)
+                        .map(|((count, days), weekday)| WeekdayCount {
+                            weekday,
+                            count,
+                            days,
+                        })
                         .collect(),
                     coverage_note: range_coverage_note(&range.gaps),
                     gaps: range.gaps,

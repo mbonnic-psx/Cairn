@@ -162,3 +162,71 @@ export const hourInWords = (hour: number): string =>
     minute: '2-digit',
     timeZone: 'UTC',
   });
+
+/** What a locale reports of its week, in the two forms the platforms have given it. */
+interface LocaleWeek {
+  /** The current form: a method. */
+  getWeekInfo?: () => { firstDay?: unknown };
+  /** The older form: an accessor. */
+  weekInfo?: { firstDay?: unknown };
+}
+
+/**
+ * The day a locale begins its week on, in the core's numbering (0 = Monday ... 6 = Sunday): the
+ * platform's `firstDay` runs 1 (Monday) to 7 (Sunday). `getWeekInfo()` is preferred, then
+ * `weekInfo`, and a webview with neither, a `getWeekInfo()` that throws, or a `firstDay` that is not an
+ * integer from 1 to 7, begins on Monday (W2): an invalid one is not passed over for the other form. Pure: it is given the object, so a test can give it any.
+ */
+export function firstWeekdayOf(locale: LocaleWeek): number {
+  try {
+    const info =
+      typeof locale.getWeekInfo === 'function' ? locale.getWeekInfo() : locale.weekInfo;
+    const first = info?.firstDay;
+    return typeof first === 'number' &&
+      Number.isInteger(first) &&
+      first >= 1 &&
+      first <= 7
+      ? first - 1
+      : 0;
+  } catch {
+    return 0;
+  }
+}
+
+/**
+ * The first day of the computer's week, from its region (W9). With no `locale`, the one the days are
+ * named in (`Intl.DateTimeFormat().resolvedOptions().locale`), so the order and the names come from
+ * one place. Holds no reach data. It never throws: it runs when the reaches screen mounts, *Today*
+ * included, so a webview with no `Intl.Locale`, or a locale it refuses, begins on Monday (W2).
+ */
+export function firstWeekday(locale?: string): number {
+  try {
+    return firstWeekdayOf(
+      new Intl.Locale(
+        locale ?? new Intl.DateTimeFormat().resolvedOptions().locale,
+      ) as LocaleWeek,
+    );
+  } catch {
+    return 0;
+  }
+}
+
+/**
+ * A day of the week as the computer names it, `Monday`: 0 = Monday ... 6 = Sunday. Made from a fixed
+ * instant in UTC (2024-01-01 was a Monday), so no zone can move a name to another day.
+ */
+export const weekdayInWords = (weekday: number): string =>
+  new Date(Date.UTC(2024, 0, 1 + weekday)).toLocaleDateString([], {
+    weekday: 'long',
+    timeZone: 'UTC',
+  });
+
+/**
+ * How many of a weekday a range holds, in words: `across 1 Monday`, `across 4 Mondays`, and
+ * `not in these days` for a weekday the range does not hold (W4, W7). The plural adds an `s`, which is
+ * right for English day names; plural forms in other languages belong to a translation (W8).
+ */
+export function acrossInWords(weekday: number, days: number): string {
+  if (days === 0) return 'not in these days';
+  return `across ${days} ${weekdayInWords(weekday)}${days === 1 ? '' : 's'}`;
+}

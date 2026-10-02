@@ -215,6 +215,44 @@ the same sealed sentence as for its bounds and nothing else returned, unless:
 `by_weekday` (`history-by-weekday`) and `movement` (`history-movement`) are still absent. Each will take the same
 `offsets` when it is built.
 
+#### Amended in slice `history-by-weekday` (2026-10-02)
+
+**The signature does not change.** The days are bucketed by the `offsets` the amendment above added. Gaps review W5
+decides a reach belongs to the local day its own instant falls in, by the offset in force then, exactly as for
+hours. Nothing about the week is sent: which day the week starts on is the interface's choice (W2), and the core is
+locale-free.
+
+**Fields.** Slice `history-by-weekday` adds one, so the answer holds eight keys:
+
+```
+  by_weekday:  [{ weekday, count, days }],  // exactly 7, weekday 0 (Monday) – 6 (Sunday) ascending; [] when sealed
+```
+
+This supersedes the original `[{ weekday, count }]` above by one field, `days`. The field was never sent before.
+
+- `weekday` is numbered as `domain::dates::LocalDate::weekday` numbers it: 0 = Monday … 6 = Sunday (ISO 8601,
+  zero-based). Note that this is **not** JavaScript's `Date.prototype.getDay`, where 0 is Sunday. The wire order is
+  fixed. The interface draws the week from the first day the computer's locale gives, picking each entry by its
+  `weekday` value, not by its position.
+- `count` is built from reaches alone. W6 decides that an estimate is not counted toward its weekday, though it has
+  a date: what Cairn did not count is not recorded as though it had been. `estimates_excluded` is the same count by
+  site and by hour state, and the interface states it on *By day* too.
+- `days` is how many of that weekday the dates `first_day..=last_day` hold (W4). It is calendar arithmetic on the
+  two dates, with no offset: a 23-hour or 25-hour day is still one Sunday. It counts the range's days, not the days
+  Cairn watched, and the coverage note states what Cairn did not see, as for sites and hours. The values sum to the
+  range's length in days, saturating at `u32::MAX`. A weekday the range does not hold usually has `days` 0 and
+  `count` 0, and the interface does not show that `0` as a day with no reaches. The pair is not guaranteed, even for
+  the offsets the computer sends (amended 2026-10-02, adversary W-A1): where a clock change crosses midnight, a reach
+  inside the range's instants can fall on a local date outside `[first_day, last_day]` — America/Goose_Bay put its
+  clocks back at 00:01 until 2010, so the first hour of a Sunday's range read as Saturday 23:01 — and `check_offsets`
+  also accepts lists the computer could not send (adversary A3). So a weekday with `days` 0 can hold a `count`. The interface draws every count the core sends: a weekday is shown as
+  *not in these days* only when both are 0.
+- A quiet range is seven entries with `count` 0 and the range's `days` (FR-024). A sealed answer is `[]`, never seven
+  zeros, which would read as a quiet range.
+- `movement` (`history-movement`) is still absent.
+
+See `slices/history-by-weekday/plan.md`, *The day*, *The week* and *How many of each day*.
+
 ### `get_quote(day) -> string | null`
 
 A quote from the bundled set, or nothing. Never fetched. Null is a valid, complete answer —

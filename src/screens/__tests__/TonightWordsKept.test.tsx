@@ -10,7 +10,17 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { NotebookShell } from '../../shell/NotebookShell';
 import { CheckIn } from '../CheckIn';
 import { Reaches } from '../Reaches';
-import { baseline, controlsOf, structureOf, wordsOf, OVER_TIME, TODAY, TONIGHT } from './beforeTheReveal';
+import {
+  baseline,
+  controlsOf,
+  structureOf,
+  wordsOf,
+  BY_DAY_DELTA,
+  OVER_TIME,
+  TODAY,
+  TONIGHT,
+  type Delta,
+} from './beforeTheReveal';
 import { installFakeCore, type FakeCore } from './fakeCore';
 import {
   evening,
@@ -48,11 +58,11 @@ const settle = () =>
     await vi.advanceTimersByTimeAsync(0);
   });
 
-function expectKept(shown: HTMLElement, html: string) {
+function expectKept(shown: HTMLElement, html: string, deltas: Delta[] = []) {
   const was = baseline(html);
-  expect(wordsOf(shown)).toEqual(wordsOf(was));
-  expect(controlsOf(shown)).toEqual(controlsOf(was));
-  expect(structureOf(shown)).toEqual(structureOf(was));
+  expect(wordsOf(shown)).toEqual(wordsOf(was, deltas));
+  expect(controlsOf(shown)).toEqual(controlsOf(was, deltas));
+  expect(structureOf(shown)).toEqual(structureOf(was, deltas));
 }
 
 describe('the states the baseline holds', () => {
@@ -84,7 +94,7 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (look) 
     } else if (answer !== 'looking') {
       await screen.findByText(answer.sealed ?? 'Cairn counts only while it is running. This is what it saw over these days.');
     }
-    expectKept(main, OVER_TIME[name]!);
+    expectKept(main, OVER_TIME[name]!, [BY_DAY_DELTA]);
   });
 
   it.each(Object.keys(tonightCases))('Tonight, %s, keeps its words and controls', async (name) => {

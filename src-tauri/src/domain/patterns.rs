@@ -8,6 +8,10 @@
 //! many estimates were set aside for the window, so that exclusion is stated
 //! rather than left implicit.
 //!
+//! [`by_hour`] and [`by_weekday`] place each reach by the offset in force at its
+//! own instant; [`weekdays_in`] counts the weekdays the range holds, by the
+//! calendar alone (gaps review B4, W4, W5).
+//!
 //! This module reads no clock and knows nothing about what platform it runs
 //! on (FR-019, FR-020, FR-024) — the local offset that turns an instant into
 //! an hour and a weekday is supplied by the caller (`research.md`, R4), never
@@ -208,6 +212,18 @@ pub struct OffsetChange {
     pub offset_seconds: i32,
 }
 
+/// The offset in force at `at`: that of the last of `changes` at or before it,
+/// found by binary search, or `first_offset` when none is. Shared by
+/// [`by_hour`] and [`by_weekday`], so the two cannot disagree. The changes must
+/// increase: that is the caller's check.
+fn offset_in_force(first_offset: i32, changes: &[OffsetChange], at: i64) -> i32 {
+    let in_force = changes.partition_point(|change| change.from <= at);
+    match in_force.checked_sub(1) {
+        Some(index) => changes[index].offset_seconds,
+        None => first_offset,
+    }
+}
+
 /// The hours of `[from, to)`, each reach counted in the hour the computer's
 /// clock showed at its own instant (gaps review B4).
 ///
@@ -231,14 +247,68 @@ pub fn by_hour(
         if reach.at < from || reach.at >= to {
             continue;
         }
-        let in_force = changes.partition_point(|change| change.from <= reach.at);
-        let offset = match in_force.checked_sub(1) {
-            Some(index) => changes[index].offset_seconds,
-            None => first_offset,
-        };
+        let offset = offset_in_force(first_offset, changes, reach.at);
         hours[hour_of_day(reach.at, offset) as usize] += 1;
     }
     hours
+}
+
+/// The days of the week of `[from, to)`, each reach counted on the weekday of
+/// the local day the computer's clock showed at its own instant (gaps review
+/// W5), indexed by [`LocalDate::weekday`]: 0 = Monday .. 6 = Sunday.
+///
+/// The offset in force, the range test and the preconditions are those of
+/// [`by_hour`], found by the same lookup ([`offset_in_force`]), so the two can
+/// never disagree about which offset a reach had. The sum is therefore the
+/// sum of [`by_hour`]'s. Estimates never come in (FR-023, W6).
+pub fn by_weekday(
+    reaches: &[Reach],
+    first_offset: i32,
+    changes: &[OffsetChange],
+    from: i64,
+    to: i64,
+) -> [u32; 7] {
+    let mut weekdays = [0u32; 7];
+    for reach in reaches {
+        if reach.at < from || reach.at >= to {
+            continue;
+        }
+        let offset = offset_in_force(first_offset, changes, reach.at);
+        let weekday =
+            LocalDate::from_days_since_epoch(local_day(reach.at, offset)).weekday();
+        weekdays[weekday as usize] += 1;
+    }
+    weekdays
+}
+
+/// How many of each weekday the dates `first_day..=last_day` hold, indexed by
+/// [`LocalDate::weekday`] (gaps review W4).
+///
+/// Pure calendar arithmetic with no offset: a local date is a date in every
+/// zone, and a 23-hour or 25-hour day is still one day. With `n` days, each
+/// weekday holds `n / 7` and the `n % 7` weekdays from `first_day`'s onwards
+/// one more. Computed in `i64` with checked arithmetic and saturated to `u32`
+/// as `estimates_excluded` is: a range may be thousands of years (R5), and a
+/// [`LocalDate`] spans more days than `u32` holds. A first day after the last
+/// gives seven zeros.
+pub fn weekdays_in(first_day: LocalDate, last_day: LocalDate) -> [u32; 7] {
+    let days = last_day
+        .days_since_epoch()
+        .checked_sub(first_day.days_since_epoch())
+        .and_then(|difference| difference.checked_add(1))
+        .filter(|days| *days > 0);
+    let Some(days) = days else {
+        return [0; 7];
+    };
+    let (whole_weeks, extra) = (days / 7, days % 7);
+    let start = i64::from(first_day.weekday());
+    let mut weekdays = [0u32; 7];
+    for (weekday, count) in weekdays.iter_mut().enumerate() {
+        let steps_in = (weekday as i64 - start).rem_euclid(7);
+        let held = whole_weeks.saturating_add(i64::from(steps_in < extra));
+        *count = u32::try_from(held).unwrap_or(u32::MAX);
+    }
+    weekdays
 }
 
 /// Most reached first; equal counts by domain name.

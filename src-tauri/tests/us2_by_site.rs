@@ -184,7 +184,7 @@ fn assert_in_voice(sentence: &str) {
 // --- Scenario 12: the wire shape ---------------------------------------------
 
 #[test]
-fn the_answer_serialises_to_exactly_seven_keys() {
+fn the_answer_serialises_to_exactly_eight_keys() {
     let state_setup = setup();
     let state = app(&state_setup, &Keychain::available());
     let value = serde_json::to_value(summarize(&state)).unwrap();
@@ -200,13 +200,14 @@ fn the_answer_serialises_to_exactly_seven_keys() {
         [
             "by_hour",
             "by_site",
+            "by_weekday",
             "coverage_note",
             "dst_approximate",
             "estimates_excluded",
             "gaps",
             "sealed"
         ],
-        "no by_weekday or movement: nothing computed them"
+        "no movement: nothing computed it"
     );
 }
 
@@ -216,7 +217,7 @@ fn the_answer_serialises_to_exactly_seven_keys() {
 mod with_history {
     use super::*;
 
-    use cairn::ipc::state::HourCount;
+    use cairn::ipc::state::{HourCount, WeekdayCount};
     use cairn::store::history::{CoverageGap, History, OpenHistory};
     use cairn::store::key::HistoryKey;
 
@@ -325,6 +326,14 @@ mod with_history {
             Patterns {
                 by_site: Vec::new(),
                 by_hour: (0..24).map(|hour| HourCount { hour, count: 0 }).collect(),
+                // Four weeks: four of each day, none reached.
+                by_weekday: (0..7)
+                    .map(|weekday| WeekdayCount {
+                        weekday,
+                        count: 0,
+                        days: 4
+                    })
+                    .collect(),
                 gaps: Vec::new(),
                 coverage_note: None,
                 estimates_excluded: 0,

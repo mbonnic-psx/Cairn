@@ -14,7 +14,7 @@ import { describe, expect, it, vi } from 'vitest';
 import type { Patterns } from '../../ipc/reaches';
 import { NotebookShell } from '../../shell/NotebookShell';
 import { Reaches } from '../Reaches';
-import { BY_HOUR_WORDS } from './beforeTheReveal';
+import { BY_DAY_DELTA, BY_HOUR_WORDS } from './beforeTheReveal';
 import { evening, rangeCoverageNote, sealedSentence, todayCases } from './tonightCases';
 import { never } from './fakeCore';
 
@@ -30,6 +30,7 @@ const answer = (over: Partial<Patterns> = {}): Patterns => ({
     { domain: 'video.example', count: 4 },
   ],
   by_hour: hours({ 2: 2, 14: 6, 15: 3 }),
+  by_weekday: [],
   gaps: [],
   coverage_note: null,
   estimates_excluded: 0,
@@ -94,6 +95,7 @@ describe('Seen by, on a notebook page', () => {
     expect(buttons.map((b) => [b.textContent, b.getAttribute('aria-pressed')])).toEqual([
       ['By site', 'true'],
       ['By hour', 'false'],
+      ['By day', 'false'],
     ]);
     for (const button of buttons) expect(button).toHaveClass('nb-reaches-which__button');
   });
@@ -235,6 +237,8 @@ describe('the words it said before the notebook', () => {
     const { spread, user: pageUser } = await byHourOnPage(patterns);
     await pageUser.click(choose('By hour'));
 
-    expect(words(spread)).toEqual(BY_HOUR_WORDS[name]);
+    expect(words(spread)).toEqual(
+      [...BY_HOUR_WORDS[name]!, ...BY_DAY_DELTA.words!.added!].sort(),
+    );
   });
 });

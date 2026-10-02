@@ -12,14 +12,17 @@
 import { useEffect, useState, type ReactNode } from 'react';
 
 import {
+  acrossInWords,
   addDays,
   dayBounds,
+  firstWeekday,
   hourInWords,
   isLocalDate,
   localToday,
   offsetChanges,
   rangeBounds,
   rangeInWords,
+  weekdayInWords,
 } from '../localDays';
 import {
   largestCount,
@@ -66,35 +69,74 @@ const COULD_NOT_READ =
 const SEEN_BY = 'Seen by';
 const BY_SITE = 'By site';
 const BY_HOUR = 'By hour';
-/** What an estimate has none of, in the view it is left out of. */
-const estimatesSentence = (days: number, view: Seen) =>
-  days === 1
-    ? `Your own estimate for 1 day is not counted here, because an estimate has no ${view}.`
-    : `Your own estimates for ${days} days are not counted here, because an estimate has no ${view}.`;
+const BY_DAY = 'By day';
+/**
+ * Why an estimate is left out of the view it is left out of: it has no site and no hour, and it is not
+ * something Cairn saw, which is all a day of the week is counted from (W6).
+ */
+const estimatesSentence = (days: number, view: Seen) => {
+  const reason =
+    view === 'weekday' ? 'Cairn counts only what it saw' : `an estimate has no ${view}`;
+  return days === 1
+    ? `Your own estimate for 1 day is not counted here, because ${reason}.`
+    : `Your own estimates for ${days} days are not counted here, because ${reason}.`;
+};
 
-/** The two ways to see a range: by the sites reached, or by the hours of the day. */
-type Seen = 'site' | 'hour';
+/** The three ways to see a range: by the sites reached, the hours of the day, or the days of the week. */
+type Seen = 'site' | 'hour' | 'weekday';
 
-/** One line of a range's list: a site or an hour, with its count. */
+/** One line of a range's list: a site, an hour or a day of the week, with its count. */
 interface Row {
   key: string;
   name: string;
   count: number;
+  /** How many of that day the range holds (`across 4 Mondays`): only a day of the week has one. */
+  clause?: string;
+  /** A day the range does not hold: its name and clause, with no count and no bar (W7). */
+  absent?: boolean;
 }
 
-/** The lines of the range in the view chosen: sites most first, or all 24 hours from midnight. */
-const rowsOf = (answer: Patterns, seen: Seen): Row[] =>
-  seen === 'site'
-    ? answer.by_site.map((site) => ({
-        key: site.domain,
-        name: site.domain,
-        count: site.count,
-      }))
-    : answer.by_hour.map((one) => ({
-        key: String(one.hour),
-        name: hourInWords(one.hour),
-        count: one.count,
-      }));
+/**
+ * The lines of the range in the view chosen: sites most first, all 24 hours from midnight, or the seven
+ * days of the week from `weekStart`. Each day is picked by its own `weekday`, not by its place in the
+ * answer.
+ */
+const rowsOf = (answer: Patterns, seen: Seen, weekStart: number): Row[] => {
+  if (seen === 'site') {
+    return answer.by_site.map((site) => ({
+      key: site.domain,
+      name: site.domain,
+      count: site.count,
+    }));
+  }
+  if (seen === 'hour') {
+    return answer.by_hour.map((one) => ({
+      key: String(one.hour),
+      name: hourInWords(one.hour),
+      count: one.count,
+    }));
+  }
+  // An answer with no days at all (sealed) draws none; otherwise all seven are drawn (W3), a weekday
+  // the answer left out as a name with no count known.
+  if (answer.by_weekday.length === 0) return [];
+  return Array.from({ length: 7 }, (_, place) => (weekStart + place) % 7).map(
+    (weekday) => {
+      const day = answer.by_weekday.find((one) => one.weekday === weekday);
+      return {
+        key: String(weekday),
+        name: weekdayInWords(weekday),
+        count: day?.count ?? 0,
+        // Nor is a reach called "not in these days": with no days to count by, the name stands with its count.
+        clause:
+          day && (day.days > 0 || day.count === 0)
+            ? acrossInWords(weekday, day.days)
+            : undefined,
+        // Only a weekday that holds no days and no reach is "not in these days": a count is never hidden (Y23).
+        absent: day !== undefined && day.days === 0 && day.count === 0,
+      };
+    },
+  );
+};
 
 /** Whether the view has nothing to count: no sites, or no reach in any hour. */
 const isQuiet = (rows: Row[]) => rows.every((row) => row.count === 0);
@@ -113,11 +155,16 @@ export function Reaches({
   today,
   read = realReader,
   now = realNow,
+  firstDay,
 }: {
   today?: TodaysReaches;
   read?: ReachesReader;
   now?: () => Date;
+  /** The day the week begins on, 0 (Monday) to 6 (Sunday): the computer's own unless a test says. */
+  firstDay?: number;
 }) {
+  // Read once: the order of the week does not change while the screen is open.
+  const [weekStart] = useState(() => firstDay ?? firstWeekday());
   const [view, setView] = useState<'today' | 'over-time'>('today');
 
   const which = (
@@ -134,7 +181,7 @@ export function Reaches({
     view === 'today' ? (
       <TodayView today={today} read={read} now={now} />
     ) : (
-      <OverTimeView read={read} now={now} />
+      <OverTimeView read={read} now={now} weekStart={weekStart} />
     );
 
   // The group is the spread's first child and the view a fragment of its two pages, so a change of
@@ -237,7 +284,15 @@ function TodayView({
 /** What the view holds: the answer for a range, nothing yet, or one sentence for a read that threw. */
 type Answer = Patterns | 'looking' | 'unreadable';
 
-function OverTimeView({ read, now }: { read: ReachesReader; now: () => Date }) {
+function OverTimeView({
+  read,
+  now,
+  weekStart,
+}: {
+  read: ReachesReader;
+  now: () => Date;
+  weekStart: number;
+}) {
   // The range is component state and nothing more: leaving the view forgets it (H2).
   const todayDay = localToday(now());
   const [firstDay, setFirstDay] = useState(() => addDays(todayDay, -27));
@@ -288,7 +343,7 @@ function OverTimeView({ read, now }: { read: ReachesReader; now: () => Date }) {
         : answer.sealed;
   // The answer to draw as a list: none while looking, unreadable or sealed.
   const list = typeof answer === 'string' || answer.sealed ? null : answer;
-  const rows = list ? rowsOf(list, seen) : [];
+  const rows = list ? rowsOf(list, seen, weekStart) : [];
   const largest = largestCount(rows);
   return (
     <>
@@ -316,19 +371,28 @@ function OverTimeView({ read, now }: { read: ReachesReader; now: () => Date }) {
         {!list ? null : (
           <>
             {isQuiet(rows) && <p className="nb-reaches-empty">{NOTHING_THESE_DAYS}</p>}
-            {rows.length > 0 && (seen === 'hour' || !isQuiet(rows)) && (
+            {rows.length > 0 && (seen !== 'site' || !isQuiet(rows)) && (
               <ul className="nb-reaches-log">
                 {rows.map((row) => (
                   <li key={row.key} className="nb-reaches-line">
                     <span className="nb-reaches-site">{row.name}</span>
-                    <div aria-hidden="true" className="nb-reaches-bar">
-                      <div
-                        data-testid="bar"
-                        className="nb-reaches-bar__fill"
-                        style={{ width: `${Math.round((row.count / largest) * 100)}%` }}
-                      />
-                    </div>
-                    <span className="nb-reaches-count">{row.count}</span>
+                    {row.clause !== undefined && (
+                      <span className="nb-reaches-time">{row.clause}</span>
+                    )}
+                    {!row.absent && (
+                      <>
+                        <div aria-hidden="true" className="nb-reaches-bar">
+                          <div
+                            data-testid="bar"
+                            className="nb-reaches-bar__fill"
+                            style={{
+                              width: `${Math.round((row.count / largest) * 100)}%`,
+                            }}
+                          />
+                        </div>
+                        <span className="nb-reaches-count">{row.count}</span>
+                      </>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -340,7 +404,7 @@ function OverTimeView({ read, now }: { read: ReachesReader; now: () => Date }) {
   );
 }
 
-/** By site | By hour, under the date boxes in every state, so it never moves when an answer arrives. */
+/** By site | By hour | By day, under the date boxes in every state, so it never moves when an answer arrives. */
 function SeenByChoice({
   seen,
   onChoose,
@@ -355,6 +419,9 @@ function SeenByChoice({
       </ViewButton>
       <ViewButton current={seen === 'hour'} onClick={() => onChoose('hour')}>
         {BY_HOUR}
+      </ViewButton>
+      <ViewButton current={seen === 'weekday'} onClick={() => onChoose('weekday')}>
+        {BY_DAY}
       </ViewButton>
     </div>
   );

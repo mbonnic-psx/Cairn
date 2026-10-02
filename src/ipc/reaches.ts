@@ -1,5 +1,5 @@
 /**
- * Today's reaches, and a range of days by site and by hour.
+ * Today's reaches, and a range of days by site, by hour and by day of week.
  *
  * In a file of its own so the restriction can be stated where it is enforced:
  * **the Reaches screen is the only thing that may import this** (FR-030a). An
@@ -47,6 +47,18 @@ export interface HourCount {
   count: number;
 }
 
+export interface WeekdayCount {
+  /**
+   * 0 (Monday) to 6 (Sunday), as the core numbers them: not `Date.getDay`'s, which begins on
+   * Sunday. Which day a week begins on is the screen's to choose and is never sent.
+   */
+  weekday: number;
+  /** Reaches on this weekday, by the computer's clock at each reach's own instant. */
+  count: number;
+  /** How many days of this weekday the range holds; 0 when it holds none. */
+  days: number;
+}
+
 /** The offset the computer's clock takes from `from` on: epoch seconds, and whole seconds east of UTC. */
 export interface OffsetChange {
   from: number;
@@ -54,14 +66,16 @@ export interface OffsetChange {
 }
 
 /**
- * A range of days, by site and by hour. Only what Cairn can state truthfully is here:
- * by day of week and movement join it when a slice computes them.
+ * A range of days, by site, by hour and by day of week. Only what Cairn can state truthfully is
+ * here: movement joins it when a slice computes it.
  */
 export interface Patterns {
   /** Most first; equal counts by domain name. */
   by_site: SiteCount[];
   /** Exactly 24, hour 0 to 23 ascending, zeros included; empty only when `sealed`. */
   by_hour: HourCount[];
+  /** Exactly 7, weekday 0 (Monday) to 6 (Sunday) ascending, zeros included; empty only when `sealed`. */
+  by_weekday: WeekdayCount[];
   /** Each cut to the part inside the range. */
   gaps: Gap[];
   /** The gaps in one sentence, about the range. */
@@ -99,6 +113,6 @@ export const summarizeReaches = (
     offsets,
   });
 
-/** The largest count among the sites or hours, never less than 1: what each bar is a share of. */
+/** The largest count among the sites, hours or days, never less than 1: what each bar is a share of. */
 export const largestCount = <T extends { count: number }>(counts: T[]): number =>
   counts.reduce((largest, one) => Math.max(largest, one.count), 1);

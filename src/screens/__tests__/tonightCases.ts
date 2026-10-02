@@ -69,9 +69,14 @@ const sites = [
   { domain: 'shop.example', count: 1 },
 ];
 
+/** Seven days from Monday, none reached, each held by the 4 weeks of the default range. */
+const week = () =>
+  Array.from({ length: 7 }, (_, weekday) => ({ weekday, count: 0, days: 4 }));
+
 const range = (over: Partial<Patterns>): Patterns => ({
   by_site: sites,
   by_hour: [],
+  by_weekday: week(),
   gaps: [],
   coverage_note: null,
   estimates_excluded: 0,

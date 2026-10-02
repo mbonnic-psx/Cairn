@@ -22,6 +22,7 @@ const quietDay: TodaysReaches = {
 const quietRange: Patterns = {
   by_site: [],
   by_hour: [],
+  by_weekday: [],
   gaps: [],
   coverage_note: null,
   estimates_excluded: 0,

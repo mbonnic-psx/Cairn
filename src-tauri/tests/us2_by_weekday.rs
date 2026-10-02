@@ -1,15 +1,18 @@
-//! Slice `history-by-hour`: a range of days, by hour, through the driving port.
+//! Slice `history-by-weekday`: a range of days, by day of the week, through
+//! the driving port.
 //!
-//! `specs/003-reflection-and-history/slices/history-by-hour/plan.md`, *Acceptance,
-//! as scenarios through the driving port*, 1 to 14 and 16. Each **When** enters
-//! through `AppState::summarize_reaches`, as the IPC command serves it, with the
-//! offsets the interface would send written out as fixtures, and each **Then**
-//! is observed in what it returns. `offset_changes.rs` holds each offset rule at
-//! its edge; `patterns_by_hour.rs` holds the bucketing's properties.
+//! `specs/003-reflection-and-history/slices/history-by-weekday/plan.md`,
+//! *Acceptance, as scenarios through the driving port*, 1 to 17 and 19. Each
+//! **When** enters through `AppState::summarize_reaches`, as the IPC command
+//! serves it, with the offsets the interface would send written out as
+//! fixtures, and each **Then** is observed in what it returns.
+//! `offset_changes.rs` holds each offset rule at its edge; `patterns_by_weekday.rs`
+//! holds the bucketing's and the weekday count's properties. Every expected
+//! weekday is read off the calendar: 2026-09-07 is a Monday.
 //!
 //! Fixtures are integers, never a zone database: the core knows no zone.
 //! London's clocks go back at 2026-10-25 01:00 UTC and forward at 2026-03-29
-//! 01:00 UTC; Lord Howe's go forward half an hour at 2026-10-03 15:30 UTC.
+//! 01:00 UTC; Cairo's skip midnight on 2026-04-24.
 //!
 //! The history-reading scenarios need the history store and are compiled only
 //! with it; the build that keeps none has its own, at the end.
@@ -44,8 +47,6 @@ const DAY: i64 = 86_400;
 const AUTUMN: i64 = 1_792_890_000;
 /// 2026-03-29 01:00 UTC: London's clocks go forward, 0 to +3 600.
 const SPRING: i64 = 1_774_746_000;
-/// 2026-10-03 15:30 UTC: Lord Howe's clocks go forward, +37 800 to +39 600.
-const LORD_HOWE: i64 = 1_791_041_400;
 /// 2027-01-02 12:00 UTC: after every range here.
 const NOW: i64 = 1_798_891_200;
 
@@ -96,16 +97,6 @@ impl Range {
         }
     }
 
-    /// 2026-09-03 to 2026-09-30 in London: summer time throughout.
-    fn four_weeks_in_london() -> Self {
-        Range::new("2026-09-03", "2026-09-30", HOUR, HOUR, &[])
-    }
-
-    /// The same days in UTC.
-    fn four_weeks_in_utc() -> Self {
-        Range::new("2026-09-03", "2026-09-30", 0, 0, &[])
-    }
-
     /// 2026-10-19 to 2026-11-01 in London, across the clocks going back.
     fn autumn() -> Self {
         Range::new("2026-10-19", "2026-11-01", HOUR, 0, &[(AUTUMN, 0)])
@@ -127,20 +118,9 @@ impl Range {
         )
     }
 
-    /// 2026-10-01 to 2026-10-09 on Lord Howe.
-    fn lord_howe() -> Self {
-        Range::new(
-            "2026-10-01",
-            "2026-10-09",
-            37_800,
-            39_600,
-            &[(LORD_HOWE, 39_600)],
-        )
-    }
-
-    /// The same four weeks in New York (summer time, −4 h).
-    fn four_weeks_in_new_york() -> Self {
-        Range::new("2026-09-03", "2026-09-30", -4 * HOUR, -4 * HOUR, &[])
+    /// 2026-09-07 to 2026-10-04 in London: four whole weeks, Monday to Sunday.
+    fn four_whole_weeks() -> Self {
+        Range::new("2026-09-07", "2026-10-04", HOUR, HOUR, &[])
     }
 
     fn ask(&self, state: &AppState) -> Patterns {
@@ -226,26 +206,34 @@ fn app(setup: &Setup, keychain: &Keychain) -> AppState {
     }
 }
 
-/// The hours that hold anything, as `(hour, count)`.
+/// The days that hold anything, as `(weekday, count)`.
 #[cfg(feature = "history")]
 fn occupied(patterns: &Patterns) -> Vec<(u8, u32)> {
     patterns
-        .by_hour
+        .by_weekday
         .iter()
-        .filter(|hour| hour.count > 0)
-        .map(|hour| (hour.hour, hour.count))
+        .filter(|day| day.count > 0)
+        .map(|day| (day.weekday, day.count))
         .collect()
 }
 
-/// All 24 hours, 0 to 23 in order, whatever they hold.
+/// All seven days, 0 (Monday) to 6 (Sunday) in order, whatever they hold.
 #[cfg(feature = "history")]
-fn assert_all_24_hours(patterns: &Patterns) {
-    let hours: Vec<u8> = patterns.by_hour.iter().map(|hour| hour.hour).collect();
-    assert_eq!(
-        hours,
-        (0..24).collect::<Vec<u8>>(),
-        "24 hours from midnight"
-    );
+fn assert_all_7_days(patterns: &Patterns) {
+    let days: Vec<u8> = patterns.by_weekday.iter().map(|day| day.weekday).collect();
+    assert_eq!(days, (0..7).collect::<Vec<u8>>(), "seven days from Monday");
+}
+
+/// How many of each weekday the range holds, Monday first.
+#[cfg(feature = "history")]
+fn days_held(patterns: &Patterns) -> Vec<u32> {
+    patterns.by_weekday.iter().map(|day| day.days).collect()
+}
+
+/// Every count, Monday first.
+#[cfg(feature = "history")]
+fn counts(patterns: &Patterns) -> Vec<u32> {
+    patterns.by_weekday.iter().map(|day| day.count).collect()
 }
 
 /// The voice rule (SC-019, FR-031) and the ranking words (H3): every sentence
@@ -267,6 +255,10 @@ fn assert_in_voice(sentence: &str) {
         "busiest",
         "top ",
         "rank",
+        "average",
+        "per day",
+        "best",
+        "quietest",
     ] {
         assert!(
             !lower.contains(banned),
@@ -275,13 +267,13 @@ fn assert_in_voice(sentence: &str) {
     }
 }
 
-// --- Scenario 16: the wire shape -----------------------------------------------
+// --- Scenario 19: the wire shape -----------------------------------------------
 
 #[test]
-fn the_answer_serialises_to_exactly_eight_keys_and_dst_approximate_is_false() {
+fn the_answer_serialises_to_exactly_eight_keys_and_never_movement() {
     let state_setup = setup();
     let state = app(&state_setup, &Keychain::available());
-    let value = serde_json::to_value(Range::four_weeks_in_utc().ask(&state)).unwrap();
+    let value = serde_json::to_value(Range::four_whole_weeks().ask(&state)).unwrap();
     let object = value.as_object().expect("an object");
     let mut keys: Vec<&str> = object.keys().map(String::as_str).collect();
     keys.sort_unstable();
@@ -299,10 +291,20 @@ fn the_answer_serialises_to_exactly_eight_keys_and_dst_approximate_is_false() {
         ],
         "never movement: nothing computed it"
     );
-    assert_eq!(object["dst_approximate"], serde_json::json!(false));
+    if cfg!(feature = "history") {
+        let days = object["by_weekday"].as_array().expect("a list");
+        assert_eq!(days.len(), 7);
+        for (weekday, day) in days.iter().enumerate() {
+            let day = day.as_object().expect("an object");
+            let mut keys: Vec<&str> = day.keys().map(String::as_str).collect();
+            keys.sort_unstable();
+            assert_eq!(keys, ["count", "days", "weekday"]);
+            assert_eq!(day["weekday"], serde_json::json!(weekday));
+        }
+    }
 }
 
-// --- Scenarios 1–13, against the history -----------------------------------------
+// --- Scenarios 1–15, against the history ------------------------------------------
 
 #[cfg(feature = "history")]
 mod with_history {
@@ -333,51 +335,70 @@ mod with_history {
         }
     }
 
+    const MON: u8 = 0;
+    const TUE: u8 = 1;
+    const WED: u8 = 2;
+    const THU: u8 = 3;
+    const FRI: u8 = 4;
+    const SUN: u8 = 6;
+
     // Scenario 1
     #[test]
-    fn all_24_hours_from_midnight_each_with_its_count() {
+    fn all_seven_days_in_the_cores_order_each_with_its_count_and_its_days() {
         let setup = setup();
         let history = seed(&setup.data);
-        // 14:10, 14:50 and 15:05 local (summer time) on one day; 02:30 on another.
-        let london = Range::four_weeks_in_london();
-        for (day, hour, minute) in [
-            ("2026-09-10", 14, 10),
-            ("2026-09-10", 14, 50),
-            ("2026-09-10", 15, 5),
-            ("2026-09-20", 2, 30),
-        ] {
-            reach_at(&history, midnight(day) - HOUR + hour * HOUR + minute * 60);
-        }
+        // Mondays 2026-09-07 (twice), Wednesday the 9th, Sunday the 13th.
+        reaches_on(&history, "2026-09-07", 2);
+        reaches_on(&history, "2026-09-09", 1);
+        reaches_on(&history, "2026-09-13", 1);
         let state = app(&setup, &Keychain::available());
 
-        let patterns = london.ask(&state);
+        let patterns = Range::four_whole_weeks().ask(&state);
 
-        assert_all_24_hours(&patterns);
-        assert_eq!(occupied(&patterns), [(2, 1), (14, 2), (15, 1)]);
-        assert!(!patterns.dst_approximate);
+        assert_all_7_days(&patterns);
+        assert_eq!(counts(&patterns), [2, 0, 1, 0, 0, 0, 1]);
+        assert_eq!(days_held(&patterns), [4; 7]);
         assert_eq!(patterns.sealed, None);
     }
 
     #[test]
-    fn a_quiet_range_is_24_zeros_never_an_empty_list() {
+    fn a_quiet_range_is_seven_zeros_with_its_days_never_an_empty_list() {
         let setup = setup();
         let _ = seed(&setup.data);
         let state = app(&setup, &Keychain::available());
 
-        let patterns = Range::four_weeks_in_london().ask(&state);
+        let patterns = Range::four_whole_weeks().ask(&state);
 
-        assert_all_24_hours(&patterns);
-        assert!(patterns.by_hour.iter().all(|hour| hour.count == 0));
+        assert_all_7_days(&patterns);
+        assert_eq!(counts(&patterns), [0; 7]);
+        assert_eq!(days_held(&patterns), [4; 7]);
         assert_eq!(patterns.sealed, None);
-        assert!(!patterns.dst_approximate);
     }
 
     // Scenario 2
     #[test]
-    fn the_edges_of_the_range_are_in_no_hour_as_in_no_site() {
+    fn every_day_present_a_week_with_one_reach_a_day() {
         let setup = setup();
         let history = seed(&setup.data);
-        let london = Range::four_weeks_in_london();
+        // Monday 2026-09-07 to Sunday the 13th, at noon UTC.
+        for day in 7..=13 {
+            reach_at(&history, midnight(&format!("2026-09-{day:02}")) + 12 * HOUR);
+        }
+        let state = app(&setup, &Keychain::available());
+        let week = Range::new("2026-09-07", "2026-09-13", HOUR, HOUR, &[]);
+
+        let patterns = week.ask(&state);
+
+        assert_eq!(counts(&patterns), [1; 7]);
+        assert_eq!(days_held(&patterns), [1; 7]);
+    }
+
+    // Scenario 3
+    #[test]
+    fn the_edges_of_the_range_are_in_no_day_as_in_no_site_and_no_hour() {
+        let setup = setup();
+        let history = seed(&setup.data);
+        let london = Range::four_whole_weeks();
         reach_at(&history, london.start - 1);
         reach_at(&history, london.start);
         reach_at(&history, london.end - 1);
@@ -386,181 +407,244 @@ mod with_history {
 
         let patterns = london.ask(&state);
 
-        let hours: u32 = patterns.by_hour.iter().map(|hour| hour.count).sum();
+        let days: u32 = counts(&patterns).iter().sum();
         let sites: u32 = patterns.by_site.iter().map(|site| site.count).sum();
-        assert_eq!(
-            hours, 2,
-            "the second before the start and the end itself are out"
-        );
-        assert_eq!(hours, sites);
-        assert_eq!(occupied(&patterns), [(0, 1), (23, 1)]);
-    }
-
-    // Scenario 3
-    #[test]
-    fn autumn_the_repeated_hour_is_one_hour_on_the_clock() {
-        let setup = setup();
-        let history = seed(&setup.data);
-        for at in [
-            AUTUMN - 1,
-            AUTUMN,
-            AUTUMN + 1_800,
-            midnight("2026-10-26") + 12 * HOUR,
-        ] {
-            reach_at(&history, at);
-        }
-        let state = app(&setup, &Keychain::available());
-
-        let patterns = Range::autumn().ask(&state);
-
-        assert_eq!(occupied(&patterns), [(1, 3), (12, 1)]);
-        assert!(!patterns.dst_approximate);
+        let hours: u32 = patterns.by_hour.iter().map(|hour| hour.count).sum();
+        assert_eq!(days, 2, "the second before the start and the end are out");
+        assert_eq!(days, sites);
+        assert_eq!(days, hours);
+        // The first Monday, and the last Sunday.
+        assert_eq!(occupied(&patterns), [(MON, 1), (SUN, 1)]);
     }
 
     // Scenario 4
     #[test]
-    fn spring_the_skipped_hour_is_still_listed() {
+    fn midnight_by_the_clock_not_by_utc() {
         let setup = setup();
         let history = seed(&setup.data);
-        reach_at(&history, SPRING - 1);
-        reach_at(&history, SPRING);
+        // Sunday the 13th 23:59 BST, Monday the 14th 00:01 BST, and 23:30 UTC
+        // on the 13th, which is 00:30 on Monday in London.
+        reach_at(&history, midnight("2026-09-14") - HOUR - 60);
+        reach_at(&history, midnight("2026-09-14") - HOUR + 60);
+        reach_at(&history, midnight("2026-09-13") + 23 * HOUR + 1_800);
         let state = app(&setup, &Keychain::available());
 
-        let patterns = Range::spring().ask(&state);
+        let patterns = Range::four_whole_weeks().ask(&state);
 
-        assert_all_24_hours(&patterns);
-        assert_eq!(occupied(&patterns), [(0, 1), (2, 1)]);
-        assert_eq!(
-            patterns.by_hour[1].count, 0,
-            "hour 1 is listed, with nothing in it"
-        );
-        assert!(!patterns.dst_approximate);
+        assert_eq!(occupied(&patterns), [(MON, 2), (SUN, 1)]);
     }
 
     // Scenario 5
     #[test]
-    fn a_year_whose_ends_agree_still_places_a_summer_reach_by_summer_time() {
+    fn autumn_the_25_hour_sunday_is_one_sunday_counted_once_in_days() {
         let setup = setup();
         let history = seed(&setup.data);
-        reach_at(&history, midnight("2026-07-01") + 12 * HOUR);
+        // Sunday 00:30 BST, and Sunday 23:30 GMT, the 25th.
+        reach_at(&history, midnight("2026-10-24") + 23 * HOUR + 1_800);
+        reach_at(&history, midnight("2026-10-25") + 23 * HOUR + 1_800);
         let state = app(&setup, &Keychain::available());
 
-        let patterns = Range::year_of_2026().ask(&state);
+        let patterns = Range::autumn().ask(&state);
 
-        assert_eq!(occupied(&patterns), [(13, 1)]);
-        assert!(!patterns.dst_approximate);
+        assert_eq!(occupied(&patterns), [(SUN, 2)]);
+        assert_eq!(patterns.by_weekday[SUN as usize].days, 2);
+        assert_eq!(days_held(&patterns), [2; 7]);
     }
 
     // Scenario 6
     #[test]
-    fn a_half_hour_change_places_the_second_before_and_the_instant_itself() {
+    fn spring_the_23_hour_sunday_is_one_sunday_counted_once_in_days() {
         let setup = setup();
         let history = seed(&setup.data);
-        reach_at(&history, LORD_HOWE - 1);
-        reach_at(&history, LORD_HOWE);
+        // Sunday 00:59:59 GMT, and 00:30 BST on Monday the 30th.
+        reach_at(&history, SPRING - 1);
+        reach_at(&history, midnight("2026-03-29") + 23 * HOUR + 1_800);
         let state = app(&setup, &Keychain::available());
 
-        let patterns = Range::lord_howe().ask(&state);
+        let patterns = Range::spring().ask(&state);
 
-        // 01:59:59 and 02:30:00 local.
-        assert_eq!(occupied(&patterns), [(1, 1), (2, 1)]);
+        assert_eq!(occupied(&patterns), [(MON, 1), (SUN, 1)]);
+        assert_eq!(days_held(&patterns), [2; 7]);
     }
 
     // Scenario 7
     #[test]
-    fn the_hour_follows_the_offsets_sent_and_nothing_is_kept_between_calls() {
+    fn a_year_whose_ends_agree_places_a_summer_reach_by_summer_time() {
         let setup = setup();
         let history = seed(&setup.data);
-        reach_at(&history, midnight("2026-09-15") + 13 * HOUR);
+        // Sunday 2026-07-05 23:30 UTC is Monday 00:30 BST.
+        reach_at(&history, midnight("2026-07-05") + 23 * HOUR + 1_800);
         let state = app(&setup, &Keychain::available());
 
-        let in_london = Range::four_weeks_in_london().ask(&state);
-        let in_new_york = Range::four_weeks_in_new_york().ask(&state);
-        let london_again = Range::four_weeks_in_london().ask(&state);
+        let patterns = Range::year_of_2026().ask(&state);
 
-        assert_eq!(occupied(&in_london), [(14, 1)]);
-        assert_eq!(occupied(&in_new_york), [(9, 1)]);
-        assert_eq!(london_again, in_london, "the core keeps no zone");
-        assert!(!in_london.dst_approximate);
-        assert!(!in_new_york.dst_approximate);
-        assert!(!london_again.dst_approximate);
+        assert_eq!(occupied(&patterns), [(MON, 1)]);
+        assert_eq!(days_held(&patterns), [52, 52, 52, 53, 52, 52, 52]);
     }
 
-    // Scenario 8
+    // Scenario 8, K23 to K25 through the command
     #[test]
-    fn twenty_three_fifty_nine_and_zero_zero_one_fall_either_side_of_midnight() {
+    fn a_skipped_midnight_is_placed_under_either_accepted_first_offset() {
         let setup = setup();
-        let history = seed(&setup.data);
-        // 23:59 on 10 September and 00:01 on 11 September, London, summer time.
-        reach_at(&history, midnight("2026-09-11") - HOUR - 60);
-        reach_at(&history, midnight("2026-09-11") - HOUR + 60);
+        let cairo = Range::new("2026-04-24", "2026-04-30", 7_200, 10_800, &[]);
+        assert_eq!(cairo.start, 1_776_981_600);
+        reach_at(&seed(&setup.data), cairo.start + 60);
         let state = app(&setup, &Keychain::available());
 
-        let patterns = Range::four_weeks_in_london().ask(&state);
+        for first_offset in [7_200, 10_800] {
+            let patterns = cairo.ask_with(&state, &[change(cairo.start, first_offset)]);
+            assert_eq!(patterns.sealed, None, "{first_offset} is placed");
+            assert_eq!(occupied(&patterns), [(FRI, 1)], "{first_offset}");
+            assert_eq!(days_held(&patterns), [1; 7]);
+        }
+        let own = cairo.ask(&state);
+        assert_eq!(occupied(&own), [(FRI, 1)]);
+    }
 
-        assert_eq!(occupied(&patterns), [(0, 1), (23, 1)]);
+    #[test]
+    fn a_range_that_ends_at_the_changes_own_instant_ends_on_thursday() {
+        let setup = setup();
+        // 2026-04-17 to 2026-04-23, ending where Cairo's clocks skip (K24).
+        let cairo = Range::new("2026-04-17", "2026-04-23", 7_200, 7_200, &[]);
+        assert_eq!(cairo.end, 1_776_981_600);
+        reach_at(&seed(&setup.data), cairo.end - 1);
+        let state = app(&setup, &Keychain::available());
+
+        let patterns = cairo.ask(&state);
+
+        assert_eq!(patterns.sealed, None);
+        assert_eq!(occupied(&patterns), [(THU, 1)]);
+        assert_eq!(days_held(&patterns), [1; 7]);
     }
 
     // Scenario 9
     #[test]
-    fn the_hours_are_complete_with_no_journal_entry_and_the_same_with_three() {
+    fn the_weekday_follows_the_offsets_sent_and_nothing_is_kept_between_calls() {
         let setup = setup();
         let history = seed(&setup.data);
-        reaches_on(&history, "2026-09-05", 3);
+        // Tuesday 2026-09-15 23:30 UTC: Wednesday 00:30 in London, Tuesday
+        // 19:30 in New York.
+        reach_at(&history, midnight("2026-09-15") + 23 * HOUR + 1_800);
+        let state = app(&setup, &Keychain::available());
+        let in_london = Range::new("2026-09-15", "2026-09-16", HOUR, HOUR, &[]);
+        let in_new_york =
+            Range::new("2026-09-15", "2026-09-16", -4 * HOUR, -4 * HOUR, &[]);
+
+        let london = in_london.ask(&state);
+        let new_york = in_new_york.ask(&state);
+        let london_again = in_london.ask(&state);
+
+        assert_eq!(occupied(&london), [(WED, 1)]);
+        assert_eq!(occupied(&new_york), [(TUE, 1)]);
+        assert_eq!(london_again, london, "the core keeps no zone");
+    }
+
+    // Scenario 10
+    #[test]
+    fn one_day_holds_one_of_its_weekday_and_none_of_the_others() {
+        let setup = setup();
+        let history = seed(&setup.data);
+        reaches_on(&history, "2026-09-15", 3);
+        let state = app(&setup, &Keychain::available());
+        let day = Range::new("2026-09-15", "2026-09-15", HOUR, HOUR, &[]);
+
+        let patterns = day.ask(&state);
+
+        assert_all_7_days(&patterns);
+        assert_eq!(days_held(&patterns), [0, 1, 0, 0, 0, 0, 0]);
+        assert_eq!(occupied(&patterns), [(TUE, 3)]);
+    }
+
+    #[test]
+    fn three_days_leave_four_weekdays_present_with_no_days() {
+        let setup = setup();
+        let _ = seed(&setup.data);
+        let state = app(&setup, &Keychain::available());
+        // Friday 2026-09-11 to Sunday the 13th.
+        let weekend = Range::new("2026-09-11", "2026-09-13", HOUR, HOUR, &[]);
+
+        let patterns = weekend.ask(&state);
+
+        assert_all_7_days(&patterns);
+        assert_eq!(days_held(&patterns), [0, 0, 0, 0, 1, 1, 1]);
+        assert_eq!(counts(&patterns), [0; 7]);
+    }
+
+    // Scenario 11
+    #[test]
+    fn an_uneven_range_holds_two_mondays_and_one_tuesday() {
+        let setup = setup();
+        let _ = seed(&setup.data);
+        let state = app(&setup, &Keychain::available());
+        // Saturday 2026-09-12 to Monday the 21st.
+        let ten = Range::new("2026-09-12", "2026-09-21", HOUR, HOUR, &[]);
+
+        let patterns = ten.ask(&state);
+
+        assert_eq!(days_held(&patterns), [2, 1, 1, 1, 1, 2, 2]);
+    }
+
+    // Scenario 12
+    #[test]
+    fn the_days_are_complete_with_no_journal_entry_and_the_same_with_three() {
+        let setup = setup();
+        let history = seed(&setup.data);
+        reaches_on(&history, "2026-09-09", 3);
         reaches_on(&history, "2026-09-10", 2);
         let state = app(&setup, &Keychain::available());
-        let without = Range::four_weeks_in_utc().ask(&state);
-        assert_eq!(
-            occupied(&without),
-            [(0, 5)],
-            "complete with no entry ever written"
-        );
+        let without = Range::four_whole_weeks().ask(&state);
+        assert_eq!(occupied(&without), [(WED, 3), (THU, 2)]);
 
-        for day in ["2026-09-05", "2026-09-10", "2026-09-29"] {
+        for day in ["2026-09-09", "2026-09-10", "2026-09-29"] {
             history
                 .save_entry(date(day), "Something I wrote.", 1)
                 .unwrap();
         }
 
-        let with = Range::four_weeks_in_utc().ask(&state);
-        assert_eq!(with.by_hour, without.by_hour);
+        let with = Range::four_whole_weeks().ask(&state);
+        assert_eq!(with.by_weekday, without.by_weekday);
         assert_eq!(with, without);
     }
 
-    // Scenario 10
+    // Scenario 13
     #[test]
-    fn an_estimate_is_not_a_reach_it_has_no_hour_and_is_still_counted() {
+    fn an_estimate_is_not_a_reach_it_is_in_no_day_and_is_still_counted() {
         let setup = setup();
         let history = seed(&setup.data);
-        reaches_on(&history, "2026-09-05", 3);
+        reaches_on(&history, "2026-09-09", 3);
         let state = app(&setup, &Keychain::available());
-        let reaches_alone = Range::four_weeks_in_utc().ask(&state);
+        let reaches_alone = Range::four_whole_weeks().ask(&state);
 
         // Two inside the range, one the day after it.
-        history.save_estimate(date("2026-09-03"), 4).unwrap();
-        history.save_estimate(date("2026-09-30"), 9).unwrap();
-        history.save_estimate(date("2026-10-01"), 7).unwrap();
+        history.save_estimate(date("2026-09-08"), 4).unwrap();
+        history.save_estimate(date("2026-10-04"), 9).unwrap();
+        history.save_estimate(date("2026-10-05"), 7).unwrap();
 
-        let patterns = Range::four_weeks_in_utc().ask(&state);
+        let patterns = Range::four_whole_weeks().ask(&state);
 
-        assert_eq!(patterns.by_hour, reaches_alone.by_hour);
-        assert_eq!(occupied(&patterns), [(0, 3)]);
+        assert_eq!(patterns.by_weekday, reaches_alone.by_weekday);
+        assert_eq!(occupied(&patterns), [(WED, 3)]);
+        assert_eq!(
+            days_held(&patterns),
+            [4; 7],
+            "an estimate leaves days alone"
+        );
         assert_eq!(patterns.estimates_excluded, 2);
     }
 
-    // Scenario 11
+    // Scenario 14
     #[test]
     fn gaps_and_the_note_are_what_by_site_gets_for_the_range() {
         let setup = setup();
         let history = seed(&setup.data);
-        let utc = Range::four_weeks_in_utc();
+        let london = Range::four_whole_weeks();
         history
             .record_gap(&CoverageGap {
-                from: utc.start - 2 * DAY,
-                to: utc.start + 6 * HOUR,
+                from: london.start - 2 * DAY,
+                to: london.start + 6 * HOUR,
             })
             .unwrap();
-        let inside = utc.start + 10 * DAY;
+        let inside = london.start + 10 * DAY;
         history
             .record_gap(&CoverageGap {
                 from: inside,
@@ -569,14 +653,14 @@ mod with_history {
             .unwrap();
         let state = app(&setup, &Keychain::available());
 
-        let patterns = utc.ask(&state);
+        let patterns = london.ask(&state);
 
         let spans: Vec<(i64, i64)> =
             patterns.gaps.iter().map(|gap| (gap.from, gap.to)).collect();
         assert_eq!(
             spans,
             [
-                (utc.start, utc.start + 6 * HOUR),
+                (london.start, london.start + 6 * HOUR),
                 (inside, inside + 3 * HOUR)
             ]
         );
@@ -587,133 +671,124 @@ mod with_history {
     }
 
     #[test]
-    fn a_range_wholly_inside_a_gap_is_24_zeros_with_the_note() {
+    fn a_range_wholly_inside_a_gap_is_seven_zeros_with_its_days_and_the_note() {
         let setup = setup();
         let history = seed(&setup.data);
-        let utc = Range::four_weeks_in_utc();
+        let london = Range::four_whole_weeks();
         history
             .record_gap(&CoverageGap {
-                from: utc.start - 5 * DAY,
-                to: utc.end + 5 * DAY,
+                from: london.start - 5 * DAY,
+                to: london.end + 5 * DAY,
             })
             .unwrap();
         let state = app(&setup, &Keychain::available());
 
-        let patterns = utc.ask(&state);
+        let patterns = london.ask(&state);
 
-        assert_all_24_hours(&patterns);
-        assert!(patterns.by_hour.iter().all(|hour| hour.count == 0));
+        assert_all_7_days(&patterns);
+        assert_eq!(counts(&patterns), [0; 7]);
+        assert_eq!(days_held(&patterns), [4; 7]);
         let note = patterns.coverage_note.expect("a note");
         assert!(note.contains("28 days"), "{note}");
     }
 
     #[test]
-    fn a_deleted_day_leaves_only_what_remains_and_no_gap() {
+    fn a_deleted_day_leaves_only_what_remains_keeps_days_and_adds_no_gap() {
         let setup = setup();
         let history = seed(&setup.data);
-        reaches_on(&history, "2026-09-05", 3);
+        reaches_on(&history, "2026-09-09", 3);
         reaches_on(&history, "2026-09-10", 2);
         history
-            .delete_reach_history(midnight("2026-09-05"), midnight("2026-09-06"))
+            .delete_reach_history(midnight("2026-09-09"), midnight("2026-09-10"))
             .unwrap();
         let state = app(&setup, &Keychain::available());
 
-        let patterns = Range::four_weeks_in_utc().ask(&state);
+        let patterns = Range::four_whole_weeks().ask(&state);
 
-        assert_eq!(occupied(&patterns), [(0, 2)]);
+        assert_eq!(occupied(&patterns), [(THU, 2)]);
+        assert_eq!(days_held(&patterns), [4; 7], "a deleted day is still a day");
         assert!(patterns.gaps.is_empty());
         assert_eq!(patterns.coverage_note, None);
     }
 
-    // Scenario 12, through the port (each edge is held in `offset_changes.rs`)
+    // Scenario 15, through the port (each edge is held in `offset_changes.rs`)
     #[test]
     fn offsets_that_cannot_be_the_computers_are_refused_with_the_one_sentence() {
         let setup = setup();
-        reaches_on(&seed(&setup.data), "2026-09-05", 3);
+        reaches_on(&seed(&setup.data), "2026-09-09", 3);
         let state = app(&setup, &Keychain::available());
-        let london = Range::four_weeks_in_london();
+        let london = Range::four_whole_weeks();
         let start = london.start;
         let refused = |offsets: Vec<OffsetChange>| {
             let patterns = london.ask_with(&state, &offsets);
             let sentence = patterns.sealed.clone().expect("refused");
             assert_in_voice(&sentence);
+            assert!(patterns.by_weekday.is_empty(), "never seven zeros");
             assert!(patterns.by_site.is_empty(), "nothing else is returned");
-            assert!(patterns.by_hour.is_empty(), "never 24 zeros");
+            assert!(patterns.by_hour.is_empty());
             assert!(patterns.gaps.is_empty());
             assert_eq!(patterns.coverage_note, None);
-            assert!(!patterns.dst_approximate);
             sentence
         };
-        let many: Vec<OffsetChange> = std::iter::once(change(start, HOUR))
-            .chain(
-                (1..=30)
-                    .map(|n| change(start + n * HOUR, if n % 2 == 1 { 0 } else { HOUR })),
-            )
-            .collect();
 
         let sentences = [
+            // None at all.
             refused(Vec::new()),
+            // Not beginning at the range's start.
             refused(vec![change(start + 1, HOUR)]),
-            // London implies +1 h; a first offset a clock change from it is
-            // the offset in force, and three hours and a second is not.
+            // Below what the start implies.
             refused(vec![change(start, -2 * HOUR - 1)]),
+            // Not increasing.
             refused(vec![change(start, HOUR), change(start, 0)]),
+            // At the range's end.
             refused(vec![change(start, HOUR), change(london.end, 0)]),
+            // Beyond any zone.
             refused(vec![change(start, 15 * HOUR)]),
+            // Neighbours that do not differ.
             refused(vec![change(start, HOUR), change(start + HOUR, HOUR)]),
+            // A change larger than any clock makes.
             refused(vec![
                 change(start, HOUR),
                 change(start + HOUR, 4 * HOUR + 1),
             ]),
-            refused(vec![
-                change(start, HOUR),
-                change(start + HOUR, -2 * HOUR - 1),
-            ]),
-            refused(many),
             refused(vec![change(i64::MIN, 0)]),
             refused(vec![change(start, i64::MAX)]),
         ];
 
         assert!(sentences.iter().all(|one| one == &sentences[0]));
-        // The same sentence the range's own bounds are refused with.
-        let bounds = state.summarize_reaches(
-            london.last,
-            london.first,
-            london.start,
-            london.end,
-            &london.offsets,
+        assert_eq!(
+            london.ask(&state).sealed,
+            None,
+            "the right offsets are placed"
         );
-        assert_eq!(bounds.sealed.as_deref(), Some(sentences[0].as_str()));
-        // And the right offsets are accepted.
-        assert_eq!(london.ask(&state).sealed, None);
     }
 
-    // Scenario 13
+    // Scenario 16
     #[test]
-    fn a_sealed_history_says_so_with_no_hours_not_24_zeros() {
+    fn a_sealed_history_says_so_with_no_days_not_seven_zeros() {
         let setup = setup();
-        reaches_on(&seed(&setup.data), "2026-09-05", 3);
+        reaches_on(&seed(&setup.data), "2026-09-09", 3);
         let keychain = Keychain::available();
         keychain.set_available(false);
         let state = app(&setup, &keychain);
 
-        let patterns = Range::four_weeks_in_utc().ask(&state);
+        let patterns = Range::four_whole_weeks().ask(&state);
 
         let sentence = patterns.sealed.expect("the sealed sentence");
         assert_in_voice(&sentence);
-        assert!(patterns.by_hour.is_empty());
+        assert!(patterns.by_weekday.is_empty());
         assert!(patterns.by_site.is_empty());
+        assert!(patterns.by_hour.is_empty());
         assert!(patterns.gaps.is_empty());
         assert_eq!(patterns.coverage_note, None);
         assert_eq!(patterns.estimates_excluded, 0);
-        assert!(!patterns.dst_approximate);
     }
 
     #[test]
-    fn a_history_that_opens_but_cannot_be_read_is_sealed_with_no_hours() {
+    fn a_history_that_opens_but_cannot_be_read_is_sealed_with_no_days() {
         let setup = setup();
         let history = seed(&setup.data);
-        reaches_on(&history, "2026-09-05", 3);
+        reaches_on(&history, "2026-09-09", 3);
         drop(history);
         // A reach whose time is not a whole number: it opens, and the read of
         // the range cannot make sense of it.
@@ -728,85 +803,37 @@ mod with_history {
         connection
             .execute(
                 "INSERT INTO reaches (domain, at) VALUES ('odd.example', ?1)",
-                [Range::four_weeks_in_utc().start as f64 + 0.5],
+                [Range::four_whole_weeks().start as f64 + 0.5],
             )
             .unwrap();
         drop(connection);
         let state = app(&setup, &Keychain::available());
 
-        let patterns = Range::four_weeks_in_utc().ask(&state);
+        let patterns = Range::four_whole_weeks().ask(&state);
 
         let sentence = patterns
             .sealed
             .expect("a read that does not go through is never a quiet range");
         assert_in_voice(&sentence);
-        assert!(patterns.by_hour.is_empty(), "never 24 zeros");
+        assert!(patterns.by_weekday.is_empty(), "never seven zeros");
         assert!(patterns.by_site.is_empty());
-        assert!(!patterns.dst_approximate);
-    }
-
-    /// K25: Cairo's clocks skip midnight on 2026-04-24 (+7 200 to +10 800), so
-    /// the range's first midnight never shows on a clock. Asked through the
-    /// command, as K23 pinned at the check, it is placed, not sealed.
-    #[test]
-    fn a_range_whose_first_midnight_the_clock_skips_is_placed_through_the_command() {
-        let setup = setup();
-        let cairo = Range::new("2026-04-24", "2026-04-30", 7_200, 10_800, &[]);
-        assert_eq!(cairo.start, 1_776_981_600);
-        reach_at(&seed(&setup.data), cairo.start + 60);
-        let state = app(&setup, &Keychain::available());
-        let ask = |first_offset: i64| {
-            cairo.ask_with(&state, &[change(cairo.start, first_offset)])
-        };
-
-        // The range's own offsets: +7 200 at the start puts the reach at 00:01.
-        let patterns = cairo.ask(&state);
-        assert_eq!(patterns.sealed, None, "a placeable range is placed");
-        assert_all_24_hours(&patterns);
-        assert_eq!(patterns.by_site.len(), 1);
-        assert_eq!(patterns.by_site[0].domain, "a.example");
-        assert_eq!(patterns.by_site[0].count, 1);
-        assert_eq!(occupied(&patterns), [(0, 1)], "7 200 puts it at 00:01");
-        // +10 800, the offset in force once the clock has skipped.
-        let new = ask(10_800);
-        assert_eq!(new.sealed, None);
-        assert_eq!(new.by_site.len(), 1, "in By site");
-        assert_eq!(occupied(&new), [(1, 1)], "in hour 01, not 00");
-
-        // Every first offset the core accepts here, each with its hour.
-        for (offset, hour) in [(7_200, 0), (10_800, 1), (14_400, 2), (18_000, 3)] {
-            let patterns = ask(offset);
-            assert_eq!(patterns.sealed, None, "{offset} is placed");
-            assert_eq!(patterns.by_site.len(), 1);
-            assert_eq!(occupied(&patterns), [(hour, 1)], "{offset}");
-        }
-
-        // Below the implied one is sealed, as is more than a clock change above
-        // it. Cairo's implied offset is 7 200, so 3 600 (hour 23) is sealed (A3).
-        for offset in [7_199, 3_600, 0, 18_001] {
-            let patterns = ask(offset);
-            assert!(patterns.sealed.is_some(), "{offset} is sealed");
-            assert!(patterns.by_hour.is_empty(), "never 24 zeros");
-            assert!(patterns.by_site.is_empty());
-        }
     }
 }
 
-// --- Scenario 14: a build without the history --------------------------------------
+// --- Scenario 17: a build without the history ---------------------------------------
 
 #[cfg(not(feature = "history"))]
 #[test]
-fn a_build_without_the_history_says_so_with_no_hours() {
+fn a_build_without_the_history_says_so_with_no_days() {
     let setup = setup();
     let state = app(&setup, &Keychain::available());
 
-    let patterns = Range::four_weeks_in_utc().ask(&state);
+    let patterns = Range::four_whole_weeks().ask(&state);
 
     assert_eq!(
         patterns.sealed.as_deref(),
         Some("This build of Cairn does not keep a history. Protection is unaffected.")
     );
-    assert!(patterns.by_hour.is_empty());
+    assert!(patterns.by_weekday.is_empty());
     assert!(patterns.by_site.is_empty());
-    assert!(!patterns.dst_approximate);
 }

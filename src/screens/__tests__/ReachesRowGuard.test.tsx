@@ -1,13 +1,14 @@
 /**
  * When the reaches screen draws a list for a range, on today's card and on a notebook page: the
- * guard on the list is that there are rows and that either the view is by hour (a quiet range
- * keeps its 24 zero hours under the sentence) or the range is not quiet. Each case below is one
- * corner of that guard, so no part of it can be changed without a case failing.
+ * guard on the list is that there are rows and that either the view is by hour or by day (a quiet
+ * range keeps its 24 zero hours, or its seven days, under the sentence) or the range is not quiet.
+ * Each case below is one corner of that guard, so no part of it can be changed without a case
+ * failing.
  */
 declare const process: { env: Record<string, string | undefined> };
 process.env.TZ = 'Europe/London';
 
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { cleanup, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -21,9 +22,18 @@ const NOTHING = 'Nothing here for these days.';
 const hours = (counts: Record<number, number> = {}) =>
   Array.from({ length: 24 }, (_, hour) => ({ hour, count: counts[hour] ?? 0 }));
 
+/** Seven days from Monday, with `counts` at the weekdays named; each is held by 4 days. */
+const week = (counts: Record<number, number> = {}) =>
+  Array.from({ length: 7 }, (_, weekday) => ({
+    weekday,
+    count: counts[weekday] ?? 0,
+    days: 4,
+  }));
+
 const patterns = (over: Partial<Patterns>): Patterns => ({
   by_site: [{ domain: 'a.example', count: 5 }],
   by_hour: hours({ 14: 6 }),
+  by_weekday: week({ 2: 3 }),
   gaps: [],
   coverage_note: null,
   estimates_excluded: 0,
@@ -39,7 +49,11 @@ const readerOf = (answer: Patterns): ReachesReader => ({
 
 type Where = 'card' | 'page';
 
-async function open(where: Where, answer: Patterns, view: 'By site' | 'By hour') {
+async function open(
+  where: Where,
+  answer: Patterns,
+  view: 'By site' | 'By hour' | 'By day',
+) {
   const user = userEvent.setup();
   if (where === 'card') {
     render(<Reaches read={readerOf(answer)} now={evening} />);
@@ -56,7 +70,7 @@ async function open(where: Where, answer: Patterns, view: 'By site' | 'By hour')
   }
   await user.click(await screen.findByRole('button', { name: 'Over time' }));
   await waitFor(() => expect(screen.queryByText('Looking…')).toBeNull());
-  if (view === 'By hour') await user.click(screen.getByRole('button', { name: 'By hour' }));
+  if (view !== 'By site') await user.click(screen.getByRole('button', { name: view }));
 }
 
 const lines = () => screen.queryAllByRole('listitem');
@@ -98,6 +112,28 @@ describe.each<Where>(['card', 'page'])('the list of a range, on the %s', (where)
     expect(document.querySelector('ul')).toBeNull();
   });
 
+  it('keeps all seven days under the sentence in the day view of a quiet range', async () => {
+    await open(
+      where,
+      patterns({ by_site: [], by_hour: hours(), by_weekday: week() }),
+      'By day',
+    );
+    expect(screen.getByText(NOTHING)).toBeInTheDocument();
+    expect(lines()).toHaveLength(7);
+  });
+
+  it('draws the seven days with no sentence in the day view of a range with reaches', async () => {
+    await open(where, patterns({}), 'By day');
+    expect(screen.queryByText(NOTHING)).toBeNull();
+    expect(lines()).toHaveLength(7);
+  });
+
+  it('is not drawn in the day view when the answer holds no days at all', async () => {
+    await open(where, patterns({ by_weekday: [] }), 'By day');
+    expect(lines()).toHaveLength(0);
+    expect(document.querySelector('ul')).toBeNull();
+  });
+
   it('is not drawn in the site view when the answer holds nothing at all', async () => {
     await open(where, patterns({ by_site: [], by_hour: [] }), 'By site');
     expect(lines()).toHaveLength(0);
@@ -105,11 +141,19 @@ describe.each<Where>(['card', 'page'])('the list of a range, on the %s', (where)
   });
 
   it('is not drawn, in either view, when the answer is sealed', async () => {
-    const sealed = patterns({ by_site: [], by_hour: [], sealed: sealedSentence });
-    await open(where, sealed, 'By hour');
-    expect(screen.getAllByText(sealedSentence).length).toBeGreaterThan(0);
-    expect(lines()).toHaveLength(0);
-    expect(document.querySelector('ul')).toBeNull();
-    expect(within(document.body).queryByText(NOTHING)).toBeNull();
+    const sealed = patterns({
+      by_site: [],
+      by_hour: [],
+      by_weekday: [],
+      sealed: sealedSentence,
+    });
+    for (const view of ['By hour', 'By day'] as const) {
+      cleanup();
+      await open(where, sealed, view);
+      expect(screen.getAllByText(sealedSentence).length).toBeGreaterThan(0);
+      expect(lines()).toHaveLength(0);
+      expect(document.querySelector('ul')).toBeNull();
+      expect(within(document.body).queryByText(NOTHING)).toBeNull();
+    }
   });
 });
