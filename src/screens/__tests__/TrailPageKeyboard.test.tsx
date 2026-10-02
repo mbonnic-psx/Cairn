@@ -13,8 +13,9 @@ import { Trail } from '../Trail';
 import { trailCases } from './pinCases';
 
 const nodeFs = 'node:' + 'fs';
-const { readFileSync } = (await import(/* @vite-ignore */ nodeFs)) as {
+const { readFileSync, readdirSync } = (await import(/* @vite-ignore */ nodeFs)) as {
   readFileSync: (path: string, encoding: 'utf8') => string;
+  readdirSync: (path: string) => string[];
 };
 const noComments = (css: string) => css.replace(/\/\*[\s\S]*?\*\//g, '');
 const ruleList = (css: string) =>
@@ -94,13 +95,25 @@ describe('the sheet', () => {
     expect(rule!.body).toMatch(/outline-offset:\s*-4px/);
   });
 
+  // Every sheet is global once its screen is imported (loose-ends T011), so the sweep reads every sheet the
+  // app loads: the four slice sheets, notebook.css and theme.css. notebook.css scrolls `.nb-page-area`,
+  // which is already a tab stop (the page area takes focus, D19), so it is named here and nowhere else.
+  const sheetNames = readdirSync('src/styles').filter((f) => f.endsWith('.css')).sort();
+  const loaded = [...readFileSync('src/main.tsx', 'utf8').matchAll(/import\s+'\.\/styles\/([\w-]+\.css)'/g)].map((m) => m[1]!);
+  const TAB_STOPS = ['notebook.css: .nb-page-area', 'protection-page.css: .nb-trail-leaves > .nb-trail-sticky'];
+
+  it('reads every sheet the app loads, and every sheet in the directory', () => {
+    expect(loaded.length, 'main.tsx imports its sheets from ./styles/').toBeGreaterThanOrEqual(1);
+    expect(sheetNames, 'a sheet under src/styles/ that main.tsx does not import, or the reverse').toEqual([...loaded].sort());
+    expect(sheetNames).toEqual(expect.arrayContaining(['notebook.css', 'theme.css']));
+  });
+
   it('leaves no other scrolling element on a page without being a tab stop', () => {
-    const sheets = ['protection-page', 'setup-pages', 'tonight-page', 'quiet-pages'];
-    const scrolling = sheets.flatMap((name) =>
-      ruleList(readFileSync(`src/styles/${name}.css`, 'utf8'))
+    const scrolling = sheetNames.flatMap((name) =>
+      ruleList(readFileSync(`src/styles/${name}`, 'utf8'))
         .filter((r) => /overflow(-[xy])?:\s*(auto|scroll)/.test(r.body))
-        .map((r) => r.selector),
+        .map((r) => `${name}: ${r.selector}`),
     );
-    expect(scrolling).toEqual(['.nb-trail-leaves > .nb-trail-sticky']);
+    expect(scrolling.sort()).toEqual(TAB_STOPS);
   });
 });

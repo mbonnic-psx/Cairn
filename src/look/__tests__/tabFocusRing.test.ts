@@ -10,10 +10,14 @@ import { contrastRatio } from '../contrast';
 // Vitest blanks CSS imports, and this project carries no Node typings, so the stylesheet is read from
 // disk through a module name TypeScript cannot see.
 const nodeFs = 'node:' + 'fs';
-const { readFileSync } = (await import(/* @vite-ignore */ nodeFs)) as {
+const { readFileSync, readdirSync } = (await import(/* @vite-ignore */ nodeFs)) as {
   readFileSync: (path: string, encoding: 'utf8') => string;
+  readdirSync: (path: string) => string[];
 };
 const css = readFileSync('src/styles/notebook.css', 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+const sheetNames: string[] = readdirSync('src/styles').filter((f) => f.endsWith('.css')).sort();
+const loaded = [...readFileSync('src/main.tsx', 'utf8').matchAll(/import\s+'\.\/styles\/([\w-]+\.css)'/g)].map((m) => m[1]!);
+const sheets = sheetNames.map((name) => ({ name, text: readFileSync(`src/styles/${name}`, 'utf8').replace(/\/\*[\s\S]*?\*\//g, '') }));
 
 const LOOKS = ['morning', 'midday', 'night'] as const;
 type Look = (typeof LOOKS)[number];
@@ -106,19 +110,30 @@ function rulesApplyingTo(source: string, selector: string): Found[] {
   return found;
 }
 
-describe('every rule that can apply to a tab\'s focus ring is one the guard models (FR-022, FR-021; quiet-pages T013)', () => {
+describe('every rule that can apply to a tab\'s focus ring is one the guard models (FR-022, FR-021; quiet-pages T013, loose-ends T011)', () => {
   const SELECTOR = '.nb-tab:focus-visible';
-  const outsideForced = rulesApplyingTo(css, SELECTOR).filter((r) => !r.scope.includes('forced-colors'));
+  // Every sheet is global once its screen is imported, so every sheet under src/styles/ is read.
+  const outsideForced = sheets.flatMap((sheet) =>
+    rulesApplyingTo(sheet.text, SELECTOR)
+      .filter((r) => !r.scope.includes('forced-colors'))
+      .map((r) => ({ ...r, sheet: sheet.name })),
+  );
+
+  it('reads every sheet the app loads, and every sheet in the directory', () => {
+    expect(loaded.length, 'main.tsx imports its sheets from ./styles/').toBeGreaterThanOrEqual(1);
+    expect(sheetNames, 'a sheet under src/styles/ that main.tsx does not import, or the reverse').toEqual([...loaded].sort());
+    expect(sheets.map((s) => s.name)).toContain('notebook.css');
+  });
 
   it('finds the bare rules the ring is read from, so the check is live', () => {
-    expect(outsideForced.length).toBeGreaterThanOrEqual(1);
+    expect(outsideForced.filter((r) => r.sheet === 'notebook.css').length).toBeGreaterThanOrEqual(1);
     expect(ring).not.toBe('');
   });
 
-  it('finds no look-scoped rule and no rule inside an at-rule that it does not model', () => {
+  it('finds no look-scoped rule, no rule inside an at-rule and no rule in another sheet that it does not model', () => {
     const unmodelled = outsideForced
-      .filter((r) => r.item !== SELECTOR || r.scope !== '')
-      .map((r) => `${r.scope ? r.scope + ' { ' : ''}${r.item}${r.scope ? ' }' : ''}`);
+      .filter((r) => r.sheet !== 'notebook.css' || r.item !== SELECTOR || r.scope !== '')
+      .map((r) => `${r.sheet}: ${r.scope ? r.scope + ' { ' : ''}${r.item}${r.scope ? ' }' : ''}`);
     expect(unmodelled, `${SELECTOR} has a rule this guard does not model`).toEqual([]);
   });
 });

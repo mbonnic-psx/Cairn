@@ -14,10 +14,14 @@ import type { NotebookLook } from '../look';
 // Vitest blanks CSS imports, and this project carries no Node typings, so the stylesheet is read from
 // disk through a module name TypeScript cannot see.
 const nodeFs = 'node:' + 'fs';
-const { readFileSync } = (await import(/* @vite-ignore */ nodeFs)) as {
+const { readFileSync, readdirSync } = (await import(/* @vite-ignore */ nodeFs)) as {
   readFileSync: (path: string, encoding: 'utf8') => string;
+  readdirSync: (path: string) => string[];
 };
 const css = readFileSync('src/styles/notebook.css', 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+const sheetNames: string[] = readdirSync('src/styles').filter((f) => f.endsWith('.css')).sort();
+const loaded = [...readFileSync('src/main.tsx', 'utf8').matchAll(/import\s+'\.\/styles\/([\w-]+\.css)'/g)].map((m) => m[1]!);
+const sheets = sheetNames.map((name) => ({ name, text: readFileSync(`src/styles/${name}`, 'utf8').replace(/\/\*[\s\S]*?\*\//g, '') }));
 
 const LOOKS: NotebookLook[] = ['morning', 'midday', 'night'];
 const FLOOR = 3;
@@ -134,8 +138,10 @@ describe('the hilltop cairn\'s outline stones hold 3:1 on what lies behind them 
 
 // T005 (loose-ends; quiet-pages T013, research R6): `bodyOf` returns the first rule for a selector, so a
 // second rule for any selector the model reads, scoped to a look or inside a media query, would change the
-// scene with no change here. Each selector the model reads has exactly one rule, bare, or the guard fails by name.
-describe('every rule that can apply to what the cairn guard models is the one it reads (FR-021, SC-003; quiet-pages T013)', () => {
+// scene with no change here. T011: every sheet is global once its screen is imported, so every sheet under
+// src/styles/ is read. Each selector the model reads has exactly one rule, bare, in notebook.css, or the guard
+// fails by sheet and selector.
+describe('every rule that can apply to what the cairn guard models is the one it reads (FR-021, SC-003; quiet-pages T013, loose-ends T011)', () => {
   const MODELLED = [
     ...(['far', 'mid', 'near'] as const).map((n) => `.nb-hill--${n}`),
     '.nb-cairn',
@@ -143,30 +149,38 @@ describe('every rule that can apply to what the cairn guard models is the one it
   ];
   const rulesFor = (selector: string) => {
     const found: Array<{ item: string; scope: string }> = [];
-    const scope: string[] = [];
-    const re = /([^{}]*)\{|\}/g;
-    let m: RegExpExecArray | null;
-    while ((m = re.exec(css))) {
-      if (m[0] === '}') {
-        scope.pop();
-        continue;
+    for (const sheet of sheets) {
+      const scope: string[] = [];
+      const re = /([^{}]*)\{|\}/g;
+      let m: RegExpExecArray | null;
+      while ((m = re.exec(sheet.text))) {
+        if (m[0] === '}') {
+          scope.pop();
+          continue;
+        }
+        const header = m[1]!.trim();
+        if (header.startsWith('@')) {
+          scope.push(header);
+          continue;
+        }
+        for (const item of header.split(',').map((x) => x.trim())) {
+          const last = item.split(/[\s>+~]+/).pop()!.replace(/\[[^\]]*\]/g, '');
+          if (last === selector) found.push({ item: `${sheet.name}: ${scope.length ? scope.join(' > ') + ' { ' + item + ' }' : item}`, scope: sheet.name });
+        }
+        re.lastIndex = sheet.text.indexOf('}', re.lastIndex) + 1;
       }
-      const header = m[1]!.trim();
-      if (header.startsWith('@')) {
-        scope.push(header);
-        continue;
-      }
-      for (const item of header.split(',').map((x) => x.trim())) {
-        const last = item.split(/[\s>+~]+/).pop()!.replace(/\[[^\]]*\]/g, '');
-        if (last === selector) found.push({ item, scope: scope.join(' > ') });
-      }
-      re.lastIndex = css.indexOf('}', re.lastIndex) + 1;
     }
     return found;
   };
 
-  it.each(MODELLED)('%s has one bare rule, the one the model reads, and no other', (selector) => {
-    const found = rulesFor(selector).map((r) => (r.scope ? `${r.scope} { ${r.item} }` : r.item));
-    expect(found, `${selector} has a rule this guard does not model`).toEqual([selector]);
+  it('reads every sheet the app loads, and every sheet in the directory', () => {
+    expect(loaded.length, 'main.tsx imports its sheets from ./styles/').toBeGreaterThanOrEqual(1);
+    expect(sheetNames, 'a sheet under src/styles/ that main.tsx does not import, or the reverse').toEqual([...loaded].sort());
+    expect(sheets.map((s) => s.name)).toContain('notebook.css');
+  });
+
+  it.each(MODELLED)('%s has one bare rule, the one the model reads, and no other, in any sheet', (selector) => {
+    const found = rulesFor(selector).map((r) => r.item);
+    expect(found, `${selector} has a rule this guard does not model`).toEqual([`notebook.css: ${selector}`]);
   });
 });

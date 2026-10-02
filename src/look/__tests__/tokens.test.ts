@@ -6,8 +6,9 @@ import { contrastRatio } from '../contrast';
 // Vitest blanks CSS imports, and this project carries no Node typings, so the
 // stylesheets are read from disk through a module name TypeScript cannot see.
 const nodeFs = 'node:' + 'fs';
-const { readFileSync } = (await import(/* @vite-ignore */ nodeFs)) as {
+const { readFileSync, readdirSync } = (await import(/* @vite-ignore */ nodeFs)) as {
   readFileSync: (path: string, encoding: 'utf8') => string;
+  readdirSync: (path: string) => string[];
 };
 const notebook = readFileSync('src/styles/notebook.css', 'utf8');
 const theme = readFileSync('src/styles/theme.css', 'utf8');
@@ -501,34 +502,45 @@ describe('text laid over the scene meets its floor against the sun or moon behin
     ['.nb-titlebar', ['']],
     ['.nb-sun', ['']],
   ];
+  // T011: every sheet is global once its screen is imported, so every sheet under src/styles/ is read.
+  const sheetNames = readdirSync('src/styles').filter((f) => f.endsWith('.css')).sort();
+  const loaded = [...readFileSync('src/main.tsx', 'utf8').matchAll(/import\s+'\.\/styles\/([\w-]+\.css)'/g)].map((m) => m[1]!);
   const applying = (selector: string) => {
-    const found: Array<{ item: string; scope: string }> = [];
-    const scope: string[] = [];
-    const re = /([^{}]*)\{|\}/g;
-    const source = noComments(notebook);
-    let m: RegExpExecArray | null;
-    while ((m = re.exec(source))) {
-      if (m[0] === '}') {
-        scope.pop();
-        continue;
+    const found: Array<{ item: string; scope: string; sheet: string }> = [];
+    for (const sheet of sheetNames) {
+      const scope: string[] = [];
+      const re = /([^{}]*)\{|\}/g;
+      const source = noComments(readFileSync(`src/styles/${sheet}`, 'utf8'));
+      let m: RegExpExecArray | null;
+      while ((m = re.exec(source))) {
+        if (m[0] === '}') {
+          scope.pop();
+          continue;
+        }
+        const header = m[1]!.trim();
+        if (header.startsWith('@')) {
+          scope.push(header);
+          continue;
+        }
+        for (const item of header.split(',').map((x) => x.trim())) {
+          const last = item.split(/[\s>+~]+/).pop()!.replace(/\[[^\]]*\]/g, '');
+          if (last === selector) found.push({ item, scope: scope.join(' > '), sheet });
+        }
+        re.lastIndex = source.indexOf('}', re.lastIndex) + 1;
       }
-      const header = m[1]!.trim();
-      if (header.startsWith('@')) {
-        scope.push(header);
-        continue;
-      }
-      for (const item of header.split(',').map((x) => x.trim())) {
-        const last = item.split(/[\s>+~]+/).pop()!.replace(/\[[^\]]*\]/g, '');
-        if (last === selector) found.push({ item, scope: scope.join(' > ') });
-      }
-      re.lastIndex = source.indexOf('}', re.lastIndex) + 1;
     }
     return found.filter((r) => !r.scope.includes('forced-colors'));
   };
 
-  it.each(READ)('%s: the rules that can apply to it are exactly the ones the band model reads', (selector, scopes) => {
-    const found = applying(selector).map((r) => (r.item === selector ? r.scope : `${r.scope} { ${r.item} }`));
-    expect(found, `${selector} has a rule the band model does not read`).toEqual(scopes);
+  it('reads every sheet the app loads, and every sheet in the directory', () => {
+    expect(loaded.length, 'main.tsx imports its sheets from ./styles/').toBeGreaterThanOrEqual(1);
+    expect(sheetNames, 'a sheet under src/styles/ that main.tsx does not import, or the reverse').toEqual([...loaded].sort());
+    expect(sheetNames).toContain('notebook.css');
+  });
+
+  it.each(READ)('%s: the rules that can apply to it are exactly the ones the band model reads, in notebook.css', (selector, scopes) => {
+    const found = applying(selector).map((r) => `${r.sheet}: ${r.item === selector ? r.scope : `${r.scope} { ${r.item} }`}`);
+    expect(found, `${selector} has a rule the band model does not read`).toEqual(scopes.map((scope) => `notebook.css: ${scope}`));
   });
 
   const HEIGHTS = Array.from({ length: Math.floor((2160 - 600) / 20) + 1 }, (_, i) => 600 + i * 20);
