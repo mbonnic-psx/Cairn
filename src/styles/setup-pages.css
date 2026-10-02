@@ -305,3 +305,13 @@
   outline: 2px solid var(--nb-ink);
   outline-offset: 2px;
 }
+
+/* Forced colours drop the fills, so a filled button would read as bare words: give each an edge in the
+   system's text colour. Only here, so nothing moves outside forced colours. */
+@media (forced-colors: active) {
+  .nb-choosing-turn-on,
+  .nb-disclosure-confirm,
+  .nb-disclosure-back {
+    border: 1px solid CanvasText;
+  }
+}

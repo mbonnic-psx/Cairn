@@ -195,3 +195,11 @@
   font-size: 12px;
   color: var(--nb-ink-quiet);
 }
+
+/* Forced colours drop the fill and the quiet ink, so the button keeps an edge of the system's text colour.
+   Only here, so nothing moves outside forced colours. */
+@media (forced-colors: active) {
+  .nb-protection-note__button {
+    border: 1px solid CanvasText;
+  }
+}
