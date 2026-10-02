@@ -51,3 +51,13 @@ Note: the `whenWas` BlockStatement mutant (line 200) is counted by the tool amon
 - Compared with `looks`: Greeting.tsx and NotebookShell.tsx survivors are the same equivalent ones (Greeting.tsx 2 survivors here against 4 in `looks`; the other two `looks` survivors do not recur). Trail.tsx and notebookPage.ts are fully killed.
 - `.stryker-tmp` was cleaned by the tool and is gitignored; no `reports/` directory was left. The full log is at `~/.cache/cairn-scratch/protection-page-stryker.log`.
 - `git status` showed `specs/004-notebook-landscape/slices/protection-page/benchmark.json` modified before this run; it was not touched by it.
+
+## After the pass (2026-10-02)
+
+`src/screens/__tests__/ProtectionLastChecked.test.tsx` pins both gaps under (a). Re-run over `src/screens/Protection.tsx`:
+
+```
+All files       |  97.37 |   97.37 |       74 |         0 |          2 |        0 |        0 |
+```
+
+Left: `Protection.tsx:87` (badge class string, artwork) and `Protection.tsx:50` (the `[state]` dependency array of the read on mount; equivalent in every way the app renders Protection today, since `state` is set once by `App`). Handed back, not this slice's: today's phrase says "1 hours ago", "1 days ago" and "60 minutes ago" at the unit boundaries, in Current as on the page. FR-018 keeps the words; the owner of protection's wording (002) may want it fixed.
