@@ -492,3 +492,32 @@ fn an_accepted_offset_list_can_place_a_reach_on_a_weekday_the_range_does_not_hol
     assert_eq!(held, [0, 1, 0, 0, 0, 0, 0]);
     assert_eq!(held[WED], 0, "a reach on a weekday whose days is 0");
 }
+
+#[test]
+fn a_clock_change_after_midnight_puts_a_reach_on_a_date_the_range_does_not_hold() {
+    // Adversary W-A1: America/Goose_Bay, 2010-11-07, a Sunday. The clocks went back at
+    // 00:01 to Saturday 23:01, so instants inside Sunday's range read as Saturday. These
+    // are the exact bounds and offsets the screen sent for that day.
+    let start = 1_289_098_800; // 2010-11-07 00:00 -03:00
+    let end = 1_289_188_800; // 2010-11-08 00:00 -04:00
+    let changes = [OffsetChange {
+        from: 1_289_098_860,
+        offset_seconds: -14_400,
+    }];
+    let saturday_23_30 = reach(1_289_100_600);
+    let sunday_midday = reach(1_289_149_200);
+
+    let weekdays = by_weekday(
+        &[saturday_23_30, sunday_midday],
+        -10_800,
+        &changes,
+        start,
+        end,
+    );
+    // Monday = 0 … Saturday = 5, Sunday = 6.
+    assert_eq!(weekdays, [0, 0, 0, 0, 0, 1, 1]);
+    // The range holds one Sunday and no Saturday, so Saturday is days 0 with a count:
+    // the screen must draw it, not hide it (Y23).
+    let sunday: LocalDate = serde_json::from_str("\"2010-11-07\"").unwrap();
+    assert_eq!(weekdays_in(sunday, sunday), [0, 0, 0, 0, 0, 0, 1]);
+}
