@@ -1,10 +1,10 @@
 # Benchmark — 004-notebook-landscape
 
-Drawn 2026-10-02T17:09:31Z at `d90af2f` from 10 record(s) under `specs/004-notebook-landscape/` by `scripts/agents/benchmark.py overview`; `/benchmark` redraws it, and so does closing a slice. Regenerated whole, never edited: the records beside each slice are the source.
+Drawn 2026-10-02T19:13:23Z at `dbd7e24` from 11 record(s) under `specs/004-notebook-landscape/` by `scripts/agents/benchmark.py overview`; `/benchmark` redraws it, and so does closing a slice. Regenerated whole, never edited: the records beside each slice are the source.
 
 ## Slices
 
-9 slice(s) recorded, 8h44m+ in all.
+10 slice(s) recorded, 10h24m+ in all.
 
 | slice | delegate/cycle | wall | in | out | models | sessions | converge | +tasks | gaps | mutation | adversary | demo | verify✗ | rework | tasks | files | ±lines |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
@@ -16,6 +16,7 @@ Drawn 2026-10-02T17:09:31Z at `d90af2f` from 10 record(s) under `specs/004-noteb
 | loose-ends | task/rule | 59m02s+ | 32.7M (+1 unread) | 59.4k | claude-opus-5-5, claude-sonnet-5-5 | 1 | 2 | 8 | 3/6 | 100.00 | 0 | accepted | 0 | 0 | 19 | 84 | +104189/-12 |
 | protection-page | story/rule, task/rule | 1h00m+ | 36.7M (+2 unread) | 64.2k | claude-opus-5-5, claude-sonnet-5-5 | 1 | 2 | 8 | 4/0 | 81.70 | 0 | accepted | 0 | 0 | 26 | 64 | +3338/-16 |
 | quiet-pages | story/rule | 40m58s+ | 46.1M (+1 unread) | 86.3k | claude-opus-5-5, claude-sonnet-5-5 | 1 | 1 | 1 | 1/5 | 100.00 | 0 | accepted | 0 | 0 | 13 | 114 | +6995/-20 |
+| reveal | task/rule | 1h39m | 61.9M | 107.1k | claude-opus-5-5, claude-sonnet-5-5 | 1 | 1 | 2 | 4/6 | 99.37 | 4 | accepted | 0 | 0 | 23 | 124 | +3883/-2519 |
 | setup-pages | story/rule, task/rule | 1h11m | 58.7M | 86.3k | claude-opus-5-5, claude-sonnet-5-5 | 1 | 2 | 3 | 3/4 | 93.80 | 0 | accepted | 0 | 0 | 23 | 69 | +4353/-11 |
 | tonight-page | story/rule, task/rule | 1h39m+ | 50.3M (+2 unread) | 69.2k | claude-opus-5-5, claude-sonnet-5-5 | 1 | 1 | 3 | 4/3 | 96.43 | 0 | accepted | 1 | 0 | 27 | 138 | +10499/-103 |
 
@@ -144,6 +145,22 @@ delegate/cycle = how implementation was delegated and driven; in = input + cache
 | demo | 2026-10-02 07:51 | 8m56s | 8.4M | 16k | claude-opus-5-5, claude-sonnet-5-5 | drive-converge, drive-gaps, drive-hand, drive-implement, drive-slice | yes | outcome=accepted, driver=cruise |
 | adversary | 2026-10-02 08:25 | unbracketed | unknown | unknown | — | — | no | findings=0, seams=0, driver=cruise |
 | mutation | 2026-10-02 08:25 | 2m45s | 933.4k | 5.8k | claude-opus-5-5, claude-sonnet-5-5 | drive-mutation | yes | mutation_score=100.00, driver=cruise |
+
+### reveal — 1h39m
+
+| stage | started (UTC) | wall | in | out | model | agent | delegated | reported |
+|---|---|---|---|---|---|---|---|---|
+| gaps | 2026-10-02 17:28 | 1m36s | 772k | 9.2k | claude-opus-5-5 | — | no | gaps=4, driver=cruise |
+| plan | 2026-10-02 17:30 | 16m55s | 13.2M | 8.4k | claude-opus-5-5 | general-purpose | yes | driver=cruise |
+| tasks | 2026-10-02 17:47 | 2m10s | 836.4k | 3.2k | claude-opus-5-5, claude-sonnet-5-5 | drive-tasks | yes | driver=cruise |
+| implement | 2026-10-02 17:49 | 25m05s | 16.6M | 32.2k | claude-opus-5-5, claude-sonnet-5-5 | drive-implement | yes | verify_failures=0, delegate=task, cycle=rule, split=0, driver=cruise |
+| converge | 2026-10-02 18:15 | 6m10s | 5M | 8.1k | claude-opus-5-5 | drive-converge | yes | driver=cruise |
+| gaps | 2026-10-02 18:21 | 5m45s | 4.4M | 8.2k | claude-opus-5-5 | drive-gaps, drive-skipper | yes | gaps=6, driver=cruise |
+| implement | 2026-10-02 18:27 | 5m07s | 2.3M | 5.7k | claude-opus-5-5, claude-sonnet-5-5 | drive-implement | yes | verify_failures=0, delegate=task, cycle=rule, split=0, driver=cruise |
+| demo | 2026-10-02 18:32 | 6m24s | 3.3M | 5.1k | claude-opus-5-5 | drive-hand | yes | outcome=accepted, driver=cruise |
+| adversary | 2026-10-02 18:39 | 10m33s | 8M | 9.4k | claude-opus-5-5 | drive-adversary | yes | findings=4, seams=2, driver=cruise |
+| implement | 2026-10-02 18:49 | 9m07s | 4.7M | 9.6k | claude-opus-5-5, claude-sonnet-5-5 | drive-implement | yes | verify_failures=0, delegate=task, cycle=rule, split=0, driver=cruise |
+| mutation | 2026-10-02 18:59 | 10m58s | 2.9M | 8k | claude-opus-5-5, claude-sonnet-5-5 | drive-mutation | yes | mutation_score=99.37, driver=cruise |
 
 ### setup-pages — 1h11m
 
