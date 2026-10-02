@@ -92,4 +92,12 @@ describe('the baseline itself', () => {
       expect(controlsOf(baseline(html))).toEqual([]);
     }
   });
+
+  // A3: text beside a child element is a word like any other.
+  it('reads the words beside a child element, so two pages that differ only there differ', () => {
+    const was = baseline('<p>A <span>x</span></p>');
+    const now = baseline('<p>B <span>x</span></p>');
+    expect(wordsOf(now)).not.toEqual(wordsOf(was));
+    expect(wordsOf(was)).toEqual(['A ', 'x']);
+  });
 });

@@ -47,12 +47,30 @@ export function baseline(html: string): HTMLElement {
   return root;
 }
 
-/** The words, one per leaf element, in a fixed order: a sentence that moved page still matches. */
+/**
+ * The words, one per run of text between elements (whitespace alone is not a word), in a fixed order: a sentence that
+ * moved page still matches. A run is the adjacent text nodes of one parent joined: React gives `{n} addresses` two
+ * nodes where the captured markup, parsed from a string, holds one, and the words are the same.
+ */
 export function wordsOf(root: HTMLElement, deltas: Delta[] = []): string[] {
-  const record = Array.from(root.querySelectorAll('*'))
-    .filter((el) => el.children.length === 0 && el.textContent)
-    .map((el) => el.textContent as string)
-    .sort();
+  const record: string[] = [];
+  const walk = (node: Node): void => {
+    let run = '';
+    const end = (): void => {
+      if (run.trim() !== '') record.push(run);
+      run = '';
+    };
+    for (const child of Array.from(node.childNodes)) {
+      if (child.nodeType === 3) run += child.textContent ?? '';
+      else if (child.nodeType === 1) {
+        end();
+        walk(child);
+      }
+    }
+    end();
+  };
+  walk(root);
+  record.sort();
   return applied(record, deltas.map((d) => d.words ?? {}));
 }
 

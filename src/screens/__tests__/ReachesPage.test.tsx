@@ -44,12 +44,9 @@ function onPage(ui: React.ReactElement) {
   return { ...view, main, spread, left: pages[0], right: pages[1], pages };
 }
 
-/** The text of every element with no element inside it, sorted: the words, wherever they sit. */
+/** The words, wherever they sit: the same reading the baseline gets, so text beside a child element counts on both sides. */
 function words(root: HTMLElement): string[] {
-  return Array.from(root.querySelectorAll('*'))
-    .filter((el) => el.children.length === 0 && el.textContent)
-    .map((el) => el.textContent as string)
-    .sort();
+  return wordsOf(root);
 }
 
 const now = evening;
