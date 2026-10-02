@@ -36,11 +36,11 @@ const rules: Rule[] = [...css.matchAll(/([^{};]+)\{([^{}]*)\}/g)].map((m) => ({
 
 const COLOURS = ['--nb-ink', '--nb-ink-body', '--nb-ink-quiet', '--nb-accent-amber', '--nb-rule', '--nb-paper'];
 const FONTS = ['--nb-font-mono', '--nb-font-serif'];
-/** The only places a typewriter face belongs on these spreads (research P5). */
+/** The small labels and buttons that are set in the typewriter face, and the only places it belongs (research P5, D12). */
 const MONO = [
   '.nb-protection-badge',
   '.nb-protection-figure__label',
-  '.nb-trail-inventory__caption',
+  '.nb-trail-inventory__aside',
   '.nb-protection-note__button',
 ];
 /** The shell's own spread classes: the sources use them, this stylesheet may add to them. */
@@ -108,6 +108,15 @@ describe('the protection-page stylesheet', () => {
     expect(withMono.length).toBeGreaterThan(0);
     for (const { selector } of withMono) {
       for (const one of selector.split(',').map((s) => s.trim())) expect(MONO, one).toContain(one);
+    }
+  });
+
+  it('sets every small label and button in the typewriter face, each one a class a screen renders (T021)', () => {
+    for (const selector of MONO) {
+      const own = rules.filter((r) => r.selector.split(',').map((x) => x.trim()).includes(selector));
+      expect(own.length, `${selector} is not in the sheet`).toBeGreaterThan(0);
+      expect(own.map((r) => r.body).join(''), selector).toMatch(/font-family:[^;]*--nb-font-mono/);
+      expect(named, `${selector} is rendered by neither screen`).toContain(selector.slice(1));
     }
   });
 
