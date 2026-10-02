@@ -4,6 +4,7 @@
  * A day is the time between two local midnights, so it can be 23 or 25 hours long.
  * The zone is fixed before any date is made.
  */
+declare const process: { env: Record<string, string | undefined> };
 process.env.TZ = 'Europe/London';
 
 import { describe, expect, it } from 'vitest';

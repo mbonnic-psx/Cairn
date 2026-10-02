@@ -14,7 +14,8 @@ export interface Bounds {
 
 const pad = (n: number) => String(n).padStart(2, '0');
 
-const format = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const format = (d: Date) =>
+  `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 
 function parse(day: string): [number, number, number] {
   const [y, m, d] = day.split('-').map(Number);

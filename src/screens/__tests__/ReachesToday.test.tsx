@@ -4,6 +4,7 @@
  * The reader and the clock are passed in as props, so nothing here mocks a module.
  * The zone is fixed before any date is made: the clock-change case needs a zone with one.
  */
+declare const process: { env: Record<string, string | undefined> };
 process.env.TZ = 'Europe/London';
 
 import { render, screen } from '@testing-library/react';
@@ -12,7 +13,12 @@ import { describe, expect, it } from 'vitest';
 import { Reaches } from '../Reaches';
 import type { Patterns, TodaysReaches } from '../../ipc/reaches';
 
-const quietDay: TodaysReaches = { reaches: [], gaps: [], coverage_note: null, sealed: null };
+const quietDay: TodaysReaches = {
+  reaches: [],
+  gaps: [],
+  coverage_note: null,
+  sealed: null,
+};
 const quietRange: Patterns = {
   by_site: [],
   gaps: [],
