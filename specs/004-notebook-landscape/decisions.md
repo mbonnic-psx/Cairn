@@ -513,3 +513,25 @@ Every product decision a `/cruise` run took, in order. A person overrides one by
 - **Confidence:** high · **Would reverse if:** the production build inside the suite proves too slow and the owner prefers a CI step
 - **Written to:** `specs/004-notebook-landscape/spec.md` (Clarifications), `specs/004-notebook-landscape/adversary-log.md` (R1)
 - **Status:** standing
+
+## D46 — How does a later, deliberate change to a page's words meet the reveal's frozen baseline?
+- **Stage:** gaps after converge · **Slice:** reveal · **When:** 2026-10-03T01:00:00Z · **Iteration:** 11
+- **Question:** The `*WordsKept` tests compare each page with the markup captured before the reveal (`beforeTheReveal.ts`), as an exact set of words and controls. A later slice that adds words on purpose (003 `history-by-weekday`, *By day* under Seen by) has no sanctioned way to update it: frozen literals are never re-captured.
+- **Options:** append a dated delta beside the frozen record, naming the slice and decision that changed the words, and compare against record plus delta; the captured markup is never edited or re-captured (recommended: the precedent of `pinned.md`, whose rows are appended, never rewritten, and its 2026-10-02 *Seen by* row); re-capture the record from the new page; loosen the comparison to "at least these words"
+- **Decision:** The first. The fixture's header says so, and `history-by-weekday` rebases onto the spread-only screens and records its *By day* words as such a delta.
+- **Why:** The baseline exists to prove the reveal lost nothing a person had. Re-capturing would make it prove nothing; loosening it would let a word go missing unseen.
+- **Decided by:** host (stage recommendation)
+- **Confidence:** high · **Would reverse if:** deltas pile up until the baseline no longer reads as what a person had before the reveal; then retire it for ordinary page tests
+- **Written to:** `specs/004-notebook-landscape/story-split.md` (Parking lot), `specs/004-notebook-landscape/slices/reveal/tasks.md` (T019)
+- **Status:** standing
+
+## D47 — Do the paper tabs come before the page in the keyboard and reading order?
+- **Stage:** gaps after converge · **Slice:** reveal · **When:** 2026-10-03T01:00:00Z · **Iteration:** 11
+- **Question:** With the reveal, a released build ships the notebook shell for the first time. In it, keyboard users reach the paper tabs only after every control on the page: `NotebookShell` renders the page area (`<main tabIndex={0}>`) before `<nav aria-label="Pages">`. Today's interface put the tabs in a header before the content. On the setup step that means the page area, nine checkboxes, the address box, "Protect it" and "Turn protection on" before the first tab. No decision or contract records the order.
+- **Options:** (a) move the tabs before the page in the DOM so they come first in Tab order and reading order, drawn where they are now, with the Tab sequence pinned by a test (recommended by the gaps pass); (b) keep page-first and record it as accepted, pinned by a test; (c) keep page-first and add a "skip to pages" link first in focus order
+- **Decision:** (a). `<nav aria-label="Pages">` comes before `<main>` inside the notebook. The tabs are drawn exactly where the owner accepted them, in all three looks and at every window size. `src/shell/__tests__/NotebookShell.test.tsx` pins the order: from the start of the shell, Tab reaches every tab in `tabsFor` order (`aria-current` unchanged), then the page area (D19), then the page's own controls; D30's left page stays its own stop after the page area. The order is written into `contracts/ui-shell.md` under Navigation.
+- **Why:** The spec asks that every tab and control be reachable in a sensible order (edge cases, Keyboard only; FR-022, SC-004). A person who only wants Tonight should not tab through nine categories first, and today's interface always offered the tabs first, so the reveal would otherwise be where a keyboard user's Cairn gets worse. (b) leaves that cost on every screen; (c) adds a control the owner never saw on the board. Only the order changes, not the drawing: the tabs are placed absolutely outside the notebook's right edge.
+- **Decided by:** drive-skipper (claude-opus-5-5[1m])
+- **Confidence:** high · **Would reverse if:** moving the tabs in the DOM cannot be done without changing where or how they are drawn in some look or window size; then (c), never a moved tab
+- **Written to:** `src/shell/NotebookShell.tsx`, `src/shell/__tests__/NotebookShell.test.tsx`, `specs/004-notebook-landscape/contracts/ui-shell.md` (Navigation)
+- **Status:** standing

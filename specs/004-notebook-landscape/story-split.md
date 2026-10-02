@@ -74,3 +74,4 @@ the frame's page-spread layout and the look tokens, both settled by `frame` and 
   without overlap or clipping, FR-025, FR-029) waits on the owner choosing a browser test runner, a new dependency
   (D10, D27). Until then the demos' screenshots are the only proof of real layout.
 - `reveal` removes every screen's one-column layout (D42). The 003 slice `history-by-weekday`, planned in its own worktree on 2026-10-02, builds on the Today page as `reveal` leaves it: rebase it after `reveal` merges.
+- After the reveal, a slice that changes a page's words on purpose records the change as a dated delta beside the frozen record in `beforeTheReveal.ts`, naming its slice and decision; the captured markup is never edited or re-captured (D46). `history-by-weekday` does this for *By day*, and retires its Current branch and its edits to `TonightCurrentPin.test.tsx`, which the reveal deleted.

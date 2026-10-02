@@ -151,7 +151,7 @@ together. Build a release version and confirm no switch exists anywhere in it.
 **Acceptance Scenarios**:
 
 1. **Given** a development build, **When** the tester chooses morning, midday or night on the switch, **Then** the whole scene, the greeting and the notebook take that look at once, with no transition, and the current screen and anything typed on it are kept.
-2. **Given** a development build, **When** Cairn starts, **Then** the switch is on Current and Cairn looks exactly as it does today, until the tester chooses a look.
+2. **Given** a development build before the reveal, **When** Cairn starts, **Then** the switch is on Current and Cairn looks exactly as it does today, until the tester chooses a look.
 3. **Given** a released build before the reveal, **When** the person uses Cairn in any way, **Then** no look switch is present, reachable or announced, and Cairn looks exactly as it does today.
 5. **Given** a development build after the reveal, **When** Cairn starts, **Then** the switch is on Morning and offers Morning, Midday and Night; there is no Current.
 6. **Given** a released build after the reveal, **When** the person opens Cairn, **Then** they see the notebook in the morning look with "Good morning.", and no look switch is present, reachable or announced.
@@ -233,7 +233,7 @@ still present and still works, now laid out as a notebook page.
 
 - **FR-009**: The interface MUST support exactly three looks: morning, midday and night, as described in User Story 2 and on the reference canvas.
 - **FR-010**: Changing the look MUST change the sky, hills, sun or moon, cairn colours, greeting and notebook together. It MUST keep the current screen and anything typed on it.
-- **FR-011**: A development build MUST offer a switch, small, at the top right of the window, labelled "Look (testing)", with four choices: Current, Morning, Midday, Night. Current is today's interface, unchanged. The switch MUST start on Current every time Cairn starts, and MUST NOT remember the last choice. After the reveal (FR-032) the switch offers three choices, Morning, Midday, Night, and starts on Morning every time Cairn starts, still remembering nothing.
+- **FR-011**: Until the reveal (FR-032), a development build MUST offer a switch, small, at the top right of the window, labelled "Look (testing)", with four choices: Current, Morning, Midday, Night. Current is today's interface, unchanged. The switch MUST start on Current every time Cairn starts, and MUST NOT remember the last choice. After the reveal (FR-032) the switch offers three choices, Morning, Midday, Night, and starts on Morning every time Cairn starts, still remembering nothing.
 - **FR-012**: A released build MUST contain no look switch: not shown, not reachable by keyboard or any key combination, and not announced to assistive technology. Until the reveal (FR-032), it MUST show today's interface, unchanged.
 - **FR-013**: Choosing the look by time of day MUST NOT be part of this feature. Nothing in this feature reads the clock to choose a look.
 - **FR-013a**: The look switch is temporary. Before Cairn's first release, the time-of-day feature MUST remove the switch and let the clock choose the look. This feature records that obligation and does not meet it.

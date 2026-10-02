@@ -313,6 +313,90 @@
       "signals": {
         "driver": "cruise"
       }
+    },
+    {
+      "stage": "gaps",
+      "started": "2026-10-02T18:21:14Z",
+      "planned": "gaps: strong → host model — `strong` maps to the host model",
+      "tasks": {
+        "start": {
+          "open": 3,
+          "done": 12
+        },
+        "end": {
+          "open": 7,
+          "done": 12
+        }
+      },
+      "ended": "2026-10-02T18:26:59Z",
+      "seconds": 345,
+      "span": {
+        "from": {
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/7953f214-69ad-494c-97da-cb3203c107d8.jsonl": 1224728,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/7953f214-69ad-494c-97da-cb3203c107d8/subagents/agent-a09a454a6493b2ee1.jsonl": 709370,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/7953f214-69ad-494c-97da-cb3203c107d8/subagents/agent-a0cdaf55403319556.jsonl": 404871,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/7953f214-69ad-494c-97da-cb3203c107d8/subagents/agent-a1bfc3b586128a8e1.jsonl": 364912,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/7953f214-69ad-494c-97da-cb3203c107d8/subagents/agent-a3f8152351bd3f8e3.jsonl": 228817,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/7953f214-69ad-494c-97da-cb3203c107d8/subagents/agent-a77651a339743cd8c.jsonl": 403073,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/7953f214-69ad-494c-97da-cb3203c107d8/subagents/agent-a848c0cb576de9ebf.jsonl": 1223295,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/7953f214-69ad-494c-97da-cb3203c107d8/subagents/agent-a9432546bd1879a9f.jsonl": 937811,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/7953f214-69ad-494c-97da-cb3203c107d8/subagents/agent-aa2f45f9a2135efa3.jsonl": 286892,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/7953f214-69ad-494c-97da-cb3203c107d8/subagents/agent-ab6a1e50afb1de7b6.jsonl": 402745,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/7953f214-69ad-494c-97da-cb3203c107d8/subagents/agent-ac81f287cef100deb.jsonl": 263927
+        },
+        "to": {
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/7953f214-69ad-494c-97da-cb3203c107d8.jsonl": 1306765,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/7953f214-69ad-494c-97da-cb3203c107d8/subagents/agent-a09a454a6493b2ee1.jsonl": 709370,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/7953f214-69ad-494c-97da-cb3203c107d8/subagents/agent-a0cdaf55403319556.jsonl": 404871,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/7953f214-69ad-494c-97da-cb3203c107d8/subagents/agent-a1bfc3b586128a8e1.jsonl": 364912,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/7953f214-69ad-494c-97da-cb3203c107d8/subagents/agent-a3f8152351bd3f8e3.jsonl": 228817,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/7953f214-69ad-494c-97da-cb3203c107d8/subagents/agent-a77651a339743cd8c.jsonl": 403073,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/7953f214-69ad-494c-97da-cb3203c107d8/subagents/agent-a848c0cb576de9ebf.jsonl": 1223295,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/7953f214-69ad-494c-97da-cb3203c107d8/subagents/agent-a9432546bd1879a9f.jsonl": 937811,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/7953f214-69ad-494c-97da-cb3203c107d8/subagents/agent-aa2f45f9a2135efa3.jsonl": 286892,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/7953f214-69ad-494c-97da-cb3203c107d8/subagents/agent-ab6a1e50afb1de7b6.jsonl": 402745,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/7953f214-69ad-494c-97da-cb3203c107d8/subagents/agent-ac220eba136c19919.jsonl": 645113,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/7953f214-69ad-494c-97da-cb3203c107d8/subagents/agent-ac81f287cef100deb.jsonl": 263927,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/7953f214-69ad-494c-97da-cb3203c107d8/subagents/agent-adaefe6b514e3720a.jsonl": 230170
+        }
+      },
+      "usage": {
+        "source": "claude",
+        "session": "7953f214-69ad-494c-97da-cb3203c107d8",
+        "read": "message.usage on each assistant line, once per requestId",
+        "host": {
+          "claude-opus-5-5": {
+            "input": 8,
+            "output": 6335,
+            "cache_read": 708058,
+            "cache_creation": 10499
+          }
+        },
+        "subagents": {
+          "claude-opus-5-5": {
+            "input": 84,
+            "output": 1825,
+            "cache_read": 3485665,
+            "cache_creation": 175086
+          }
+        },
+        "agents": [
+          "drive-gaps",
+          "drive-skipper"
+        ]
+      },
+      "ran": [
+        "claude-opus-5-5"
+      ],
+      "agents": [
+        "drive-gaps",
+        "drive-skipper"
+      ],
+      "delegated": true,
+      "signals": {
+        "gaps": 6,
+        "driver": "cruise"
+      }
     }
   ]
 }
