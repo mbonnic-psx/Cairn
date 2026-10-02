@@ -12,6 +12,11 @@ import { Protection } from '../Protection';
 import type { PendingChange, ProtectionState } from '../../ipc';
 import { installFakeCore, type FakeCore } from './fakeCore';
 
+type NodeLikeProcess = {
+  on(event: string, listener: (...args: unknown[]) => void): void;
+  off(event: string, listener: (...args: unknown[]) => void): void;
+};
+
 const NOW_MS = 1_800_000_000_000;
 const NOW = NOW_MS / 1000;
 
@@ -76,7 +81,9 @@ describe('Keep things as they are, with nobody listening', () => {
       eligible_now: false,
     };
     const unhandled = vi.fn();
-    process.on('unhandledRejection', unhandled);
+    // Node's process, reached without the Node type definitions the app's tsconfig leaves out.
+    const proc = (globalThis as unknown as { process: NodeLikeProcess }).process;
+    proc.on('unhandledRejection', unhandled);
 
     render(<Protection state={stateAt(NOW)} pending={pending} />);
     fireEvent.click(screen.getByRole('button', { name: /keep things as they are/i }));
@@ -85,7 +92,7 @@ describe('Keep things as they are, with nobody listening', () => {
       expect(core.calls).toEqual([{ cmd: 'cancel_pending_change', args: { id: 'abc' } }]),
     );
     await new Promise((resolve) => setTimeout(resolve, 0));
-    process.off('unhandledRejection', unhandled);
+    proc.off('unhandledRejection', unhandled);
     expect(unhandled).not.toHaveBeenCalled();
   });
 });
