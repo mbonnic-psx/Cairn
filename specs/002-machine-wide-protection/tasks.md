@@ -270,6 +270,9 @@ releasable.
       per platform. The rest of quickstart.md, which needs a desktop session and a human
       at the keyboard, is still unrun.
 - [X] T100 Update `CLAUDE.md` to replace "no application code exists yet" with the real build and test commands
+- [ ] T101 Ask the core for the waiting change when protection's state is shown, and again after any change that protects less or a cancel, and pass it to Protection, in `src/App.tsx` (FR-047c, FR-047e). Today `getPendingChange` (`src/ipc/index.ts`) has no caller, so no screen shows a waiting change or "Keep things as they are". The test drives the running app's shell: a waiting change appears with its time left, and cancelling it removes it. Current's Protection then shows it too; that is this feature's change, not a break of 004's SC-009. Raised by 004 `protection-page` (004 decisions D11)
+- [ ] T102 What is protected says "You can ask for that here" and offers no way to ask (`src/screens/Trail.tsx`). Either the screen gains the control that starts a removal through the waiting period, or the sentence names only what the screen offers (Principle III). Raised by 004 `protection-page` (its tasks.md, T024)
+- [ ] T103 "Last checked" reads "1 hours ago", "1 days ago" and "60 minutes ago" at its unit boundaries (`whenWas`, `src/screens/Protection.tsx`). Fix the words in both layouts and update `src/screens/__tests__/ProtectionLastChecked.test.tsx`, which pins today's. Raised by 004 `protection-page` (its mutation.md)
 
 ---
 
