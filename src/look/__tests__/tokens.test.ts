@@ -238,9 +238,50 @@ describe('the shell contract in the stylesheet (contracts/ui-shell.md)', () => {
     expect(y % 32, 'the ruling starts 22px into the pitch, where the first line of writing sits').toBe(22);
   });
 
-  it('names no fold: the spread is two equal columns and nothing more', () => {
-    expect(notebook).not.toMatch(/--nb-fold/);
+  it('draws the fold in one place, .nb-fold, from --nb-fold', () => {
+    const reading = rules.filter((r) => /var\(--nb-fold\)/.test(r.body));
+    expect(reading).toHaveLength(1);
+    expect(reading[0]!.selector).toBe('.nb-fold');
     expect(ruleFor('.nb-spread')[0]!.body).toMatch(/grid-template-columns:\s*1fr 1fr/);
+  });
+});
+
+describe('the published shell contract says what the stylesheet and the shell do (contracts/ui-shell.md)', () => {
+  const contract = readFileSync('specs/004-notebook-landscape/contracts/ui-shell.md', 'utf8');
+  const shellSource = readFileSync('src/shell/NotebookShell.tsx', 'utf8');
+  // The scene is grouped by the table's own rows or lives in the look's sky, hills, stones and tabs.
+  const scene = /^--nb-(sky-|greeting-|hill-|shadow-|tab-|star|sun$|sun-glow$|stone-(base|moss|amber|pale)$)/;
+  const tableRows = contract.slice(contract.indexOf('| Token |'));
+
+  it('lists in its token table every token a look block defines, apart from the scene', () => {
+    const defined = new Set(
+      [...noComments(notebook).matchAll(/(--nb-[a-z-]+)\s*:/g)].map((m) => m[1]!),
+    );
+    const missing = [...defined].filter((t) => !scene.test(t) && !tableRows.includes('`' + t + '`'));
+    expect(missing, 'tokens the contract does not name').toEqual([]);
+  });
+
+  it('names every aria-hidden element the shell draws inside the notebook as the shell\'s', () => {
+    const drawn = [...shellSource.matchAll(/className="(nb-[a-z-]+)"\s+aria-hidden="true"/g)].map((m) => m[1]!);
+    expect(drawn).toEqual(expect.arrayContaining(['nb-margin', 'nb-fold']));
+    for (const name of drawn) {
+      expect(contract, `.${name} is not named`).toMatch(new RegExp('`\\.' + name + '`[^\\n]*|[^\\n]*`\\.' + name + '`'));
+      expect(contract, `.${name} is not called the shell's`).toMatch(
+        new RegExp('`\\.' + name + '`[^.]*shell|shell[^.]*`\\.' + name + '`'),
+      );
+    }
+  });
+
+  it('does not say the notebook draws no fold', () => {
+    expect(contract).not.toContain('draws no fold');
+  });
+
+  it('says the notebook is a size container whenever the stylesheet makes it one', () => {
+    const containing = [...noComments(notebook).matchAll(/([^{};]+)\{([^{}]*container-type\s*:[^{}]*)\}/g)];
+    expect(containing.some((m) => m[1]!.trim() === '.nb-notebook')).toBe(true);
+    expect(contract, 'the contract does not name container-type').toContain('container-type');
+    expect(contract).toMatch(/size container/);
+    expect(contract).toMatch(/names? its own/);
   });
 });
 

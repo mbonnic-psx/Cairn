@@ -1,0 +1,12 @@
+ RUN  v3.2.7 /home/mbonnic/Cairn-worktrees/fold-and-width
+
+ ✓ src/look/__tests__/fold.test.ts (17 tests) 11ms
+ ✓ src/look/__tests__/tokens.test.ts (175 tests) 77ms
+ ✓ src/look/__tests__/notebookSize.test.ts (20 tests) 176ms
+ ✓ src/shell/__tests__/NotebookShell.test.tsx (28 tests) 285ms
+
+ Test Files  4 passed (4)
+      Tests  240 passed (240)
+   Start at  10:10:15
+   Duration  1.43s (transform 311ms, setup 193ms, collect 563ms, tests 548ms, environment 1.46s, prepare 625ms)
+

@@ -21,6 +21,7 @@
   --nb-ink-quiet: #6b5a47;
   --nb-rule: #ebe0cb;
   --nb-margin: #c99a83;
+  --nb-fold: #e3d6bf;
   --nb-accent-amber: #7d5a22;
   --nb-button: #33291f;
   --nb-button-ink: #f8f1e3;
@@ -73,6 +74,7 @@
   --nb-ink-quiet: #6b5a47;
   --nb-rule: #e3d6bf;
   --nb-margin: #c99a83;
+  --nb-fold: #e3d6bf;
   --nb-accent-amber: #7d5a22;
   --nb-button: #33291f;
   --nb-button-ink: #f8f1e3;
@@ -124,6 +126,7 @@
   --nb-ink-quiet: #6b5a47;
   --nb-rule: #dccdb1;
   --nb-margin: #c99a83;
+  --nb-fold: #dccdb1;
   --nb-accent-amber: #7d5a22;
   --nb-button: #33291f;
   --nb-button-ink: #f1e6d0;
@@ -185,7 +188,7 @@
   position: relative;
   box-sizing: border-box;
   display: grid;
-  grid-template-columns: 250px minmax(0, 830px);
+  grid-template-columns: 250px minmax(0, min(1200px, max(830px, calc((100vh - 120px) * 830 / 680))));
   column-gap: 44px;
   justify-content: center;
   align-items: start;
@@ -339,7 +342,10 @@
 /* The notebook. */
 .nb-notebook {
   position: relative;
-  height: calc(100vh - 120px);
+  width: 100%;
+  aspect-ratio: 830 / 680;
+  container-type: size;
+  max-height: calc(100vh - 120px);
   min-height: 480px;
   background: var(--nb-paper);
   border-radius: 6px;
@@ -382,6 +388,16 @@
   left: 38px;
   width: 1px;
   background: var(--nb-margin);
+  pointer-events: none;
+}
+/* The fold: one line on the centre of the gap between the leaves, drawn by the shell, fixed while the pages scroll. */
+.nb-fold {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(50% + 6px);
+  width: 0;
+  border-left: 1px solid var(--nb-fold);
   pointer-events: none;
 }
 .nb-label {
@@ -438,7 +454,10 @@
   cursor: pointer;
   transition: filter 160ms ease;
 }
-@media (min-height: 800px) {
+/* Large tabs when the notebook itself is tall enough to hold them whole; the
+ * window's height no longer says so, because the notebook's height also
+ * follows its width. */
+@container (min-height: 580px) {
   .nb-tabs {
     top: 40px;
     gap: 6px;
@@ -512,11 +531,31 @@
     font-size: 30px;
   }
   .nb-notebook {
-    height: 100%;
+    max-height: 100%;
     min-height: 0;
   }
   .nb-page-area {
     padding: 28px 32px 28px 52px;
+  }
+  .nb-fold {
+    left: calc(50% + 10px);
+  }
+}
+
+/* A webview that does not read aspect-ratio (WebKit before Safari 15) would
+ * give the notebook no height, and the page area, which scrolls inside it,
+ * would grow to its content and be cut off by the window. The proportion is
+ * not kept there; the height is, so the pages still scroll. */
+@supports not (aspect-ratio: 1 / 1) {
+  .nb-notebook {
+    height: calc(100vh - 120px);
+  }
+}
+@supports not (aspect-ratio: 1 / 1) {
+  @media (max-width: 1099px) {
+    .nb-notebook {
+      height: 100%;
+    }
   }
 }
 
@@ -536,6 +575,9 @@
   }
   .nb-tab[aria-current='page'] {
     border-width: 3px;
+  }
+  .nb-fold {
+    border-left-color: GrayText;
   }
   .nb-landscape {
     forced-color-adjust: none;

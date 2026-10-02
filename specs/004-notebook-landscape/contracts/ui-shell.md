@@ -1,8 +1,8 @@
 # Contract — the notebook shell
 
 What the page slices (`protection-page`, `tonight-page`, `setup-pages`, `quiet-pages`) build against. Settled by
-slice `frame`, extended by slice `looks` (more `Look` values and tokens) and by `protection-page` (knowing it is on a
-page, headings), and by nothing else.
+slice `frame`, extended by slice `looks` (more `Look` values and tokens), by `protection-page` (knowing it is on a
+page, headings) and by `fold-and-width` (the fold), and by nothing else.
 
 ## Navigation
 
@@ -19,12 +19,22 @@ page, headings), and by nothing else.
   screen receives no new props from the shell.
 - A page slice that lays a screen out as two pages does so inside that screen's own component, using the shell's
   spread classes:
-  - `.nb-spread`: a grid of two equal columns (the notebook draws no fold);
+  - `.nb-spread`: a grid of two equal columns;
   - `.nb-page`: one page;
   - `.nb-page--ruled`: a page with rule lines.
 
   The margin line is the shell's, drawn once as a single `.nb-margin` element inside the notebook; it does not
   scroll with the page. A page slice never adds a `.nb-margin` of its own.
+
+  The fold is the shell's too: drawn once as a single `.nb-fold` element inside the notebook, on the centre of the gap
+  between the leaves, and it does not scroll. It is centred only if the pages keep to this: a page slice never adds a
+  fold of its own, never gives a spread unequal columns or any horizontal padding or margin, and never restyles
+  `.nb-page-area`, whose padding is the shell's.
+
+  The notebook is a size container (`container-type: size`); the tab column queries it. A page that queries a
+  container sets and names its own, and nothing on a page is fixed to the window (`position: fixed` is placed by the
+  notebook).
+
   A screen whose content fits one page leaves the right page as `.nb-page--ruled` and empty (FR-031).
 
 ## Knowing it is on a page
@@ -74,6 +84,7 @@ by every look with no change of its own:
 | `--nb-ink-quiet` | labels, captions, times |
 | `--nb-rule` | rule lines and dividers |
 | `--nb-margin` | the margin line |
+| `--nb-fold` | the fold between the pages |
 | `--nb-accent-amber` | waiting and not confirmed (text) |
 | `--nb-button` | the primary button's fill, with `--nb-button-ink` |
 | `--nb-font-serif` | headings, lists, reflective text; the same in every look, set once in the shared `[data-look]` block |
