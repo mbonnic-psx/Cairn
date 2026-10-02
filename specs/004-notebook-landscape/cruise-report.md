@@ -1,53 +1,83 @@
 # Cruise report — The notebook in the landscape (004)
 
-Written by the completion audit, iteration 6, 2026-10-02; brought up to date in iteration 7, after `loose-ends` merged, in iteration 8, after `fold-and-width`, and in iteration 10, after `board-scale`. Three `drive-gaps` reviews read the whole of `spec.md`
-against what is on `main` (frame and looks; setup and Protection pages; Today, Tonight, What Cairn covers and
-This machine is as it was).
+Written by the completion audit, iteration 6, 2026-10-02. Updated in iterations 7, 8 and 10, and rewritten in
+iteration 11 after `reveal` merged (#55). Three `drive-gaps` reviews read the whole of `spec.md` against `main`:
+the frame, looks and release; setup and Protection; and Today, Tonight, What Cairn covers and This machine is as
+it was.
 
 ## What the specification asked
 
 1. The window as a notebook resting on a landscape, with paper tabs, a greeting and the Cairn mark (US1).
-2. Three looks — morning, midday, night — behind a development-only switch that starts on Current (US2).
+2. Three looks, morning, midday and night, with a switch only in development builds (US2).
 3. Every existing screen laid out as a notebook spread, word for word, readable and usable by keyboard in every
    look (US3).
-4. Then the reveal: the notebook becomes the default, only after the owner accepts all three looks (FR-032, SC-008).
+4. Then the reveal: the notebook becomes Cairn's interface once you accept all three looks (FR-032, SC-008).
 
 ## What shipped
 
-1. `frame` (#28), `looks` (#30), `protection-page` (#31), `setup-pages` (#34), `quiet-pages` (#35),
-   `tonight-page` (#38) — six slices, every one behind the switch.
-2. `loose-ends` (#42, D26, D29–D31): the seven things the pages promised are now held by tests. What is protected's left page now scrolls inside itself, and its focus ring has room (found at its demo).
-3. `fold-and-width` (slice 9, your message after your demo, D33–D36): the fold between the pages in every look and on every screen, and a notebook that widens with the window up to 1200×983, never taller than wide, never narrower than before.
-4. `board-scale` (slice 10, your message after your demo of fold-and-width, D37–D40): the whole scene is your G-Morning board scaled to the window. The notebook fills most of a large window as on the board, the greeting sits hard left and grows (60px at 1920×1080), and the writing grows with the notebook. This replaces fold-and-width's 1200px cap.
-5. Host work: D19 (#40) — the page area takes focus, so a spread with no control scrolls from the keyboard, and
-   each screen opens at its top.
-6. The audit found no criterion unbuilt. Every requirement it read is built and almost all are held by tests.
+1. All 10 slices are merged: `frame` (#28), `looks` (#30), `protection-page` (#31), `setup-pages` (#34),
+   `quiet-pages` (#35), `tonight-page` (#38), `loose-ends` (#42), `fold-and-width` (#46), `board-scale` (#49) and
+   `reveal` (#55).
+2. **The reveal (your "go reveal", D41).**
+   - A released build opens on the morning notebook, with "Good morning." at any hour, and no switch.
+   - A development build starts on Morning, and its "Look (testing)" switch offers Morning, Midday and Night.
+   - Today's interface and the Current choice are gone, along with every screen's old one-column layout (D42).
+     The old code no longer ships, which closes frame finding R1.
+   - Keyboard users now reach the paper tabs before the page (D47). Where the tabs are drawn has not changed.
+   - Every screen's words, controls and live regions are checked against what it said before the reveal (D43).
+     A later change to a page's words is recorded as a dated change beside that record (D46).
+3. **Host work.**
+   - D19 (#40): the page area takes keyboard focus, and each screen opens at its top.
+   - After the reveal: a test now checks that a missing font falls back to the same kind of face (D49).
+4. **The audit found nothing in 004 unbuilt.**
 
 ## What is left
 
-1. **`reveal`** (slice 7) — never run by `/cruise`. It waits for your own demo of all three looks (D1). Every other slice is merged.
-2. Demo design notes for the reveal's review: the midday greeting sits on the sun at every size, as on the board; in a short wide window (1920×800) the greeting grows with the width while the writing stays today's size; the title row and testing switch do not grow; at 1920×1080 the notebook is 918px tall, a little less than fold-and-width's 960 (D38 note); a page's line holds about 77 characters (D39 note); an ultrawide window stops the notebook at 1.5× as wide as tall (D38); at 2560 the tab labels read a little small and Tonight's writing space leaves a lot of ruled page below it (fold-and-width); on midday and night the fold is the ruled lines' own colour, so on a blank page only its direction sets it apart (D34 note); at 800×600 the sun or moon and the hilltop cairn are hidden behind the notebook (looks); under forced colours the landscape keeps its painted sun, moon and hills (loose-ends).
+1. **Screens that go blank or wrong when the core fails.** These were there before the notebook, and the reveal
+   kept them word for word. They are handed to the features that own them (D48):
+   - **002, T105 (HIGH):** if Cairn cannot read protection at start, the setup page shows as if Cairn were off.
+   - **002, T106–T112:** the categories vanish when they cannot be read. A turn-on that worked returns to
+     setup. What is protected's tab does nothing, and What Cairn covers is blank, when a read fails. Two
+     setup sentences are never announced. "1 addresses". Teardown's "still here" over an empty list.
+   - **003, T081 (with T080):** Today stays on "Looking…" when its read fails. Loading and could-not-read
+     sentences are never announced.
+2. **Design notes for you to look at.**
+   - In midday the greeting sits on the sun.
+   - At 2560 wide the tab labels read small.
+   - At 800×600 the sun or moon and the hilltop cairn hide behind the notebook.
+   - Over time writes dates two ways on one page.
+   - The page area's focus ring is square on rounded paper.
+   - A screen reader hears "Protection is on" twice.
+   - In a development build the switch is the first Tab stop.
+   - The window's first colour is the morning sky in every look.
+   - In a short, wide window the greeting grows with the width, but the writing does not.
+   - An ultrawide window stops the notebook at 1.5 times as wide as tall (D38).
+3. **Proven only by screenshots so far:** the real layout at 800×600, and keyboard scrolling in the macOS and Linux
+   webview. Both wait on your choice of a browser test runner (D27, frame T024).
 
 ## Out of scope, by decision
 
-1. Tonight's loading and could-not-be-read sentences go unannounced, in Current too. Handed to 003 as T080 (D28).
-2. The waiting change is never fetched (D11) and the disclosure can be confirmed before its details (D20): 002's,
-   as T101 and T104.
-3. The clock choosing the look (FR-013a) is a later feature.
+1. The waiting change is never fetched (D11, 002 T101).
+2. The disclosure can be confirmed before its details (D20, 002 T104).
+3. The clock choosing the look is a later feature. It removes the testing switch before the first release
+   (FR-013a).
 
-## Your questions — each with a recommendation
+## Your questions, each with a recommendation
 
-1. **Choose a browser test runner for the real layout check at 800×600?** (frame T024, D27) Recommend Vitest
-   Browser Mode: it runs the tests this repository already has, in a real browser. Until you choose, the demos'
-   screenshots are the only proof of real layout.
-2. **Run the reveal demo?** Recommend yes, now that `board-scale` has merged — try a full-screen window: see morning, midday and night on every page, at
-   800×600 too, on macOS or Linux if you can — that is also the only WebKit check of D19.
+1. **See the released build yourself?** Recommended: yes. Run `npm run build && npx vite preview`, or
+   `npm run tauri dev`. The reveal's demo was run by the demo agent, not by you.
+2. **Choose a browser test runner for the real layout check?** (D27) Recommended: Vitest Browser Mode. It runs
+   the tests this repository already has, in a real browser.
+3. **Fix 002 T105 next?** Recommended: yes, before anything else in 002. A protected machine that looks
+   unprotected is the one thing here that misleads.
 
 ## Decisions you have not yet reviewed
 
-1. Every entry in `decisions.md` decided by `host` or `drive-skipper` — D3 to D31, D34 to D36 and D38 to D40. D1, D2, D32, D33 and D37 are yours.
-2. Every demo `accepted-by: drive-hand` in `slices/README.md`: looks, protection-page, setup-pages, quiet-pages,
-   tonight-page, loose-ends, fold-and-width, board-scale. You have seen `frame`, and all three looks in your own demo.
+1. Every entry in `decisions.md` decided by `host` or `drive-skipper`: D3 to D31, D34 to D36, D38 to D40, and
+   D42 to D49. D1, D2, D32, D33, D37 and D41 are yours.
+2. Every demo marked `accepted-by: drive-hand` in `slices/README.md`: looks, protection-page, setup-pages,
+   quiet-pages, tonight-page, loose-ends, fold-and-width, board-scale and reveal. You saw `frame` yourself, and
+   all three looks in your own demos.
 
 ## Architecture decisions still `Proposed`
 

@@ -164,9 +164,8 @@ together. Build a release version and confirm no switch exists anywhere in it.
 Each existing screen is laid out as a notebook spread in the chosen style, with the same
 content and behaviour it has today:
 
-- **Protection**: the state of protection on the left page; what you are protecting and the
-  way to add another address beside it, with margin notes for what it does not cover and how
-  changes that protect less wait. A change that is waiting appears as a stamped note with
+- **Protection**: the state of protection on the left page, and the screen's own words on the right, as D7 settled
+  (the canvas's address box and margin notes are not today's Protection screen, so they did not come). A change that is waiting appears as a stamped note with
   "Keep things as they are".
 - **What is protected**: the full list, ruled like an inventory.
 - **Today**: today's reaches as a typed log with times, as today.
@@ -199,8 +198,8 @@ still present and still works, now laid out as a notebook page.
 - **A small window.** Some screens have a lot of content. When the window is small, the page
   scrolls inside the notebook. The tabs stay reachable, nothing is cut off or overlaps, and
   the landscape stays behind.
-- **A very large window.** The notebook keeps a comfortable reading width and stays centred
-  on the scene. The landscape fills the rest.
+- **A very large window.** The notebook keeps a comfortable reading width and keeps the G board's place in the
+  window (FR-036; centred until board-scale, D37). The landscape fills the rest.
 - **Reduced motion.** When the person's system asks for reduced motion, nothing moves: no
   settling animation, no transition between looks, no drifting scenery.
 - **High contrast or forced colours.** Text and controls stay visible and usable. The scenery
@@ -270,7 +269,7 @@ still present and still works, now laid out as a notebook page.
 - **FR-030**: The greeting MUST show the weekday and the time in the computer's own 12- or 24-hour format, and MUST keep up with the clock to within a minute while Cairn is open. Showing the time MUST NOT change the look (FR-013).
 - **FR-031**: A screen whose content fits on one page MUST put it on the left page and leave the right page as a blank ruled page. Nothing may be invented to fill it.
 - **FR-034**: The notebook MUST show a fold: one thin line between its two pages, running its full height, in every look and on every screen, a one-page screen with a blank ruled right page included. It is drawn in each look's own fold colour (the canvas's: `#e3d6bf` on the morning and midday paper, `#dccdb1` on night's lamp-lit paper), stays put while the pages scroll, is silent to assistive technology, and stays visible under forced colours.
-- **FR-035**: The notebook MUST stay landscape at every window size, never taller than it is wide, and MUST grow wider with the window up to 1200px wide (983px tall, the canvas's 830:680). Its width is the smallest of the room beside the greeting (or under it, in a narrow window), 1200px, and the larger of its width before this rule (830px beside the greeting, the full room under it) and (window height − 120px) × 830/680; its height is the smaller of the room left and its width × 680/830. At 1280×800 it is 830×680, as on the canvas. Above the cap the greeting, the notebook and the tabs stay together, centred side to side on the scene; the notebook's top and the greeting keep their places (D35, D36). Where the greeting sits beside the notebook, FR-036 sets the notebook's size and place instead of this rule's width, cap and centring; "never taller than it is wide" still holds there (D37).
+- **FR-035**: The notebook MUST stay landscape at every window size, never taller than it is wide. Where the greeting sits beside it, FR-036 governs its size and place (D37); the rest of this requirement holds in the narrow layout. It MUST grow wider with the window up to 1200px wide (983px tall, the canvas's 830:680). Its width is the smallest of the room beside the greeting (or under it, in a narrow window), 1200px, and the larger of its width before this rule (830px beside the greeting, the full room under it) and (window height − 120px) × 830/680; its height is the smaller of the room left and its width × 680/830. At 1280×800 it is 830×680, as on the canvas. Above the cap the greeting, the notebook and the tabs stay together, centred side to side on the scene; the notebook's top and the greeting keep their places (D35, D36). Where the greeting sits beside the notebook, FR-036 sets the notebook's size and place instead of this rule's width, cap and centring; "never taller than it is wide" still holds there (D37).
 - **FR-036**: Where the greeting sits beside the notebook, the scene MUST be the G-Morning board (1280×800) scaled to the window, not a fixed-size notebook in a bigger window. Measured against the window: the notebook's left edge at 350/1280 of its width and its top at 70/800 of its height, 830/1280 of its width wide and 680/800 of its height tall; the paper tabs hanging off its right edge, about 44px past it at 1280, scaled; the greeting hard left in the sky, 56/1280 of the width from the left edge and about 88/800 of the height from the top, in a column about 250/1280 wide, its "Good morning." 40px at 1280×800 and growing with the window (about 60px at 1920×1080), the weekday-and-time line and the sentence under it growing with it; the sun, the hills and the cairn in the same places relative to the window as on the board. Type and spacing inside the notebook grow with the notebook, never below their sizes before this rule, with growth capped so a page's line stays comfortable to read. At 1280×800 the scene matches the board; at 1920×1080 and 2560×1440 it looks like the board, larger. The notebook's width is the smaller of 830/1280 of the window's width and 1.5 × its height, and its height the smaller of 680/800 of the window's height and its width × 680/830 (D38). Everything inside it grows by one factor, the smaller of its width/830 and its height/680, never below 1 nor above 2; 1px lines stay 1px; a page's text column is never wider than about 75 characters at its type size (D39). The 800×600 minimum and the narrow layout (greeting above the notebook, under 1100px wide) stay as they were, nothing cut off (D37, D38, D39).
 
 **What must not change**
@@ -291,7 +290,7 @@ still present and still works, now laid out as a notebook page.
 - **SC-003**: 100% of text in every look meets the contrast floor of FR-021, measured against the colour directly behind it.
 - **SC-004**: A keyboard-only user can reach every tab and every control on every screen and see where focus is, in all three looks.
 - **SC-005**: Showing the interface makes zero network requests.
-- **SC-006**: All eight constitutional guards and every existing interface test pass, with no guard changed. Tests are changed only where they asserted the old appearance, never what a screen says or does.
+- **SC-006**: All eight constitutional guards and every existing interface test pass, with no guard changed. Tests are changed only where they asserted the old appearance, never what a screen says or does. At the reveal the tests that held today's interface itself were retired, after what they held moved onto the notebook page (D43).
 - **SC-007**: With reduced motion requested, nothing in the interface moves.
 - **SC-008**: The owner, comparing each look against the reference canvas boards, accepts it as the chosen design.
 - **SC-009**: Until the reveal, a released build, and a development build with the switch on Current, look and behave exactly as before this feature. Every existing interface test passes against them unchanged.
