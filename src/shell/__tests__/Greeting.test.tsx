@@ -131,6 +131,30 @@ describe('Greeting', () => {
     });
   });
 
+  it('leaves exactly one pending timer after a refresh', () => {
+    render(<Greeting />);
+    expect(vi.getTimerCount()).toBe(1);
+    act(() => {
+      window.dispatchEvent(new Event('focus'));
+    });
+    expect(vi.getTimerCount()).toBe(1);
+  });
+
+  it('wakes exactly when the minute turns, from a clock with milliseconds', () => {
+    vi.setSystemTime(new Date(2026, 9, 1, 7, 48, 30, 500));
+    render(<Greeting />);
+    const before = formatWeekdayTime(new Date(2026, 9, 1, 7, 48));
+    const after = formatWeekdayTime(new Date(2026, 9, 1, 7, 49));
+    act(() => {
+      vi.advanceTimersByTime(29_499);
+    });
+    expect(screen.getByText(before)).toBeInTheDocument();
+    act(() => {
+      vi.advanceTimersByTime(1);
+    });
+    expect(screen.getByText(after)).toBeInTheDocument();
+  });
+
   it('shows no count, badge or streak', () => {
     const { container } = render(<Greeting />);
     expect(container.textContent).not.toMatch(/streak|badge|\bday \d|\bchain\b|reach/i);

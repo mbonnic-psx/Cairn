@@ -22,3 +22,12 @@ describe('contrastRatio', () => {
     expect(contrastRatio('#FFF', '#000')).toBeCloseTo(21, 5)
   })
 })
+
+describe('contrastRatio on malformed colours', () => {
+  it.each(['12#3456', 'zz112233', '112233zz', '12345', '', '#12345g'])(
+    'throws for %j',
+    (bad) => {
+      expect(() => contrastRatio(bad, '#ffffff')).toThrow(/Not a hex colour/)
+    },
+  )
+})
