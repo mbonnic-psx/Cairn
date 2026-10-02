@@ -92,7 +92,7 @@ describe('the way back', () => {
     expect(screen.getByRole('button', { name: 'Today' })).toBeInTheDocument();
   });
 
-  it('offers no protected-only items before protection is on', async () => {
+  it('offers Today before protection is on, and not What is protected', async () => {
     vi.mocked(ipc.getProtectionState).mockResolvedValue(state('off'));
     render(<App />);
 
@@ -100,6 +100,8 @@ describe('the way back', () => {
     await userEvent.click(screen.getByRole('button', { name: 'What Cairn covers' }));
 
     expect(screen.queryByRole('button', { name: 'What is protected' })).toBeNull();
-    expect(screen.queryByRole('button', { name: 'Today' })).toBeNull();
+    // A person's reaches are theirs whether protection is on now or not
+    // (owner, 2026-10-01, in the history-by-site demo).
+    expect(screen.getByRole('button', { name: 'Today' })).toBeInTheDocument();
   });
 });

@@ -4,7 +4,7 @@
  * The clock is faked and moved on between presses, so "the next morning" is
  * real to the screen without a test waiting for it.
  */
-import { act, render, screen } from '@testing-library/react';
+import { act, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -151,7 +151,10 @@ describe('unsaved writing stays on the day it was written for', () => {
     expect(
       screen.getByText('Nothing here for Wednesday 30 September.'),
     ).toBeInTheDocument();
-    expect(screen.queryByText(/today/i)).not.toBeInTheDocument();
+    // The check-in itself no longer says today; the header's "Today" button
+    // leads to the reaches screen and is not a claim about this day.
+    const checkIn = document.querySelector('main > div') as HTMLElement;
+    expect(within(checkIn).queryByText(/today/i)).not.toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: /keep/i }));
     expect(save).toHaveBeenCalledWith(

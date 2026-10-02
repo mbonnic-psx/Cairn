@@ -27,7 +27,9 @@ export function tabsFor(step: Step, protectionOn: boolean, status?: ProtectionSt
   const all: Array<[TabId, string, boolean]> = [
     ['protection', 'Protection', true],
     ['trail', trailTitle(status), protectionOn],
-    ['reaches', 'Today', protectionOn],
+    // Always offered: a person's reaches are theirs whether protection is on
+    // now or not (owner, 2026-10-01, history-by-site demo).
+    ['reaches', 'Today', true],
     ['checkin', 'Tonight', true],
     ['limits', 'What Cairn covers', true],
   ];

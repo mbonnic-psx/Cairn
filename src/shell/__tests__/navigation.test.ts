@@ -15,8 +15,10 @@ describe('tabsFor', () => {
     expect(tabsFor('trail', true).map((t) => t.label)).toEqual(tabsFor('trail', true, undefined).map((t) => t.label));
   });
 
-  it('offers only protection, tonight and what cairn covers while protection is off, in header order', () => {
-    expect(ids('choosing', false)).toEqual(['protection', 'checkin', 'limits']);
+  // Today is offered whether protection is on or not: a person's reaches are
+  // theirs either way (owner, 2026-10-01, history-by-site demo).
+  it('offers protection, today, tonight and what cairn covers while protection is off, in header order', () => {
+    expect(ids('choosing', false)).toEqual(['protection', 'reaches', 'checkin', 'limits']);
   });
 
   it('adds the trail and today after protection, once protection is on', () => {
@@ -34,6 +36,7 @@ describe('tabsFor', () => {
     expect(tabsFor('protected', true, 'not_verified')[1].label).toBe('What you chose');
     expect(tabsFor('choosing', false).map((t) => t.label)).toEqual([
       'Protection',
+      'Today',
       'Tonight',
       'What Cairn covers',
     ]);
