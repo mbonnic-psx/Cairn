@@ -37,8 +37,8 @@ Committed mockups of the white-box states: not applicable here, for the reason q
 
 ## Design review
 
-Designed: (written by `/drive`'s Screen design rung, over T006 and T008)
-Reviewed: (written by `/drive`'s Design review rung, over What is protected and the setup and Protection spreads)
+Designed: T006 rings What is protected's left leaf with the page area's own ring (2px `--nb-ink`, offset -4px, inside the leaf's edge, so the ring lies on the paper it is measured against in morning, midday and night; no new colour, no motion); the leaf is a labelled region so a screen reader names it by the heading already there. T008 adds a 1px `CanvasText` border only inside `@media (forced-colors: active)` to the three setup buttons and Protection's note button, so nothing moves outside forced colours. T007's plain button keeps the shared one's box (10px 20px, 8px radius, weight 500, same line), so no layout changes.
+Reviewed: no browser review was run from this delegate; the tests are the evidence (leaf tab stop, name and ring read from the sheet; forced-colours edge on every control of both spreads in every state; no fading class anywhere) and the demo checks the ring and the forced-colours edge by eye.
 
 ## Dependencies and order
 
