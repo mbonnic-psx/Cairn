@@ -344,6 +344,7 @@
   position: relative;
   width: 100%;
   aspect-ratio: 830 / 680;
+  container-type: size;
   max-height: calc(100vh - 120px);
   min-height: 480px;
   background: var(--nb-paper);
@@ -453,7 +454,10 @@
   cursor: pointer;
   transition: filter 160ms ease;
 }
-@media (min-height: 800px) {
+/* Large tabs when the notebook itself is tall enough to hold them whole; the
+ * window's height no longer says so, because the notebook's height also
+ * follows its width. */
+@container (min-height: 580px) {
   .nb-tabs {
     top: 40px;
     gap: 6px;

@@ -124,7 +124,7 @@ describe('the notebook never narrows, never stands upright, and widens with the 
     [1100, 600, 650, 480],
     [1920, 800, 830, 680],
     [1920, 1080, 1171.8, 960],
-    [2560, 1440, 1200, 983] /* 1200 x 680 / 830 = 983.1; the specification says 982 */,
+    [2560, 1440, 1200, 983] /* 1200 x 680 / 830 = 983.1; the specification says 983 */,
     [1280, 1400, 830, 680],
     [3840, 2160, 1200, 983],
   ];
@@ -151,5 +151,89 @@ describe('the notebook never narrows, never stands upright, and widens with the 
     const s = size(w, h);
     expect(s.width).toBe(w - 80);
     expect(s.height).toBeLessThanOrEqual((s.width * 680) / 830 + 0.001);
+  });
+});
+
+// The tab column (T008). Each tab is a flex item that may shrink, so a label is whole only if the tab it ends
+// in is at least as tall as the label's longest word.
+describe('the tab column fits the notebook at every window the model covers (FR-035)', () => {
+  const tabRule = (text: string) => ruleIn(text, '.nb-tab');
+  const largeHeader = css.match(/@(media|container)\s*\(min-height:\s*(\d+)px\)\s*\{(?=[\s\S]*?min-height:\s*80px)/);
+  const largeBlock = largeHeader ? blocksOf(css, new RegExp(largeHeader[0].replace(/[()]/g, '\\$&'))).find((b) => /min-height:\s*80px/.test(b)) ?? '' : '';
+  const largeFrom = Number(largeHeader?.[2]);
+  const keyedTo = largeHeader?.[1]; // 'media' (the window) or 'container' (the notebook)
+
+  const advance = (ruleBody: Rule | undefined, font: number) => {
+    const ls = Number(declOf(ruleBody, 'letter-spacing')?.match(/^([\d.]+)em$/)?.[1]);
+    return 0.6 * font + ls * font; // a monospace glyph is 0.6em wide
+  };
+  const smallRule = tabRule(css.replace(largeBlock, ''));
+  const largeRule = tabRule(largeBlock);
+  const labels = ['Protection', 'What is protected', 'Today', 'Tonight', 'What Cairn covers'];
+  const longest = (l: string) => Math.max(...l.split(' ').map((w) => w.length));
+
+  const small = { adv: advance(smallRule, 11), pad: 8, gap: 4, top: 12, floorMin: 0, wrapAt: 76 };
+  const large = { adv: advance(largeRule, 12), pad: 10, gap: 6, top: 40, floorMin: 80, wrapAt: Infinity };
+
+  /** Final tab heights after flex-shrink (weighted by base size, clamped at each floor). */
+  function tabs(mode: typeof small, available: number): number[] {
+    const base = labels.map((l) => Math.min(l.length * mode.adv, mode.wrapAt) + 2 * mode.pad);
+    // min-height: 80px replaces min-height: min-content in the large rules.
+    const floor = labels.map((l) => (mode.floorMin > 0 ? mode.floorMin : longest(l) * mode.adv + 2 * mode.pad));
+    let size = base.map((b) => Math.max(b, 0));
+    let frozen = size.map(() => false);
+    for (let pass = 0; pass < 6; pass++) {
+      const free = available - mode.gap * (labels.length - 1) - size.reduce((a, b) => a + b, 0);
+      if (free >= 0) break;
+      const weight = size.reduce((a, b, i) => a + (frozen[i] ? 0 : b), 0);
+      let clamped = false;
+      size = size.map((b, i) => {
+        if (frozen[i]) return b;
+        const next = b + (free * b) / weight;
+        if (next < floor[i]!) {
+          frozen[i] = true;
+          clamped = true;
+          return floor[i]!;
+        }
+        return next;
+      });
+      if (!clamped) break;
+    }
+    return size;
+  }
+
+  function fits(w: number, h: number): string | null {
+    const nbHeight = size(w, h).height;
+    const isLarge = keyedTo === 'container' ? nbHeight >= largeFrom : h >= largeFrom;
+    const mode = isLarge ? large : small;
+    const available = nbHeight - mode.top - 12;
+    const final = tabs(mode, available);
+    const total = final.reduce((a, b) => a + b, 0) + mode.gap * (labels.length - 1);
+    if (total > available + 0.5) return `tabs ${total.toFixed(0)} do not fit ${available.toFixed(0)}`;
+    const cut = labels.findIndex((l, i) => final[i]! + 0.5 < longest(l) * mode.adv);
+    if (cut >= 0) return `${labels[cut]} is ${(longest(labels[cut]!) * mode.adv).toFixed(0)} in a ${final[cut]!.toFixed(0)} tab`;
+    return null;
+  }
+
+  it('the model reproduces the measured case: Protection runs past its tab at 1100x800', () => {
+    expect(largeHeader, 'a min-height block holding the large tab rules').not.toBeNull();
+    expect(Math.abs(large.adv - 8.16)).toBeLessThan(0.01);
+    expect(Math.abs(small.adv - 7.15)).toBeLessThan(0.01);
+  });
+
+  it('keeps every tab whole in every window of the grid', () => {
+    const bad: string[] = [];
+    for (let w = 800; w <= 3840; w += 20) {
+      for (let h = 600; h <= 2160; h += 20) {
+        const why = fits(w, h);
+        if (why) bad.push(`${w}x${h}: ${why}`);
+      }
+    }
+    expect(bad.slice(0, 12), `${bad.length} windows`).toEqual([]);
+  });
+
+  it('is keyed to the notebook\'s own height, which the window no longer fixes', () => {
+    expect(keyedTo).toBe('container');
+    expect(declOf(nb, 'container-type')).toBe('size');
   });
 });
