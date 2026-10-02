@@ -116,43 +116,54 @@ export default function App({ devBuild = import.meta.env.DEV }: { devBuild?: boo
     }
   }
 
-  const Shell = look === 'current' ? CurrentShell : NotebookShell;
   const tabs = tabsFor(step, protectionOn, state?.status);
+  const onSelect = (id: TabId) => void select(id);
+
+  const screen = (
+    <>
+      {step === 'choosing' && (
+        <>
+          <Categories categories={categories} onToggle={toggle} note={note} />
+          <CustomEntry />
+          <div className="flex justify-end">
+            <Button onClick={() => setStep('disclosure')}>Turn protection on</Button>
+          </div>
+        </>
+      )}
+
+      {step === 'disclosure' && (
+        <Disclosure
+          disclosures={disclosures}
+          onConfirm={confirm}
+          onBack={() => setStep('choosing')}
+        />
+      )}
+
+      {step === 'protected' && <Protection state={state} />}
+
+      {step === 'trail' && trail && <Trail trail={trail} status={state?.status} />}
+
+      {step === 'reaches' && <Reaches />}
+
+      {step === 'checkin' && <CheckIn session={checkIn} />}
+
+      {step === 'limits' && disclosures && <Limits disclosures={disclosures} />}
+    </>
+  );
 
   return (
     <>
       {/* `import.meta.env.DEV` is a build-time constant, so the bundler drops the switch from a production build. */}
       {import.meta.env.DEV && devBuild && <LookSwitch look={look} onChange={setLook} />}
-      {/* CurrentShell ignores `look`; the spread keeps one stable Shell so a change of look never remounts the screen. */}
-      <Shell tabs={tabs} onSelect={(id) => void select(id)} {...{ look }}>
-        {step === 'choosing' && (
-          <>
-            <Categories categories={categories} onToggle={toggle} note={note} />
-            <CustomEntry />
-            <div className="flex justify-end">
-              <Button onClick={() => setStep('disclosure')}>Turn protection on</Button>
-            </div>
-          </>
-        )}
-
-        {step === 'disclosure' && (
-          <Disclosure
-            disclosures={disclosures}
-            onConfirm={confirm}
-            onBack={() => setStep('choosing')}
-          />
-        )}
-
-        {step === 'protected' && <Protection state={state} />}
-
-        {step === 'trail' && trail && <Trail trail={trail} status={state?.status} />}
-
-        {step === 'reaches' && <Reaches />}
-
-        {step === 'checkin' && <CheckIn session={checkIn} />}
-
-        {step === 'limits' && disclosures && <Limits disclosures={disclosures} />}
-      </Shell>
+      {look === 'current' ? (
+        <CurrentShell tabs={tabs} onSelect={onSelect}>
+          {screen}
+        </CurrentShell>
+      ) : (
+        <NotebookShell tabs={tabs} onSelect={onSelect} look={look}>
+          {screen}
+        </NotebookShell>
+      )}
     </>
   );
 }

@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
-import type { Look } from '../../look/look';
+import type { NotebookLook } from '../../look/look';
 import type { Tab } from '../../navigation';
 import { tabsFor } from '../../navigation';
 import { NotebookShell } from '../NotebookShell';
@@ -15,7 +15,7 @@ const fakeTabs: Tab[] = [
   { id: 'checkin', label: 'Tonight', current: false },
 ];
 
-function shell(tabs: Tab[] = fakeTabs, onSelect = vi.fn(), look: Look = 'morning') {
+function shell(tabs: Tab[] = fakeTabs, onSelect = vi.fn(), look: NotebookLook = 'morning') {
   const view = render(
     <NotebookShell tabs={tabs} onSelect={onSelect} look={look}>
       <p>the screen</p>
@@ -157,5 +157,16 @@ describe('NotebookShell tab labels on every webview', () => {
       const label = button.querySelector(':scope > .nb-tab-label');
       expect(label?.textContent).toBe(button.textContent);
     }
+  });
+});
+
+describe('NotebookShell looks', () => {
+  it('admits only the three notebook looks (type-level, proved by tsc)', () => {
+    render(
+      // @ts-expect-error Current is not a notebook look (contracts/ui-shell.md, FR-013b)
+      <NotebookShell tabs={fakeTabs} onSelect={vi.fn()} look="current">
+        <p>x</p>
+      </NotebookShell>,
+    );
   });
 });

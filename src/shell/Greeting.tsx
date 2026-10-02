@@ -6,9 +6,9 @@
  */
 import { useEffect, useState } from 'react';
 
-import { formatWeekdayTime, greetingFor, type Look } from '../look/look';
+import { formatWeekdayTime, greetingFor, type NotebookLook } from '../look/look';
 
-export function Greeting({ look }: { look: Look }) {
+export function Greeting({ look }: { look: NotebookLook }) {
   const [now, setNow] = useState(() => new Date());
 
   useEffect(() => {

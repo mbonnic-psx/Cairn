@@ -5,7 +5,7 @@
  */
 import type { ReactNode } from 'react';
 
-import type { Look } from '../look/look';
+import type { NotebookLook } from '../look/look';
 import type { Tab, TabId } from '../navigation';
 import { CairnMark } from './CairnMark';
 import { Greeting } from './Greeting';
@@ -19,7 +19,7 @@ export function NotebookShell({
 }: {
   tabs: Tab[];
   onSelect: (id: TabId) => void;
-  look: Look;
+  look: NotebookLook;
   children: ReactNode;
 }) {
   return (
