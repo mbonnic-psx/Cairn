@@ -622,3 +622,118 @@ mod seen_properties {
         }
     }
 }
+
+// --- Scenarios 13 to 16: a row Cairn saw only part of ------------------------------------
+
+#[test]
+fn a_24_hour_gap_from_autumns_midnight_leaves_that_row_part_and_the_next_whole() {
+    let rows = autumn(&[(1_792_882_800, 1_792_969_200)], &[]);
+
+    assert_eq!(row_of(&rows, date(2026, 10, 25)).seen, Seen::Part);
+    assert_eq!(row_of(&rows, date(2026, 10, 26)).seen, Seen::Whole);
+}
+
+#[test]
+fn a_24_hour_gap_from_springs_midnight_leaves_that_row_none_and_the_next_part() {
+    let rows = spring(&[(1_774_742_400, 1_774_828_800)]);
+
+    assert_eq!(row_of(&rows, date(2026, 3, 29)).seen, Seen::None);
+    assert_eq!(row_of(&rows, date(2026, 3, 30)).seen, Seen::Part);
+}
+
+#[test]
+fn a_gap_over_the_last_two_hours_of_yesterday_leaves_it_part_and_today_whole() {
+    let midnight = 1_790_895_600;
+    let rows = four_weeks(&[(midnight - 2 * HOUR, midnight)], &[], NOW);
+
+    assert_eq!(row_of(&rows, date(2026, 10, 1)).seen, Seen::Part);
+    assert_eq!(row_of(&rows, date(2026, 10, 2)).seen, Seen::Whole);
+}
+
+#[test]
+fn a_row_holding_a_reach_inside_a_gap_over_all_of_it_is_part_with_its_count() {
+    // 2026-09-07 00:00 BST to 2026-09-08 00:00 BST, and a reach at noon.
+    let (begins, ends) = (1_788_735_600, 1_788_822_000);
+    let rows = four_weeks(&[(begins, ends)], &reaches(&[begins + 12 * HOUR]), NOW);
+
+    let day = row_of(&rows, date(2026, 9, 7));
+    assert_eq!((day.seen, day.count), (Seen::Part, 1));
+    assert_eq!(row_of(&rows, date(2026, 9, 6)).seen, Seen::Whole);
+}
+
+#[test]
+fn a_week_with_a_gap_over_two_of_its_seven_dates_is_part() {
+    let range = LocalRange {
+        first_day: date(2026, 8, 7),
+        last_day: date(2026, 10, 2),
+        from: 1_786_057_200,
+        to: 1_790_982_000,
+        first_offset: 3600,
+        changes: &[],
+    };
+    let third_date = 1_786_057_200 + 2 * DAY;
+    let rows = movement(&[], &range, &[(third_date, third_date + 2 * DAY)], NOW);
+
+    assert_eq!(rows[0].seen, Seen::Part);
+    assert_eq!(rows[1].seen, Seen::Whole);
+}
+
+#[test]
+fn the_goose_bay_date_under_a_gap_over_the_whole_range_is_part() {
+    let changes = [OffsetChange {
+        from: 1_289_098_860,
+        offset_seconds: -14_400,
+    }];
+    let day = date(2010, 11, 7);
+    let range = LocalRange {
+        first_day: day,
+        last_day: day,
+        from: 1_289_098_800,
+        to: 1_289_188_800,
+        first_offset: -10_800,
+        changes: &changes,
+    };
+    let rows = movement(
+        &reaches(&[1_289_100_600, 1_289_149_200]),
+        &range,
+        &[(1_289_098_800, 1_289_188_800)],
+        1_289_188_800,
+    );
+
+    assert_eq!(rows.len(), 1);
+    assert_eq!((rows[0].seen, rows[0].count), (Seen::Part, 2));
+}
+
+mod holding_a_reach {
+    use super::*;
+    use proptest::prelude::*;
+
+    proptest! {
+        #[test]
+        fn no_row_holding_a_reach_is_none(
+            gaps in proptest::collection::vec((0i64..2_419_000, 1i64..2_000_000), 0..5),
+            instants in proptest::collection::vec(1_788_562_800i64..1_790_967_600, 0..20),
+        ) {
+            let mut pairs: Vec<(i64, i64)> = gaps
+                .into_iter()
+                .map(|(from, length)| {
+                    (1_788_562_800 + from, (1_788_562_800 + from + length).min(1_790_982_000))
+                })
+                .collect();
+            pairs.sort_unstable();
+            let mut merged: Vec<(i64, i64)> = Vec::new();
+            for (from, to) in pairs {
+                match merged.last_mut() {
+                    Some(last) if from <= last.1 => last.1 = last.1.max(to),
+                    _ => merged.push((from, to)),
+                }
+            }
+
+            let rows = four_weeks(&merged, &reaches(&instants), NOW);
+
+            for row in rows {
+                prop_assert!(row.count == 0 || row.seen != Seen::None);
+            }
+        }
+    }
+}

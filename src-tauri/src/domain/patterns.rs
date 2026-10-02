@@ -424,8 +424,15 @@ pub fn movement(
     if !unseen.is_empty() {
         let seen = coverage(range, dates, length, rows.len(), unseen, now);
         for (row, (seeable, unseen_part)) in rows.iter_mut().zip(seen) {
-            if seeable > 0 && unseen_part >= seeable {
-                row.seen = Seen::None;
+            // Any unseen second is a part unseen, and a reach is proof that
+            // Cairn saw its instant, so a row holding one is never none.
+            if unseen_part > 0 {
+                let all = unseen_part >= seeable;
+                row.seen = if all && row.count == 0 {
+                    Seen::None
+                } else {
+                    Seen::Part
+                };
             }
         }
     }

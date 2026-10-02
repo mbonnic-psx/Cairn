@@ -707,6 +707,102 @@ mod with_history {
         assert!(elapsed.as_millis() < 1_000, "took {elapsed:?}");
     }
 
+    // Scenario 15, the first part
+    #[test]
+    fn a_gap_over_the_last_two_hours_of_yesterday_leaves_it_partly_seen() {
+        let setup = setup();
+        let history = seed(&setup.data);
+        let midnight = 1_790_895_600;
+        history
+            .record_gap(&CoverageGap {
+                from: midnight - 2 * HOUR,
+                to: midnight,
+            })
+            .unwrap();
+        let state = app(&setup, &Keychain::available());
+
+        let patterns = Range::four_weeks().ask(&state);
+
+        assert_eq!(patterns.movement[26].seen, Seen::Part);
+        assert_eq!(patterns.movement[27].seen, Seen::Whole);
+        assert_eq!(patterns.movement[25].seen, Seen::Whole);
+    }
+
+    // Scenario 16
+    #[test]
+    fn a_reach_recorded_inside_a_gap_over_its_whole_date_is_partly_seen_never_not_seen() {
+        let setup = setup();
+        let history = seed(&setup.data);
+        let (begins, ends) = (1_788_735_600, 1_788_822_000); // 2026-09-07 in BST
+        history.record("a.example", begins + 12 * HOUR).unwrap();
+        history
+            .record_gap(&CoverageGap {
+                from: begins,
+                to: ends,
+            })
+            .unwrap();
+        let state = app(&setup, &Keychain::available());
+
+        let patterns = Range::four_weeks().ask(&state);
+
+        let day = patterns.movement[2];
+        assert_eq!(named(&day), "2026-09-07");
+        assert_eq!((day.seen, day.count), (Seen::Part, 1));
+    }
+
+    #[test]
+    fn a_week_with_a_gap_over_two_of_its_dates_is_partly_seen() {
+        let setup = setup();
+        let history = seed(&setup.data);
+        let weekly = Range::new("2026-08-07", "2026-10-02", HOUR, HOUR, &[]);
+        history
+            .record_gap(&CoverageGap {
+                from: weekly.start + 2 * DAY,
+                to: weekly.start + 4 * DAY,
+            })
+            .unwrap();
+        let state = app(&setup, &Keychain::available());
+
+        let patterns = weekly.ask(&state);
+
+        assert_eq!(patterns.movement[0].seen, Seen::Part);
+        assert_eq!(patterns.movement[1].seen, Seen::Whole);
+    }
+
+    // Scenario 12, the second part
+    #[test]
+    fn the_goose_bay_date_under_a_gap_over_the_whole_range_is_partly_seen() {
+        let setup = setup();
+        let history = seed(&setup.data);
+        history.record("a.example", 1_289_100_600).unwrap();
+        history.record("a.example", 1_289_149_200).unwrap();
+        history
+            .record_gap(&CoverageGap {
+                from: 1_289_098_800,
+                to: 1_289_188_800,
+            })
+            .unwrap();
+        let state = app_at(&setup, &Keychain::available(), || 1_289_190_000);
+
+        let patterns = state.summarize_reaches(
+            date("2010-11-07"),
+            date("2010-11-07"),
+            1_289_098_800,
+            1_289_188_800,
+            &[
+                change(1_289_098_800, -10_800),
+                change(1_289_098_860, -14_400),
+            ],
+        );
+
+        assert_eq!(patterns.sealed, None);
+        assert_eq!(patterns.movement.len(), 1);
+        assert_eq!(
+            (patterns.movement[0].seen, patterns.movement[0].count),
+            (Seen::Part, 2)
+        );
+    }
+
     // Scenario 21
     #[test]
     fn a_range_that_cannot_be_placed_is_sealed_with_no_rows() {
