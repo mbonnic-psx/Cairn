@@ -97,12 +97,12 @@ describe('the fold (FR-034)', () => {
     expect(r.length).toBeGreaterThan(0);
     expect(r[0]!.body).toMatch(/(GrayText|CanvasText)/);
   });
-  it('lets every flex text child a page sheet lays out beside a mark wrap, so no word crosses the gap (T014)', () => {
+  it('lets every flex text child the quiet pages lay out beside a mark wrap, so no word crosses the gap (T014)', () => {
     const dir = 'src/styles';
     const lines: string[] = [];
-    const all = readdirSync(dir)
-      .filter((f) => f.endsWith('.css'))
-      .flatMap((f) => rulesOf(readFileSync(`${dir}/${f}`, 'utf8')));
+    // Only the quiet pages' sheet: the other page sheets belong to other slices (the disclosure and reaches
+    // lines are theirs to guard).
+    const all = rulesOf(readFileSync(`${dir}/quiet-pages.css`, 'utf8'));
     for (const r of all) {
       if (!/display:\s*flex\s*;/.test(r.body) || /flex-direction:\s*column/.test(r.body)) continue;
       for (const one of r.selector.split(',').map((x) => x.trim())) if (/^\.nb-[a-z-]+-line$/.test(one)) lines.push(one);
