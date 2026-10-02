@@ -317,3 +317,45 @@ describe('when it cannot be shown (scenario 38)', () => {
     expectNoVerdict();
   });
 });
+
+describe('the estimates sentence (scenarios 30, 36)', () => {
+  const reasonFor = (days: number) =>
+    days === 1
+      ? 'Your own estimate for 1 day is not counted here, because Cairn counts only what it saw.'
+      : `Your own estimates for ${days} days are not counted here, because Cairn counts only what it saw.`;
+
+  it.each([2, 1])('says it for %i estimated days, in the singular for 1', async (days) => {
+    const { read } = fakeRead(async () => patterns({ estimates_excluded: days }));
+    await openDayByDay(read);
+    await waitFor(() => expect(lines()).toHaveLength(28));
+
+    expect(screen.getByText(reasonFor(days))).toBeInTheDocument();
+    expectNoVerdict();
+  });
+
+  it('says nothing about estimates when there are none', async () => {
+    const { read } = fakeRead(async () => patterns({ estimates_excluded: 0 }));
+    await openDayByDay(read);
+    await waitFor(() => expect(lines()).toHaveLength(28));
+
+    expect(text()).not.toMatch(/estimate/i);
+  });
+
+  it('leaves By site and By hour with their own reasons', async () => {
+    const { read } = fakeRead(async () => patterns({ estimates_excluded: 2 }));
+    const { user } = await openOverTime(read);
+    await screen.findByText('a.example');
+    expect(
+      screen.getByText(
+        'Your own estimates for 2 days are not counted here, because an estimate has no site.',
+      ),
+    ).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'By hour' }));
+    expect(
+      screen.getByText(
+        'Your own estimates for 2 days are not counted here, because an estimate has no hour.',
+      ),
+    ).toBeInTheDocument();
+  });
+});
