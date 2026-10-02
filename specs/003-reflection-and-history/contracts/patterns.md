@@ -88,6 +88,37 @@ the offset in force at its instant. Checking that the changes increase is the ca
 (`reflection::over_time::check_offsets`), not this module's. `crosses_offset_change` stays, but it no longer feeds
 `dst_approximate` (`ui-ipc.md`, amended the same day). See `slices/history-by-hour/plan.md`, *The hour*.
 
+#### Amended in slice `history-by-weekday` (2026-10-02)
+
+Gaps review W5 decides a reach belongs to the local day its own instant falls in, by the offset in force then, as
+B4 decides for hours. W4 decides the screen states how many of each weekday the range holds. Two functions are added
+beside `by_hour`. `summarize` and `by_hour` are unchanged in behaviour:
+
+```rust
+pub fn by_weekday(
+    reaches: &[Reach],
+    first_offset: i32,
+    changes: &[OffsetChange],
+    from: i64,
+    to: i64,
+) -> [u32; 7]                                   // index = LocalDate::weekday, 0 = Monday … 6 = Sunday
+
+pub fn weekdays_in(first_day: LocalDate, last_day: LocalDate) -> [u32; 7]
+```
+
+`by_weekday` gives each reach in `[from, to)` the offset `by_hour` would give it. The two share one private lookup,
+so they cannot disagree. It counts the reach under the weekday of its local day, `(at + offset).div_euclid(86 400)`,
+the day rule above. Properties 1, 2, 4, 5 and 6 hold for it as they do for `summarize`. Its total equals `by_hour`'s
+for the same arguments. With no changes, it equals `summarize(...).by_weekday` for `first_offset`.
+
+`weekdays_in` counts the weekdays of the dates `first_day..=last_day`. With `n` days, each weekday gets `n / 7`, and
+the `n % 7` days from `first_day`'s weekday onwards get one more. It is computed in `i64` and saturates to `u32`. It
+gives seven zeros when `first_day > last_day`. It takes no offset and no reach. Its properties: the sum is `n`
+(below saturation); any two entries differ by at most 1; a whole number of weeks gives seven equal entries.
+
+The first day of the week, and the days' names, are not here. `by_weekday` returns `0–6`, as *Deliberately not in
+this module* says. The interface orders and names the days. See `slices/history-by-weekday/plan.md`.
+
 ### Deliberately not in this module
 
 No formatting, no labels, no words. `by_weekday` returns `0–6`, not "Monday". The pure layer
