@@ -139,3 +139,14 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (name) 
     }
   });
 });
+
+describe('What is protected rendered alone, with no shell, is its spread', () => {
+  for (const name of ['list in force', 'list not confirmed', 'list off']) {
+    it(`${name}: one spread of two pages`, () => {
+      const { container } = render(<Trail {...trailCases[name]!} />);
+      const spread = container.querySelector('.nb-spread');
+      expect(spread).not.toBeNull();
+      expect(spread!.querySelectorAll(':scope > .nb-page')).toHaveLength(2);
+    });
+  }
+});

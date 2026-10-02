@@ -2,7 +2,7 @@
 /**
  * What is protected's left leaf scrolls inside itself, so on a notebook page it is a tab stop of its own
  * (loose-ends T006; FR-022, FR-025, SC-004, D19, D30): named by the heading already on screen, with the
- * page area's focus ring. Outside any shell (Current) the leaf is as it was.
+ * page area's focus ring. Rendered alone it has the same named leaf.
  */
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -72,11 +72,12 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (look) 
   });
 });
 
-describe('outside any shell (Current)', () => {
-  it('has no sticky leaf, so nothing is a tab stop or a region that was not before', () => {
-    const { container } = render(<Trail {...trailCases['list in force']!} />);
-    expect(container.querySelector(LEAF)).toBeNull();
-    expect(container.querySelector('[tabindex], [role="region"], [aria-labelledby]')).toBeNull();
+describe('rendered alone', () => {
+  it('has the named left leaf the rest of this file holds', () => {
+    const { container, getByRole } = render(<Trail {...trailCases['list in force']!} />);
+    const leaf = container.querySelector(LEAF) as HTMLElement;
+    expect(leaf.tabIndex).toBe(0);
+    expect(getByRole('region', { name: 'What you are protecting' })).toBe(leaf);
   });
 });
 

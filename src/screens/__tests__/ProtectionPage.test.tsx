@@ -182,3 +182,45 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (name) 
     });
   });
 });
+
+describe('Protection rendered alone, with no shell, is its spread', () => {
+  const alone = (ui: React.ReactElement) => {
+    const view = render(ui);
+    const spread = view.container.querySelector('.nb-spread');
+    return { ...view, spread, pages: spread ? spread.querySelectorAll(':scope > .nb-page') : [] };
+  };
+
+  for (const name of ['off', 'in force', 'not confirmed']) {
+    it(`${name}: one spread of two pages`, () => {
+      const { spread, pages } = alone(<Protection state={cases[name]!.state} />);
+      expect(spread).not.toBeNull();
+      expect(pages).toHaveLength(2);
+    });
+
+    it(`${name}, a change waiting: one spread of two pages, the note on the right`, () => {
+      const { spread, pages } = alone(<Protection state={cases[name]!.state} pending={waiting} />);
+      expect(spread).not.toBeNull();
+      expect(pages).toHaveLength(2);
+      expect(within(pages[1] as HTMLElement).getByRole('button', { name: 'Keep things as they are' })).toBeInTheDocument();
+    });
+  }
+
+  it('checking: one spread of two pages', () => {
+    core = installFakeCore({ get_protection_state: never });
+    const { spread, pages } = alone(<Protection />);
+    expect(spread).not.toBeNull();
+    expect(pages).toHaveLength(2);
+  });
+
+  it('a read that could not be made: one spread of two pages', async () => {
+    core = installFakeCore({
+      get_protection_state: () => {
+        throw 'Cairn could not read its settings just now.';
+      },
+    });
+    const { spread, pages } = alone(<Protection />);
+    await screen.findByText('Cairn could not read its settings just now.');
+    expect(spread).not.toBeNull();
+    expect(pages).toHaveLength(2);
+  });
+});
