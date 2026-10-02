@@ -48,3 +48,14 @@ Skipped: nothing widened, and the slice does not close the split. Covered by row
 | concurrency, idempotency, ordering, retention, or time | already covered | row `frame` (time on the greeting): `Greeting.tsx` changes its element only (`h2` to `p`, D9); `whenWas` in `Protection.tsx` is today's, unchanged; "Keep things as they are" is the same handler in both layouts |
 
 Skipped: nothing widened, and the slice does not close the split. Covered by rows `frame` · release gate on the notebook and `frame` · time on the greeting.
+
+## setup-pages · 956ce4a · 2026-10-02
+
+| Trigger | Status | Evidence |
+|---|---|---|
+| driving adapter (HTTP route, CLI command, queue consumer) | not present | no IPC command, route or CLI added (`src-tauri/` untouched, `ipc_surface.rs` unchanged); the demo fake core lives under `specs/…/demo/` and ships in no build (T017) |
+| driven adapter or the provider types behind one | not present | no store, file or system call touched; the diff is `src/screens/Setup/`, `src/screens/Disclosure.tsx`, `src/styles/setup-pages.css`, one import in `src/main.tsx` and the choosing block of `src/App.tsx`, which now renders `Choosing` with today's `toggle`, `note` and `setStep('disclosure')` |
+| authorisation decision (who can reach one that already exists) | already covered | row `frame` (release gate on the notebook): a released build still forces `current`; the page context is provided only by `NotebookShell`, inside that gate; "Yes, set this up" calls today's `confirm` in both layouts (`AppSetupPages.test.tsx`) |
+| concurrency, idempotency, ordering, retention, or time | already covered | the add-then-read-back order in `CustomEntry.tsx` and the waiting untick are today's, unchanged (pinned by `SetupCurrentPin.test.tsx`); no time is read |
+
+Skipped: nothing widened, and the slice does not close the split. Covered by row `frame` · release gate on the notebook. The disclosure's yes before its details arrive is today's behaviour, handed to 002 (D20).
