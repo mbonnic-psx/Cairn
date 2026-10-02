@@ -5,7 +5,38 @@
  * before they changed it and held unchanged since: moved here verbatim, never re-typed, never re-captured. The
  * WordsKept tests read its words, controls and states and hold the notebook page to them. A change here is a change
  * to what Cairn says and needs its own decision, never a re-capture to make a test pass.
+ *
+ * A later slice that changes a page's words on purpose (D46) does not touch the records below. It writes a `Delta`
+ * beside them: the date, the slice and the decision that changed the words, and the words (or controls) it added
+ * and removed. `wordsOf` and `controlsOf` take the deltas for that page as a second argument and return the record
+ * plus what was added, minus what was removed. The captured markup is never edited and never re-captured; a page
+ * with no delta is compared with its record exactly.
  */
+
+/** One dated, deliberate change to what a page says, recorded beside the frozen markup and never inside it. */
+export interface Delta {
+  slice: string;
+  decision: string;
+  /** ISO date the change was decided. */
+  date: string;
+  words?: { added?: string[]; removed?: string[] };
+  /** In the form `controlsOf` returns: `kind | name | disabled=… | pressed=…`. */
+  controls?: { added?: string[]; removed?: string[] };
+}
+
+/** record ∪ added − removed, in the fixed order. A removal takes out one occurrence; removing what is not there is an error. */
+function applied(record: string[], change: { added?: string[]; removed?: string[] }[]): string[] {
+  const out = [...record];
+  for (const { added = [], removed = [] } of change) {
+    for (const gone of removed) {
+      const at = out.indexOf(gone);
+      if (at < 0) throw new Error(`a delta removes "${gone}", which the record does not hold`);
+      out.splice(at, 1);
+    }
+    out.push(...added);
+  }
+  return out.sort();
+}
 
 /** A record's markup, parsed in a `<template>` so it is inert: no script runs and nothing is rendered. */
 export function baseline(html: string): HTMLElement {
@@ -17,11 +48,12 @@ export function baseline(html: string): HTMLElement {
 }
 
 /** The words, one per leaf element, in a fixed order: a sentence that moved page still matches. */
-export function wordsOf(root: HTMLElement): string[] {
-  return Array.from(root.querySelectorAll('*'))
+export function wordsOf(root: HTMLElement, deltas: Delta[] = []): string[] {
+  const record = Array.from(root.querySelectorAll('*'))
     .filter((el) => el.children.length === 0 && el.textContent)
     .map((el) => el.textContent as string)
     .sort();
+  return applied(record, deltas.map((d) => d.words ?? {}));
 }
 
 function nameOf(root: HTMLElement, el: Element): string {
@@ -35,14 +67,15 @@ function nameOf(root: HTMLElement, el: Element): string {
 }
 
 /** Every control, by role and accessible text with its `disabled` and `aria-pressed`, in a fixed order. */
-export function controlsOf(root: HTMLElement): string[] {
-  return Array.from(root.querySelectorAll('button, input, textarea, select, a'))
+export function controlsOf(root: HTMLElement, deltas: Delta[] = []): string[] {
+  const record = Array.from(root.querySelectorAll('button, input, textarea, select, a'))
     .map((el) => {
       const kind = el.tagName === 'INPUT' ? `input:${el.getAttribute('type') ?? 'text'}` : el.tagName.toLowerCase();
       const disabled = el.hasAttribute('disabled');
       return `${kind} | ${nameOf(root, el)} | disabled=${disabled} | pressed=${el.getAttribute('aria-pressed')}`;
     })
     .sort();
+  return applied(record, deltas.map((d) => d.controls ?? {}));
 }
 
 import { reachesOfTheDay } from './tonightCases';

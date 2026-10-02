@@ -63,6 +63,29 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (look) 
   });
 });
 
+describe('a later, deliberate change to a page\'s words (D46)', () => {
+  it('is applied as record plus what was added minus what was removed, and the record is not touched', () => {
+    const report = {
+      complete: true,
+      confirmed: ['The background component is removed.'],
+      residue: ['a different file is still there'],
+    };
+    const main = onPage(<Teardown report={report} />, 'morning', 'protection');
+    const was = baseline(TEARDOWN_COMPLETE_WITH_RESIDUE);
+    const delta = {
+      slice: 'a-later-slice',
+      decision: 'D0',
+      date: '2026-10-03',
+      words: { added: ['a different file is still there'], removed: ['a browser policy file Cairn wrote is still there'] },
+    };
+    // Without the delta the page no longer equals the record; with it, it does.
+    expect(wordsOf(main)).not.toEqual(wordsOf(was));
+    expect(wordsOf(main)).toEqual(wordsOf(was, [delta]));
+    expect(controlsOf(main)).toEqual(controlsOf(was, [delta]));
+    expect(wordsOf(was)).toContain('a browser policy file Cairn wrote is still there');
+  });
+});
+
 describe('the baseline itself', () => {
   it('offers no control: both screens only report', () => {
     for (const html of [...Object.values(LIMITS), ...Object.values(TEARDOWN)]) {
