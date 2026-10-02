@@ -270,3 +270,30 @@
   max-width: 34em;
   color: var(--nb-ink-quiet);
 }
+
+/* A focus indicator of its own on every control, from the ink every look holds at 3:1 on its paper
+   (look/__tests__/tokens.test.ts): today's clay focus is a palette colour no look re-points. */
+.nb-categories-box:focus-visible {
+  outline: 2px solid var(--nb-ink);
+  outline-offset: 2px;
+}
+.nb-custom-input:focus-visible {
+  outline: 2px solid var(--nb-ink);
+  outline-offset: 2px;
+}
+.nb-custom-button:focus-visible {
+  outline: 2px solid var(--nb-ink);
+  outline-offset: 2px;
+}
+.nb-choosing-turn-on:focus-visible {
+  outline: 2px solid var(--nb-ink);
+  outline-offset: 2px;
+}
+.nb-disclosure-confirm:focus-visible {
+  outline: 2px solid var(--nb-ink);
+  outline-offset: 2px;
+}
+.nb-disclosure-back:focus-visible {
+  outline: 2px solid var(--nb-ink);
+  outline-offset: 2px;
+}

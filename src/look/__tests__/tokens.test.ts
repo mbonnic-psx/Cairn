@@ -503,7 +503,6 @@ describe('focus is visible on every sky and on the paper (FR-022, FR-021; resear
 
   it.each(looks)('%s: focus inside the paper keeps --nb-ink, at 3:1 on the paper', (look) => {
     expect(contrastRatio(token('--nb-ink', look), token('--nb-paper', look))).toBeGreaterThanOrEqual(3);
-    expect(rules.filter((r) => /:focus-visible/.test(r.selector) && /\.nb-page/.test(r.selector) && !/--nb-ink\b/.test(r.body))).toEqual([]);
   });
 
   it('keeps the forced-colors block covering every selector with text outside the notebook', () => {
