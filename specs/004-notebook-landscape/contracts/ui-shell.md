@@ -28,8 +28,8 @@ slice `frame`, extended by slice `looks` (more `Look` values and tokens) and by 
 
 ## Look tokens
 
-Every page reads colour and type only from CSS custom properties set on the shell's root, `[data-look]`. Each look
-(`morning`, `midday`, `night`) defines every token below under the same name, so a page that reads a token is lit
+Every page reads colour and type only from CSS custom properties set on the shell's root, `[data-look]`. What is the same in every look (the fonts) lives in one shared `[data-look]` block. Each look
+(`morning`, `midday`, `night`) defines every other token below under the same name, so a page that reads a token is lit
 by every look with no change of its own:
 
 | Token | Meaning |
@@ -42,8 +42,11 @@ by every look with no change of its own:
 | `--nb-margin` | the margin line |
 | `--nb-accent-amber` | waiting and not confirmed (text) |
 | `--nb-button` | the primary button's fill, with `--nb-button-ink` |
-| `--nb-font-serif` | headings, lists, reflective text |
-| `--nb-font-mono` | tab names, small labels, buttons only |
+| `--nb-font-serif` | headings, lists, reflective text; the same in every look, set once in the shared `[data-look]` block |
+| `--nb-font-mono` | tab names, small labels, buttons only; shared, as above |
+| `--nb-sun-size`, `--nb-sun-left`, `--nb-sun-top` | the sun's diameter and place, per look |
+| `--nb-stone-glow` | the glow around the cairn's stones; set by night alone (`looks`) |
+| `--nb-lamp-glow` | the lamp's glow on the notebook; set by night alone (`looks`) |
 | `--nb-focus-sky` | the focus outline of anything drawn over the sky (tabs, the switch); added by `looks` |
 
 Screens that still colour their text with the theme's palette (`text-ink-*`, `text-amber-*`, `text-moss-*`) are

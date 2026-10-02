@@ -5,10 +5,16 @@
  * of tokens for other looks and touching nothing else. Serif carries the
  * reading; mono is for tab names, small labels and buttons only. */
 
-[data-look="morning"] {
+/* What is the same in every look. */
+[data-look] {
   /* The screens' own serif is the bundled face here, so no platform font
    * (Palatino on Windows, DejaVu on Linux) stands in for it. */
   --font-serif: var(--font-notebook-serif);
+  --nb-font-serif: var(--font-notebook-serif);
+  --nb-font-mono: var(--font-notebook-mono);
+}
+
+[data-look="morning"] {
   --nb-paper: #f8f1e3;
   --nb-ink: #2a2119;
   --nb-ink-body: #33291f;
@@ -25,6 +31,9 @@
   --nb-greeting-ink: #2a2119;
   --nb-greeting-body: #4a3d2f;
   --nb-greeting-quiet: #6b5440;
+  --nb-sun-size: 96px;
+  --nb-sun-left: 15%;
+  --nb-sun-top: 37%;
   --nb-sun: #eda95e;
   --nb-sun-glow: #eda95e59;
   --nb-hill-far: #cdcfa8;
@@ -43,9 +52,6 @@
   --nb-tab-checkin: #d7b4a2;
   --nb-tab-limits: #cfc5b3;
   --nb-tab-ink: #2a2119;
-
-  --nb-font-serif: var(--font-notebook-serif);
-  --nb-font-mono: var(--font-notebook-mono);
 
   /* Today's screens colour their text with the theme's palette. On the paper
    * the lighter shades fall under 4.5:1, so inside the notebook alone they
@@ -94,10 +100,10 @@
 }
 .nb-sun {
   position: absolute;
-  width: 96px;
-  height: 96px;
-  left: 15%;
-  top: 37%;
+  width: var(--nb-sun-size);
+  height: var(--nb-sun-size);
+  left: var(--nb-sun-left);
+  top: var(--nb-sun-top);
   border-radius: 50%;
   background: var(--nb-sun);
   box-shadow: 0 0 80px 30px var(--nb-sun-glow);

@@ -37,9 +37,17 @@ const rules = rulesOf(notebook);
 const ruleFor = (selector: string) => rules.filter((r) => r.selector.split(',').map((x) => x.trim()).includes(selector));
 const forcedBlock = noComments(notebook).match(/@media \(forced-colors: active\)\s*\{([\s\S]*?\n\})\s*$/m)?.[1] ?? '';
 
-function token(name: string): string {
-  const m = notebook.match(new RegExp(`${name}:\\s*(#[0-9a-fA-F]{3,6})\\s*;`));
-  if (!m) throw new Error(`token ${name} is not a hex colour in notebook.css`);
+type LookName = 'morning' | 'midday' | 'night';
+
+/** The text of one look's token block, `[data-look="…"] { … }`, or '' if it has none. */
+function blockOf(look: LookName): string {
+  return noComments(notebook).match(new RegExp(`\\[data-look="${look}"\\]\\s*\\{([^}]*)\\}`))?.[1] ?? '';
+}
+
+/** A colour token from a named look's block (morning by default). */
+function token(name: string, look: LookName = 'morning'): string {
+  const m = blockOf(look).match(new RegExp(`${name}:\\s*(#[0-9a-fA-F]{3,8})\\s*;`));
+  if (!m) throw new Error(`token ${name} is not a hex colour in the ${look} block of notebook.css`);
   return m[1]!;
 }
 
@@ -137,7 +145,7 @@ describe('notebook.css behaviour rules', () => {
 
   it('keeps every colour in a token', () => {
     const outsideTokens = notebook
-      .replace(/\[data-look="morning"\]\s*\{[^}]*\}/, '')
+      .replace(/\[data-look="[a-z]+"\]\s*\{[^}]*\}/g, '')
       .replace(/\/\*[\s\S]*?\*\//g, '');
     expect(outsideTokens).not.toMatch(/#[0-9a-fA-F]{3,8}\b/);
   });
@@ -235,7 +243,33 @@ describe('the notebook renders the same on every platform', () => {
   });
 
   it("points the screens' serif at the bundled face, so no platform font stands in", () => {
-    const morning = ruleFor('[data-look="morning"]').map((r) => r.body).join('\n');
-    expect(morning).toMatch(/--font-serif:\s*var\(--font-notebook-serif\)/);
+    const shared = ruleFor('[data-look]').map((r) => r.body).join('\n');
+    expect(shared).toMatch(/--font-serif:\s*var\(--font-notebook-serif\)/);
+  });
+});
+
+describe('tokens: what differs per look, and what every look shares (FR-009, FR-021; research L2)', () => {
+  const shared = () => ruleFor('[data-look]').map((r) => r.body).join('\n');
+
+  it('puts the sun size and place in the morning block as tokens', () => {
+    for (const name of ['--nb-sun-size', '--nb-sun-left', '--nb-sun-top']) {
+      expect(blockOf('morning')).toMatch(new RegExp(`${name}:\\s*[^;]+;`));
+    }
+  });
+
+  it('draws the sun from those tokens, with no literal size or place', () => {
+    const body = ruleFor('.nb-sun').map((r) => r.body).join('');
+    expect(body).toMatch(/width:\s*var\(--nb-sun-size\)/);
+    expect(body).toMatch(/height:\s*var\(--nb-sun-size\)/);
+    expect(body).toMatch(/left:\s*var\(--nb-sun-left\)/);
+    expect(body).toMatch(/top:\s*var\(--nb-sun-top\)/);
+    expect(body).not.toMatch(/(width|height|left|top):\s*[\d.]+(px|%)/);
+  });
+
+  it('keeps the fonts in one shared block, not in any look', () => {
+    for (const name of ['--font-serif', '--nb-font-serif', '--nb-font-mono']) {
+      expect(shared()).toContain(`${name}:`);
+      expect(blockOf('morning')).not.toContain(`${name}:`);
+    }
   });
 });
