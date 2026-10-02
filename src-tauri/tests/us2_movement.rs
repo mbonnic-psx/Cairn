@@ -25,7 +25,7 @@ use std::sync::Arc;
 
 use cairn::domain::dates::LocalDate;
 use cairn::domain::normalize::ReservedNames;
-use cairn::domain::patterns::{MovementRow, Span};
+use cairn::domain::patterns::{MovementRow, Seen, Span};
 use cairn::enforcement::seed::CategoryStore;
 use cairn::helper::NoHelper;
 use cairn::ipc::state::{OffsetChange, Patterns};
@@ -270,7 +270,7 @@ fn the_answer_serialises_to_exactly_nine_keys_and_each_row_to_six() {
 mod with_history {
     use super::*;
 
-    use cairn::store::history::{History, OpenHistory};
+    use cairn::store::history::{CoverageGap, History, OpenHistory};
     use cairn::store::key::HistoryKey;
 
     fn seed(data: &Path) -> OpenHistory {
@@ -592,6 +592,119 @@ mod with_history {
 
         assert_eq!(patterns.sealed, None);
         assert_eq!(counts(&patterns), [2]);
+    }
+
+    // Scenarios 15 and 20
+    #[test]
+    fn a_range_wholly_inside_a_gap_has_every_row_not_seen_at_zero_and_the_note() {
+        let setup = setup();
+        let history = seed(&setup.data);
+        let london = Range::four_weeks();
+        history
+            .record_gap(&CoverageGap {
+                from: london.start - 5 * DAY,
+                to: NOW,
+            })
+            .unwrap();
+        let state = app(&setup, &Keychain::available());
+
+        let patterns = london.ask(&state);
+
+        assert_eq!(patterns.movement.len(), 28);
+        assert!(patterns.movement.iter().all(|row| row.seen == Seen::None));
+        assert_eq!(counts(&patterns), [0; 28]);
+        assert!(patterns.coverage_note.is_some());
+    }
+
+    #[test]
+    fn an_earlier_four_weeks_inside_one_gap_are_every_row_not_seen() {
+        let setup = setup();
+        let history = seed(&setup.data);
+        let range = Range::new("2026-08-08", "2026-09-04", HOUR, HOUR, &[]);
+        history
+            .record_gap(&CoverageGap {
+                from: range.start - DAY,
+                to: range.end + DAY,
+            })
+            .unwrap();
+        let state = app(&setup, &Keychain::available());
+
+        let patterns = range.ask(&state);
+
+        assert_eq!(patterns.movement.len(), 28);
+        assert!(patterns.movement.iter().all(|row| row.seen == Seen::None));
+    }
+
+    #[test]
+    fn a_gap_from_todays_midnight_to_now_is_a_row_not_seen() {
+        let setup = setup();
+        let history = seed(&setup.data);
+        let midnight = 1_790_895_600;
+        history
+            .record_gap(&CoverageGap {
+                from: midnight,
+                to: NOW,
+            })
+            .unwrap();
+        let state = app(&setup, &Keychain::available());
+
+        let patterns = Range::four_weeks().ask(&state);
+
+        assert_eq!(patterns.movement[27].seen, Seen::None);
+        assert_eq!(patterns.movement[26].seen, Seen::Whole);
+    }
+
+    #[test]
+    fn a_deleted_day_counts_what_remains_and_is_seen_as_it_was() {
+        let setup = setup();
+        let history = seed(&setup.data);
+        reaches_on(&history, "2026-09-09", 3);
+        reaches_on(&history, "2026-09-10", 2);
+        let state = app(&setup, &Keychain::available());
+        let before = Range::four_weeks().ask(&state);
+        history
+            .delete_reach_history(midnight("2026-09-09"), midnight("2026-09-10"))
+            .unwrap();
+
+        let patterns = Range::four_weeks().ask(&state);
+
+        assert_eq!(occupied(&patterns), [("2026-09-10".to_string(), 2)]);
+        let seen: Vec<Seen> = patterns.movement.iter().map(|row| row.seen).collect();
+        let seen_before: Vec<Seen> = before.movement.iter().map(|row| row.seen).collect();
+        assert_eq!(seen, seen_before, "deleting adds no gap");
+        assert!(patterns.gaps.is_empty());
+    }
+
+    // Scenario 24, the second part
+    #[test]
+    fn the_widest_range_the_screen_can_send_answers_with_100534_rows_inside_a_second() {
+        let setup = setup();
+        let history = seed(&setup.data);
+        let first = LocalDate::new(100, 1, 1).unwrap();
+        let last = date("2026-10-02");
+        let start = first.days_since_epoch() * DAY;
+        let end = (last.days_since_epoch() + 1) * DAY;
+        history.record("a.example", NOW - DAY).unwrap();
+        for index in 0..50 {
+            history
+                .record_gap(&CoverageGap {
+                    from: start + index * 20_000_000,
+                    to: start + index * 20_000_000 + 1_300_000,
+                })
+                .unwrap();
+        }
+        let state = app(&setup, &Keychain::available());
+
+        let started = std::time::Instant::now();
+        let patterns =
+            state.summarize_reaches(first, last, start, end, &[change(start, 0)]);
+        let elapsed = started.elapsed();
+
+        assert_eq!(patterns.sealed, None);
+        assert_eq!(patterns.movement.len(), 100_534);
+        assert_eq!(counts(&patterns).iter().sum::<u32>(), 1);
+        assert!(patterns.movement.iter().any(|row| row.seen != Seen::Whole));
+        assert!(elapsed.as_millis() < 1_000, "took {elapsed:?}");
     }
 
     // Scenario 21

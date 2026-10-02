@@ -11,7 +11,7 @@
 
 use cairn::domain::dates::LocalDate;
 use cairn::domain::patterns::{
-    movement, LocalRange, MovementRow, OffsetChange, Reach, Span,
+    movement, LocalRange, MovementRow, OffsetChange, Reach, Seen, Span,
 };
 
 const HOUR: i64 = 3600;
@@ -353,7 +353,7 @@ fn autumns_two_ends_of_the_25_hour_date_are_in_one_row() {
     }];
     let rows = ranged(
         (date(2026, 10, 19), date(2026, 11, 1)),
-        (1_792_364_400, 1_793_491_200),
+        AUTUMN_RANGE,
         3600,
         &changes,
         &reaches(&[1_792_884_600, 1_792_971_000]),
@@ -419,4 +419,206 @@ fn a_clock_change_just_after_midnight_puts_both_reaches_in_the_one_row() {
     );
     assert_eq!(rows.len(), 1);
     assert_eq!(rows[0].count, 2, "nothing lost, nothing counted twice");
+}
+
+// --- Scenarios 13 to 16, 20 and 24: what Cairn saw of each row ---------------------------
+
+/// 2026-10-19 00:00 BST to 2026-11-02 00:00 GMT.
+const AUTUMN_RANGE: (i64, i64) = (1_792_364_400, 1_793_577_600);
+/// 2026-11-03 12:00 GMT: after the autumn range.
+const AFTER_AUTUMN: i64 = 1_793_707_200;
+/// 2026-10-02 20:00 BST.
+const NOW: i64 = 1_790_967_600;
+
+fn autumn(unseen: &[(i64, i64)], reaches: &[Reach]) -> Vec<MovementRow> {
+    let changes = [OffsetChange {
+        from: 1_792_890_000,
+        offset_seconds: 0,
+    }];
+    let range = LocalRange {
+        first_day: date(2026, 10, 19),
+        last_day: date(2026, 11, 1),
+        from: AUTUMN_RANGE.0,
+        to: AUTUMN_RANGE.1,
+        first_offset: 3600,
+        changes: &changes,
+    };
+    movement(reaches, &range, unseen, AFTER_AUTUMN)
+}
+
+fn spring(unseen: &[(i64, i64)]) -> Vec<MovementRow> {
+    let changes = [OffsetChange {
+        from: 1_774_746_000,
+        offset_seconds: 3600,
+    }];
+    let range = LocalRange {
+        first_day: date(2026, 3, 23),
+        last_day: date(2026, 4, 5),
+        from: 1_774_224_000,
+        to: 1_775_430_000,
+        first_offset: 0,
+        changes: &changes,
+    };
+    movement(&[], &range, unseen, NOW)
+}
+
+/// 2026-09-05 to 2026-10-02 in London, asked at `now`.
+fn four_weeks(unseen: &[(i64, i64)], reaches: &[Reach], now: i64) -> Vec<MovementRow> {
+    let range = LocalRange {
+        first_day: date(2026, 9, 5),
+        last_day: date(2026, 10, 2),
+        from: 1_788_562_800,
+        to: 1_790_982_000,
+        first_offset: 3600,
+        changes: &[],
+    };
+    movement(reaches, &range, unseen, now)
+}
+
+fn seen_of(rows: &[MovementRow]) -> Vec<Seen> {
+    rows.iter().map(|row| row.seen).collect()
+}
+
+fn row_of(rows: &[MovementRow], day: LocalDate) -> MovementRow {
+    *rows
+        .iter()
+        .find(|row| row.day == day)
+        .expect("a row for the date")
+}
+
+#[test]
+fn a_gap_over_all_25_hours_of_autumns_date_makes_that_row_none_and_not_its_neighbours() {
+    let rows = autumn(&[(1_792_882_800, 1_792_972_800)], &[]);
+
+    let day = row_of(&rows, date(2026, 10, 25));
+    assert_eq!((day.seen, day.count), (Seen::None, 0));
+    assert_eq!(row_of(&rows, date(2026, 10, 24)).seen, Seen::Whole);
+    assert_eq!(row_of(&rows, date(2026, 10, 26)).seen, Seen::Whole);
+    assert_eq!(rows.iter().filter(|row| row.seen == Seen::None).count(), 1);
+}
+
+#[test]
+fn a_gap_over_all_23_hours_of_springs_date_makes_it_none_and_the_next_whole() {
+    let rows = spring(&[(1_774_742_400, 1_774_825_200)]);
+
+    assert_eq!(row_of(&rows, date(2026, 3, 29)).seen, Seen::None);
+    assert_eq!(row_of(&rows, date(2026, 3, 30)).seen, Seen::Whole);
+}
+
+#[test]
+fn a_gap_that_ends_at_a_local_midnight_leaves_the_next_row_whole() {
+    let midnight = 1_790_895_600; // 2026-10-02 00:00 BST
+    let rows = four_weeks(&[(midnight - 2 * HOUR, midnight)], &[], NOW);
+
+    assert_eq!(row_of(&rows, date(2026, 10, 2)).seen, Seen::Whole);
+}
+
+#[test]
+fn a_gap_from_todays_midnight_to_now_makes_todays_row_none() {
+    let midnight = 1_790_895_600;
+    let rows = four_weeks(&[(midnight, NOW)], &[], NOW);
+
+    let today = row_of(&rows, date(2026, 10, 2));
+    assert_eq!((today.seen, today.count), (Seen::None, 0));
+    assert_eq!(row_of(&rows, date(2026, 10, 1)).seen, Seen::Whole);
+}
+
+#[test]
+fn a_range_wholly_inside_one_gap_has_every_row_none_at_zero() {
+    let rows = four_weeks(&[(1_788_562_800, NOW)], &[], NOW);
+
+    assert_eq!(seen_of(&rows), vec![Seen::None; 28]);
+    assert!(rows.iter().all(|row| row.count == 0));
+
+    // The weekly case: 2026-08-08 to 2026-09-04 is 28 dates, still daily; ask
+    // for the 57 dates before it ends with the same gap over all of it.
+    let range = LocalRange {
+        first_day: date(2026, 8, 7),
+        last_day: date(2026, 10, 2),
+        from: 1_786_057_200,
+        to: 1_790_982_000,
+        first_offset: 3600,
+        changes: &[],
+    };
+    let weekly = movement(&[], &range, &[(1_786_057_200, NOW)], NOW);
+    assert_eq!(weekly.len(), 9);
+    assert_eq!(seen_of(&weekly), vec![Seen::None; 9]);
+}
+
+#[test]
+fn a_gap_over_the_first_weeks_dates_and_the_second_rows_are_judged_apart() {
+    let range = LocalRange {
+        first_day: date(2026, 8, 7),
+        last_day: date(2026, 10, 2),
+        from: 1_786_057_200,
+        to: 1_790_982_000,
+        first_offset: 3600,
+        changes: &[],
+    };
+    let first_week_ends = 1_786_057_200 + 7 * DAY;
+    let rows = movement(&[], &range, &[(1_786_057_200, first_week_ends)], NOW);
+
+    assert_eq!(rows[0].seen, Seen::None);
+    assert_eq!(rows[1].seen, Seen::Whole);
+}
+
+mod seen_properties {
+    use super::*;
+    use proptest::prelude::*;
+
+    fn rank(seen: Seen) -> u8 {
+        match seen {
+            Seen::None => 0,
+            Seen::Part => 1,
+            Seen::Whole => 2,
+        }
+    }
+
+    /// Up to six gaps, sorted and merged, inside the four weeks.
+    fn gaps() -> impl Strategy<Value = Vec<(i64, i64)>> {
+        proptest::collection::vec((0i64..2_419_000, 1i64..400_000), 0..6).prop_map(
+            |raw| {
+                let mut pairs: Vec<(i64, i64)> = raw
+                    .into_iter()
+                    .map(|(from, length)| {
+                        (
+                            1_788_562_800 + from,
+                            (1_788_562_800 + from + length).min(1_790_982_000),
+                        )
+                    })
+                    .collect();
+                pairs.sort_unstable();
+                let mut merged: Vec<(i64, i64)> = Vec::new();
+                for (from, to) in pairs {
+                    match merged.last_mut() {
+                        Some(last) if from <= last.1 => last.1 = last.1.max(to),
+                        _ => merged.push((from, to)),
+                    }
+                }
+                merged
+            },
+        )
+    }
+
+    proptest! {
+        #[test]
+        fn adding_unseen_time_never_makes_a_row_more_seen(
+            before in gaps(), extra in gaps()
+        ) {
+            let mut after: Vec<(i64, i64)> = before.iter().chain(extra.iter()).copied().collect();
+            after.sort_unstable();
+            let mut merged: Vec<(i64, i64)> = Vec::new();
+            for (from, to) in after {
+                match merged.last_mut() {
+                    Some(last) if from <= last.1 => last.1 = last.1.max(to),
+                    _ => merged.push((from, to)),
+                }
+            }
+            let less = four_weeks(&before, &[], NOW);
+            let more = four_weeks(&merged, &[], NOW);
+            for (one, other) in less.iter().zip(&more) {
+                prop_assert!(rank(other.seen) <= rank(one.seen));
+            }
+        }
+    }
 }

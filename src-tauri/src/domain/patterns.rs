@@ -373,7 +373,6 @@ pub fn movement(
     unseen: &[(i64, i64)],
     now: i64,
 ) -> Vec<MovementRow> {
-    let _ = (unseen, now);
     let first_day = range.first_day.days_since_epoch();
     let Some(dates) = range
         .last_day
@@ -421,7 +420,116 @@ pub fn movement(
         let row = &mut rows[index as usize];
         row.count = row.count.saturating_add(1);
     }
+
+    if !unseen.is_empty() {
+        let seen = coverage(range, dates, length, rows.len(), unseen, now);
+        for (row, (seeable, unseen_part)) in rows.iter_mut().zip(seen) {
+            if seeable > 0 && unseen_part >= seeable {
+                row.seen = Seen::None;
+            }
+        }
+    }
     rows
+}
+
+/// For each of `rows` rows, the seconds of it before `now`, and how many of
+/// those lie inside `unseen` (sorted, merged, inside the range).
+///
+/// The range is cut where the offset changes into stretches of one offset. In a
+/// stretch the rows' boundaries are the instants their first dates begin, so the
+/// stretch falls into pieces of one row each, found by arithmetic and never by
+/// walking the dates. The pieces come in time order, so the gaps are walked once
+/// beside them, with two pointers: the work is the rows, plus the offset
+/// changes, plus the gaps.
+fn coverage(
+    range: &LocalRange<'_>,
+    dates: i64,
+    length: i64,
+    rows: usize,
+    unseen: &[(i64, i64)],
+    now: i64,
+) -> Vec<(i64, i64)> {
+    // Only what is before the present can have been seen or missed.
+    let end = range.to.min(now).max(range.from);
+    let mut totals = vec![(0i64, 0i64); rows];
+    let mut next_gap = 0usize;
+
+    for_each_piece(range, dates, length, |row, begins, ends| {
+        let (from, to) = (begins.max(range.from), ends.min(end));
+        if to <= from {
+            return;
+        }
+        while next_gap < unseen.len() && unseen[next_gap].1 <= from {
+            next_gap += 1;
+        }
+        let mut missed = 0i64;
+        for &(gap_from, gap_to) in &unseen[next_gap..] {
+            if gap_from >= to {
+                break;
+            }
+            missed = missed.saturating_add(gap_to.min(to) - gap_from.max(from));
+        }
+        let total = &mut totals[row];
+        total.0 = total.0.saturating_add(to - from);
+        total.1 = total.1.saturating_add(missed);
+    });
+    totals
+}
+
+/// Calls `visit(row, begins, ends)` for the pieces of `[range.from, range.to)`
+/// that each lie in one row at one offset, in time order. The first row takes
+/// whatever reads as a date before it, and the last whatever reads as one
+/// after it, as a reach does.
+fn for_each_piece(
+    range: &LocalRange<'_>,
+    dates: i64,
+    length: i64,
+    mut visit: impl FnMut(usize, i64, i64),
+) {
+    let first_day = range.first_day.days_since_epoch();
+    let row_at = |at: i64, offset: i32| -> i64 {
+        (local_day(at, offset) - first_day).clamp(0, dates - 1) / length
+    };
+    let row_begins = |row: i64, offset: i32| -> i64 {
+        first_day
+            .saturating_add(row.saturating_mul(length))
+            .saturating_mul(SECONDS_PER_DAY)
+            .saturating_sub(i64::from(offset))
+    };
+    let mut stretch = |begins: i64, ends: i64, offset: i32| {
+        if ends <= begins {
+            return;
+        }
+        let (first_row, last_row) = (row_at(begins, offset), row_at(ends - 1, offset));
+        for row in first_row..=last_row {
+            let from = if row == first_row {
+                begins
+            } else {
+                row_begins(row, offset)
+            };
+            let to = if row == last_row {
+                ends
+            } else {
+                row_begins(row + 1, offset)
+            };
+            visit(row as usize, from, to);
+        }
+    };
+
+    let mut cursor = range.from;
+    let mut offset = range.first_offset;
+    for change in range.changes {
+        if change.from <= cursor {
+            offset = change.offset_seconds;
+        } else if change.from < range.to {
+            stretch(cursor, change.from, offset);
+            cursor = change.from;
+            offset = change.offset_seconds;
+        } else {
+            break;
+        }
+    }
+    stretch(cursor, range.to, offset);
 }
 
 /// Most reached first; equal counts by domain name.
