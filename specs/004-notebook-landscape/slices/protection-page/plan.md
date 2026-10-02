@@ -146,4 +146,6 @@ None.
 
 ## Open questions
 
-None. Every product question this slice met was answered at slice gaps (D6–D9).
+Every product question about this slice was answered at slice gaps (D6–D9). One question met at convergence lies outside this slice and does not block it; it is handed to the host:
+
+- **No screen in the running app shows a waiting change.** `App.tsx` never asks the core for one (`getPendingChange`, `src/ipc/index.ts:120`, has no caller) and never passes `pending` to Protection, yet What is protected tells the person they can cancel a change "at any time in that day". Options: (a) leave it, as D7 decided for this feature, which changes nothing Cairn does; (b) a separate slice outside 004 that has `App` ask for the waiting change and pass it to Protection, where this slice's spread already shows it on the right page. Recommendation: (b), because the waiting period's promise of a way out is only kept if the person can see the change. Decided by: nobody yet.
