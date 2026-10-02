@@ -1,6 +1,6 @@
 # Cruise report — The notebook in the landscape (004)
 
-Written by the completion audit, iteration 6, 2026-10-02; brought up to date in iteration 7, after `loose-ends` merged. Three `drive-gaps` reviews read the whole of `spec.md`
+Written by the completion audit, iteration 6, 2026-10-02; brought up to date in iteration 7, after `loose-ends` merged, and in iteration 8, after `fold-and-width`. Three `drive-gaps` reviews read the whole of `spec.md`
 against what is on `main` (frame and looks; setup and Protection pages; Today, Tonight, What Cairn covers and
 This machine is as it was).
 
@@ -17,14 +17,15 @@ This machine is as it was).
 1. `frame` (#28), `looks` (#30), `protection-page` (#31), `setup-pages` (#34), `quiet-pages` (#35),
    `tonight-page` (#38) — six slices, every one behind the switch.
 2. `loose-ends` (#42, D26, D29–D31): the seven things the pages promised are now held by tests. What is protected's left page now scrolls inside itself, and its focus ring has room (found at its demo).
-3. Host work: D19 (#40) — the page area takes focus, so a spread with no control scrolls from the keyboard, and
+3. `fold-and-width` (slice 9, your message after your demo, D33–D36): the fold between the pages in every look and on every screen, and a notebook that widens with the window up to 1200×983, never taller than wide, never narrower than before.
+4. Host work: D19 (#40) — the page area takes focus, so a spread with no control scrolls from the keyboard, and
    each screen opens at its top.
-4. The audit found no criterion unbuilt. Every requirement it read is built and almost all are held by tests.
+5. The audit found no criterion unbuilt. Every requirement it read is built and almost all are held by tests.
 
 ## What is left
 
 1. **`reveal`** (slice 7) — never run by `/cruise`. It waits for your own demo of all three looks (D1). Every other slice is merged.
-2. Three demo design notes for the reveal's review: the midday greeting sits on the sun; at 800×600 the sun or moon and the hilltop cairn are hidden behind the notebook (looks); under forced colours the landscape keeps its painted sun, moon and hills (loose-ends).
+2. Demo design notes for the reveal's review: the midday greeting sits on the sun (at 1920×1080 too, since the group now centres while the sun stays put); at 2560 the tab labels read a little small and Tonight's writing space leaves a lot of ruled page below it (fold-and-width); on midday and night the fold is the ruled lines' own colour, so on a blank page only its direction sets it apart (D34 note); at 800×600 the sun or moon and the hilltop cairn are hidden behind the notebook (looks); under forced colours the landscape keeps its painted sun, moon and hills (loose-ends).
 
 ## Out of scope, by decision
 
@@ -38,14 +39,14 @@ This machine is as it was).
 1. **Choose a browser test runner for the real layout check at 800×600?** (frame T024, D27) Recommend Vitest
    Browser Mode: it runs the tests this repository already has, in a real browser. Until you choose, the demos'
    screenshots are the only proof of real layout.
-2. **Run the reveal demo?** Recommend yes, now that `loose-ends` has merged: see morning, midday and night on every page, at
+2. **Run the reveal demo?** Recommend yes, now that `fold-and-width` has merged — try a full-screen window: see morning, midday and night on every page, at
    800×600 too, on macOS or Linux if you can — that is also the only WebKit check of D19.
 
 ## Decisions you have not yet reviewed
 
-1. Every entry in `decisions.md` decided by `host` or `drive-skipper` — D3 to D31. D1 and D2 are yours.
+1. Every entry in `decisions.md` decided by `host` or `drive-skipper` — D3 to D31 and D34 to D36. D1, D2, D32 and D33 are yours.
 2. Every demo `accepted-by: drive-hand` in `slices/README.md`: looks, protection-page, setup-pages, quiet-pages,
-   tonight-page, loose-ends. You have seen only `frame`.
+   tonight-page, loose-ends, fold-and-width. You have seen `frame`, and all three looks in your own demo.
 
 ## Architecture decisions still `Proposed`
 

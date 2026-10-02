@@ -379,7 +379,7 @@ Every product decision a `/cruise` run took, in order. A person overrides one by
 - **Options:** the canvas's colours, held visibly apart from the paper (at least 1.2:1, more than the ruled lines' 1.16:1) and drawn in a system colour under forced colours (recommended); 3:1 like the mark (D4) and the control edges (D15)
 - **Decision:** The canvas's colours. A test holds each look's fold at least 1.2:1 against its paper, and under forced colours the fold is drawn in a system colour, so it stays visible there.
 - **Why:** The constitution sets no contrast floor, and the specification's floors cover text (FR-021), the mark that tells the person this is Cairn (FR-033) and what identifies a control (D15). The fold is neither: each page reads on its own and the pages already sit apart, so WCAG 1.4.11 does not ask it of a decorative line. A 3:1 fold would be a heavy rule down the middle of a page the owner has just said looks great.
-- **Decided by:** host (the constitution and the specification answer it outright)
+- **Decided by:** host (stage recommendation)
 - **Confidence:** medium · **Would reverse if:** the owner, at the reveal demo, wants the fold darker, or reads it as something a person needs to tell the pages apart
 - **Written to:** `specs/004-notebook-landscape/spec.md` (Clarifications, FR-034)
 - **Status:** standing
@@ -394,7 +394,8 @@ Every product decision a `/cruise` run took, in order. A person overrides one by
 - **Decided by:** drive-skipper (claude-opus-5-5[1m])
 - **Confidence:** high · **Would reverse if:** in the slice's demo on a large screen, the owner says the 1200 notebook looks small in the scene or the lines read long. The cap then moves; the rule stays the same.
 - **Written to:** `specs/004-notebook-landscape/spec.md` (Clarifications, FR-035)
-- **Status:** overridden in part by D36 (the width rule below the cap; the 1200×982 cap and the centring stand)
+- **Status:** overridden by D36
+- **Note:** D36 overrides only the width rule below the cap; the 1200×983 cap and the centring stand. D34's answer was recommended by its own question's options and answered outright by the constitution and the specification.
 - **Note, 2026-10-02 (converge T009):** the cap's height is 1200 × 680/830 = 983, not 982; FR-035 and the tests say 983.
 
 ## D36 — Does keeping the proportion ever make the notebook narrower than today?
