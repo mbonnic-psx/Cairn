@@ -197,3 +197,42 @@ is the same either way); Q2 changes Y6's clause cases and `acrossInWords` in Y15
   `over_time.rs`, `state.rs`, `reaches.ts`, `Reaches.tsx`, the wire-shape tests' key lists, the pin's Over time
   cases). Run them after this lands, not beside it. `history-movement` takes the same `offsets` and needs no change
   to the signature.
+
+## Phase 4: Convergence
+
+Pass 1 (2026-10-02). Only `CRITICAL` and `HIGH` re-open the loop; neither task below does.
+
+- [ ] Y23 [US2] [MEDIUM] [W7, FR-022; Principle III] The screen never hides a count the core sent, and the contract
+  states only what the core guarantees. Evidence: `check_offsets` accepts, for London 2026-09-15 alone, offsets
+  `[{range_start, 14 400}]` (3 hours above the implied +3 600, inside both the start rule and the end rule), and
+  `by_weekday` then puts a reach at `range_end − 1 800` on Wednesday, giving counts `[0, 0, 1, 0, 0, 0, 0]` beside
+  `days` `[0, 1, 0, 0, 0, 0, 0]` (probe run against `check_offsets`, `by_weekday` and `weekdays_in`, then removed).
+  `Reaches.tsx:132` marks a row `absent` on `days === 0` alone, so that reach is drawn as *not in these days*, with
+  no count, while *By site* lists it. `contracts/ui-ipc.md` (amendment for this slice) says *a weekday the range
+  does not hold has `days` 0 and `count` 0*, which holds only for the offsets the screen sends. RED: a
+  `ReachesByDay.test.tsx` case with an entry `{ weekday, count: 1, days: 0 }` that expects its count and bar
+  drawn, on the card and on the page; and a `patterns_by_weekday.rs` example pinning the probe above, so the limit
+  is stated in a test rather than discovered. GREEN: `absent` only when `days === 0 && count === 0`; the contract
+  sentence says the pair is 0 and 0 for the offsets the screen sends, and that an accepted offset list can place a
+  reach on a date outside the range (the A3 limit, as by hour has it). Sweep, to close the class: every place
+  `Reaches.tsx` drops or hides a value it was sent — `absent`, `isQuiet`, and `rowsOf`'s `find`, which drops a
+  weekday missing from the answer instead of drawing all seven (W3) — and every sentence in the two contract
+  amendments that claims an invariant of `by_weekday` or `by_hour` that `check_offsets` does not enforce.
+- [ ] Y24 [US2] [LOW] [W2, W9] Every branch of the week's first day is pinned, and finding it can never take the
+  reaches screen down. Evidence: changing `firstWeekdayOf` (`src/localDays.ts:181`) to fall through to `weekInfo`
+  when `getWeekInfo()` returns a `firstDay` outside 1–7 left all 82 tests of `weekdays.test.ts`,
+  `ReachesByDay*.test.tsx` and `ReachesRowGuard.test.tsx` green: the case is unpinned. Separately,
+  `firstWeekday()` runs in `Reaches`' state initialiser (`src/screens/Reaches.tsx:167`) on every mount, *Today*
+  included, and a webview whose `Intl.Locale` is missing or whose `getWeekInfo()` throws would throw there rather
+  than open on Monday as the plan says it does. RED in `weekdays.test.ts`: `getWeekInfo` returning `{ firstDay: 9 }`
+  beside `weekInfo: { firstDay: 7 }` gives 0 (the plan's reading: the forms are tried by presence, then Monday;
+  if the host reads it otherwise, it says so and the expectation flips); `getWeekInfo` returning `undefined` gives
+  0; `getWeekInfo` that throws gives 0. GREEN: `firstWeekdayOf` and `firstWeekday` catch and give Monday. Sweep:
+  every `Intl` call made on the reaches screen's mount or render path (`firstWeekday`, `weekdayInWords`,
+  `hourInWords`) either cannot throw for the values it is given or is covered by the same fallback.
+
+## Convergence
+
+**Converged at pass 1** (2026-10-02, `drive-converge` · host model · delegated, fresh context), against every level: domain, use case, delivery adapter, screen and the published contract. No CRITICAL or HIGH. Y23 (MEDIUM: a hostile but accepted offset list can put a reach on a weekday whose `days` is 0, which the screen then hides as "not in these days") and Y24 (LOW: the invalid-`getWeekInfo` branch is untested, and `firstWeekday()` on the mount path could throw on a webview without `Intl.Locale`) are Phase 4, after the demo.
+
+Principles the diff touches: **I**, *By day* changes the view only (`Reaches.tsx`); **II**, no dependency, the week's first day never leaves the interface, the answer read from the encrypted history and `[]` when sealed (`ipc/state.rs`); **III**, sealed is `[]` not seven zeros, an absent weekday shows no zero, estimates stated with their reason (`Reaches.tsx`) — Y23 its open part; **VI**, no ranking word, banned-words and streaks guards clean.
