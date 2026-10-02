@@ -1,6 +1,14 @@
-import { describe, expect, it } from 'vitest';
+import { invoke } from '@tauri-apps/api/core';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { largestCount, type SiteCount } from './reaches';
+import {
+  largestCount,
+  listTodaysReaches,
+  summarizeReaches,
+  type SiteCount,
+} from './reaches';
+
+vi.mock('@tauri-apps/api/core', () => ({ invoke: vi.fn() }));
 
 describe('largestCount', () => {
   it('is never less than 1, so an empty list or zeros divide safely', () => {
@@ -24,5 +32,33 @@ describe('largestCount', () => {
     }));
     expect(() => largestCount(sites)).not.toThrow();
     expect(largestCount(sites)).toBe(7);
+  });
+});
+
+describe('the reaches wrappers', () => {
+  beforeEach(() => {
+    vi.mocked(invoke).mockReset().mockResolvedValue({ reaches: [] });
+  });
+
+  it('asks for the day by its bounds and returns what the core says', async () => {
+    await expect(listTodaysReaches(100, 200)).resolves.toEqual({ reaches: [] });
+    expect(invoke).toHaveBeenCalledWith('list_todays_reaches', {
+      dayStart: 100,
+      dayEnd: 200,
+    });
+  });
+
+  it('asks for the range by its dates and bounds and returns what the core says', async () => {
+    await expect(summarizeReaches('2026-09-03', '2026-09-30', 100, 200)).resolves.toEqual(
+      {
+        reaches: [],
+      },
+    );
+    expect(invoke).toHaveBeenCalledWith('summarize_reaches', {
+      firstDay: '2026-09-03',
+      lastDay: '2026-09-30',
+      rangeStart: 100,
+      rangeEnd: 200,
+    });
   });
 });

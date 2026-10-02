@@ -9,7 +9,14 @@ process.env.TZ = 'Europe/London';
 
 import { describe, expect, it } from 'vitest';
 
-import { addDays, dayBounds, isLocalDate, localToday, rangeBounds } from '../localDays';
+import {
+  addDays,
+  dayBounds,
+  dayInWords,
+  isLocalDate,
+  localToday,
+  rangeBounds,
+} from '../localDays';
 
 const seconds = (d: Date) => Math.round(d.getTime() / 1000);
 
@@ -117,5 +124,34 @@ describe('isLocalDate', () => {
     expect(() => dayBounds('1')).toThrow(RangeError);
     expect(() => rangeBounds('2026-09-10', '2026-09-0')).toThrow(RangeError);
     expect(() => rangeBounds('26-09-10', '2026-09-10')).toThrow(RangeError);
+  });
+});
+
+describe('dayInWords', () => {
+  it('names every month, without the year unless asked', () => {
+    const names = [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
+    ];
+    names.forEach((name, month) => {
+      const day = `2026-${String(month + 1).padStart(2, '0')}-03`;
+      expect(dayInWords(day)).toBe(`3 ${name}`);
+      expect(dayInWords(day, true)).toBe(`3 ${name} 2026`);
+    });
+  });
+
+  it('refuses what is not a calendar date, and says which', () => {
+    expect(() => dayInWords('2026-02-30')).toThrow(RangeError);
+    expect(() => dayInWords('2026-02-30')).toThrow('not a calendar date: "2026-02-30"');
   });
 });
