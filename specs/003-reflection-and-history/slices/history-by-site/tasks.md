@@ -97,10 +97,10 @@ its phase touches.
 
 ## Phase 3 — Hold it
 
-- [ ] S20 `make verify` green; `make smoke` green (`main.rs` changed); `npm run check` (all seven guards),
+- [X] S20 `make verify` green; `make smoke` green (`main.rs` changed); `npm run check` (all seven guards),
   `npm test` and `npm run lint` green; `cargo fmt --all` and
   `cargo clippy --all-targets -- -D warnings` clean. Run by the host. This stage builds nothing.
-- [ ] S21 `contracts/ui-ipc.md`, as amended, matches `Patterns` in Rust (`ipc/state.rs`) and TypeScript
+- [X] S21 `contracts/ui-ipc.md`, as amended, matches `Patterns` in Rust (`ipc/state.rs`) and TypeScript
   (`src/ipc/reaches.ts`) field for field, and S3's wire-shape test holds it.
 - [ ] S22 After the merge, on `main` (the feature's `tasks.md` and `pinned.md` are the host's): append the two *(The two pin rows landed early, in #21; the feature `tasks.md` ticks remain for after the merge.)*
   pinned rows if S2 has not already; tick T039, T040 and T047 if their by-site halves are all they still owe,
