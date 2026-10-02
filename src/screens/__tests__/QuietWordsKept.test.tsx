@@ -10,7 +10,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { NotebookShell } from '../../shell/NotebookShell';
 import { Limits } from '../Limits';
 import { Teardown } from '../Teardown';
-import { baseline, controlsOf, wordsOf, LIMITS, TEARDOWN, TEARDOWN_COMPLETE_WITH_RESIDUE } from './beforeTheReveal';
+import { baseline, controlsOf, structureOf, wordsOf, LIMITS, TEARDOWN, TEARDOWN_COMPLETE_WITH_RESIDUE } from './beforeTheReveal';
 import { disclosureCases, teardownCases } from './quietCases';
 
 function onPage(ui: React.ReactElement, look: 'morning' | 'midday' | 'night', tab: 'limits' | 'protection') {
@@ -41,6 +41,7 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (look) 
     const was = baseline(LIMITS[name]!);
     expect(wordsOf(main)).toEqual(wordsOf(was));
     expect(controlsOf(main)).toEqual(controlsOf(was));
+    expect(structureOf(main)).toEqual(structureOf(was));
   });
 
   it.each(Object.keys(teardownCases))('This machine is as it was, %s, keeps its words and controls', (name) => {
@@ -48,6 +49,7 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (look) 
     const was = baseline(TEARDOWN[name]!);
     expect(wordsOf(main)).toEqual(wordsOf(was));
     expect(controlsOf(main)).toEqual(controlsOf(was));
+    expect(structureOf(main)).toEqual(structureOf(was));
   });
 
   it('This machine is as it was, complete but with something left, keeps its words and controls', () => {
@@ -60,6 +62,7 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (look) 
     const was = baseline(TEARDOWN_COMPLETE_WITH_RESIDUE);
     expect(wordsOf(main)).toEqual(wordsOf(was));
     expect(controlsOf(main)).toEqual(controlsOf(was));
+    expect(structureOf(main)).toEqual(structureOf(was));
   });
 });
 
@@ -82,6 +85,7 @@ describe('a later, deliberate change to a page\'s words (D46)', () => {
     expect(wordsOf(main)).not.toEqual(wordsOf(was));
     expect(wordsOf(main)).toEqual(wordsOf(was, [delta]));
     expect(controlsOf(main)).toEqual(controlsOf(was, [delta]));
+    expect(structureOf(main)).toEqual(structureOf(was));
     expect(wordsOf(was)).toContain('a browser policy file Cairn wrote is still there');
   });
 });
@@ -99,5 +103,23 @@ describe('the baseline itself', () => {
     const now = baseline('<p>B <span>x</span></p>');
     expect(wordsOf(now)).not.toEqual(wordsOf(was));
     expect(wordsOf(was)).toEqual(['A ', 'x']);
+  });
+
+  // A4: the accessible structure is compared too, empty live regions included.
+  it('reads the groups, regions and live regions, so a dropped one or a renamed one differs', () => {
+    const was = baseline(
+      '<div role="group" aria-label="Which days"><button>Today</button></div><p role="status"></p><div aria-live="polite"></div>',
+    );
+    const droppedStatus = baseline('<div role="group" aria-label="Which days"><button>Today</button></div><div aria-live="polite"></div>');
+    const renamedGroup = baseline(
+      '<div role="group" aria-label="Seen by"><button>Today</button></div><p role="status"></p><div aria-live="polite"></div>',
+    );
+    expect(structureOf(droppedStatus)).not.toEqual(structureOf(was));
+    expect(structureOf(renamedGroup)).not.toEqual(structureOf(was));
+    expect(structureOf(was)).toEqual([
+      'group | Which days | live=null',
+      'null |  | live=polite',
+      'status |  | live=null',
+    ]);
   });
 });

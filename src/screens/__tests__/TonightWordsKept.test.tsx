@@ -10,7 +10,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { NotebookShell } from '../../shell/NotebookShell';
 import { CheckIn } from '../CheckIn';
 import { Reaches } from '../Reaches';
-import { baseline, controlsOf, wordsOf, OVER_TIME, TODAY, TONIGHT } from './beforeTheReveal';
+import { baseline, controlsOf, structureOf, wordsOf, OVER_TIME, TODAY, TONIGHT } from './beforeTheReveal';
 import { installFakeCore, type FakeCore } from './fakeCore';
 import {
   evening,
@@ -52,6 +52,7 @@ function expectKept(shown: HTMLElement, html: string) {
   const was = baseline(html);
   expect(wordsOf(shown)).toEqual(wordsOf(was));
   expect(controlsOf(shown)).toEqual(controlsOf(was));
+  expect(structureOf(shown)).toEqual(structureOf(was));
 }
 
 describe('the states the baseline holds', () => {

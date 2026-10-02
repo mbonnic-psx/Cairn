@@ -10,7 +10,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { NotebookShell } from '../../shell/NotebookShell';
 import { Protection } from '../Protection';
 import { Trail } from '../Trail';
-import { baseline, controlsOf, wordsOf, PROTECTION, TRAIL } from './beforeTheReveal';
+import { baseline, controlsOf, structureOf, wordsOf, PROTECTION, TRAIL } from './beforeTheReveal';
 import { installFakeCore, never, type FakeCore } from './fakeCore';
 import { cases, trailCases } from './pinCases';
 
@@ -51,6 +51,7 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (look) 
     const was = baseline(PROTECTION['checking']!);
     expect(wordsOf(main)).toEqual(wordsOf(was));
     expect(controlsOf(main)).toEqual(controlsOf(was));
+    expect(structureOf(main)).toEqual(structureOf(was));
   });
 
   it('Protection, when the read could not be made, keeps its words and controls', async () => {
@@ -64,6 +65,7 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (look) 
     const was = baseline(PROTECTION['trouble']!);
     expect(wordsOf(main)).toEqual(wordsOf(was));
     expect(controlsOf(main)).toEqual(controlsOf(was));
+    expect(structureOf(main)).toEqual(structureOf(was));
   });
 
   it.each(Object.keys(cases))('Protection, %s, keeps its words and controls', (name) => {
@@ -71,6 +73,7 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (look) 
     const was = baseline(PROTECTION[name]!);
     expect(wordsOf(main)).toEqual(wordsOf(was));
     expect(controlsOf(main)).toEqual(controlsOf(was));
+    expect(structureOf(main)).toEqual(structureOf(was));
   });
 
   it.each(Object.keys(trailCases))('What is protected, %s, keeps its words and controls', (name) => {
@@ -78,6 +81,8 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (look) 
     const was = baseline(TRAIL[name]!);
     expect(wordsOf(main)).toEqual(wordsOf(was));
     expect(controlsOf(main)).toEqual(controlsOf(was));
+    // structureOf is not yet compared here: the spread's left page is a named role="region" (labelled by its heading)
+    // that the one-column What is protected did not have. Reported (T023); the difference awaits a decision.
   });
 });
 

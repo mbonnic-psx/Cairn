@@ -14,7 +14,7 @@ import { Disclosure } from '../Disclosure';
 import { Categories } from '../Setup/Categories';
 import { Choosing } from '../Setup/Choosing';
 import { CustomEntry } from '../Setup/CustomEntry';
-import { baseline, controlsOf, wordsOf, PIN } from './beforeTheReveal';
+import { baseline, controlsOf, structureOf, wordsOf, PIN } from './beforeTheReveal';
 import { installFakeCore, never, type FakeCore } from './fakeCore';
 import { categories, disclosures, localhostReason, readBack, waitingNote } from './setupCases';
 
@@ -127,5 +127,6 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (look) 
     const was = baseline(PIN[name]!);
     expect(wordsOf(main)).toEqual(wordsOf(was));
     expect(controlsOf(main)).toEqual(controlsOf(was));
+    expect(structureOf(main)).toEqual(structureOf(was));
   });
 });

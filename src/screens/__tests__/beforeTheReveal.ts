@@ -96,6 +96,28 @@ export function controlsOf(root: HTMLElement, deltas: Delta[] = []): string[] {
   return applied(record, deltas.map((d) => d.controls ?? {}));
 }
 
+/**
+ * What a reader of the page is told besides its words and controls: every group, region, live region and status, by
+ * role and accessible name with its `aria-live`, empty ones included. Sorted. Native controls are `controlsOf`'s.
+ */
+export function structureOf(root: HTMLElement): string[] {
+  return Array.from(root.querySelectorAll('[role="group"], [role="region"], [role="status"], [role="alert"], [role="log"], [aria-live]'))
+    .map((el) => {
+      const labelledBy = el.getAttribute('aria-labelledby');
+      const name =
+        el.getAttribute('aria-label') ??
+        (labelledBy
+          ? labelledBy
+              .split(/\s+/)
+              .map((id) => root.querySelector(`[id="${id}"]`)?.textContent?.trim() ?? '')
+              .join(' ')
+              .trim()
+          : '');
+      return `${el.getAttribute('role')} | ${name} | live=${el.getAttribute('aria-live')}`;
+    })
+    .sort();
+}
+
 import { reachesOfTheDay } from './tonightCases';
 
 // ---- Protection and What is protected (Increment 1a) ----
