@@ -1,7 +1,8 @@
 /**
  * Every shape What Cairn covers and This machine is as it was can show, as the props that produce it
- * (slice 004 `quiet-pages`). The pin renders each outside any shell; the page tests render each on a
- * notebook page and compare the words. The disclosure words are the core's own
+ * (slice 004 `quiet-pages`). The
+ * the words-kept tests render each on a notebook page and compare its words with the markup captured before the
+ * reveal (`beforeTheReveal.ts`). The disclosure words are the core's own
  * (`src-tauri/src/ipc/state.rs`, `disclosures`).
  */
 import type { Disclosures, TeardownReport } from '../../ipc';

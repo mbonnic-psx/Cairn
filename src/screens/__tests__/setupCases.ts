@@ -1,6 +1,7 @@
 /**
- * The states the setup screens can show, as the props and core answers that produce them. The pin renders each
- * outside any shell; the page tests render each on a notebook page and compare the words.
+ * The states the setup screens can show, as the props and core answers that produce them. Since the
+ * reveal, the words-kept tests render each on a notebook page and compare its words with the markup captured before the
+ * reveal (`beforeTheReveal.ts`).
  */
 import type { CategoryPreset, Disclosures, ProtectionState, ProtectionStatus } from '../../ipc';
 
