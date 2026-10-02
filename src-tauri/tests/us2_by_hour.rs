@@ -737,6 +737,51 @@ mod with_history {
         assert!(patterns.by_site.is_empty());
         assert!(!patterns.dst_approximate);
     }
+
+    /// K25: Cairo's clocks skip midnight on 2026-04-24 (+7 200 to +10 800), so
+    /// the range's first midnight never shows on a clock. Asked through the
+    /// command, as K23 pinned at the check, it is placed, not sealed.
+    #[test]
+    fn a_range_whose_first_midnight_the_clock_skips_is_placed_through_the_command() {
+        let setup = setup();
+        let cairo = Range::new("2026-04-24", "2026-04-30", 7_200, 10_800, &[]);
+        assert_eq!(cairo.start, 1_776_981_600);
+        reach_at(&seed(&setup.data), cairo.start + 60);
+        let state = app(&setup, &Keychain::available());
+        let ask = |first_offset: i64| {
+            cairo.ask_with(&state, &[change(cairo.start, first_offset)])
+        };
+
+        // The range's own offsets: +7 200 at the start puts the reach at 00:01.
+        let patterns = cairo.ask(&state);
+        assert_eq!(patterns.sealed, None, "a placeable range is placed");
+        assert_all_24_hours(&patterns);
+        assert_eq!(patterns.by_site.len(), 1);
+        assert_eq!(patterns.by_site[0].domain, "a.example");
+        assert_eq!(patterns.by_site[0].count, 1);
+        assert_eq!(occupied(&patterns), [(0, 1)], "7 200 puts it at 00:01");
+        // +10 800, the offset in force once the clock has skipped.
+        let new = ask(10_800);
+        assert_eq!(new.sealed, None);
+        assert_eq!(new.by_site.len(), 1, "in By site");
+        assert_eq!(occupied(&new), [(1, 1)], "in hour 01, not 00");
+
+        // Every first offset the core accepts here, each with its hour.
+        for (offset, hour) in [(3_600, 23), (7_200, 0), (10_800, 1), (14_400, 2)] {
+            let patterns = ask(offset);
+            assert_eq!(patterns.sealed, None, "{offset} is placed");
+            assert_eq!(patterns.by_site.len(), 1);
+            assert_eq!(occupied(&patterns), [(hour, 1)], "{offset}");
+        }
+
+        // One more than a clock change from the implied one is sealed.
+        for offset in [3_599, 14_401] {
+            let patterns = ask(offset);
+            assert!(patterns.sealed.is_some(), "{offset} is sealed");
+            assert!(patterns.by_hour.is_empty(), "never 24 zeros");
+            assert!(patterns.by_site.is_empty());
+        }
+    }
 }
 
 // --- Scenario 14: a build without the history --------------------------------------
