@@ -94,6 +94,67 @@
       "signals": {
         "driver": "cruise"
       }
+    },
+    {
+      "stage": "tasks",
+      "started": "2026-10-02T05:33:42Z",
+      "planned": "tasks: fast → sonnet — Claude Code: the Agent tool's `model` parameter, set per call",
+      "tasks": {
+        "start": null,
+        "end": {
+          "open": 12,
+          "done": 0
+        }
+      },
+      "ended": "2026-10-02T05:36:18Z",
+      "seconds": 156,
+      "span": {
+        "from": {
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/abe2056c-0ebc-4293-ad12-5c3e3597b844.jsonl": 753819,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/abe2056c-0ebc-4293-ad12-5c3e3597b844/subagents/agent-ae893a61841c96348.jsonl": 804886
+        },
+        "to": {
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/abe2056c-0ebc-4293-ad12-5c3e3597b844.jsonl": 755002,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/abe2056c-0ebc-4293-ad12-5c3e3597b844/subagents/agent-a928cf62340da434d.jsonl": 358632,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/abe2056c-0ebc-4293-ad12-5c3e3597b844/subagents/agent-ae893a61841c96348.jsonl": 869728
+        }
+      },
+      "usage": {
+        "source": "claude",
+        "session": "abe2056c-0ebc-4293-ad12-5c3e3597b844",
+        "read": "message.usage on each assistant line, once per requestId",
+        "host": {},
+        "subagents": {
+          "claude-sonnet-5-5": {
+            "input": 16,
+            "output": 1154,
+            "cache_read": 399412,
+            "cache_creation": 73916
+          },
+          "claude-opus-5-5": {
+            "input": 8,
+            "output": 320,
+            "cache_read": 692165,
+            "cache_creation": 12711
+          }
+        },
+        "agents": [
+          "drive-slice",
+          "drive-tasks"
+        ]
+      },
+      "ran": [
+        "claude-opus-5-5",
+        "claude-sonnet-5-5"
+      ],
+      "agents": [
+        "drive-slice",
+        "drive-tasks"
+      ],
+      "delegated": true,
+      "signals": {
+        "driver": "cruise"
+      }
     }
   ]
 }
