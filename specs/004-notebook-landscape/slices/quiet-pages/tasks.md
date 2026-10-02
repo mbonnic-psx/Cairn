@@ -57,6 +57,7 @@ Reviewed: drive-implement (sonnet), 2026-10-02, in a browser on the worktree's d
 - `delivery/survey/pinned.md` needs a row for the pin written in T001. `check-slice-scope` refuses it on a slice branch ("outside every deployable and not a slice's to write"), so the host appends it on `main`, verbatim:
 
   `| 2026-10-02 | What Cairn covers and This machine is as it was as they render today: the covered lines, what is not covered, what is kept and the note on administrators (one and two covered lines); teardown as it was and almost everything undone, with and without checked lines and what is left, element for element. Nothing pinned What Cairn covers before this row. Slice 004 `quiet-pages` adds their notebook spreads beside them and leaves this output unchanged in Current | `Limits.tsx`, `Teardown.tsx` outside the notebook (no page context) | `QuietCurrentPin.test.tsx` (`quietCases.ts`); `Waiting.test.tsx` (the teardown report) | `npx vitest run src/screens/__tests__/QuietCurrentPin.test.tsx src/screens/__tests__/Waiting.test.tsx` |`
+- **Keyboard scrolling of a spread with no control (MEDIUM, after-converge gaps).** What Cairn covers and This machine is as it was hold no focusable element, and the notebook's scrolling page area (`<main className="nb-page-area nb-page">`, `src/shell/NotebookShell.tsx:39`) has no `tabIndex`. Measured at 800×600: page area 465px, content 1026px, window not scrollable. Chromium (and so WebView2 on Windows) puts the scroller in the tab order; WebKit (Tauri on macOS and Linux) is believed not to, untested here. If so, a keyboard-only person cannot reach the lower lines there. The fix is a shell change (`tabIndex={0}`, an accessible name, a token-drawn focus ring on the page area), which is frame's file and outside this slice; it touches every spread, protection-page's included. Recommendation: one small shell task before `reveal`, with a test that the page area is focusable and named.
 - This machine is as it was is not reachable from the app (D16): no browser can show either outcome; the tests render both in every look, and the demo names it under *Not working yet*.
 
 ## Dependencies and order
@@ -92,6 +93,12 @@ Constitution, per principle the diff touches:
 - I, V: nothing reacts to a blocked request; no notification or prompt (`check-no-notifications` clean). IV and VII: not applicable.
 
 Record corrected by this pass: T007's RED was a move of night's `--nb-sun-top` from 41% to 32%, nine percentage points; a 9% *relative* raise turns only the older T016 checks red.
+
+After-converge gaps (`drive-gaps` · model: opus · delegated, fresh context, 2026-10-02): 19 criteria traced, 5 findings, none CRITICAL or HIGH. Every word and state today's screens show at `b73df5b` is on the spreads. Triage:
+- MEDIUM, handed back (below): keyboard-only scrolling of a spread with no control may not work in WebKit (macOS, Linux). The scroller is the shell's `main` (`src/shell/NotebookShell.tsx:39`), outside this slice's files, and protection-page's spreads share it.
+- LOW, fixed in `quickstart.md`: step 2 now says the note on administrators sits below the fold at 1280×800 and how to scroll; step 4 names the page-area Tab stop Chromium draws before the tabs.
+- LOW, already recorded: FR-025's "without overlap or clipping" has no automated check (frame T024, quickstart *Not working yet*).
+- LOW, not reachable: a partial report with nothing checked and nothing left would show the partial sentence over no list, as Current does; the core never sends it (`complete: residue.is_empty()`, `src-tauri/src/enforcement/teardown.rs:89`).
 
 ## Phase 4: Convergence
 
