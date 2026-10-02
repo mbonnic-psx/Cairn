@@ -20,13 +20,20 @@
   padding-top: 22px;
   overflow-wrap: anywhere;
 }
-/* What is protected: its left leaf keeps its own height and stays put while the list scrolls past. */
+/* What is protected: its left leaf keeps its own height and stays put while the list scrolls past.
+   The spread is exactly as tall as the page area (a definite height) and is a size container, so the leaf can
+   be bounded by that height in cqh. A percentage would resolve against the leaf's own grid row, which grows
+   with the list, and the leaf would never be bounded. The rows still grow past the spread with a long list. */
+.nb-trail-leaves {
+  height: 100%;
+  container-type: size;
+}
 .nb-trail-leaves > .nb-trail-sticky {
   position: sticky;
   top: 0;
   align-self: start;
   /* However much it says, it never outgrows the page area: it scrolls inside itself instead of clipping. */
-  max-height: 100%;
+  max-height: 100cqh;
   overflow-y: auto;
 }
 /* Inside the leaf's edge, as the page area's own ring is: the ink every look holds at 3:1 on its paper. */
