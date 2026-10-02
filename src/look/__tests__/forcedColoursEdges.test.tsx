@@ -115,6 +115,28 @@ function edge(cls: string): { base: number; forced: number; named: boolean } {
   return { base, forced, named };
 }
 
+/**
+ * The mark a pressed or current control gets in the forced-colours block beyond its unpressed edge (T015): the
+ * widest `border`, `border-width` or side width a forced rule for `.cls[aria-pressed='true']` or
+ * `.cls[aria-current…]` sets, in px, or null when that rule paints a SelectedItem/Highlight background.
+ */
+const STATE = /\[aria-(?:pressed=['"]?true['"]?|current(?:=[^\]]*)?)\]/;
+function pressedMark(cls: string): { wider: number; fill: boolean } {
+  const unpressed = edge(cls).forced;
+  let widest = 0;
+  let fill = false;
+  for (const sheet of SHEETS) {
+    for (const r of sheet.forced) {
+      if (!r.selectors.some((s) => s.startsWith(`.${cls}`) && STATE.test(s))) continue;
+      for (const m of r.body.matchAll(/(?:^|[;\s])border(?:-(?:top|right|bottom|left))?(?:-width)?:\s*(\d*\.?\d+)px/g)) {
+        widest = Math.max(widest, Number(m[1]));
+      }
+      fill ||= /background(?:-color)?:\s*(?:SelectedItem|Highlight)\b/.test(r.body);
+    }
+  }
+  return { wider: widest - unpressed, fill };
+}
+
 const LOOKS: NotebookLook[] = ['morning', 'midday', 'night'];
 const tabs = [{ id: 'protection' as const, label: 'Protection', current: true }];
 const noop = () => undefined;
@@ -253,6 +275,19 @@ describe('forced colours keep every control an edge', () => {
         if (!ok) bare.push(`.${classes.join('.')}`);
       }
       expect([...new Set(bare)], `${name}, ${look}: controls with no edge of 1px in forced colours`).toEqual([]);
+      const unmarked: string[] = [];
+      for (const control of main.querySelectorAll<HTMLElement>("[aria-pressed='true'], [aria-current]")) {
+        const classes = Array.from(control.classList).filter((c) => c.startsWith('nb-'));
+        const told = classes.some((c) => {
+          const m = pressedMark(c);
+          return m.wider >= 2 || m.fill;
+        });
+        if (!told) unmarked.push(`.${classes.join('.')}`);
+      }
+      expect(
+        [...new Set(unmarked)],
+        `${name}, ${look}: pressed or current controls forced colours does not tell from the rest`,
+      ).toEqual([]);
     });
   });
 

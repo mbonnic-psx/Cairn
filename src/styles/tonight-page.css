@@ -383,4 +383,8 @@
   .nb-reaches-which__button {
     border: 1px solid CanvasText;
   }
+  /* The pressed view carries a heavier rule, as the shell's current tab does: every colour is the system's here. */
+  .nb-reaches-which__button[aria-pressed='true'] {
+    border-bottom-width: 3px;
+  }
 }
