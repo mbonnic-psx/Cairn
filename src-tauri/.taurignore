@@ -1,0 +1,5 @@
+# The Tauri dev watcher rebuilds and restarts the app on any change under
+# src-tauri. Tests and their fixtures are not part of the app, so editing them
+# should not restart it.
+tests/
+helper/tests/
