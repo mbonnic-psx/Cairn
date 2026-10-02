@@ -182,7 +182,7 @@ Appended by converge pass 1 at `28982cd`. Graded; K23 is `HIGH` and re-opens the
 
 Appended by converge pass 2 at `4fb1156`. K23 and K24 closed; one `LOW`, which does not re-open the loop.
 
-- [ ] K25 [US2] [LOW] [Principle III] **A skipped-midnight range is placed through the command, not only the check.**
+- [X] K25 [US2] [LOW] [Principle III] **A skipped-midnight range is placed through the command, not only the check.**
   Seen: K23's fix is pinned at `check_offsets` (`src-tauri/tests/offset_changes.rs`), and `AppState::summarize_reaches`
   calls it directly (`src-tauri/src/ipc/state.rs:829`), but no test at the adapter (`src-tauri/tests/us2_by_hour.rs`,
   `with_history`) asks a range whose first midnight the clock skips — the level where pass 1's regression showed as
