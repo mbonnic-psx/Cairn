@@ -8,18 +8,50 @@
  */
 import { Card } from '../components/Card';
 import type { TeardownReport } from '../ipc';
+import { useNotebookPage } from '../shell/notebookPage';
+
+/** Today's words, read by both layouts so they cannot drift apart. */
+const COMPLETE_HEADING = 'This machine is as it was';
+const PARTIAL_HEADING = 'Almost everything is undone';
+const COMPLETE_SENTENCE =
+  'Cairn checked each change it had made and undid it. What Cairn did not write is untouched.';
+const PARTIAL_SENTENCE =
+  'Cairn undid what it could and checked each one. These are still here, so you can decide what to do with them.';
 
 export function Teardown({ report }: { report: TeardownReport }) {
+  const onPage = useNotebookPage();
+
+  if (onPage) {
+    return (
+      <div className="nb-spread nb-teardown-leaves">
+        <div className="nb-page">
+          <h2 className="nb-teardown-title">{report.complete ? COMPLETE_HEADING : PARTIAL_HEADING}</h2>
+          <p className="nb-teardown-sentence">{report.complete ? COMPLETE_SENTENCE : PARTIAL_SENTENCE}</p>
+
+          {report.confirmed.length > 0 && (
+            <ul className="nb-teardown-list nb-teardown-checked">
+              {report.confirmed.map((line) => (
+                <li key={line} className="nb-teardown-line">
+                  <span aria-hidden className="nb-teardown-mark nb-teardown-mark--dot" />
+                  <span>{line}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+        <div className="nb-page nb-page--ruled" />
+      </div>
+    );
+  }
+
   return (
     <Card className="max-w-2xl">
       <h2 className="reflective text-3xl text-ink-900">
-        {report.complete ? 'This machine is as it was' : 'Almost everything is undone'}
+        {report.complete ? COMPLETE_HEADING : PARTIAL_HEADING}
       </h2>
 
       <p className="reflective mt-4 text-lg text-ink-700">
-        {report.complete
-          ? 'Cairn checked each change it had made and undid it. What Cairn did not write is untouched.'
-          : 'Cairn undid what it could and checked each one. These are still here, so you can decide what to do with them.'}
+        {report.complete ? COMPLETE_SENTENCE : PARTIAL_SENTENCE}
       </p>
 
       {report.confirmed.length > 0 && (
