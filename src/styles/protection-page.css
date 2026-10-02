@@ -37,6 +37,10 @@
   /* The line above stays for a webview that does not know cqh; the one below is the bound that works. */
   max-height: 100cqh;
   overflow-y: auto;
+  /* Room for the ring below: 4px inset plus its 2px line, and a little air, so the ring never crosses the text. */
+  padding-inline: 12px;
+  /* The same width back again, so the text keeps its place and its measure; the box reaches into the gutters. */
+  margin-inline: -12px;
 }
 /* Inside the leaf's edge, as the page area's own ring is: the ink every look holds at 3:1 on its paper. */
 .nb-trail-leaves > .nb-trail-sticky:focus-visible {
