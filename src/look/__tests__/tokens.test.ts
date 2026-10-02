@@ -273,3 +273,90 @@ describe('tokens: what differs per look, and what every look shares (FR-009, FR-
     }
   });
 });
+
+// ---------------------------------------------------------------------------
+// Midday and night: each is a complete block, readable on its own sky.
+// ---------------------------------------------------------------------------
+const SKIES = ['--nb-sky-top', '--nb-sky-mid', '--nb-sky-bottom'] as const;
+const TABS = ['protection', 'trail', 'reaches', 'checkin', 'limits'] as const;
+const namesIn = (look: LookName) => [...blockOf(look).matchAll(/(--[a-z0-9-]+):/g)].map((m) => m[1]!);
+
+/** Hue in degrees and saturation 0..1 of a #rrggbb colour. */
+function hueSat(hex: string): { h: number; s: number } {
+  const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255) as [number, number, number];
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const l = (max + min) / 2;
+  const d = max - min;
+  if (d === 0) return { h: 0, s: 0 };
+  const s = d / (1 - Math.abs(2 * l - 1));
+  const h = max === r ? ((g - b) / d + 6) % 6 : max === g ? (b - r) / d + 2 : (r - g) / d + 4;
+  return { h: h * 60, s };
+}
+
+function completeAndReadable(look: Exclude<LookName, 'morning'>) {
+  const t = (name: string) => token(name, look);
+
+  it('defines every token the morning block defines', () => {
+    const have = new Set(namesIn(look));
+    expect(namesIn('morning').filter((n) => !have.has(n))).toEqual([]);
+  });
+
+  it.each([
+    ['--nb-ink', TEXT],
+    ['--nb-ink-body', TEXT],
+    ['--nb-ink-quiet', TEXT],
+    ['--nb-accent-amber', TEXT],
+  ] as Array<[string, number]>)('%s on the paper', (name, floor) => {
+    expect(contrastRatio(t(name), t('--nb-paper'))).toBeGreaterThanOrEqual(floor);
+  });
+
+  it('the primary button text on its fill', () => {
+    expect(contrastRatio(t('--nb-button-ink'), t('--nb-button'))).toBeGreaterThanOrEqual(TEXT);
+  });
+
+  it.each(SKIES)('the greeting and the title bar name on the sky at %s', (sky) => {
+    expect(contrastRatio(t('--nb-greeting-ink'), t(sky))).toBeGreaterThanOrEqual(LARGE);
+    expect(contrastRatio(t('--nb-greeting-quiet'), t(sky))).toBeGreaterThanOrEqual(TEXT);
+    // The title bar name and the switch both use the greeting's body ink.
+    expect(contrastRatio(t('--nb-greeting-body'), t(sky))).toBeGreaterThanOrEqual(TEXT);
+  });
+
+  it.each(TABS)('tab text on the %s tab', (id) => {
+    expect(contrastRatio(t('--nb-tab-ink'), t(`--nb-tab-${id}`))).toBeGreaterThanOrEqual(TEXT);
+  });
+
+  it('the current tab (paper) reads in --nb-ink', () => {
+    expect(contrastRatio(t('--nb-ink'), t('--nb-paper'))).toBeGreaterThanOrEqual(TEXT);
+  });
+
+  it('the theme palette overrides read on the paper, and the badges on their tints', () => {
+    const overrides = [...blockOf(look).matchAll(/(--color-[a-z]+-\d+):\s*(#[0-9a-fA-F]{6})/g)];
+    expect(overrides.length).toBeGreaterThan(0);
+    for (const [, name, colour] of overrides) {
+      expect(contrastRatio(colour!, t('--nb-paper')), name).toBeGreaterThanOrEqual(TEXT);
+    }
+    const own = new Map(overrides.map((m) => [m[1]!.replace('--color-', ''), m[2]!]));
+    const tints = new Map([...theme.matchAll(/--color-([a-z]+-\d+):\s*(#[0-9a-fA-F]{6})\s*;/g)].map((m) => [m[1]!, m[2]!]));
+    const colour = (n: string) => own.get(n) ?? tints.get(n)!;
+    for (const [fg, bg] of [['moss-600', 'moss-100'], ['amber-600', 'amber-100'], ['ink-500', 'sand-100']] as const) {
+      expect(contrastRatio(colour(fg), colour(bg)), `${fg} on ${bg}`).toBeGreaterThanOrEqual(TEXT);
+    }
+  });
+
+  it.each(SKIES)('the mark and the cairn base stone hold 3:1 on the sky at %s (FR-033, D4)', (sky) => {
+    expect(contrastRatio(t('--nb-stone-base'), t(sky))).toBeGreaterThanOrEqual(3);
+  });
+
+  it('uses no red: no strong saturation near hue 0 or 360 (FR-016)', () => {
+    const colours = [...blockOf(look).matchAll(/(--[a-z0-9-]+):\s*(#[0-9a-fA-F]{6})\s*;/g)];
+    for (const [, name, hex] of colours) {
+      const { h, s } = hueSat(hex!);
+      expect(s > 0.5 && (h < 15 || h > 345), `${name} ${hex}`).toBe(false);
+    }
+  });
+}
+
+describe('midday look (US2; FR-009, FR-021, FR-016, FR-033)', () => {
+  completeAndReadable('midday');
+});

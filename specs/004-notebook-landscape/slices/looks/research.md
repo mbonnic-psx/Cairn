@@ -24,6 +24,12 @@ values, by token, with `frame`'s morning token in the same role:
 | tabs | `#e7dcc8`, `#dcbf8c`, `#d7b4a2`, `#cfc5b3`; ink `#2a2119` | `#8f8574`, `#8a9478`, `#a68a7c`, `#9a9283`; ink `#1d1915` |
 | notebook shadow | edge `#c9b998`, soft `#33291f80` | edge `#8a7860`, soft `#00000099`, lamp glow `#f3c88c40` |
 
+**Departures made** (token, look: old → new, the pair it fixed):
+
+- Midday: none. `#6b5440` on `#ecca8a` measures 4.51:1, over the floor, so the canvas values stand. The canvas shows
+  four tab colours and no green; midday's `trail` tab keeps morning's `#b9c4a7`, and the sun sits at 11.7% / 7.5%
+  (150 / 60 px of 1280 x 800).
+
 The canvas names tabs by its own sample set (it shows a Settings tab, which does not exist: spec Assumptions).
 Map its colours onto the five real tabs in the order the canvas uses them, the current tab taking the paper colour
 as in `frame`.

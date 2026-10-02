@@ -63,6 +63,54 @@
   --color-moss-600: #4a5e41;
 }
 
+/* Midday: high, flat light. Values from the canvas board G-Midday; any move
+ * to meet a contrast floor is recorded in slices/looks/research.md (L1). */
+[data-look="midday"] {
+  --nb-paper: #f8f1e3;
+  --nb-ink: #2a2119;
+  --nb-ink-body: #33291f;
+  --nb-ink-quiet: #6b5a47;
+  --nb-rule: #e3d6bf;
+  --nb-margin: #c99a83;
+  --nb-accent-amber: #7d5a22;
+  --nb-button: #33291f;
+  --nb-button-ink: #f8f1e3;
+
+  --nb-sky-top: #f6e6c4;
+  --nb-sky-mid: #f1d8a4;
+  --nb-sky-bottom: #ecca8a;
+  --nb-greeting-ink: #2a2119;
+  --nb-greeting-body: #4a3d2f;
+  --nb-greeting-quiet: #6b5440;
+  --nb-sun-size: 84px;
+  --nb-sun-left: 11.7%;
+  --nb-sun-top: 7.5%;
+  --nb-sun: #f5c374;
+  --nb-sun-glow: #f5c37473;
+  --nb-hill-far: #dccb98;
+  --nb-hill-mid: #c2ad72;
+  --nb-hill-near: #93874f;
+  --nb-stone-base: #4a3a22;
+  --nb-stone-moss: #5f6234;
+  --nb-stone-amber: #a8762f;
+  --nb-stone-pale: #fbf3df;
+  --nb-shadow-edge: #c9b998;
+  --nb-shadow-soft: #33291f80;
+
+  --nb-tab-protection: #e7dcc8;
+  --nb-tab-trail: #b9c4a7;
+  --nb-tab-reaches: #dcbf8c;
+  --nb-tab-checkin: #d7b4a2;
+  --nb-tab-limits: #cfc5b3;
+  --nb-tab-ink: #2a2119;
+
+  --color-ink-500: #5c5245;
+  --color-ink-400: #6b5f52;
+  --color-amber-600: #7d5a22;
+  --color-amber-500: #8a6325;
+  --color-moss-600: #4a5e41;
+}
+
 /* The window. */
 .nb-root {
   position: relative;
