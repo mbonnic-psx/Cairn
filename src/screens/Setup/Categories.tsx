@@ -24,7 +24,7 @@ export function Categories({
 
   if (onPage) {
     return (
-      <section className="nb-categories">
+      <section className="nb-categories-section">
         <h2 className="nb-categories-title">What would you like to protect?</h2>
         <p className="nb-categories-lead">
           Each of these is a starting list. It becomes yours — add to it, take things out

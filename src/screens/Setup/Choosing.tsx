@@ -7,6 +7,7 @@
  */
 import { Button } from '../../components/Button';
 import type { CategoryPreset } from '../../ipc';
+import { useNotebookPage } from '../../shell/notebookPage';
 import { Categories } from './Categories';
 import { CustomEntry } from './CustomEntry';
 
@@ -22,6 +23,26 @@ export function Choosing({
   /** What "Turn protection on" does: the way forward to the disclosure. */
   onTurnOn: () => void;
 }) {
+  const onPage = useNotebookPage();
+
+  if (onPage) {
+    return (
+      <div className="nb-spread nb-choosing-spread">
+        <div className="nb-page nb-choosing-left">
+          <Categories categories={categories} onToggle={onToggle} note={note} />
+        </div>
+        <div className="nb-page nb-choosing-right">
+          <CustomEntry />
+          <div className="nb-choosing-foot">
+            <button type="button" className="nb-choosing-turn-on" onClick={onTurnOn}>
+              Turn protection on
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <>
       <Categories categories={categories} onToggle={onToggle} note={note} />

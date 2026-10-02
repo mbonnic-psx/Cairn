@@ -63,7 +63,7 @@ export function CustomEntry({
 
   if (onPage) {
     return (
-      <section className="nb-custom">
+      <section className="nb-custom-section">
         <h2 className="nb-custom-title">Anywhere else?</h2>
         <p className="nb-custom-lead">
           Type an address and Cairn will protect it, along with its www. form.

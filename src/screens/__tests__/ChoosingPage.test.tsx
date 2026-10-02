@@ -84,7 +84,7 @@ describe('Categories on a notebook page (T004)', () => {
     expect(within(main).getByText(/Each of these is a starting list/)).toBeInTheDocument();
     expect(main.querySelector('.settle')).toBeNull();
     expect(main.querySelector('section.rounded-2xl')).toBeNull();
-    expect(main.querySelector('section.nb-categories')).not.toBeNull();
+    expect(main.querySelector('section.nb-categories-section')).not.toBeNull();
   });
 
   it('draws one label per category wrapping a checkbox, its name and its count', () => {
@@ -152,7 +152,7 @@ describe('CustomEntry on a notebook page (T005)', () => {
     ).toBeInTheDocument();
     expect(main.querySelector('.settle')).toBeNull();
     expect(main.querySelector('section.rounded-2xl')).toBeNull();
-    expect(main.querySelector('section.nb-custom')).not.toBeNull();
+    expect(main.querySelector('section.nb-custom-section')).not.toBeNull();
   });
 
   it('names the box with the hidden label, keeps its id and its placeholder', () => {
@@ -270,5 +270,65 @@ describe('what comes back after an address is submitted, on a page (T006)', () =
     expect(found.className).toContain('nb-custom-reason');
     expect(found.className).not.toMatch(/red|rose|crimson|text-amber|--nb-accent-red/);
     expect(main.innerHTML).not.toMatch(/red/i);
+  });
+});
+
+describe.each(['morning', 'midday', 'night'] as const)('the choosing step on a notebook page, in the %s look (T007)', (look) => {
+  const step = (onTurnOn: () => void = noop, note?: string) => (
+    <Choosing categories={categories} onToggle={noop} note={note} onTurnOn={onTurnOn} />
+  );
+
+  function spreadOf(main: HTMLElement) {
+    const spread = main.querySelector(':scope > .nb-spread') as HTMLElement | null;
+    const pages = spread ? Array.from(spread.querySelectorAll<HTMLElement>(':scope > .nb-page')) : [];
+    return { spread, pages, left: pages[0]!, right: pages[1]! };
+  }
+
+  it('is one spread of two pages inside the page area, neither page ruled', () => {
+    const { main } = onPage(step(), look);
+    const { spread, pages } = spreadOf(main);
+    expect(spread).not.toBeNull();
+    expect(pages).toHaveLength(2);
+    for (const page of pages) expect(page).not.toHaveClass('nb-page--ruled');
+  });
+
+  it('holds the categories and the note on the left, the address box on the right', () => {
+    const { main } = onPage(step(noop, waitingNote), look);
+    const { left, right } = spreadOf(main);
+    expect(within(left).getByRole('heading', { level: 2, name: 'What would you like to protect?' })).toBeInTheDocument();
+    expect(within(left).getAllByRole('checkbox')).toHaveLength(categories.length);
+    expect(within(left).getByText(waitingNote)).toBeInTheDocument();
+    expect(within(right).getByRole('heading', { level: 2, name: 'Anywhere else?' })).toBeInTheDocument();
+    expect(within(right).getByLabelText('Address to protect')).toBeInTheDocument();
+    expect(within(right).getByRole('button', { name: 'Protect it' })).toBeInTheDocument();
+  });
+
+  it('ends the right page with "Turn protection on", a plain button that calls onTurnOn once', async () => {
+    const onTurnOn = vi.fn();
+    const { main } = onPage(step(onTurnOn), look);
+    const { right } = spreadOf(main);
+    const foot = right.lastElementChild as HTMLElement;
+    expect(foot.className).toContain('nb-choosing-foot');
+    expect(foot.children).toHaveLength(1);
+    const button = within(foot).getByRole('button', { name: 'Turn protection on' });
+    expect(button.tagName).toBe('BUTTON');
+    expect(button.className).toContain('nb-choosing-turn-on');
+    expect(button.className).not.toMatch(/transition-colors|duration-200|bg-clay/);
+    await userEvent.click(button);
+    expect(onTurnOn).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps the heading outline: Cairn, then the two page headings in reading order', () => {
+    onPage(step(), look);
+    expect(screen.getAllByRole('heading').map((h) => h.textContent)).toEqual([
+      'Cairn',
+      'What would you like to protect?',
+      'Anywhere else?',
+    ]);
+  });
+
+  it('says the same words as the same props outside any shell', () => {
+    const here = onPage(step(noop, waitingNote), look).main.textContent;
+    expect(here).toBe(outside(step(noop, waitingNote)));
   });
 });
