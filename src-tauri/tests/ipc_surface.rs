@@ -13,7 +13,7 @@
 ///
 /// Adding a command without adding it here fails this test — which is the
 /// point.
-const CLASSIFIED: [(&str, Effect); 20] = [
+const CLASSIFIED: [(&str, Effect); 21] = [
     // Reads. They change nothing.
     ("get_protection_state", Effect::Reads),
     ("get_trail", Effect::Reads),
@@ -38,6 +38,10 @@ const CLASSIFIED: [(&str, Effect); 20] = [
     // the trusted clock as they were (`us1_quote.rs`).
     ("get_quotes_shown", Effect::Reads),
     ("set_quotes_shown", Effect::Reads),
+    // A range of days, by site, for the Reaches screen's *Over time*. It reads
+    // the history and nothing else, and says nothing that leads to a
+    // protection change (slice `history-by-site`).
+    ("summarize_reaches", Effect::Reads),
     // Increases. Immediate, and never gated (FR-048).
     ("add_custom_entry", Effect::Increases),
     ("turn_protection_on", Effect::Increases),
