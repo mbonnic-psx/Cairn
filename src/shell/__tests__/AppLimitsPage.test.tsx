@@ -1,6 +1,6 @@
 /**
  * Through the real `App` (slice `quiet-pages`, T006): in a notebook look the What Cairn covers tab opens a
- * spread under the notebook's heading outline, with protection on or off, and Current is unchanged. The core
+ * spread under the notebook's heading outline, with protection on or off, as before the reveal. The core
  * is a fake written in the test tree at the one seam the interface calls it through.
  */
 import { render, screen, within } from '@testing-library/react';

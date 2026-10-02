@@ -1,6 +1,6 @@
 /**
  * Through the real `App` (slice `loose-ends`, T004; carries setup-pages T024): "Yes, set this up" pressed on the
- * notebook page leads where it leads in Current, both ways, in every look. The core is a fake written in the test
+ * notebook page leads where it led before the reveal, both ways, in every look. The core is a fake written in the test
  * tree at the one seam the interface calls it through; no command is answered that the screens do not ask.
  */
 import { render, screen, within } from '@testing-library/react';

@@ -104,7 +104,7 @@ function words(root: HTMLElement): string[] {
 /** The words the screen said before the notebook, for a case the pin held: parsed from the baseline, never rendered. */
 const wasWords = (key: string) => wordsOf(baseline(TONIGHT[key]!));
 
-/** The time as Current writes it: the same call. */
+/** The time as the screen writes it: the same call. */
 const timeOf = (seconds: number) =>
   new Date(seconds * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 

@@ -1,7 +1,7 @@
 /**
  * Through the real `App` (slice `setup-pages`, T011): in a notebook look, choosing what to protect and Before
- * Cairn changes anything open as spreads, the step's state survives a walk between looks, and Current is
- * unchanged. The core is a fake written in the test tree at the one seam the interface calls it through.
+ * Cairn changes anything open as spreads, the step's state survives a walk between looks, as before
+ * the reveal. The core is a fake written in the test tree at the one seam the interface calls it through.
  */
 import { cleanup, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';

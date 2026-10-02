@@ -107,7 +107,7 @@ const states: Record<string, (look: Look) => Promise<HTMLElement>> = {
     await screen.findByText(disclosures.administrator);
     return main;
   },
-  // The pin's last state is the column `App` drew in Current: the choosing step with the core's categories.
+  // The pin's last state is the column `App` drew before the reveal: the choosing step with the core's categories.
   'the choosing step through App, in Current': async (look) =>
     show(<Choosing categories={categories} onToggle={noop} onTurnOn={vi.fn()} />, look),
 };

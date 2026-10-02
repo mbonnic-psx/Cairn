@@ -116,7 +116,7 @@ describe('notebook.css behaviour rules', () => {
     }
   });
 
-  it('scopes every selector to the notebook, so nothing outside the notebook is styled (SC-009)', () => {
+  it('scopes every selector to the notebook, so nothing outside the notebook is styled', () => {
     expect(rules.length).toBeGreaterThan(10);
     for (const r of rules) {
       for (const one of r.selector.split(',')) expect(one.trim()).toMatch(/^(\.nb-|\[data-look)/);

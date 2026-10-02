@@ -123,7 +123,7 @@ describe('the released interface (SC-002)', () => {
       for (const current of ['min-h-screen px-6 py-12', 'mx-auto mb-10 flex max-w-3xl']) {
         expect(prod, `the released build must not carry ${current}`).not.toContain(current);
       }
-      // Current's own code (R7, E7.1): the Card's class string and the theme's .reflective / .settle rules.
+      // The retired layout's own code (R7, E7.1): the Card's class string and the theme's .reflective / .settle rules.
       for (const marker of CURRENT_CODE) {
         expect(prod, `the released build must not carry ${marker}`).not.toContain(marker);
       }
@@ -131,7 +131,7 @@ describe('the released interface (SC-002)', () => {
     TIMEOUT,
   );
 
-  it('looks for Current\'s code by markers the retired pins\' captured markup really carries', async () => {
+  it('looks for the retired layout\'s code by markers the retired pins\' captured markup really carries', async () => {
     const { PIN, PROTECTION } = await import('../../screens/__tests__/beforeTheReveal');
     const captured = [...Object.values(PIN), ...Object.values(PROTECTION)].join('\n');
     expect(captured).toContain(CARD_CLASSES);

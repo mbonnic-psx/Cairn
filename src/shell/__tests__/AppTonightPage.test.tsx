@@ -1,7 +1,7 @@
 /**
  * Through the real `App` (slice `tonight-page`, T018): in a notebook look the Today tab opens the Today spread
  * and "Over time" switches the view inside the notebook, the Tonight tab opens the Tonight spread, what is
- * typed in the writing space survives a trip to another tab and a change of look, and Current is unchanged.
+ * typed in the writing space survives a trip to another tab and a change of look, as it did before the reveal.
  * The core is a fake written in the test tree at the one seam the interface calls it through.
  */
 import { render, screen } from '@testing-library/react';

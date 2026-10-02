@@ -54,7 +54,7 @@ function words(root: HTMLElement): string[] {
 
 const now = evening;
 
-/** The time as Current writes it: the same call. */
+/** The time as the screen writes it: the same call. */
 const timeOf = (seconds: number) =>
   new Date(seconds * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
@@ -348,7 +348,7 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (name) 
       },
     );
 
-    it('draws the date boxes as plain date inputs with the slice class and Current rules', async () => {
+    it('draws the date boxes as plain date inputs with the slice class and the rules it had before the reveal', async () => {
       const { left } = await overTime('looking');
       const from = within(left!).getByLabelText('From') as HTMLInputElement;
       const to = within(left!).getByLabelText('To') as HTMLInputElement;
@@ -482,7 +482,7 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (name) 
       });
     });
 
-    it('keeps each bar as wide as Current draws it, from the sheet and no other colour', async () => {
+    it('keeps each bar as wide as it was drawn before the reveal, from the sheet and no other colour', async () => {
       const { right } = await listed(overTimeCases['a list'] as Patterns);
       const bars = within(right).getAllByTestId('bar');
       expect(bars.map((b) => b.style.width)).toEqual(['100%', '44%', '11%']);

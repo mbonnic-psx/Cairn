@@ -1,6 +1,6 @@
 /**
  * Through the real `App` (slice `protection-page`, T009): in a notebook look the Protection tab and the
- * What is protected tab open as spreads under the notebook's heading outline, and Current is unchanged.
+ * What is protected tab open as spreads under the notebook's heading outline, as before the reveal.
  * The core is a fake written in the test tree at the one seam the interface calls it through.
  */
 import { render, screen, within } from '@testing-library/react';

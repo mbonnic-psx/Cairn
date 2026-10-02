@@ -1,6 +1,6 @@
 /// <reference types="vite/client" />
 /**
- * Nothing a look re-points fades (loose-ends T007; looks T024, D3, SC-009): no element on any screen a page
+ * Nothing a look re-points fades (loose-ends T007; looks T024, D3): no element on any screen a page
  * can show carries a transition, animation or settle class, in any look and any state the case files hold,
  * and Protection's "Keep things as they are" is a plain button with the box the shared one had.
  */
