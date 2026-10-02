@@ -16,7 +16,10 @@ import { Reaches } from './screens/Reaches';
 import { Categories } from './screens/Setup/Categories';
 import { CustomEntry } from './screens/Setup/CustomEntry';
 import { Trail } from './screens/Trail';
+import { LookSwitch } from './look/LookSwitch';
+import type { Look } from './look/look';
 import { CurrentShell } from './shell/CurrentShell';
+import { NotebookShell } from './shell/NotebookShell';
 import {
   getDisclosures,
   getProtectionState,
@@ -31,7 +34,10 @@ import {
   type Trail as TrailData,
 } from './ipc';
 
-export default function App() {
+export default function App({ devBuild = import.meta.env.DEV }: { devBuild?: boolean }) {
+  // Chosen at the switch, kept nowhere, and always 'current' outside a dev build.
+  const [chosenLook, setLook] = useState<Look>('current');
+  const look: Look = devBuild ? chosenLook : 'current';
   const [step, setStep] = useState<Step>('choosing');
   const [categories, setCategories] = useState<CategoryPreset[]>([]);
   const [trail, setTrail] = useState<TrailData>();
@@ -42,8 +48,12 @@ export default function App() {
   const checkIn = useCheckInSession();
 
   useEffect(() => {
-    listCategories().then(setCategories).catch(() => undefined);
-    getDisclosures().then(setDisclosures).catch(() => undefined);
+    listCategories()
+      .then(setCategories)
+      .catch(() => undefined);
+    getDisclosures()
+      .then(setDisclosures)
+      .catch(() => undefined);
     getProtectionState()
       .then((current) => {
         setState(current);
@@ -106,38 +116,42 @@ export default function App() {
     }
   }
 
+  const Shell = look === 'morning' ? NotebookShell : CurrentShell;
+  const tabs = tabsFor(step, protectionOn, state?.status);
+
   return (
-    <CurrentShell
-      tabs={tabsFor(step, protectionOn, state?.status)}
-      onSelect={(id) => void select(id)}
-    >
-      {step === 'choosing' && (
-        <>
-          <Categories categories={categories} onToggle={toggle} note={note} />
-          <CustomEntry />
-          <div className="flex justify-end">
-            <Button onClick={() => setStep('disclosure')}>Turn protection on</Button>
-          </div>
-        </>
-      )}
+    <>
+      {/* `import.meta.env.DEV` is a build-time constant, so the bundler drops the switch from a production build. */}
+      {import.meta.env.DEV && devBuild && <LookSwitch look={look} onChange={setLook} />}
+      <Shell tabs={tabs} onSelect={(id) => void select(id)}>
+        {step === 'choosing' && (
+          <>
+            <Categories categories={categories} onToggle={toggle} note={note} />
+            <CustomEntry />
+            <div className="flex justify-end">
+              <Button onClick={() => setStep('disclosure')}>Turn protection on</Button>
+            </div>
+          </>
+        )}
 
-      {step === 'disclosure' && (
-        <Disclosure
-          disclosures={disclosures}
-          onConfirm={confirm}
-          onBack={() => setStep('choosing')}
-        />
-      )}
+        {step === 'disclosure' && (
+          <Disclosure
+            disclosures={disclosures}
+            onConfirm={confirm}
+            onBack={() => setStep('choosing')}
+          />
+        )}
 
-      {step === 'protected' && <Protection state={state} />}
+        {step === 'protected' && <Protection state={state} />}
 
-      {step === 'trail' && trail && <Trail trail={trail} status={state?.status} />}
+        {step === 'trail' && trail && <Trail trail={trail} status={state?.status} />}
 
-      {step === 'reaches' && <Reaches />}
+        {step === 'reaches' && <Reaches />}
 
-      {step === 'checkin' && <CheckIn session={checkIn} />}
+        {step === 'checkin' && <CheckIn session={checkIn} />}
 
-      {step === 'limits' && disclosures && <Limits disclosures={disclosures} />}
-    </CurrentShell>
+        {step === 'limits' && disclosures && <Limits disclosures={disclosures} />}
+      </Shell>
+    </>
   );
 }
