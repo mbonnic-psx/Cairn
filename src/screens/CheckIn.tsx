@@ -357,6 +357,24 @@ export function CheckIn({ session }: { session?: CheckInSession }) {
       </figure>
     ) : null;
 
+  // The same two pieces as Current's, as the page draws them: the quote opens the right page, the switch ends it.
+  const pageQuote =
+    quotesShown && quote ? (
+      <figure className="nb-checkin-quote">
+        <p className="nb-checkin-quote__line">{quote}</p>
+      </figure>
+    ) : null;
+  const pageSwitch =
+    quotesShown === undefined ? null : (
+      <button
+        type="button"
+        className="nb-checkin-switch"
+        onClick={() => switchQuotes(!quotesShown)}
+      >
+        {quotesShown ? HIDE_QUOTES : SHOW_QUOTES}
+      </button>
+    );
+
   if (!view && onPage) {
     return (
       <div className="nb-spread nb-checkin-leaves">
@@ -419,6 +437,7 @@ export function CheckIn({ session }: { session?: CheckInSession }) {
           {view.coverage_note && <p className="nb-checkin-note">{view.coverage_note}</p>}
         </div>
         <div className="nb-page nb-page--ruled">
+          {pageQuote}
           <label className="nb-checkin-label">
             <span className="nb-checkin-label__text">{HOW_THE_DAY_WENT}</span>
             <textarea
@@ -437,6 +456,7 @@ export function CheckIn({ session }: { session?: CheckInSession }) {
           >
             {KEEP_THIS}
           </button>
+          {pageSwitch}
         </div>
       </div>
     );

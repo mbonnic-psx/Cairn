@@ -11,11 +11,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { NotebookLook } from '../../look/look';
 import { NotebookShell } from '../../shell/NotebookShell';
 import { CheckIn, type CheckInSession } from '../CheckIn';
-import { installFakeCore, type FakeCore } from './fakeCore';
+import { installFakeCore, never, type FakeCore } from './fakeCore';
 import {
   dayCoverageNote,
   evening,
   loadRefusal,
+  quoteLine,
   reachesOfTheDay,
   tonightCases,
   tonightCore,
@@ -93,7 +94,6 @@ function without(found: string[], taken: string[]) {
   return rest;
 }
 
-const SWITCH_WORDS = ['Show quotes', 'Hide quotes'];
 const OPEN_DAYS = [
   'reaches, no coverage note, quotes hidden',
   'no reaches, no coverage note, quotes hidden',
@@ -327,11 +327,124 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (name) 
       const right = words(onPage.right!);
       onPage.unmount();
       core?.remove();
-      // The quotes switch joins the right page with its own rule.
-      const outside = without(await wordsOutside(c), left).filter(
-        (w) => !SWITCH_WORDS.includes(w),
+      expect(right).toEqual(without(await wordsOutside(c), left));
+    });
+  });
+
+  describe('the quote and the quotes switch on an open day', () => {
+    /** The class of each of the right page's direct children, in order. */
+    const order = (right: HTMLElement) =>
+      Array.from(right.children).map((el) => el.className);
+
+    /** The setting still being read: `get_quotes_shown` never answers. */
+    const pendingSetting: TonightCase = {
+      ...tonightCases['reaches, with a quote']!,
+      quotesShown: false,
+    };
+
+    it('quotes shown with a quote: the quote first, the writing space, "Keep this", the switch last', async () => {
+      const { right } = await show(tonightCases['reaches, with a quote']!, true);
+      expect(right).toBeDefined();
+      expect(order(right!)).toEqual([
+        'nb-checkin-quote',
+        'nb-checkin-label',
+        'nb-checkin-keep',
+        'nb-checkin-switch',
+      ]);
+      const quote = right!.firstElementChild as HTMLElement;
+      expect(quote.tagName).toBe('FIGURE');
+      expect(quote.querySelector('p')).toHaveClass('nb-checkin-quote__line');
+      expect(quote).toHaveTextContent(quoteLine);
+      expect(right!.lastElementChild).toHaveTextContent('Hide quotes');
+    });
+
+    it('quotes hidden: no quote, the switch reads "Show quotes"', async () => {
+      const { right } = await show(tonightCases[OPEN_DAYS[0]!]!, true);
+      expect(right).toBeDefined();
+      expect(right!.querySelector('figure')).toBeNull();
+      expect(order(right!)).toEqual([
+        'nb-checkin-label',
+        'nb-checkin-keep',
+        'nb-checkin-switch',
+      ]);
+      expect(right!.lastElementChild).toHaveTextContent('Show quotes');
+    });
+
+    it('the setting unknown, refused: no quote and no switch', async () => {
+      const { right } = await show(tonightCases['reaches, the quotes setting unknown']!, true);
+      expect(right).toBeDefined();
+      expect(right!.querySelector('figure')).toBeNull();
+      expect(order(right!)).toEqual(['nb-checkin-label', 'nb-checkin-keep']);
+    });
+
+    it('the setting unknown, still being read: no quote and no switch', async () => {
+      vi.setSystemTime(evening());
+      const answers = tonightCore(pendingSetting);
+      core = installFakeCore({ ...answers, get_quotes_shown: never });
+      const view = render(
+        <NotebookShell tabs={tabs} onSelect={vi.fn()} look={look}>
+          <CheckIn />
+        </NotebookShell>,
       );
-      expect(right).toEqual(outside);
+      await settle();
+      const right = view.container
+        .querySelector<HTMLElement>('main .nb-spread')!
+        .querySelectorAll<HTMLElement>(':scope > .nb-page')[1];
+      expect(right).toBeDefined();
+      expect(right!.querySelector('figure')).toBeNull();
+      expect(order(right!)).toEqual(['nb-checkin-label', 'nb-checkin-keep']);
+    });
+
+    it('shown with no quote: no quote, the switch present', async () => {
+      const { right } = await show(tonightCases['reaches, quotes shown and none to be had']!, true);
+      expect(right).toBeDefined();
+      expect(right!.querySelector('figure')).toBeNull();
+      expect(order(right!)).toEqual([
+        'nb-checkin-label',
+        'nb-checkin-keep',
+        'nb-checkin-switch',
+      ]);
+      expect(right!.lastElementChild).toHaveTextContent('Hide quotes');
+    });
+
+    it('the switch is a plain button in the slice\u2019s class, with no fade', async () => {
+      const { right } = await show(tonightCases['reaches, with a quote']!, true);
+      expect(right).toBeDefined();
+      const toggle = within(right!).getByRole('button', { name: 'Hide quotes' });
+      expect(toggle.tagName).toBe('BUTTON');
+      expect(toggle).toHaveClass('nb-checkin-switch');
+      expect(toggle.className).not.toMatch(/transition|duration-|animate-|rounded|px-/);
+    });
+
+    it('pressing it asks set_quotes_shown with the same arguments as outside any shell', async () => {
+      const c = tonightCases['reaches, with a quote']!;
+      const presses = async (shell: boolean) => {
+        const view = await show(c, shell);
+        fireEvent.click(screen.getByRole('button', { name: 'Hide quotes' }));
+        await settle();
+        const asked = core!.calls.filter((call) => call.cmd === 'set_quotes_shown');
+        view.unmount();
+        core?.remove();
+        return asked;
+      };
+      const onPage = await presses(true);
+      expect(onPage).toEqual([{ cmd: 'set_quotes_shown', args: { shown: false } }]);
+      expect(onPage).toEqual(await presses(false));
+    });
+
+    it.each([
+      'reaches, with a quote',
+      'reaches, quotes shown and none to be had',
+      'reaches, the quotes setting unknown',
+    ])('%s: the right page\u2019s words equal the same part outside any shell', async (key) => {
+      const c = tonightCases[key]!;
+      const onPage = await show(c, true);
+      expect(onPage.right).toBeDefined();
+      const left = words(onPage.left!);
+      const right = words(onPage.right!);
+      onPage.unmount();
+      core?.remove();
+      expect(right).toEqual(without(await wordsOutside(c), left));
     });
   });
 });
