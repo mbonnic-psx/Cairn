@@ -43,6 +43,62 @@
       "agents": null,
       "delegated": false,
       "signals": {}
+    },
+    {
+      "stage": "tasks",
+      "started": "2026-10-02T02:57:05Z",
+      "planned": "tasks: fast → sonnet — Claude Code: the Agent tool's `model` parameter, set per call",
+      "tasks": {
+        "start": null,
+        "end": {
+          "open": 16,
+          "done": 0
+        }
+      },
+      "ended": "2026-10-02T02:59:04Z",
+      "seconds": 119,
+      "span": {
+        "from": {
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1aaf8c2c-95cc-4d60-8c0a-547f149a5b32.jsonl": 2287952
+        },
+        "to": {
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1aaf8c2c-95cc-4d60-8c0a-547f149a5b32.jsonl": 2407819,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1aaf8c2c-95cc-4d60-8c0a-547f149a5b32/subagents/agent-adeb4c1fced2516b4.jsonl": 422714
+        }
+      },
+      "usage": {
+        "source": "claude",
+        "session": "1aaf8c2c-95cc-4d60-8c0a-547f149a5b32",
+        "read": "message.usage on each assistant line, once per requestId",
+        "host": {
+          "claude-opus-5-5": {
+            "input": 14,
+            "output": 5217,
+            "cache_read": 2273973,
+            "cache_creation": 10921
+          }
+        },
+        "subagents": {
+          "claude-sonnet-5-5": {
+            "input": 18,
+            "output": 84,
+            "cache_read": 448881,
+            "cache_creation": 70804
+          }
+        },
+        "agents": [
+          "drive-tasks"
+        ]
+      },
+      "ran": [
+        "claude-opus-5-5",
+        "claude-sonnet-5-5"
+      ],
+      "agents": [
+        "drive-tasks"
+      ],
+      "delegated": true,
+      "signals": {}
     }
   ]
 }

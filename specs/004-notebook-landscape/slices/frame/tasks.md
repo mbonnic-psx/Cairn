@@ -1,0 +1,64 @@
+---
+description: "Tasks for slice `frame` of 004-notebook-landscape"
+---
+
+# Tasks: The notebook in the landscape — slice `frame`
+
+**Input**: `slices/frame/plan.md`, `research.md` (R1–R8), `data-model.md`, `contracts/ui-shell.md`, `quickstart.md`; spec FRs cited in `story-split.md` row 1.
+**Scope**: US1, plus the parts of US2 this slice owns (Current and Morning, the switch, the default-Current rule, the production build having no switch). Midday, night and their tokens belong to slice `looks`.
+**Method**: Every task is one RED-GREEN-REFACTOR increment: write the failing test, make it pass, tidy, commit. No example map or `model.yaml` exists for this slice, so the rules below are cut from the spec's acceptance scenarios and the plan's research decisions. No mocking framework: fakes live in the test tree. Tests that render `NotebookShell`, `CurrentShell`, `Greeting`, `LookSwitch` take props directly and need no stub at all. The few `App`-level tests reuse the ipc stubbing `src/screens/__tests__/Navigation.test.tsx` already carries; do not add a new mocking approach.
+**Guard**: the existing tests under `src/screens/__tests__/` are never edited, and every task ends with `npm test` green.
+
+## Format: `[ID] [P?] [Story] Description`
+
+## Phase 1: Setup
+
+- [ ] T001 [P] [US1] Vendor the fonts (FR-014, FR-015, R2). No test: this adds data, not behaviour; the proof is T012's font test and quickstart step 4. Fetch Fontsource 5.3.0 without touching `package.json` or `package-lock.json`: in the scratchpad, `npm pack @fontsource/libre-caslon-text@5.3.0 @fontsource/ibm-plex-mono@5.3.0`, extract, and copy the latin-subset woff2 files into `src/assets/fonts/` as `LibreCaslonText-400.woff2`, `LibreCaslonText-400i.woff2`, `LibreCaslonText-700.woff2`, `IBMPlexMono-400.woff2`, `IBMPlexMono-500.woff2`, plus the SIL OFL 1.1 text as `src/assets/fonts/OFL.txt`. Confirm `git status` shows no change to either manifest.
+- [ ] T002 [P] [US1] Window opens at 1280x800 (FR-028, R5). RED: `src/shell/__tests__/windowConfig.test.ts` reads `src-tauri/tauri.conf.json` and asserts `app.windows[0]` width 1280, height 800, minWidth 800, minHeight 600. GREEN: edit width and height in `src-tauri/tauri.conf.json`. If `tsc` lacks Node types for `fs`, read the file with Vite's `?raw` import instead of adding a package.
+
+## Phase 2: Foundational (blocks every later task)
+
+- [ ] T003 [US1] Rule: one function decides which tabs exist (FR-003, FR-004, FR-005; US1 scenarios 1, 2, 4; R7; data-model *Tab*). RED: `src/shell/__tests__/navigation.test.ts` pins `tabsFor(step, protectionOn)`: Protection always present and current for `choosing`, `disclosure`, `protected`; trail (label from `trailTitle`) and Today only when protection is on; Tonight and What Cairn covers always; the ordering of today's header; exactly one tab current; no other ids. GREEN: create `src/navigation.ts`, moving the rules out of `src/App.tsx` lines 95–140; `App.tsx` still renders its header from it. REFACTOR: `src/screens/__tests__/Navigation.test.tsx` and `AppFlows.test.tsx` stay green unchanged.
+- [ ] T004 [US1] Rule: Current is today's interface, byte for byte (SC-009, contracts "What never changes"). RED: `src/shell/__tests__/CurrentShell.test.tsx` renders `CurrentShell` with props (tabs, onSelect, children) and asserts the header, the Cairn heading, the nav buttons (role `button`, today's names), `aria-current="page"` on the current tab and the single-column container around the children. GREEN: move the `<main>`, header and column markup out of `App.tsx` into `src/shell/CurrentShell.tsx`, rendering from `tabsFor`; `App.tsx` renders `CurrentShell` around the same screen elements. Depends on T003. The whole existing suite is the characterisation guard.
+- [ ] T005 [P] [US2] Rule: the Look value and the greeting's words and time (FR-006, FR-013b, FR-030; data-model *Look*, *Greeting*; R4). RED: `src/look/__tests__/look.test.ts`: `greetingFor('morning')` is "Good morning."; `formatWeekdayTime` returns weekday plus 24-hour time for a locale such as `en-GB` and weekday plus 12-hour time for `en-US`, for a fixed date; nothing reads the clock to choose a look. GREEN: `src/look/look.ts` (`Look = 'current' | 'morning'`, both functions). Disjoint from T003 and T004.
+- [ ] T006 [P] [US2] Rule: contrast is measured, not eyeballed (FR-021, SC-003, R6). RED: `src/look/__tests__/contrast.test.ts` asserts `contrastRatio('#000000','#ffffff')` is 21, `contrastRatio` of identical colours is 1, and a known mid-grey pair against its published WCAG value, and is order-independent. GREEN: `src/look/contrast.ts`. Disjoint from T005.
+
+## Phase 3: User Story 1 — the window becomes a notebook (P1)
+
+- [ ] T007 [US1] Rule: paper tabs offer the same destinations under the same rules, and say which is current (FR-003, FR-005, FR-022, FR-024; scenarios 1–3; contracts "Navigation"). RED: `src/shell/__tests__/NotebookShell.test.tsx` renders `NotebookShell` with a fake tab list and children: every tab is a `button` with exactly today's name; the current one has `aria-current="page"`; selecting by click and by keyboard (Tab to it, Enter) calls `onSelect` with its id; the children appear inside one scrolling page area; no tab is rendered for an id `tabsFor` does not return. GREEN: `src/shell/NotebookShell.tsx` with `data-look="morning"` on its root, tabs, page area and structural classes `.nb-spread`, `.nb-page` (styles come in T012). Depends on T003.
+- [ ] T008 [P] [US1] Rule: the greeting shows the true weekday and time and keeps up (FR-006, FR-030, FR-008; R4). RED: `src/shell/__tests__/Greeting.test.tsx` with `vi.useFakeTimers` and a fixed system time: shows "Good morning." and the formatted weekday and time; advancing 60 s updates the time; the first tick lands on the next minute boundary; unmount clears the timer; no digit-count, badge or streak words appear. GREEN: `src/shell/Greeting.tsx` using T005. Depends on T005; disjoint from T007.
+- [ ] T009 [P] [US1] Rule: the scenery and mark are present, silent and free of banned imagery (FR-001, FR-007, FR-017, FR-024). RED: `src/shell/__tests__/Landscape.test.tsx`: `Landscape` is `aria-hidden="true"` and holds a sky, three hill layers, a sun and a cairn of exactly five stones; `CairnMark` renders five stones as inline SVG with an accessible name; neither contains a lock, shield or chain shape (assert by test ids and absence of those labels). GREEN: `src/shell/Landscape.tsx` and `src/shell/CairnMark.tsx`. Disjoint from T007 and T008.
+- [ ] T010 [US1] Rule: the notebook shell is assembled and carries no reach data (FR-002, FR-006, FR-007, FR-008, FR-027, SC-001; contracts "What never changes"). RED: extend `NotebookShell.test.tsx` (a second `describe`, same file as T007, hence not [P]): the shell shows the mark, the greeting and the landscape around the notebook, the screen children untouched; its module imports nothing from `ipc/reaches`. GREEN: compose `Landscape`, `Greeting`, `CairnMark` into `NotebookShell`. Depends on T007, T008, T009.
+- [ ] T011 [US2] Rule: the switch starts on Current, moves between Current and Morning without losing anything, and does not exist in a production build (FR-010, FR-011, FR-012, FR-032; US2 scenarios 1–3 for the two looks here; R1, R3; data-model *Look*). RED: `src/shell/__tests__/LookSwitch.test.tsx` (the component alone, props only): labelled "Look (testing)", offers Current and Morning, reports the choice, keyboard operable. `src/shell/__tests__/AppLook.test.tsx` (App-level, `App` takes a `devBuild` prop defaulting to `import.meta.env.DEV`): with it true the switch shows and Current is selected on every fresh render (nothing in storage is read or written); choosing Morning shows `NotebookShell`, choosing Current shows `CurrentShell`; text typed in Tonight survives the round trip and the step is unchanged; with `vi.stubEnv('DEV', false)` (and `vi.unstubAllEnvs` after) there is no element whose label or text is "Look (testing)", it cannot be focused by Tab, and the output equals the Current output. GREEN: `src/look/LookSwitch.tsx`; `App.tsx` holds `look` in state (default `'current'`, forced to `'current'` when not a dev build) and picks the shell. Depends on T004, T005, T010.
+- [ ] T012 [US1] Styling: fonts, look tokens, scene and notebook layout (FR-001, FR-002, FR-014, FR-015, FR-021, FR-022, FR-025, FR-029; R2, R6, R8; contracts "Look tokens"). Styles come from `src/styles/theme.css` (`@font-face`, `--font-notebook-serif`, `--font-notebook-mono`) and the new `src/styles/notebook.css` (`[data-look="morning"]` tokens `--nb-paper`, `--nb-ink`, `--nb-ink-body`, `--nb-ink-quiet`, `--nb-rule`, `--nb-margin`, `--nb-accent-amber`, `--nb-button`, `--nb-button-ink`, `--nb-font-serif`, `--nb-font-mono`; scene; spread classes `.nb-spread`, `.nb-page`, `.nb-page--ruled`, `.nb-margin`; the under-1100px stacked layout). The screen is the notebook in the morning look at 1280x800 and 800x600.
+  - Design, before any code: `delivery/skills/frontend-design`'s second pass over the plan, plus whatever the `AGENTS.md` extension block adds to `/drive`'s *Screen design* rung (none today beyond this file).
+  - RED first, in `src/look/__tests__/tokens.test.ts`: (a) parse each token from `notebook.css` and assert every text and background pair the morning look uses meets 4.5:1 (3:1 for text 24px and up), using T006, with the sky pairs as well as paper pairs; (b) `theme.css` declares all five `@font-face` rules, each `src` resolves to a file in `src/assets/fonts/` (T001), with `font-display: swap`, a fallback stack, and no `http` URL; (c) `notebook.css` carries a `prefers-reduced-motion: reduce` block that removes every animation and transition, a `forced-colors: active` block, the 1100px breakpoint, and a visible `:focus-visible` rule on tabs and the switch; (d) mono is applied only to tab names, labels and buttons, never to the page body.
+  - GREEN: write the CSS until the test passes; import `notebook.css` where `theme.css` is imported. REFACTOR: no screen file changes, no colour outside a token (contract). Depends on T001, T006, T010.
+- [x] T013 ~~Committed mockups for the event model~~ — *not applicable, removed by the host 2026-10-01*: this repository has no event model (`delivery/docs/event-model/` does not exist and `check-model` does not run here). The shell's states are recorded on the design canvas (boards `G-Morning`, `G-Midday`, `G-Night`), which the spec cites.
+
+## Design review
+
+Designed: <!-- written by /drive's Screen design rung: the second pass of delivery/skills/frontend-design over the plan, before T012's code -->
+Reviewed: <!-- written by /drive's Design review rung: the rendered morning look at 1280x800 and 800x600 checked against delivery/skills/web-interface-guidelines, before the demo -->
+
+## Final verification
+
+- [ ] T014 [US1] Quickstart step 1: `npm test`. Every existing test in `src/screens/__tests__/` passes unchanged and every new test passes (SC-006, SC-009). Depends on T011, T012.
+- [ ] T015 [US1] Quickstart step 4: `npm run build && ! grep -rl "Look (testing)" dist/`. The build succeeds and the search finds nothing (SC-002, R1's "to be verified" note). If the string survives, stop and hand it back: it is a defect in T011, not a search to loosen. Depends on T011, T012.
+- [ ] T016 [US1] Quickstart step 5: `npm run check && npm run lint`. All eight guards and the linter pass with no guard edited (FR-026). Depends on T014, T015.
+
+## Dependencies and order
+
+- T001, T002, T005, T006 have no prerequisites.
+- T003 then T004 then T011. T005 feeds T008 and T011. T003 feeds T007. T007, T008, T009 feed T010. T010 feeds T011 and T012. T001, T006, T010 feed T012. T012 feeds T013, T014, T015. T016 last.
+
+## Parallel opportunities
+
+- **Batch A (start of work)**: T001, T002, T005, T006 — disjoint files (`src/assets/fonts/`, `src-tauri/tauri.conf.json` and its test, `src/look/look.ts`, `src/look/contrast.ts` and their tests). T003 may also run beside them: it owns `src/navigation.ts`, `src/App.tsx` and `src/shell/__tests__/navigation.test.ts`, which none of the others touch.
+- **Batch B (after T003/T005)**: T008 and T009 may run alongside T007: `Greeting.tsx`, `Landscape.tsx`/`CairnMark.tsx` and `NotebookShell.tsx` are different files with different tests. T004 may also run here, but it edits `App.tsx` and so must not run beside anything else that edits it.
+- **Batch C (after T012)**: T013 alongside T014 and T015 (the mockups touch no source; T014 and T015 only read). T015 writes `dist/`, so do not run it beside another build.
+- **Not parallel**: T003, T004 and T011 all edit `src/App.tsx`: strictly in that order. T007 and T010 share `NotebookShell.tsx` and its test file. T012 owns `theme.css` and `notebook.css`; nothing else edits them. T016 runs last, alone.
+
+## Convergence
+
+(The verdict comes later.)
