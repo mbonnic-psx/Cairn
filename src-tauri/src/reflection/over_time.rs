@@ -2,7 +2,7 @@
 
 use crate::domain::dates::LocalDate;
 use crate::domain::patterns::{summarize, Reach};
-use crate::reflection::checkin::could_begin;
+use crate::reflection::checkin::{could_begin, offset_from_midnight};
 use crate::services::Trouble;
 use crate::store::gaps::{clipped, Gap};
 use crate::store::history::OpenHistory;
@@ -26,13 +26,19 @@ pub fn check_range(
 ) -> Result<(), Trouble> {
     let day_after_last =
         LocalDate::from_days_since_epoch(last_day.days_since_epoch() + 1);
-    let start_offset = range_start - first_day.days_since_epoch() * 86_400;
-    let end_offset = range_end - day_after_last.days_since_epoch() * 86_400;
+    let start_offset = offset_from_midnight(first_day, range_start);
+    let end_offset = offset_from_midnight(day_after_last, range_end);
+    let offsets_agree = match (start_offset, end_offset) {
+        (Some(start), Some(end)) => end.checked_sub(start).is_some_and(|difference| {
+            difference.unsigned_abs() <= LARGEST_CLOCK_CHANGE.unsigned_abs()
+        }),
+        _ => false,
+    };
 
     if first_day > last_day
         || !could_begin(first_day, range_start)
         || !could_begin(day_after_last, range_end)
-        || (end_offset - start_offset).abs() > LARGEST_CLOCK_CHANGE
+        || !offsets_agree
         || range_start > now
     {
         return Err(Trouble::new(

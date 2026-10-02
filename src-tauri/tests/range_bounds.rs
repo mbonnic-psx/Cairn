@@ -168,3 +168,17 @@ fn a_range_across_both_changes_is_accepted_when_its_ends_agree() {
         (date("2026-03-01"), date("2026-11-01"), date("2026-11-02"));
     assert!(check_range(first, last, midnight(first), midnight(after), LATER).is_ok());
 }
+
+#[test]
+fn an_instant_at_either_extreme_is_refused_not_a_panic() {
+    for extreme in [i64::MIN, i64::MAX] {
+        // every position an extreme can take in the two bounds and in `now`
+        assert!(check_range(first(), first(), extreme, 0, 0).is_err());
+        assert!(check_range(first(), first(), 0, extreme, 0).is_err());
+        assert!(check_range(first(), last(), extreme, extreme, extreme).is_err());
+        assert!(check_range(first(), last(), midnight(first()), extreme, LATER).is_err());
+        assert!(
+            check_range(first(), last(), extreme, midnight(after_last()), LATER).is_err()
+        );
+    }
+}
