@@ -115,9 +115,43 @@ describe('the protection-page stylesheet', () => {
     expect(css).not.toMatch(/animation|transition|@keyframes/);
   });
 
-  it('wraps a long domain rather than overflowing a page', () => {
-    const address = rules.filter((r) => r.selector.includes('.nb-trail-inventory'));
-    expect(address.some((r) => /overflow-wrap:\s*anywhere/.test(r.body))).toBe(true);
+  describe('an address reads whole, one to a line (T013)', () => {
+    const body = (selector: string) =>
+      rules.filter((r) => r.selector.split(',').map((x) => x.trim()).includes(selector)).map((r) => r.body).join('');
+    const line = body('.nb-trail-inventory__line');
+    const address = body('.nb-trail-inventory__address');
+
+    it('lets the aside move to its own line before an address breaks', () => {
+      expect(line).toMatch(/display:\s*flex/);
+      expect(line).toMatch(/flex-wrap:\s*wrap/);
+    });
+
+    it('pins no item of a row to its full width: nothing here is flex: none or flex-shrink: 0', () => {
+      expect(css).not.toMatch(/flex:\s*none/);
+      expect(css).not.toMatch(/flex-shrink:\s*0/);
+    });
+
+    it('breaks an address only when it alone is wider than the page', () => {
+      expect(address).toMatch(/overflow-wrap:\s*break-word/);
+      expect(address).not.toMatch(/anywhere/);
+      for (const { selector, body: b } of rules) {
+        if (/overflow-wrap:\s*anywhere/.test(b)) {
+          expect(selector, 'anywhere belongs on the ruled page only').toContain('.nb-page--ruled');
+        }
+      }
+    });
+
+    it('marks a continuation line with a hanging indent on the address', () => {
+      const pad = address.match(/padding-left:\s*([\d.]+)(em|px)/);
+      const indent = address.match(/text-indent:\s*-([\d.]+)(em|px)/);
+      expect(pad).not.toBeNull();
+      expect(indent).not.toBeNull();
+      expect(indent![1]! + indent![2]!).toBe(pad![1]! + pad![2]!);
+    });
+
+    it('keeps the rule pitch: a line is 32px', () => {
+      expect(line).toMatch(/line-height:\s*32px/);
+    });
   });
 
   it('has a rule for every slice class the screens name, and names no class they do not', () => {
