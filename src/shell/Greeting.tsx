@@ -1,14 +1,14 @@
 /**
- * The morning greeting: the words, then the true weekday and time in the
+ * The greeting: the words of the look on screen, then the true weekday and time in the
  * computer's own locale. It keeps up by waking on each minute boundary,
  * re-reading the clock on every wake, on focus and when shown again, and holds
  * nothing else: nothing that counts or accumulates.
  */
 import { useEffect, useState } from 'react';
 
-import { formatWeekdayTime, greetingFor } from '../look/look';
+import { formatWeekdayTime, greetingFor, type NotebookLook } from '../look/look';
 
-export function Greeting() {
+export function Greeting({ look }: { look: NotebookLook }) {
   const [now, setNow] = useState(() => new Date());
 
   useEffect(() => {
@@ -40,7 +40,7 @@ export function Greeting() {
   return (
     <div className="nb-greeting">
       <span className="nb-greeting__time">{formatWeekdayTime(now)}</span>
-      <h2 className="nb-greeting__words">{greetingFor('morning')}</h2>
+      <h2 className="nb-greeting__words">{greetingFor(look)}</h2>
     </div>
   );
 }

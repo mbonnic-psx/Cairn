@@ -26,3 +26,14 @@ Findings (triaged by the host, 2026-10-01):
 | R2 | LOW | question | declined, confirmed by the owner 2026-10-01 (D2) | A released build opens at 1280×800, not 1000×720, before the reveal. That differs from the letter of SC-009 and FR-012. The owner asked for 1280×800 explicitly (FR-028, gaps review 2026-10-01). The window's size is not the interface the reveal guards. Decided by the host on that standing answer; the owner may reverse it. |
 
 No CRITICAL or HIGH. Current is byte-for-byte today's: `innerHTML` matched `main`'s App for three statuses across every tab, and the production CSS adds only `.nb-`/`[data-look]` rules, `@font-face` and two unused `:root` properties.
+
+## looks · 522e163 · 2026-10-02
+
+| Trigger | Status | Evidence |
+|---|---|---|
+| driving adapter (HTTP route, CLI command, queue consumer) | not present | no IPC command, route or CLI added (`src-tauri/` untouched, `ipc_surface.rs` unchanged); the switch gains two choices of an in-window development control |
+| driven adapter or the provider types behind one | not present | no store, file or system call touched; the diff is `src/look/`, `src/shell/`, `src/styles/notebook.css` and one line of `src/App.tsx` |
+| authorisation decision (who can reach one that already exists) | already covered | row `frame` (release gate on the notebook): `src/App.tsx` still forces `current` outside a dev build and drops the switch at build time; this diff changes only which notebook look renders inside the gate. Re-proved at the demo (R8) and by T013 |
+| concurrency, idempotency, ordering, retention, or time | already covered | row `frame` (time on the greeting): `src/shell/Greeting.tsx` changes only the words, chosen by the look; its clock code is untouched |
+
+Skipped: nothing widened, and the slice does not close the split. Covered by rows `frame` · release gate on the notebook and `frame` · time on the greeting.

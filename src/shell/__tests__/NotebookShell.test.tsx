@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
+import type { NotebookLook } from '../../look/look';
 import type { Tab } from '../../navigation';
 import { tabsFor } from '../../navigation';
 import { NotebookShell } from '../NotebookShell';
@@ -14,9 +15,9 @@ const fakeTabs: Tab[] = [
   { id: 'checkin', label: 'Tonight', current: false },
 ];
 
-function shell(tabs: Tab[] = fakeTabs, onSelect = vi.fn()) {
+function shell(tabs: Tab[] = fakeTabs, onSelect = vi.fn(), look: NotebookLook = 'morning') {
   const view = render(
-    <NotebookShell tabs={tabs} onSelect={onSelect}>
+    <NotebookShell tabs={tabs} onSelect={onSelect} look={look}>
       <p>the screen</p>
     </NotebookShell>,
   );
@@ -73,6 +74,36 @@ describe('NotebookShell tabs', () => {
   });
 });
 
+describe('NotebookShell by look', () => {
+  it('midday: data-look, the midday words, a sun and no moon', () => {
+    const { container } = shell(fakeTabs, vi.fn(), 'midday');
+    expect(container.firstElementChild).toHaveAttribute('data-look', 'midday');
+    expect(screen.getByText('Midday.')).toBeInTheDocument();
+    expect(container.querySelector('[data-testid="sun"]')).not.toBeNull();
+    expect(container.querySelector('[data-testid="moon"]')).toBeNull();
+  });
+
+  it('night: data-look, the evening words, the moon and the stars', () => {
+    const { container } = shell(fakeTabs, vi.fn(), 'night');
+    expect(container.firstElementChild).toHaveAttribute('data-look', 'night');
+    expect(screen.getByText('Good evening.')).toBeInTheDocument();
+    expect(container.querySelector('[data-testid="moon"]')).not.toBeNull();
+    expect(container.querySelectorAll('[data-testid="star"]')).toHaveLength(6);
+    expect(container.querySelector('[data-testid="sun"]')).toBeNull();
+  });
+
+  it('carries no transition or animation style on anything it renders (D3)', () => {
+    for (const look of ['morning', 'midday', 'night'] as const) {
+      const { container, unmount } = shell(fakeTabs, vi.fn(), look);
+      for (const el of container.querySelectorAll<HTMLElement>('*')) {
+        expect(el.style.transition).toBe('');
+        expect(el.style.animation).toBe('');
+      }
+      unmount();
+    }
+  });
+});
+
 describe('NotebookShell assembly', () => {
   it('shows the mark, the greeting and the landscape around the untouched children', () => {
     const { container } = shell();
@@ -102,7 +133,7 @@ describe('NotebookShell assembly', () => {
 
   it('gives a page slice the spread classes to build on', () => {
     const { container } = render(
-      <NotebookShell tabs={fakeTabs} onSelect={vi.fn()}>
+      <NotebookShell tabs={fakeTabs} onSelect={vi.fn()} look="morning">
         <div className="nb-page nb-page--ruled">ruled</div>
       </NotebookShell>,
     );
@@ -126,5 +157,16 @@ describe('NotebookShell tab labels on every webview', () => {
       const label = button.querySelector(':scope > .nb-tab-label');
       expect(label?.textContent).toBe(button.textContent);
     }
+  });
+});
+
+describe('NotebookShell looks', () => {
+  it('admits only the three notebook looks (type-level, proved by tsc)', () => {
+    render(
+      // @ts-expect-error Current is not a notebook look (contracts/ui-shell.md, FR-013b)
+      <NotebookShell tabs={fakeTabs} onSelect={vi.fn()} look="current">
+        <p>x</p>
+      </NotebookShell>,
+    );
   });
 });

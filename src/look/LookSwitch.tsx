@@ -7,6 +7,8 @@ import type { Look } from './look';
 const CHOICES: { value: Look; name: string }[] = [
   { value: 'current', name: 'Current' },
   { value: 'morning', name: 'Morning' },
+  { value: 'midday', name: 'Midday' },
+  { value: 'night', name: 'Night' },
 ];
 
 export function LookSwitch({
@@ -19,6 +21,7 @@ export function LookSwitch({
   return (
     <label
       className="nb-switch"
+      data-look={look === 'current' ? undefined : look}
       style={{
         position: 'fixed',
         top: 8,
