@@ -9,9 +9,10 @@
  * congratulation for a short list, no shame for a long one, no comparison with
  * yesterday, no total to beat. Just what happened, and what Cairn did not see.
  */
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 
 import { Card } from '../components/Card';
+import { useNotebookPage } from '../shell/notebookPage';
 import {
   addDays,
   dayBounds,
@@ -47,6 +48,35 @@ const realReader: ReachesReader = {
 };
 const realNow = () => new Date();
 
+// The words, once: Current and the notebook page both read them.
+const WHICH_DAYS = 'Which days';
+const TODAY = 'Today';
+const OVER_TIME = 'Over time';
+const LOOKING = 'Looking…';
+const NOTHING_TODAY = 'Nothing here for today.';
+const NOTHING_THESE_DAYS = 'Nothing here for these days.';
+const COUNTED_ONLY_TODAY =
+  'Cairn counts only while it is running. This is what it saw today.';
+const COUNTED_ONLY_WHILE_RUNNING =
+  'Cairn counts only while it is running. This is what it saw over these days.';
+const COULD_NOT_READ =
+  'Cairn could not read your history just now. Protection is unaffected.';
+const ESTIMATE_ONE =
+  'Your own estimate for 1 day is not counted here, because an estimate has no site.';
+const estimatesMany = (days: number) =>
+  `Your own estimates for ${days} days are not counted here, because an estimate has no site.`;
+
+/** Where a view sits: today's card, or the two pages of a spread (the right one ruled and empty for now). */
+function Frame({ onPage, children }: { onPage: boolean; children: ReactNode }) {
+  if (!onPage) return <Card>{children}</Card>;
+  return (
+    <>
+      <div className="nb-page">{children}</div>
+      <div className="nb-page nb-page--ruled" />
+    </>
+  );
+}
+
 export function Reaches({
   today,
   read = realReader,
@@ -56,55 +86,86 @@ export function Reaches({
   read?: ReachesReader;
   now?: () => Date;
 }) {
+  const onPage = useNotebookPage();
   const [view, setView] = useState<'today' | 'over-time'>('today');
 
+  const which = (
+    <div
+      className={onPage ? 'nb-reaches-which' : 'mb-4 flex gap-2'}
+      role="group"
+      aria-label={WHICH_DAYS}
+    >
+      <ViewButton
+        onPage={onPage}
+        current={view === 'today'}
+        onClick={() => setView('today')}
+      >
+        {TODAY}
+      </ViewButton>
+      <ViewButton
+        onPage={onPage}
+        current={view === 'over-time'}
+        onClick={() => setView('over-time')}
+      >
+        {OVER_TIME}
+      </ViewButton>
+    </div>
+  );
+  const shown =
+    view === 'today' ? (
+      <TodayView onPage={onPage} today={today} read={read} now={now} />
+    ) : (
+      <OverTimeView onPage={onPage} read={read} now={now} />
+    );
+
+  // On a page the group is the spread's first child and the view a fragment of its two pages, so a change of
+  // view keeps the button just pressed, and focus with it.
+  if (onPage) {
+    return (
+      <div className="nb-spread nb-reaches-leaves">
+        {which}
+        {shown}
+      </div>
+    );
+  }
   return (
     <div>
-      <div className="mb-4 flex gap-2" role="group" aria-label="Which days">
-        <ViewButton current={view === 'today'} onClick={() => setView('today')}>
-          Today
-        </ViewButton>
-        <ViewButton current={view === 'over-time'} onClick={() => setView('over-time')}>
-          Over time
-        </ViewButton>
-      </div>
-      {view === 'today' ? (
-        <TodayView today={today} read={read} now={now} />
-      ) : (
-        <OverTimeView read={read} now={now} />
-      )}
+      {which}
+      {shown}
     </div>
   );
 }
 
 function ViewButton({
+  onPage,
   current,
   onClick,
   children,
 }: {
+  onPage: boolean;
   current: boolean;
   onClick: () => void;
   children: string;
 }) {
-  return (
-    <button
-      type="button"
-      aria-pressed={current}
-      onClick={onClick}
-      className={`rounded-full px-4 py-1.5 text-sm ${
+  const className = onPage
+    ? 'nb-reaches-which__button'
+    : `rounded-full px-4 py-1.5 text-sm ${
         current ? 'bg-sand-200 text-ink-900' : 'text-ink-500 hover:bg-sand-100'
-      }`}
-    >
+      }`;
+  return (
+    <button type="button" aria-pressed={current} onClick={onClick} className={className}>
       {children}
     </button>
   );
 }
 
 function TodayView({
+  onPage,
   today,
   read,
   now,
 }: {
+  onPage: boolean;
   today?: TodaysReaches;
   read: ReachesReader;
   now: () => Date;
@@ -124,28 +185,28 @@ function TodayView({
 
   if (!day) {
     return (
-      <Card>
-        <p className="text-ink-400">Looking…</p>
-      </Card>
+      <Frame onPage={onPage}>
+        <p className="text-ink-400">{LOOKING}</p>
+      </Frame>
     );
   }
 
   if (day.sealed) {
     return (
-      <Card>
-        <h2 className="reflective text-3xl text-ink-900">Today</h2>
+      <Frame onPage={onPage}>
+        <h2 className="reflective text-3xl text-ink-900">{TODAY}</h2>
         <p className="reflective mt-4 max-w-prose text-lg text-ink-700">{day.sealed}</p>
-      </Card>
+      </Frame>
     );
   }
 
   return (
-    <Card>
-      <h2 className="reflective text-3xl text-ink-900">Today</h2>
+    <Frame onPage={onPage}>
+      <h2 className="reflective text-3xl text-ink-900">{TODAY}</h2>
 
       {day.reaches.length === 0 ? (
         <p className="reflective mt-4 max-w-prose text-lg text-ink-700">
-          Nothing here for today.
+          {NOTHING_TODAY}
         </p>
       ) : (
         <ul className="mt-8 divide-y divide-sand-200">
@@ -162,22 +223,24 @@ function TodayView({
       )}
 
       <p className="reflective mt-8 border-t border-sand-200 pt-6 text-ink-500">
-        {day.coverage_note ??
-          'Cairn counts only while it is running. This is what it saw today.'}
+        {day.coverage_note ?? COUNTED_ONLY_TODAY}
       </p>
-    </Card>
+    </Frame>
   );
 }
-
-const COUNTED_ONLY_WHILE_RUNNING =
-  'Cairn counts only while it is running. This is what it saw over these days.';
-const COULD_NOT_READ =
-  'Cairn could not read your history just now. Protection is unaffected.';
 
 /** What the view holds: the answer for a range, nothing yet, or one sentence for a read that threw. */
 type Answer = Patterns | 'looking' | 'unreadable';
 
-function OverTimeView({ read, now }: { read: ReachesReader; now: () => Date }) {
+function OverTimeView({
+  onPage,
+  read,
+  now,
+}: {
+  onPage: boolean;
+  read: ReachesReader;
+  now: () => Date;
+}) {
   // The range is component state and nothing more: leaving the view forgets it (H2).
   const todayDay = localToday(now());
   const [firstDay, setFirstDay] = useState(() => addDays(todayDay, -27));
@@ -207,7 +270,7 @@ function OverTimeView({ read, now }: { read: ReachesReader; now: () => Date }) {
   };
 
   return (
-    <Card>
+    <Frame onPage={onPage}>
       <h2 className="reflective text-3xl text-ink-900">
         {rangeInWords(firstDay, lastDay)}
       </h2>
@@ -237,13 +300,13 @@ function OverTimeView({ read, now }: { read: ReachesReader; now: () => Date }) {
       </div>
 
       <RangeBody answer={answer} />
-    </Card>
+    </Frame>
   );
 }
 
 function RangeBody({ answer }: { answer: Answer }) {
   if (answer === 'looking') {
-    return <p className="mt-8 text-ink-400">Looking…</p>;
+    return <p className="mt-8 text-ink-400">{LOOKING}</p>;
   }
   if (answer === 'unreadable') {
     return (
@@ -266,14 +329,14 @@ function RangeBody({ answer }: { answer: Answer }) {
       {answer.estimates_excluded > 0 && (
         <p className="reflective mt-4 max-w-prose text-ink-500">
           {answer.estimates_excluded === 1
-            ? 'Your own estimate for 1 day is not counted here, because an estimate has no site.'
-            : `Your own estimates for ${answer.estimates_excluded} days are not counted here, because an estimate has no site.`}
+            ? ESTIMATE_ONE
+            : estimatesMany(answer.estimates_excluded)}
         </p>
       )}
 
       {answer.by_site.length === 0 ? (
         <p className="reflective mt-8 max-w-prose text-lg text-ink-700">
-          Nothing here for these days.
+          {NOTHING_THESE_DAYS}
         </p>
       ) : (
         <ul className="mt-8 divide-y divide-sand-200">
