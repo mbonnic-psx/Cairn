@@ -56,3 +56,58 @@ Every product decision a `/cruise` run took, in order. A person overrides one by
 - **Confidence:** medium · **Would reverse if:** a page slice gives a screen long-form text of its own while Current still exists, or the owner says a move to or from Current must keep everything
 - **Written to:** `specs/004-notebook-landscape/spec.md` (Clarifications), `specs/004-notebook-landscape/slices/looks/tasks.md` (T015), `specs/004-notebook-landscape/slices/looks/quickstart.md` (Not working yet), `src/shell/__tests__/AppLook.test.tsx`
 - **Status:** standing
+
+## D6 — How does a screen know it is on a notebook page?
+- **Stage:** slice gaps · **Slice:** protection-page · **When:** 2026-10-02T06:15:00Z · **Iteration:** 3
+- **Question:** A screen gets no new props from the shell, and Current must stay exactly as today, yet each page slice lays its screen out as two pages. How does the screen tell which it is in?
+- **Options:** the notebook tells the screens it wraps through React context, Current tells them nothing (recommended); a second notebook copy of each screen; CSS alone over today's markup
+- **Decision:** The notebook tells the screens through React context, read with one hook from `src/shell/`. Told, a screen lays itself out as a spread; not told, it renders exactly as today. One component, one set of state.
+- **Why:** It is the one reading that keeps both rules the specification states: no new props, and Current unchanged (SC-009). A copy of each screen could drift in words or behaviour (FR-018); CSS alone cannot move today's single card onto two pages.
+- **Decided by:** host (stage recommendation)
+- **Confidence:** high · **Would reverse if:** a page slice finds a screen whose today's markup cannot be kept element for element beside its spread
+- **Written to:** `specs/004-notebook-landscape/contracts/ui-shell.md` (Knowing it is on a page), `specs/004-notebook-landscape/spec.md` (Clarifications)
+- **Status:** standing
+
+## D7 — Does the Protection spread gain content the screen does not show today?
+- **Stage:** slice gaps · **Slice:** protection-page · **When:** 2026-10-02T06:15:00Z · **Iteration:** 3
+- **Question:** US3 describes the Protection spread with what you are protecting, a way to add an address and margin notes. Today's Protection screen shows none of them.
+- **Options:** today's content only: state, words and figures on the left, a waiting change on the right, else a blank ruled page (recommended); bring the list, the address box and the limits onto it, as the canvas shows
+- **Decision:** Today's content only. Left page: the state, its words and the two figures. Right page: a waiting change with "Keep things as they are", when there is one; otherwise blank and ruled.
+- **Why:** FR-018 keeps every screen word for word and FR-031 says nothing is invented to fill a page; the canvas content is illustration (Assumptions). Moving controls between screens is a change of what Cairn does, which this feature rules out.
+- **Decided by:** host (stage recommendation)
+- **Confidence:** high · **Would reverse if:** the owner, at the reveal demo, wants the Protection spread to carry the canvas's content
+- **Written to:** `specs/004-notebook-landscape/spec.md` (Clarifications)
+- **Status:** standing
+
+## D8 — Where does the What is protected list go on its spread?
+- **Stage:** slice gaps · **Slice:** protection-page · **When:** 2026-10-02T06:15:00Z · **Iteration:** 3
+- **Question:** The screen is a heading, a count sentence, notes and a list. How do they sit on two pages?
+- **Options:** the heading, sentence and notes on the left, the list on the right ruled like an inventory (recommended); everything on the left, the right blank
+- **Decision:** Heading, count sentence, not-confirmed note and the note on taking things out on the left page; the list on the right, ruled, one address a line. A long list scrolls inside the notebook.
+- **Why:** US3 asks for "the full list, ruled like an inventory"; a person reads what the list is before reading down it.
+- **Decided by:** host (stage recommendation)
+- **Confidence:** medium · **Would reverse if:** the owner, at the reveal demo, wants the list on the left page
+- **Written to:** `specs/004-notebook-landscape/spec.md` (Clarifications)
+- **Status:** standing
+
+## D9 — Who settles the notebook's heading outline, and how?
+- **Stage:** slice gaps · **Slice:** protection-page · **When:** 2026-10-02T06:15:00Z · **Iteration:** 3
+- **Question:** Frame T025: the notebook has no `h1` and the greeting is the first heading. Nobody owns it.
+- **Options:** protection-page, the first page slice to land: one visually hidden `h1` "Cairn", greeting not a heading (recommended by T025); each page slice in turn
+- **Decision:** `protection-page` settles it as T025 recommends, and writes the rule into the contract.
+- **Why:** A screen reader's list of headings should open on Cairn and then the page, not on "Good morning.". One owner, once, before the other page slices build.
+- **Decided by:** host (stage recommendation)
+- **Confidence:** high · **Would reverse if:** the owner wants the greeting announced as a heading
+- **Written to:** `specs/004-notebook-landscape/contracts/ui-shell.md` (Headings), `specs/004-notebook-landscape/spec.md` (Clarifications)
+- **Status:** standing
+
+## D10 — Which page slices run now, and who carries the open tasks?
+- **Stage:** ready-set selection · **Slice:** protection-page, setup-pages, quiet-pages, tonight-page · **When:** 2026-10-02T06:15:00Z · **Iteration:** 3
+- **Question:** Three page slices are ready and unclaimed. The notebook context (D6) is shared code none of them has yet. Seven carried tasks wait for owners.
+- **Options:** `protection-page` alone first, since it lands the context, then the other two together against it (recommended); all three at once, each adding the context
+- **Decision:** `protection-page` runs alone this iteration and lands the context and the heading outline. `setup-pages` and `quiet-pages` run together after it merges. `tonight-page` waits for 003's `history-by-site` (parking lot). Carried tasks: frame T025 to `protection-page`; looks T021 (focus on the paper) and T024 (no fades) to `setup-pages` for the setup screens and to `tonight-page` for the check-in; looks T020, T022, T023 (sun band, hilltop stones, tab focus ring) to `quiet-pages`; frame T024 (a real-browser layout check) stays open, since adding a browser runner changes `package.json`, which no slice may write.
+- **Why:** A slice whose shared surface is still being decided is worked first, never alongside others (drive, *The contract is settled*). Three slices each writing the same new hook would collide at every merge.
+- **Decided by:** host (stage recommendation)
+- **Confidence:** high · **Would reverse if:** the owner adopts a browser test runner, which frees frame T024 to ride with a page slice
+- **Written to:** `specs/004-notebook-landscape/story-split.md` (Parking lot)
+- **Status:** standing
