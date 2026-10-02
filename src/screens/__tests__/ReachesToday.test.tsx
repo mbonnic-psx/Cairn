@@ -2,7 +2,10 @@
  * Pin: the reaches screen opens on Today, and asks for this local day.
  *
  * The reader and the clock are passed in as props, so nothing here mocks a module.
+ * The zone is fixed before any date is made: the clock-change case needs a zone with one.
  */
+process.env.TZ = 'Europe/London';
+
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
@@ -44,5 +47,18 @@ describe('the reaches screen opens on Today', () => {
     expect(await screen.findByText(/nothing here for today/i)).toBeInTheDocument();
     const midnight = seconds(new Date(2026, 8, 30));
     expect(calls).toEqual([[midnight, midnight + 86_400]]);
+  });
+
+  it('asks for this local midnight to the next one on a 25-hour day', async () => {
+    const { calls, read } = fakeRead();
+    const now = new Date(2026, 9, 25, 20, 0);
+
+    render(<Reaches read={read} now={() => now} />);
+
+    expect(await screen.findByText(/nothing here for today/i)).toBeInTheDocument();
+    const start = seconds(new Date(2026, 9, 25));
+    const next = seconds(new Date(2026, 9, 26));
+    expect(next - start).toBe(25 * 3600);
+    expect(calls).toEqual([[start, next]]);
   });
 });

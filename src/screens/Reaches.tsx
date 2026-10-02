@@ -12,6 +12,7 @@
 import { useEffect, useState } from 'react';
 
 import { Card } from '../components/Card';
+import { dayBounds, localToday } from '../localDays';
 import {
   listTodaysReaches,
   summarizeReaches,
@@ -46,10 +47,8 @@ export function Reaches({
 
   useEffect(() => {
     if (today) return;
-    const start = new Date(now());
-    start.setHours(0, 0, 0, 0);
-    const dayStart = Math.round(start.getTime() / 1000);
-    read.listTodaysReaches(dayStart, dayStart + 86_400)
+    const { start, end } = dayBounds(localToday(now()));
+    read.listTodaysReaches(start, end)
       .then(setDay)
       .catch(() => undefined);
     // The reader and the clock are fixed for the life of the screen.
