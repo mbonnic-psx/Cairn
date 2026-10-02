@@ -72,7 +72,7 @@ describe('What is protected on a notebook page', () => {
   it('shows the not-confirmed note only when not confirmed, in amber, on the left', () => {
     const a = onPage(<Trail {...notConfirmed} />);
     const note = within(a.left!).getByText(NOTE);
-    expect(note).toHaveClass('nb-note');
+    expect(note).toHaveClass('nb-trail-note');
     expect(note.outerHTML).not.toMatch(/red/i);
     a.unmount();
     for (const c of [inForce, off]) {
@@ -84,7 +84,7 @@ describe('What is protected on a notebook page', () => {
 
   it('keeps the left page sticky', () => {
     const { left } = onPage(<Trail {...inForce} />);
-    expect(left).toHaveClass('nb-page--sticky');
+    expect(left).toHaveClass('nb-trail-sticky');
   });
 
   it('lists one address a line, in order, on a ruled right page', () => {

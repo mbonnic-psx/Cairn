@@ -23,8 +23,8 @@ export function Trail({ trail, status }: { trail: TrailData; status?: Protection
 
   if (onPage) {
     return (
-      <div className="nb-spread nb-leaves">
-        <div className="nb-page nb-page--sticky">
+      <div className="nb-spread nb-trail-leaves">
+        <div className="nb-page nb-trail-sticky">
           <h2 className="nb-trail-title">
             {inForce ? 'What you are protecting' : 'What you have chosen'}
           </h2>
@@ -33,7 +33,7 @@ export function Trail({ trail, status }: { trail: TrailData; status?: Protection
             and whatever you have added yourself.
           </p>
           {status === 'not_verified' && (
-            <p className="nb-note">
+            <p className="nb-trail-note">
               Cairn has not confirmed this is in force just now. It keeps trying, and it keeps
               what you chose.
             </p>
@@ -44,12 +44,12 @@ export function Trail({ trail, status }: { trail: TrailData; status?: Protection
           </p>
         </div>
         <div className="nb-page nb-page--ruled">
-          <ul className="nb-inventory">
+          <ul className="nb-trail-inventory">
             {trail.entries.map((entry) => (
-              <li key={entry.domain} className="nb-inventory__line">
-                <span className="nb-inventory__address">{entry.domain}</span>
+              <li key={entry.domain} className="nb-trail-inventory__line">
+                <span className="nb-trail-inventory__address">{entry.domain}</span>
                 {entry.auto_www && (
-                  <span className="nb-inventory__aside">added with its root address</span>
+                  <span className="nb-trail-inventory__aside">added with its root address</span>
                 )}
               </li>
             ))}

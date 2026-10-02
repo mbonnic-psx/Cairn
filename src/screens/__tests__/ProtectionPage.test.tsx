@@ -117,7 +117,7 @@ describe('Protection on a notebook page, with a change waiting', () => {
       ).toBeInTheDocument();
       expect(within(right!).getByRole('button', { name: 'Keep things as they are' })).toBeInTheDocument();
       expect(within(left!).queryByText('Turn protection off')).toBeNull();
-      const note = right!.querySelector('.nb-note');
+      const note = right!.querySelector('.nb-protection-note');
       expect(note).not.toBeNull();
       expect(right!.innerHTML).not.toMatch(/red/i);
     });

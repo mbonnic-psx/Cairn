@@ -8,28 +8,31 @@
  */
 
 /* Two leaves inside the shell's one scrolling page area. */
-.nb-leaves {
+.nb-protection-leaves,
+.nb-trail-leaves {
   column-gap: 48px;
   align-items: start;
 }
-.nb-leaves > .nb-page {
+.nb-protection-leaves > .nb-page,
+.nb-trail-leaves > .nb-page {
   /* The page area already carries the margins; a leaf is only its own column. */
   min-height: 100%;
 }
-.nb-leaves > .nb-page--ruled {
+.nb-protection-leaves > .nb-page--ruled,
+.nb-trail-leaves > .nb-page--ruled {
   /* The first line of writing sits on a rule: the ruling starts 22px into the 32px pitch. */
   padding-top: 22px;
   min-height: 420px;
   overflow-wrap: anywhere;
 }
 /* What is protected: its left leaf stays put while the list scrolls past on the right. */
-.nb-leaves > .nb-page--sticky {
+.nb-trail-leaves > .nb-trail-sticky {
   position: sticky;
   top: 0;
 }
 
 /* The state of protection, on the left leaf. */
-.nb-state {
+.nb-protection-badge {
   display: inline-block;
   padding: 3px 12px;
   border-radius: 999px;
@@ -37,7 +40,7 @@
   font-size: 12px;
   letter-spacing: 0.04em;
 }
-.nb-state-title {
+.nb-protection-title {
   margin: 24px 0 0;
   font-family: var(--nb-font-serif);
   font-size: 30px;
@@ -45,7 +48,7 @@
   line-height: 1.2;
   color: var(--nb-ink);
 }
-.nb-state-detail {
+.nb-protection-detail {
   margin: 12px 0 0;
   max-width: 34em;
   font-size: 18px;
@@ -53,7 +56,7 @@
 }
 
 /* Two plain figures with a hairline between them. */
-.nb-figures {
+.nb-protection-figures {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 24px;
@@ -61,15 +64,15 @@
   padding-top: 20px;
   border-top: 1px solid var(--nb-rule);
 }
-.nb-figure {
+.nb-protection-figure {
   min-width: 0;
 }
-.nb-figure__label {
+.nb-protection-figure__label {
   font-family: var(--nb-font-mono);
   font-size: 12px;
   color: var(--nb-ink-quiet);
 }
-.nb-figure__value {
+.nb-protection-figure__value {
   margin: 4px 0 0;
   font-size: 24px;
   line-height: 1.3;
@@ -78,21 +81,21 @@
 }
 
 /* A note in the amber language: an edge, with its words left on the paper. */
-.nb-note {
+.nb-protection-note {
   margin: 0;
   padding: 2px 0 2px 16px;
   border-left: 3px solid var(--nb-accent-amber);
   color: var(--nb-accent-amber);
 }
-.nb-note__what {
+.nb-protection-note__what {
   margin: 0;
   color: var(--nb-ink);
 }
-.nb-note__sentence {
+.nb-protection-note__sentence {
   margin: 8px 0 0;
   color: var(--nb-ink-body);
 }
-.nb-note__button {
+.nb-protection-note__button {
   margin: 12px 0 0 -8px;
   font-family: var(--nb-font-mono);
   font-size: 12.5px;
@@ -112,7 +115,7 @@
   font-size: 18px;
   color: var(--nb-ink-body);
 }
-.nb-trail-count + .nb-note {
+.nb-trail-count + .nb-trail-note {
   margin-top: 16px;
 }
 .nb-trail-taking-out {
@@ -123,25 +126,33 @@
   color: var(--nb-ink-quiet);
 }
 
+/* What is protected's not-confirmed note: the same amber edge, its own rule. */
+.nb-trail-note {
+  margin: 0;
+  padding: 2px 0 2px 16px;
+  border-left: 3px solid var(--nb-accent-amber);
+  color: var(--nb-accent-amber);
+}
+
 /* The list, ruled like an inventory: one address to a line, each on a rule. */
-.nb-inventory {
+.nb-trail-inventory {
   margin: 0;
   padding: 0;
   list-style: none;
 }
-.nb-inventory__line {
+.nb-trail-inventory__line {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
   gap: 16px;
   line-height: 32px;
 }
-.nb-inventory__address {
+.nb-trail-inventory__address {
   min-width: 0;
   color: var(--nb-ink);
   overflow-wrap: anywhere;
 }
-.nb-inventory__aside {
+.nb-trail-inventory__aside {
   flex: none;
   font-size: 14px;
   color: var(--nb-ink-quiet);

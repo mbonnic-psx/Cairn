@@ -37,9 +37,16 @@ const rules: Rule[] = [...css.matchAll(/([^{};]+)\{([^{}]*)\}/g)].map((m) => ({
 const COLOURS = ['--nb-ink', '--nb-ink-body', '--nb-ink-quiet', '--nb-accent-amber', '--nb-rule', '--nb-paper'];
 const FONTS = ['--nb-font-mono', '--nb-font-serif'];
 /** The only places a typewriter face belongs on these spreads (research P5). */
-const MONO = ['.nb-state', '.nb-figure__label', '.nb-inventory__caption', '.nb-note__button'];
+const MONO = [
+  '.nb-protection-badge',
+  '.nb-protection-figure__label',
+  '.nb-trail-inventory__caption',
+  '.nb-protection-note__button',
+];
 /** The shell's own spread classes: the sources use them, this stylesheet may add to them. */
 const SHELL = ['nb-spread', 'nb-page', 'nb-page--ruled', 'nb-label'];
+/** One prefix per screen: a page slice's selectors are its own (contracts/ui-shell.md). */
+const OWN = ['nb-protection-', 'nb-trail-'];
 
 const classesIn = (text: string) => new Set(text.match(/\bnb-[a-z0-9]+(?:[-_]{1,2}[a-z0-9]+)*/g) ?? []);
 const named = new Set([...classesIn(protection), ...classesIn(trail)]);
@@ -62,6 +69,17 @@ describe('the protection-page stylesheet', () => {
       for (const one of selector.split(',').map((s) => s.trim())) {
         expect(one, one).toMatch(/^(\.nb-|\[data-look)/);
       }
+    }
+  });
+
+  it('names only the shell\'s classes and classes under this slice\'s own prefixes', () => {
+    for (const name of styled) {
+      if (SHELL.includes(name)) continue;
+      expect(OWN.some((p) => name.startsWith(p)), `.${name}`).toBe(true);
+    }
+    for (const name of named) {
+      if (SHELL.includes(name)) continue;
+      expect(OWN.some((p) => name.startsWith(p)), `.${name} in a screen`).toBe(true);
     }
   });
 
@@ -98,7 +116,7 @@ describe('the protection-page stylesheet', () => {
   });
 
   it('wraps a long domain rather than overflowing a page', () => {
-    const address = rules.filter((r) => r.selector.includes('.nb-inventory'));
+    const address = rules.filter((r) => r.selector.includes('.nb-trail-inventory'));
     expect(address.some((r) => /overflow-wrap:\s*anywhere/.test(r.body))).toBe(true);
   });
 

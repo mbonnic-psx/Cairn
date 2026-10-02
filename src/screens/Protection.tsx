@@ -46,7 +46,7 @@ export function Protection({
     if (onPage) {
       return (
         <Spread>
-          <p className="nb-state-detail">{trouble}</p>
+          <p className="nb-protection-detail">{trouble}</p>
         </Spread>
       );
     }
@@ -61,7 +61,7 @@ export function Protection({
     if (onPage) {
       return (
         <Spread>
-          <p className="nb-state-detail">Checking this machine…</p>
+          <p className="nb-protection-detail">Checking this machine…</p>
         </Spread>
       );
     }
@@ -77,18 +77,18 @@ export function Protection({
   if (onPage) {
     return (
       <Spread right={pending && <Waiting pending={pending} onCancelled={onCancelled} />}>
-        <span className={`nb-state ${toneClasses[words.tone]}`}>{words.title}</span>
-        <h2 className="nb-state-title">{words.title}</h2>
-        <p className="nb-state-detail">{words.detail}</p>
+        <span className={`nb-protection-badge ${toneClasses[words.tone]}`}>{words.title}</span>
+        <h2 className="nb-protection-title">{words.title}</h2>
+        <p className="nb-protection-detail">{words.detail}</p>
         {current.status !== 'off' && (
-          <dl className="nb-figures">
-            <div className="nb-figure">
-              <dt className="nb-figure__label">Addresses in force</dt>
-              <dd className="nb-figure__value">{current.entry_count_verified}</dd>
+          <dl className="nb-protection-figures">
+            <div className="nb-protection-figure">
+              <dt className="nb-protection-figure__label">Addresses in force</dt>
+              <dd className="nb-protection-figure__value">{current.entry_count_verified}</dd>
             </div>
-            <div className="nb-figure">
-              <dt className="nb-figure__label">Last checked</dt>
-              <dd className="nb-figure__value">
+            <div className="nb-protection-figure">
+              <dt className="nb-protection-figure__label">Last checked</dt>
+              <dd className="nb-protection-figure__value">
                 {current.verified_at ? whenWas(current.verified_at) : 'not yet'}
               </dd>
             </div>
@@ -132,7 +132,7 @@ export function Protection({
 /** The notebook's two pages: what is said on the left, a blank ruled page (or a note) on the right. */
 function Spread({ children, right }: { children: ReactNode; right?: ReactNode }) {
   return (
-    <div className="nb-spread nb-leaves">
+    <div className="nb-spread nb-protection-leaves">
       <div className="nb-page">{children}</div>
       <div className="nb-page nb-page--ruled">{right}</div>
     </div>
@@ -164,10 +164,10 @@ function Waiting({
 
   if (onPage) {
     return (
-      <div className="nb-note">
-        <p className="nb-note__what">{pending.what}</p>
-        <p className="nb-note__sentence">{sentence}</p>
-        <Button tone="quiet" className="nb-note__button" onClick={cancel}>
+      <div className="nb-protection-note">
+        <p className="nb-protection-note__what">{pending.what}</p>
+        <p className="nb-protection-note__sentence">{sentence}</p>
+        <Button tone="quiet" className="nb-protection-note__button" onClick={cancel}>
           Keep things as they are
         </Button>
       </div>
