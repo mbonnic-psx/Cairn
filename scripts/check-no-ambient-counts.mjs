@@ -48,7 +48,9 @@ const ROOT = 'src';
 const NAVIGATED_TO = [
   join('src', 'screens', 'Reaches.tsx'),
   join('src', 'screens', 'CheckIn.tsx'),
-  join('src', 'screens', 'History.tsx'),
+  // History lives on the reaches screen, as its "Over time" view, never a
+  // screen of its own (003 H1, slice history-by-site), so History.tsx is not
+  // a place reach data may appear.
   join('src', 'screens', 'Day.tsx'),
 ];
 

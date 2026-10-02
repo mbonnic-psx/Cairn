@@ -131,7 +131,7 @@ export default tseslint.config(
   // just the one it needed. That is the same shape of hole the ambient-counts
   // guard had.
   {
-    files: ['src/screens/Reaches.tsx', 'src/screens/History.tsx'],
+    files: ['src/screens/Reaches.tsx'],
     rules: {
       'no-restricted-imports': [
         'error',
