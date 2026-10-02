@@ -418,7 +418,26 @@ export function CheckIn({ session }: { session?: CheckInSession }) {
           )}
           {view.coverage_note && <p className="nb-checkin-note">{view.coverage_note}</p>}
         </div>
-        <div className="nb-page nb-page--ruled" />
+        <div className="nb-page nb-page--ruled">
+          <label className="nb-checkin-label">
+            <span className="nb-checkin-label__text">{HOW_THE_DAY_WENT}</span>
+            <textarea
+              className="nb-checkin-write"
+              value={draft}
+              onChange={(event) => {
+                type(event.target.value);
+              }}
+            />
+          </label>
+          <button
+            type="button"
+            className="nb-checkin-keep"
+            onClick={() => keep(opened, draft).then((after) => after && setView(after))}
+            disabled={keeping || showsNothing(draft)}
+          >
+            {KEEP_THIS}
+          </button>
+        </div>
       </div>
     );
   }

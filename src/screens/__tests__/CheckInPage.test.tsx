@@ -5,12 +5,12 @@
 declare const process: { env: Record<string, string | undefined> };
 process.env.TZ = 'Europe/London';
 
-import { act, render, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { NotebookLook } from '../../look/look';
 import { NotebookShell } from '../../shell/NotebookShell';
-import { CheckIn } from '../CheckIn';
+import { CheckIn, type CheckInSession } from '../CheckIn';
 import { installFakeCore, type FakeCore } from './fakeCore';
 import {
   dayCoverageNote,
@@ -86,6 +86,14 @@ const withoutRight = (found: string[]) => {
   return rest;
 };
 
+/** The words in `found` that `taken` does not account for (a multiset difference). */
+function without(found: string[], taken: string[]) {
+  const rest = [...found];
+  for (const word of taken) rest.splice(rest.indexOf(word), 1);
+  return rest;
+}
+
+const SWITCH_WORDS = ['Show quotes', 'Hide quotes'];
 const OPEN_DAYS = [
   'reaches, no coverage note, quotes hidden',
   'no reaches, no coverage note, quotes hidden',
@@ -204,6 +212,126 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (name) 
       const outside = await show(tonightCases[OPEN_DAYS[0]!]!, false);
       expect(outside.container.querySelector('section.settle')).not.toBeNull();
       expect(outside.container.querySelector('[class*="nb-"]')).toBeNull();
+    });
+  });
+
+  describe('an open day, the right page: the writing space and "Keep this"', () => {
+    const WRITING_DAYS = [
+      ...OPEN_DAYS,
+      'an entry written before',
+    ];
+
+    it.each(WRITING_DAYS)('%s: a labelled textarea of the slice\u2019s class, then "Keep this"', async (key) => {
+      const { spread, right } = await show(tonightCases[key]!, true);
+      expect(spread).not.toBeNull();
+      expect(right).toHaveClass('nb-page--ruled');
+      const space = within(right!).getByLabelText('How the day went');
+      expect(space.tagName).toBe('TEXTAREA');
+      expect(space).toHaveClass('nb-checkin-write');
+      for (const banned of ['focus:outline-none', 'focus:border-clay-500', 'min-h-48']) {
+        expect(space).not.toHaveClass(banned);
+      }
+      expect(Array.from(space.classList).some((c) => c.startsWith('border-'))).toBe(false);
+      const keep = within(right!).getByRole('button', { name: 'Keep this' });
+      expect(keep.tagName).toBe('BUTTON');
+      expect(keep).toHaveClass('nb-checkin-keep');
+      expect(keep.className).not.toMatch(/transition|duration-|animate-/);
+      // The label comes first, the button after the writing space.
+      expect(
+        space.compareDocumentPosition(keep) & Node.DOCUMENT_POSITION_FOLLOWING,
+      ).toBeTruthy();
+      expect(right!.querySelector('label')).toHaveClass('nb-checkin-label');
+    });
+
+    it('shows the saved entry when nothing has been typed, and the typed text once there is some', async () => {
+      const { right } = await show(tonightCases['an entry written before']!, true);
+      const space = within(right!).getByLabelText('How the day went') as HTMLTextAreaElement;
+      expect(space.value).toBe('A slow morning, a better afternoon.');
+      fireEvent.change(space, { target: { value: 'Typed since.' } });
+      expect(space.value).toBe('Typed since.');
+    });
+
+    it('asks the session to type what is typed, and shows the session\u2019s draft', async () => {
+      const typed: string[] = [];
+      const session: CheckInSession = {
+        opened: { day: '2026-09-30', start: 1_790_722_800, end: 1_790_809_200 },
+        open: () => undefined,
+        draft: 'Held by the session.',
+        note: undefined,
+        kept: false,
+        keeping: false,
+        quote: undefined,
+        holdQuote: () => undefined,
+        type: (text) => typed.push(text),
+        keep: () => Promise.resolve(undefined),
+      };
+      vi.setSystemTime(evening());
+      core = installFakeCore(tonightCore(tonightCases[OPEN_DAYS[0]!]!));
+      render(
+        <NotebookShell tabs={tabs} onSelect={vi.fn()} look={look}>
+          <CheckIn session={session} />
+        </NotebookShell>,
+      );
+      await settle();
+      const space = screen.getByLabelText('How the day went') as HTMLTextAreaElement;
+      expect(space.value).toBe('Held by the session.');
+      fireEvent.change(space, { target: { value: 'More.' } });
+      expect(typed).toEqual(['More.']);
+    });
+
+    it('"Keep this" is disabled while the space shows nothing and enabled once it shows something', async () => {
+      const { right } = await show(tonightCases[OPEN_DAYS[0]!]!, true);
+      const keep = within(right!).getByRole('button', { name: 'Keep this' });
+      const space = within(right!).getByLabelText('How the day went');
+      expect(keep).toBeDisabled();
+      fireEvent.change(space, { target: { value: ' \u200B ' } });
+      expect(keep).toBeDisabled();
+      fireEvent.change(space, { target: { value: 'Something.' } });
+      expect(keep).toBeEnabled();
+    });
+
+    it('"Keep this" is disabled while keeping', async () => {
+      // `save_journal_entry` never answers in this case, so the save stays out.
+      const { right } = await show(tonightCases['an entry written before']!, true);
+      const keep = within(right!).getByRole('button', { name: 'Keep this' });
+      expect(keep).toBeEnabled();
+      fireEvent.click(keep);
+      await settle();
+      expect(keep).toBeDisabled();
+    });
+
+    it('pressing it asks save_journal_entry with the same arguments as outside any shell', async () => {
+      const c = tonightCases['an entry kept']!;
+      const saves = async (shell: boolean) => {
+        const view = await show(c, shell);
+        fireEvent.change(screen.getByLabelText('How the day went'), {
+          target: { value: c.keep!.typed },
+        });
+        fireEvent.click(screen.getByRole('button', { name: 'Keep this' }));
+        await settle();
+        const asked = core!.calls.filter((call) => call.cmd === 'save_journal_entry');
+        view.unmount();
+        core?.remove();
+        return asked;
+      };
+      const onPage = await saves(true);
+      expect(onPage).toHaveLength(1);
+      expect(onPage).toEqual(await saves(false));
+    });
+
+    it.each(WRITING_DAYS)('%s: the right page\u2019s words equal the same part outside any shell', async (key) => {
+      const c = tonightCases[key]!;
+      const onPage = await show(c, true);
+      expect(onPage.right).toBeDefined();
+      const left = words(onPage.left!);
+      const right = words(onPage.right!);
+      onPage.unmount();
+      core?.remove();
+      // The quotes switch joins the right page with its own rule.
+      const outside = without(await wordsOutside(c), left).filter(
+        (w) => !SWITCH_WORDS.includes(w),
+      );
+      expect(right).toEqual(outside);
     });
   });
 });
