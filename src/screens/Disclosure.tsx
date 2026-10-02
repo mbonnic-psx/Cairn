@@ -30,7 +30,7 @@ export function Disclosure({
     getDisclosures().then(setDetails).catch(() => setDetails(undefined));
   }, [disclosures]);
 
-  if (onPage && details) {
+  if (onPage) {
     return (
       <div className="nb-spread nb-disclosure-spread">
         <div className="nb-page nb-disclosure-left">
@@ -42,31 +42,40 @@ export function Disclosure({
             what was there first.
           </p>
 
-          <ul className="nb-disclosure-list">
-            {details.in_force.map((line) => (
-              <li key={line} className="nb-disclosure-line">
-                <span aria-hidden className="nb-disclosure-dot nb-disclosure-dot--in-force" />
-                <span>{line}</span>
-              </li>
-            ))}
-          </ul>
+          {details && (
+            <>
+              <ul className="nb-disclosure-list">
+                {details.in_force.map((line) => (
+                  <li key={line} className="nb-disclosure-line">
+                    <span aria-hidden className="nb-disclosure-dot nb-disclosure-dot--in-force" />
+                    <span>{line}</span>
+                  </li>
+                ))}
+              </ul>
 
-          <p className="nb-disclosure-helper">{details.helper}</p>
+              <p className="nb-disclosure-helper">{details.helper}</p>
+            </>
+          )}
         </div>
 
         <div className="nb-page nb-disclosure-right">
-          <h3 className="nb-disclosure-subtitle">What this does not cover</h3>
-          <ul className="nb-disclosure-list">
-            {details.not_covered.map((line) => (
-              <li key={line} className="nb-disclosure-line">
-                <span aria-hidden className="nb-disclosure-dot nb-disclosure-dot--not-covered" />
-                <span>{line}</span>
-              </li>
-            ))}
-          </ul>
+          {details && (
+            <>
+              <h3 className="nb-disclosure-subtitle">What this does not cover</h3>
+              <ul className="nb-disclosure-list">
+                {details.not_covered.map((line) => (
+                  <li key={line} className="nb-disclosure-line">
+                    <span aria-hidden className="nb-disclosure-dot nb-disclosure-dot--not-covered" />
+                    <span>{line}</span>
+                  </li>
+                ))}
+              </ul>
 
-          <p className="nb-disclosure-administrator">{details.administrator}</p>
+              <p className="nb-disclosure-administrator">{details.administrator}</p>
+            </>
+          )}
 
+          {/* The way forward is the foot of the right page, with the details or without them. */}
           <div className="nb-disclosure-foot">
             <button type="button" className="nb-disclosure-confirm" onClick={onConfirm}>
               Yes, set this up

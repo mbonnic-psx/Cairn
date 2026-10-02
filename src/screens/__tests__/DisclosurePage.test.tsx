@@ -10,7 +10,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { NotebookLook } from '../../look/look';
 import { NotebookShell } from '../../shell/NotebookShell';
 import { Disclosure } from '../Disclosure';
-import { installFakeCore, type FakeCore } from './fakeCore';
+import { installFakeCore, never, type FakeCore } from './fakeCore';
 import { disclosures } from './setupCases';
 
 let core: FakeCore | undefined;
@@ -124,5 +124,78 @@ describe.each(['morning', 'midday', 'night'] as const)('Disclosure on a notebook
     expect(within(left!).getByText(disclosures.helper)).toBeInTheDocument();
     expect(within(right!).getByText(disclosures.administrator)).toBeInTheDocument();
     expect(core.calls.filter((c) => c.cmd === 'get_disclosures')).toHaveLength(1);
+  });
+});
+
+describe('Disclosure on a notebook page without its details (T009)', () => {
+  const states: Array<[string, () => React.ReactElement, () => void]> = [
+    ['loading', () => <Disclosure onConfirm={noop} onBack={noop} />, () => (core = installFakeCore({ get_disclosures: never }))],
+    [
+      'could not be read',
+      () => <Disclosure onConfirm={noop} onBack={noop} />,
+      () =>
+        (core = installFakeCore({
+          get_disclosures: () => {
+            throw 'unreadable';
+          },
+        })),
+    ],
+  ];
+  const settle = () => new Promise((resolve) => setTimeout(resolve, 20));
+
+  it.each(states)('%s: the left page holds the heading and the paragraph and nothing else', async (_name, ui, install) => {
+    install();
+    const { left, main } = onPage(ui());
+    await settle();
+    expect(within(left).getByRole('heading', { level: 2, name: 'Before Cairn changes anything' })).toBeInTheDocument();
+    expect(left.children).toHaveLength(2);
+    expect(left.querySelector('p')?.textContent).toMatch(/^Cairn protects this whole machine/);
+    expect(main.querySelector('ul, h3')).toBeNull();
+  });
+
+  it.each(states)('%s: the right page holds only the two buttons, and both work', async (_name, _ui, install) => {
+    install();
+    const onConfirm = vi.fn();
+    const onBack = vi.fn();
+    const { right } = onPage(<Disclosure onConfirm={onConfirm} onBack={onBack} />);
+    await settle();
+    expect(Array.from(right.querySelectorAll('*')).map((el) => el.tagName)).toEqual(['DIV', 'BUTTON', 'BUTTON']);
+    expect(within(right).getAllByRole('button').map((b) => b.textContent)).toEqual(['Yes, set this up', 'Not yet']);
+    expect(right.querySelector('h3, ul, p')).toBeNull();
+    await userEvent.click(within(right).getByRole('button', { name: 'Yes, set this up' }));
+    await userEvent.click(within(right).getByRole('button', { name: 'Not yet' }));
+    expect(onConfirm).toHaveBeenCalledTimes(1);
+    expect(onBack).toHaveBeenCalledTimes(1);
+  });
+
+  it('puts the two buttons last on the right page, in one foot container, in every state', async () => {
+    const feet: string[] = [];
+    for (const [, ui, install] of states) {
+      install();
+      const { right, unmount } = onPage(ui());
+      await settle();
+      const foot = right.lastElementChild as HTMLElement;
+      expect(Array.from(foot.children).map((c) => c.textContent)).toEqual(['Yes, set this up', 'Not yet']);
+      feet.push(foot.className);
+      unmount();
+      core?.remove();
+    }
+    const { right } = onPage(<Disclosure disclosures={disclosures} onConfirm={noop} onBack={noop} />);
+    const foot = right.lastElementChild as HTMLElement;
+    expect(Array.from(foot.children).map((c) => c.textContent)).toEqual(['Yes, set this up', 'Not yet']);
+    feet.push(foot.className);
+    expect(new Set(feet).size).toBe(1);
+    expect(feet[0]).toContain('nb-disclosure-foot');
+  });
+
+  it.each(states)('%s: says the same words as the same state outside any shell', async (_name, ui, install) => {
+    install();
+    const { main, unmount } = onPage(ui());
+    await settle();
+    const here = main.textContent;
+    unmount();
+    const view = render(ui());
+    await settle();
+    expect(here).toBe(view.container.textContent);
   });
 });
