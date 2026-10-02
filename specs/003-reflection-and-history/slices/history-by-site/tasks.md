@@ -19,27 +19,27 @@ its phase touches.
 
 ## Phase 1 — RED: the behaviour, stated as failing tests
 
-- [ ] S3 [P] [US2] [T039, T040, T043, T044, T049; scenarios 1–8, 10, 12] Write `src-tauri/tests/us2_by_site.rs`
+- [X] S3 [P] [US2] [T039, T040, T043, T044, T049; scenarios 1–8, 10, 12] Write `src-tauri/tests/us2_by_site.rs`
   against `AppState`, the driving port, seeding the history through `OpenHistory` as
   `us1_write_tonight.rs` does. It covers by site most first, with the edges of the range excluded; changing the
   range and back; the same answer with and without journal entries; a quiet range; gaps cut to the range, with
   a note about *these days*; a range wholly inside a gap; estimates out of `by_site` and counted by date; a
   deleted day adding no gap; sealed, and a history that opens but cannot be read; the no-history build; and the
   serialised keys, exactly five. Every sentence is checked for voice. Written by a different agent than S11–S14.
-- [ ] S4 [P] [US2] [scenario 9] Write `src-tauri/tests/range_bounds.rs` (`#![cfg(feature = "history")]`, as
+- [X] S4 [P] [US2] [scenario 9] Write `src-tauri/tests/range_bounds.rs` (`#![cfg(feature = "history")]`, as
   `bounds_and_clipping.rs` is) against `reflection::over_time::check_range`. Each limit is held at its edge and
   one second past it: first day after last; `range_start` at −14 h and +12 h of `first_day`'s UTC midnight;
   `range_end` the same against the day after `last_day`; offsets differing by exactly 2 h and by 2 h + 1 s; a
   range that begins at the present and one second after it. Also a 4-week range across a 23-hour and a 25-hour
   day, accepted.
-- [ ] S5 [P] [US2] [scenario 5] Write `src-tauri/tests/range_coverage.rs`: `store::gaps::range_coverage_note`
+- [X] S5 [P] [US2] [scenario 5] Write `src-tauri/tests/range_coverage.rs`: `store::gaps::range_coverage_note`
   is `None` for no gaps. It states minutes under an hour, hours under two days, and days from two days up,
   speaks of *these days* and never *today*, and passes the banned-word list. `coverage_note` for a day says
   what it says now (the `gaps` test holds it).
-- [ ] S6 [P] [US2] [T041; scenario 11] Write `src-tauri/tests/patterns_at_scale.rs`: two years of history at
+- [X] S6 [P] [US2] [T041; scenario 11] Write `src-tauri/tests/patterns_at_scale.rs`: two years of history at
   50 reaches a day across 300 sites, read through `AppState::summarize_reaches` for the two years, inside
   1 000 ms. The header says what this does not measure, as `at_scale.rs`'s does.
-- [ ] S7 [P] [US2] [T044] Grow `CLASSIFIED` in `src-tauri/tests/ipc_surface.rs` from 17 to 18 with
+- [X] S7 [P] [US2] [T044] Grow `CLASSIFIED` in `src-tauri/tests/ipc_surface.rs` from 17 to 18 with
   `summarize_reaches` as `Effect::Reads`, so `every_classified_command_is_exposed` fails until it is exposed.
 - [ ] S8 [P] [US2] [W13] Write `src/__tests__/localDays.test.ts` for `src/localDays.ts`: today's date as
   `YYYY-MM-DD`; a day's bounds as its two local midnights, 23 hours apart on a spring-forward day and 25 on a
@@ -58,18 +58,18 @@ its phase touches.
 
 ## Phase 2 — GREEN: the least that passes
 
-- [ ] S11 [P] [US2] [S5] `src-tauri/src/store/gaps.rs`: `range_coverage_note(gaps)`, beside `coverage_note`,
+- [X] S11 [P] [US2] [S5] `src-tauri/src/store/gaps.rs`: `range_coverage_note(gaps)`, beside `coverage_note`,
   which does not change. The span is in minutes, hours or days; the sentence states the limit and guesses at
   nothing.
-- [ ] S12 [US2] [S4] `src-tauri/src/reflection/checkin.rs`: extract the rule that an instant could begin a
+- [X] S12 [US2] [S4] `src-tauri/src/reflection/checkin.rs`: extract the rule that an instant could begin a
   given day, as a refactor, with `bounds_and_clipping.rs` and `us1_write_tonight.rs` green before and after.
   `src-tauri/src/reflection/over_time.rs` (new) and `reflection/mod.rs`: `check_range`, using that rule at each
   end, plus the offset limit and the has-begun limit, with the refusal sentence in `plan.md`.
-- [ ] S13 [US2] [T043; S3] `src-tauri/src/reflection/over_time.rs`: assemble the range from an
+- [X] S13 [US2] [T043; S3] `src-tauri/src/reflection/over_time.rs`: assemble the range from an
   `OpenHistory`: `between`, `gaps_between` cut by `clipped`, `estimates_between(first_day, last_day + 1)`
   counted, and `by_site` from `domain::patterns::summarize` given the reaches and no estimates. Every read
   error is returned as one, never as an empty list. Depends on S11 and S12.
-- [ ] S14 [US2] [T044; S3, S6, S7] `src-tauri/src/ipc/state.rs`: `SiteCount { domain, count }`, `Patterns` with
+- [X] S14 [US2] [T044; S3, S6, S7] `src-tauri/src/ipc/state.rs`: `SiteCount { domain, count }`, `Patterns` with
   the five fields, and `AppState::summarize_reaches(first_day, last_day, range_start, range_end)`. Bounds are
   checked first, then the history opened through `open_history`, and every refusal becomes the sealed
   sentence. Without the `history` feature, the answer is `NO_HISTORY`. `ipc/commands.rs`: the
@@ -78,7 +78,7 @@ its phase touches.
 - [ ] S15 [P] [US2] [W13; S8] `src/localDays.ts`: `localToday(now)`, `dayBounds(day)`,
   `rangeBounds(firstDay, lastDay)` and `addDays(day, n)`, built from the calendar (`new Date(y, m, d)`), never
   by adding seconds. It holds no reach data, so the guard has nothing to say about it.
-- [ ] S16 [P] [US2] [T034, W14] `src/ipc/reaches.ts`: `SiteCount`, `Patterns` (the five fields), and
+- [X] S16 [P] [US2] [T034, W14] `src/ipc/reaches.ts`: `SiteCount`, `Patterns` (the five fields), and
   `summarizeReaches(firstDay, lastDay, rangeStart, rangeEnd)`. The wrapper returns what the command returns.
   The screen turns a thrown error into its own sentence (S17).
 - [ ] S17 [US2] [T045, T047; S9, S10, S1] `src/screens/Reaches.tsx`: the *Today* | *Over time* choice; *Today*
