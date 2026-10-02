@@ -28,7 +28,9 @@ slice `frame`, extended by slice `looks` (more `Look` values and tokens) and by 
 
 ## Look tokens
 
-Every page reads colour and type only from CSS custom properties set on the shell's root, `[data-look]`:
+Every page reads colour and type only from CSS custom properties set on the shell's root, `[data-look]`. Each look
+(`morning`, `midday`, `night`) defines every token below under the same name, so a page that reads a token is lit
+by every look with no change of its own:
 
 | Token | Meaning |
 |---|---|
@@ -42,6 +44,7 @@ Every page reads colour and type only from CSS custom properties set on the shel
 | `--nb-button` | the primary button's fill, with `--nb-button-ink` |
 | `--nb-font-serif` | headings, lists, reflective text |
 | `--nb-font-mono` | tab names, small labels, buttons only |
+| `--nb-focus-sky` | the focus outline of anything drawn over the sky (tabs, the switch); added by `looks` |
 
 Screens that still colour their text with the theme's palette (`text-ink-*`, `text-amber-*`, `text-moss-*`) are
 covered too: inside `[data-look]` the shell re-points those palette properties to darker warm values, and the
@@ -54,4 +57,6 @@ and the contrast test (research R6) covers every page by covering the tokens.
 
 - The shell holds no reach data, imports nothing from `ipc/reaches`, and shows no count, badge or streak
   (the `check-no-ambient-counts` rule 3, FR-008).
+- `NotebookShell` takes the look (`'morning' | 'midday' | 'night'`) and sets it as `data-look` on its root; the
+  screens it wraps still receive no new props.
 - With `look === 'current'` the shell is `CurrentShell`, whose output is today's interface byte for byte (SC-009).

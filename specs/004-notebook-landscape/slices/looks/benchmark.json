@@ -46,6 +46,39 @@
         "gaps": 2,
         "driver": "cruise"
       }
+    },
+    {
+      "stage": "plan",
+      "started": "2026-10-02T04:36:11Z",
+      "planned": "plan: strong → host model — `strong` maps to the host model",
+      "tasks": {
+        "start": null,
+        "end": null
+      },
+      "ended": "2026-10-02T04:36:11Z",
+      "seconds": 0,
+      "span": {
+        "from": {
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/0310515d-72c8-40ba-a3a4-b9202231a78a.jsonl": 820771
+        },
+        "to": {
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/0310515d-72c8-40ba-a3a4-b9202231a78a.jsonl": 820771
+        }
+      },
+      "usage": {
+        "source": "claude",
+        "session": "0310515d-72c8-40ba-a3a4-b9202231a78a",
+        "read": "message.usage on each assistant line, once per requestId",
+        "host": {},
+        "subagents": {},
+        "agents": []
+      },
+      "ran": null,
+      "agents": null,
+      "delegated": false,
+      "signals": {
+        "driver": "cruise"
+      }
     }
   ]
 }
