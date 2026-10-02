@@ -10,7 +10,7 @@ description: "Tasks for slice `board-scale` of 004-notebook-landscape"
 
 ## Phase 0: Pin
 
-- [ ] T001 **Pin.** Run green and unedited `src/look/__tests__/*.test.ts(x)`, `src/shell/__tests__/NotebookShell.test.tsx`, `CurrentShell.test.tsx` and `AppLook.test.tsx` before the first increment; say so in the first commit. Record `notebook.css`'s narrow `@media (max-width: 1099px)` block as the text T002 and later tasks must leave unchanged (`git show main:src/styles/notebook.css`). Files: none.
+- [x] T001 **Pin.** Run green and unedited `src/look/__tests__/*.test.ts(x)`, `src/shell/__tests__/NotebookShell.test.tsx`, `CurrentShell.test.tsx` and `AppLook.test.tsx` before the first increment; say so in the first commit. Record `notebook.css`'s narrow `@media (max-width: 1099px)` block as the text T002 and later tasks must leave unchanged (`git show main:src/styles/notebook.css`). Files: none.
 
 ## Phase 1: The scene and the notebook's place (FR-036, D37, D38, D39)
 
