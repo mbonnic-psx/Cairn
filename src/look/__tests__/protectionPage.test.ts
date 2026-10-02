@@ -144,6 +144,25 @@ describe('the protection-page stylesheet', () => {
     });
   });
 
+  describe('the two figures keep one line each (T027)', () => {
+    const own = (selector: string) =>
+      rules.filter((r) => r.selector.split(',').map((x) => x.trim()).includes(selector)).map((r) => r.body).join('');
+    const figures = own('.nb-protection-figures');
+    const value = own('.nb-protection-figure__value');
+
+    it('sets each value on one line, so "NN minutes ago" is never broken', () => {
+      expect(value).toMatch(/white-space:\s*nowrap/);
+      expect(value).not.toMatch(/overflow-wrap|word-break/);
+    });
+
+    it('lets the figures wrap together as whole figures, never into fixed halves', () => {
+      expect(figures).toMatch(/display:\s*flex/);
+      expect(figures).toMatch(/flex-wrap:\s*wrap/);
+      expect(figures).not.toMatch(/grid-template-columns/);
+      expect(own('.nb-protection-figure')).not.toMatch(/min-width:\s*0/);
+    });
+  });
+
   it('has no animation, transition or keyframes', () => {
     expect(css).not.toMatch(/animation|transition|@keyframes/);
   });
