@@ -47,22 +47,22 @@ computer's own short date, and weeks stay weeks however long the range.
 
 Four tasks, each with files no other open task touches.
 
-- [ ] V2 [P] [US2] [contract; plan, *Contract amendments*] Append the plan's `ui-ipc.md` amendment text, verbatim, as
+- [x] V2 [P] [US2] [contract; plan, *Contract amendments*] Append the plan's `ui-ipc.md` amendment text, verbatim, as
   *Amended in slice `history-movement` (2026-10-02)* after the `history-by-weekday` amendment and before `get_quote`.
   The weekday amendment's last bullet (*`movement` … is still absent*) stays as the record it is. A documentation
   task: its proof is V21's field-for-field match, and its RED is that match failing until the code exists.
   *Files:* `specs/003-reflection-and-history/contracts/ui-ipc.md`.
-- [ ] V3 [P] [US2] [contract] Append the plan's `patterns.md` amendment (`LocalRange`, `movement`, and the properties
+- [x] V3 [P] [US2] [contract] Append the plan's `patterns.md` amendment (`LocalRange`, `movement`, and the properties
   list) after the `history-by-hour` amendment and anything below it. *Files:*
   `specs/003-reflection-and-history/contracts/patterns.md`.
-- [ ] V4 [P] [US2] [pin row 4; the ambient-counts guard] RED: plant `const movement = summary.movement;` in a new
+- [x] V4 [P] [US2] [pin row 4; the ambient-counts guard] RED: plant `const movement = summary.movement;` in a new
   scratch file `src/plantedMovement.ts` (not in `localDays.ts`, which V5 edits) and run `npm run check:ambient-counts`.
   Record that it is **not** refused. GREEN: `REACH_DATA` gains `{ pattern: /\bmovement\b/, why: 'a reach breakdown' }`
   (or its own entry), and the same run refuses the plant, naming the file and line. Record that refusal. Remove the
   plant, and run `npm run check` clean: the word appears today only in `src/ipc/reaches.ts`, an allowed place. The
   guard's allowed places do not change. *Files:* `scripts/check-no-ambient-counts.mjs`; the scratch
   `src/plantedMovement.ts`, deleted in the same task.
-- [ ] V5 [P] [US2] [rules 2, 3; scenarios 25–27] RED: write `src/__tests__/dates.test.ts`, with `process.env.TZ =
+- [x] V5 [P] [US2] [rules 2, 3; scenarios 25–27] RED: write `src/__tests__/dates.test.ts`, with `process.env.TZ =
   'Pacific/Kiritimati'` at the top. `shortDateInWords('2026-10-06', false)` equals `toLocaleDateString([], { day:
   'numeric', month: 'short', timeZone: 'UTC' })` of that date built with `setUTCFullYear`; with `true` it carries the
   year; `'0100-01-04'` names year 100, not 1900 or 2000. `weekOfInWords('2026-10-06', false)` is `week of ` plus the
