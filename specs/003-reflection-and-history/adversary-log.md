@@ -81,3 +81,12 @@ Findings (triaged by the host):
 | R5 | LOW | confirmed | fixed `51fc952` | The widest range a hostile caller can send (±9999 years) builds a 7.3M-entry per-day list for nothing (0.16 s, 94 MB). IPC only |
 
 Held: edges half-open and exact; gaps clipped and cut at both edges, rounded up; no double count across a clock change; estimates never a site; every bound refusal plain, checked arithmetic; a 4-week range across DST in eight odd zones (30-min, 2-h, date-line) accepted; no OS text or path in any sentence; a late answer dropped; the range forgotten on leaving (H2); no protection route, no count outside the reaches screen; no ranking, praise, streak or banned word. 1.06M reaches over 60k sites read in 0.40 s.
+
+## history-by-hour · 507546e · 2026-10-02
+
+| Trigger | Status | Evidence |
+|---|---|---|
+| driving adapter (HTTP route, CLI command, queue consumer) | widened | `src-tauri/src/ipc/commands.rs`: `summarize_reaches` gains `offsets` |
+| driven adapter or the provider types behind one | already covered | the range reads are unchanged since `history-by-site` (row above) |
+| authorisation decision (who can reach one that already exists) | not present | single local user; `Reads` (`tests/ipc_surface.rs`) |
+| concurrency, idempotency, ordering, retention, or time | widened | offsets in force per instant (`domain/patterns.rs` `by_hour`, `reflection/over_time.rs` `check_offsets`, `src/localDays.ts` `offsetChanges`) |
