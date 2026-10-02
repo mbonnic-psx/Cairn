@@ -178,6 +178,21 @@ Appended by converge pass 1 at `28982cd`. Graded; K23 is `HIGH` and re-opens the
   1_776_981_600) — each pinned, with the expected list derived independently of `offsetChanges` (fixed epoch
   constants, as the London file has).
 
+## Phase 5 — Convergence (pass 2)
+
+Appended by converge pass 2 at `4fb1156`. K23 and K24 closed; one `LOW`, which does not re-open the loop.
+
+- [ ] K25 [US2] [LOW] [Principle III] **A skipped-midnight range is placed through the command, not only the check.**
+  Seen: K23's fix is pinned at `check_offsets` (`src-tauri/tests/offset_changes.rs`), and `AppState::summarize_reaches`
+  calls it directly (`src-tauri/src/ipc/state.rs:829`), but no test at the adapter (`src-tauri/tests/us2_by_hour.rs`,
+  `with_history`) asks a range whose first midnight the clock skips — the level where pass 1's regression showed as
+  the sealed sentence in place of *By site* and *By hour*. RED in `us2_by_hour.rs`: Cairo 2026-04-24 to 2026-04-30
+  (`range_start` 1_776_981_600, offsets `[(1_776_981_600, 10_800)]`), with a reach at `range_start + 60`, answers
+  placed, with that reach in *By site* and in hour 01 (not 00). GREEN: no production change expected. The sweep:
+  **the same range asked through the command with each first offset the core accepts at that skipped midnight** —
+  the old (+7 200, bucketing the reach in hour 00) and the new (+10 800, hour 01) — each placed, and one more than a
+  clock change from the implied one sealed.
+
 ## Parallel opportunities
 
 - **Phase 0 runs first and alone.** K1 records the baseline and gives the host the two rows K5 and K11 need.
@@ -195,3 +210,9 @@ Appended by converge pass 1 at `28982cd`. Graded; K23 is `HIGH` and re-opens the
   `over_time.rs`, `state.rs`, `reaches.ts`, `Reaches.tsx`, `us2_by_site.rs`'s key list, the pin's Over time cases).
   Run them after this lands, not beside it. Each takes the offsets this slice adds, so neither needs a second
   amendment to the signature.
+
+## Convergence
+
+**Converged at pass 2** (2026-10-02, `drive-converge` · host model · delegated, fresh context, both passes). Pass 1 found K23 (HIGH: a range starting on a midnight the clock skips was sealed, By site included) and K24 (MEDIUM: the range-end edge of `offsetChanges` untested); both fixed (`46ef1ac`, `03709d1`) and confirmed closed in pass 2 by re-running pass 1's reproductions and mutants, and by an independent probe across all 418 IANA zones (0 ranges sealed; 8 per spring-forward-at-midnight zone under the old rule). K25 (LOW, the same case through `AppState`) is Phase 5, after the demo; it does not re-open the loop. Observation left to the owner: the first-offset rule could be tightened to `[implied, implied + 2 h]` (a contract change).
+
+Principles the diff touches: **I**, `summarize_reaches` stays `Reads` (`tests/ipc_surface.rs`), no protection route on the screen; **II**, offsets are a request parameter, discarded after use, nothing stored or sent (`ipc/state.rs`), "domain and timestamp only" holds under B4 clarified; **III**, hours exact by the offset in force at each instant (`domain/patterns.rs`), a placeable range placed and an unplaceable one refused (`reflection/over_time.rs` `check_offsets`, `src/localDays.ts`), the time Cairn did not see and the estimates exclusion stated in both views (`src/screens/Reaches.tsx`); **VI**, hours in clock order, no peak, worst or busiest wording, a quiet hour a plain zero row (`Reaches.tsx`).
