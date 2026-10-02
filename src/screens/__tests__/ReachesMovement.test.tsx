@@ -13,7 +13,7 @@ import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 
 import type { MovementRow, OffsetChange, Patterns, TodaysReaches } from '../../ipc/reaches';
-import { shortDateInWords } from '../../localDays';
+import { shortDateInWords, weekOfInWords } from '../../localDays';
 import { Reaches, type ReachesReader } from '../Reaches';
 
 /** Friday 2 October 2026, 20:00 in London. */
@@ -357,5 +357,59 @@ describe('the estimates sentence (scenarios 30, 36)', () => {
         'Your own estimates for 2 days are not counted here, because an estimate has no hour.',
       ),
     ).toBeInTheDocument();
+  });
+});
+
+/** Nine rows of a 9-week range ending 2 October 2026: 8 full weeks, then a last week of one date. */
+const weekRows = (over: Record<number, Partial<MovementRow>> = {}): MovementRow[] =>
+  Array.from({ length: 9 }, (_, place) => ({
+    day: new Date(Date.UTC(2026, 7, 7 + place * 7)).toISOString().slice(0, 10),
+    days: place === 8 ? 1 : 7,
+    span: 'week' as const,
+    count: place + 1,
+    seen: 'whole' as const,
+    so_far: place === 8,
+    ...over[place],
+  }));
+
+async function openWeeks(rows: MovementRow[], extra: Partial<Patterns> = {}) {
+  const { read } = fakeRead(async () => patterns({ movement: rows, ...extra }));
+  const opened = await openDayByDay(read);
+  await waitFor(() => expect(lines()).toHaveLength(rows.length));
+  return opened;
+}
+
+describe('how a week row reads (scenario 32)', () => {
+  it('draws one line a week, named by the date it begins, a full week with no across clause', async () => {
+    await openWeeks(weekRows());
+
+    expect(lines().map((line) => leaves(line)[0])).toEqual(
+      weekRows().map((row) => weekOfInWords(row.day, false)),
+    );
+    expect(leaves(lines()[0]!)).toEqual([weekOfInWords('2026-08-07', false), '1']);
+    expectNoVerdict();
+  });
+
+  it.each([
+    [1, 'across 1 day'],
+    [3, 'across 3 days'],
+    [6, 'across 6 days'],
+  ])('says %i dates of a short last week as %s', async (days, clause) => {
+    await openWeeks(weekRows({ 8: { days, so_far: false } }));
+
+    expect(leaves(lines()[8]!)).toEqual([weekOfInWords('2026-10-02', false), clause, '9']);
+    expect(text()).not.toMatch(/across 7|across 56/);
+  });
+
+  it('carries the year on every name when the weeks cross one', async () => {
+    const rows = weekRows().map((row, place) => ({
+      ...row,
+      day: new Date(Date.UTC(2025, 11, 6 + place * 7)).toISOString().slice(0, 10),
+    }));
+    await openWeeks(rows);
+
+    expect(lines().map((line) => leaves(line)[0])).toEqual(
+      rows.map((row) => weekOfInWords(row.day, true)),
+    );
   });
 });

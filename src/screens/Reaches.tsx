@@ -24,6 +24,7 @@ import {
   rangeInWords,
   shortDateInWords,
   weekdayInWords,
+  weekOfInWords,
 } from '../localDays';
 import {
   largestCount,
@@ -128,8 +129,16 @@ const rowsOf = (answer: Patterns, seen: Seen, weekStart: number): Row[] => {
       rows[0]!.day.slice(0, 4) !== addDays(last.day, last.days - 1).slice(0, 4);
     return rows.map((row) => ({
       key: row.day,
-      name: shortDateInWords(row.day, withYear),
+      name:
+        row.span === 'week'
+          ? weekOfInWords(row.day, withYear)
+          : shortDateInWords(row.day, withYear),
       count: row.count,
+      // Only a week that holds fewer than seven dates says how many it holds; the core's `span` says which is a week.
+      clause:
+        row.span === 'week' && row.days < 7
+          ? `across ${row.days} ${row.days === 1 ? 'day' : 'days'}`
+          : undefined,
     }));
   }
   // An answer with no days at all (sealed) draws none; otherwise all seven are drawn (W3), a weekday
