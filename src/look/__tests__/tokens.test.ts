@@ -417,6 +417,108 @@ describe('text laid over the scene meets its floor against the sun or moon behin
   it('still has a look whose disc sits behind the greeting, so the check is live', () => {
     expect(looks.some((look) => SIZES.some((size) => discTop(look, size.height) < size.greetingBottom))).toBe(true);
   });
+
+  // T020 (research Q4): every line of text over the sky is its own band, from the
+  // stylesheet's own values, for both layouts at every height the window allows,
+  // and each band's own ink is checked only against what can sit behind it.
+  const pct = (look: LookName, name: string) => parseFloat(blockOf(look).match(new RegExp(`${name}:\\s*([\\d.]+)%`))![1]!) / 100;
+  const px = (look: LookName, name: string) => parseFloat(blockOf(look).match(new RegExp(`${name}:\\s*([\\d.]+)px`))![1]!);
+  /** Every number a declaration carries across the rules for one selector (a media override comes second). */
+  const decl = (selector: string, prop: string) => {
+    const hits = ruleFor(selector).flatMap((r) => {
+      const m = r.body.match(new RegExp(`(?:^|[;\\s])${prop}:\\s*([\\d.]+)(?:px)?\\s*(?:;|$)`));
+      return m ? [Number(m[1])] : [];
+    });
+    if (hits.length === 0) throw new Error(`${selector} sets no ${prop}`);
+    return hits;
+  };
+  const rootPadTop = (wide: boolean) => {
+    const pads = ruleFor('.nb-root').flatMap((r) => {
+      const m = r.body.match(/padding:\s*(\d+)px/);
+      return m ? [Number(m[1])] : [];
+    });
+    return pads[wide ? 0 : 1]!;
+  };
+  /** preflight's html line-height, which nothing in notebook.css overrides on the 12px lines. */
+  const preflight = readFileSync('node_modules/tailwindcss/preflight.css', 'utf8');
+  const lineHeight = parseFloat(preflight.match(/html,\s*:host\s*\{[^}]*?line-height:\s*([\d.]+)/)![1]!);
+  const line12 = 12 * lineHeight;
+
+  /** Composite an 8-digit hex colour over a 6-digit one. */
+  const over = (top: string, under: string) => {
+    const a = parseInt(top.slice(7, 9), 16) / 255;
+    const ch = (hex: string, i: number) => parseInt(hex.slice(1 + i * 2, 3 + i * 2), 16);
+    return '#' + [0, 1, 2].map((i) => Math.round(ch(top, i) * a + ch(under, i) * (1 - a)).toString(16).padStart(2, '0')).join('');
+  };
+  const glowToken = (look: LookName) => {
+    const m = blockOf(look).match(/--nb-sun-glow:\s*(#[0-9a-fA-F]{8})\s*;/);
+    if (!m) throw new Error(`--nb-sun-glow is not an 8-digit hex colour in the ${look} block`);
+    return m[1]!;
+  };
+  const glowReach = (() => {
+    const m = ruleFor('.nb-sun')[0]!.body.match(/box-shadow:\s*0\s+0\s+(\d+)px\s+(\d+)px/)!;
+    return Number(m[1]) + Number(m[2]);
+  })();
+
+  const bandsOf = (wide: boolean) => {
+    const i = wide ? 0 : 1;
+    const titleTop = decl('.nb-titlebar', 'top')[0]!;
+    const asidePad = decl('.nb-aside', 'padding-top')[i]!;
+    const gap = decl('.nb-greeting', 'gap')[i]!;
+    const wordsSize = decl('.nb-greeting__words', 'font-size')[i]!;
+    const timeTop = rootPadTop(wide) + asidePad;
+    const wordsTop = timeTop + line12 + gap;
+    const wordsHeight = 2 * wordsSize * decl('.nb-greeting__words', 'line-height')[0]!;
+    return [
+      { text: 'title bar name', ink: '--nb-greeting-body', floor: TEXT, top: titleTop, bottom: titleTop + line12 },
+      { text: 'weekday and time', ink: '--nb-greeting-quiet', floor: TEXT, top: timeTop, bottom: timeTop + line12 },
+      { text: 'greeting words', ink: '--nb-greeting-ink', floor: LARGE, top: wordsTop, bottom: wordsTop + wordsHeight },
+    ];
+  };
+
+  it('keeps the band model honest: a 12px line is 18px, and a greeting is at most two words that fit the column', () => {
+    expect(line12).toBe(18);
+    const greetings = [...readFileSync('src/look/look.ts', 'utf8').matchAll(/(?:morning|midday|night):\s*'([^']+)'/g)].map((m) => m[1]!);
+    expect(greetings).toHaveLength(3);
+    for (const g of greetings) {
+      const words = g.split(' ');
+      expect(words.length, g).toBeLessThanOrEqual(2);
+      // 0.6em a letter is wider than any letter of the serif: a generous bound on a word at 40px.
+      for (const w of words) expect(w.length * 0.6 * 40, w).toBeLessThan(250);
+    }
+  });
+
+  const HEIGHTS = Array.from({ length: Math.floor((2160 - 600) / 20) + 1 }, (_, i) => 600 + i * 20);
+
+  it.each(looks.flatMap((look) => [true, false].map((wide) => [look, wide] as const)))(
+    '%s, wide layout %s, every height from 600 to 2160: each line of text holds its floor on the disc and glow that reach it',
+    (look, wide) => {
+      const size = px(look, '--nb-sun-size');
+      const sun = token('--nb-sun', look);
+      const glow = glowToken(look);
+      const glows = [over(glow, token('--nb-sky-top', look)), over(glow, token('--nb-sky-mid', look))];
+      const bands = bandsOf(wide);
+      let reached = 0;
+      for (const height of HEIGHTS) {
+        const top = pct(look, '--nb-sun-top') * height;
+        for (const band of bands) {
+          const ink = token(band.ink, look);
+          const at = `${band.text} at height ${height}`;
+          if (top < band.bottom && top + size > band.top) {
+            reached += 1;
+            expect(contrastRatio(ink, sun), `${at} on the disc`).toBeGreaterThanOrEqual(band.floor);
+          }
+          if (top - glowReach < band.bottom && top + size + glowReach > band.top) {
+            reached += 1;
+            for (const g of glows) expect(contrastRatio(ink, g), `${at} on the glow`).toBeGreaterThanOrEqual(band.floor);
+          }
+        }
+      }
+      // In the wide layout every look's disc or glow reaches some line at 600 tall, so the sweep is never vacuous
+      // (night's narrow layout is reached by nothing at 600: the moon is below the greeting there).
+      if (wide) expect(reached, 'the sweep reaches some band').toBeGreaterThan(0);
+    },
+  );
 });
 
 describe('the mark on every look\'s own sky (FR-033, D4)', () => {
