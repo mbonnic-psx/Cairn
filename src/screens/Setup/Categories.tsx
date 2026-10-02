@@ -9,6 +9,7 @@
  */
 import { Card } from '../../components/Card';
 import type { CategoryPreset } from '../../ipc';
+import { useNotebookPage } from '../../shell/notebookPage';
 
 export function Categories({
   categories,
@@ -19,6 +20,44 @@ export function Categories({
   onToggle: (id: CategoryPreset['id'], on: boolean) => void;
   note?: string;
 }) {
+  const onPage = useNotebookPage();
+
+  if (onPage) {
+    return (
+      <section className="nb-categories">
+        <h2 className="nb-categories-title">What would you like to protect?</h2>
+        <p className="nb-categories-lead">
+          Each of these is a starting list. It becomes yours — add to it, take things out
+          of it, whenever you like.
+        </p>
+
+        <ul className="nb-categories-list">
+          {categories.map((category) => (
+            <li key={category.id}>
+              <label className="nb-categories-row">
+                <input
+                  type="checkbox"
+                  className="nb-categories-box"
+                  checked={category.enabled}
+                  onChange={(event) => onToggle(category.id, event.target.checked)}
+                />
+                <span>
+                  <span className="nb-categories-name">{category.label}</span>
+                  <span className="nb-categories-count">
+                    {category.entry_count} addresses
+                    {category.edited ? ' · edited by you' : ''}
+                  </span>
+                </span>
+              </label>
+            </li>
+          ))}
+        </ul>
+
+        {note && <p className="nb-categories-note">{note}</p>}
+      </section>
+    );
+  }
+
   return (
     <Card>
       <h2 className="reflective text-3xl text-ink-900">What would you like to protect?</h2>
