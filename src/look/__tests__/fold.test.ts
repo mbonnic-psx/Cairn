@@ -97,4 +97,61 @@ describe('the fold (FR-034)', () => {
     expect(r.length).toBeGreaterThan(0);
     expect(r[0]!.body).toMatch(/(GrayText|CanvasText)/);
   });
+  describe('every spread the screens render keeps the fold on the centre of its gap', () => {
+    // The spread selectors come from the markup: every class beside nb-spread in a className under src/screens.
+    const screens = import.meta.glob(['../../screens/**/*.tsx', '!**/__tests__/**'], {
+      query: '?raw',
+      import: 'default',
+      eager: true,
+    }) as Record<string, string>;
+    const spreads = new Set<string>(['nb-spread']);
+    for (const source of Object.values(screens)) {
+      for (const m of source.matchAll(/className="([^"]*\bnb-spread\b[^"]*)"/g)) {
+        for (const c of m[1]!.split(/\s+/)) if (c.startsWith('nb-')) spreads.add(c);
+      }
+    }
+    const sheets = readdirSync('src/styles')
+      .filter((f) => f.endsWith('.css'))
+      .map((f) => ({ file: f, rules: rulesOf(readFileSync(`src/styles/${f}`, 'utf8')) }));
+    const sides = (value: string): { left: string; right: string } | null => {
+      const v = value.trim().split(/\s+/);
+      if (v.length === 1) return { left: v[0]!, right: v[0]! };
+      if (v.length === 2 || v.length === 3) return { left: v[1]!, right: v[1]! };
+      if (v.length === 4) return { left: v[3]!, right: v[1]! };
+      return null;
+    };
+
+    it('finds the spreads in the markup, the two -spread ones included', () => {
+      expect([...spreads]).toEqual(expect.arrayContaining(['nb-choosing-spread', 'nb-disclosure-spread', 'nb-protection-leaves']));
+      expect(spreads.size).toBeGreaterThanOrEqual(9);
+    });
+
+    it.each([...spreads])('.%s has equal columns and equal horizontal room on both sides', (name) => {
+      for (const { file, rules } of sheets) {
+        for (const r of rules) {
+          if (!r.selector.split(',').some((x) => x.trim() === `.${name}`)) continue;
+          const decl = (prop: string) =>
+            [...r.body.matchAll(new RegExp(`(?:^|[;\\s])${prop}\\s*:\\s*([^;]+)`, 'g'))].map((m) => m[1]!.trim());
+          for (const cols of decl('grid-template-columns')) {
+            expect(cols, `${file}: .${name} columns`).toBe('1fr 1fr');
+          }
+          for (const kind of ['padding', 'margin']) {
+            for (const v of decl(kind)) {
+              const e = sides(v);
+              expect(e, `${file}: .${name} ${kind}: ${v}`).not.toBeNull();
+              expect(e!.left, `${file}: .${name} ${kind}: ${v} is unequal`).toBe(e!.right);
+            }
+            const l = decl(`${kind}-left`);
+            const rt = decl(`${kind}-right`);
+            expect(l, `${file}: .${name} ${kind}-left without ${kind}-right`).toEqual(rt);
+            for (const v of decl(`${kind}-inline`)) {
+              const [start, end = start] = v.split(/\s+/);
+              expect(start, `${file}: .${name} ${kind}-inline: ${v}`).toBe(end);
+            }
+            expect(decl(`${kind}-inline-start`), `${file}: .${name} ${kind}-inline-start`).toEqual(decl(`${kind}-inline-end`));
+          }
+        }
+      }
+    });
+  });
 });
