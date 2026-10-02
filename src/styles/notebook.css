@@ -372,8 +372,9 @@
   height: 100%;
   overflow-y: auto;
   margin: 0;
-  padding: 40px 48px 36px 60px;
+  padding: calc(40 * var(--nb-u)) calc(48 * var(--nb-u)) calc(36 * var(--nb-u)) calc(60 * var(--nb-u));
   font-family: var(--nb-font-serif);
+  font-size: calc(16 * var(--nb-u));
   color: var(--nb-ink-body);
   line-height: 1.65;
 }
@@ -381,20 +382,21 @@
   background-image: repeating-linear-gradient(
     to bottom,
     transparent 0,
-    transparent 31px,
-    var(--nb-rule) 31px,
-    var(--nb-rule) 32px
+    transparent calc(32 * var(--nb-u) - 1px),
+    var(--nb-rule) calc(32 * var(--nb-u) - 1px),
+    var(--nb-rule) calc(32 * var(--nb-u))
   );
-  /* One tile is one pitch, so the ruling has no seam; it starts 22px in, where the first line of writing sits. */
-  background-size: 100% 32px;
-  background-position: 0 22px;
+  /* One tile is one pitch, so the ruling has no seam; it starts 22 units in, where the first line of writing sits.
+   * The rule itself stays a 1px line. */
+  background-size: 100% calc(32 * var(--nb-u));
+  background-position: 0 calc(22 * var(--nb-u));
 }
 .nb-margin {
   position: absolute;
   top: 0;
   bottom: 0;
-  left: 38px;
-  width: 1px;
+  left: calc(38 * var(--nb-u));
+  width: calc(1 * var(--nb-u));
   background: var(--nb-margin);
   pointer-events: none;
 }
@@ -403,27 +405,27 @@
   position: absolute;
   top: 0;
   bottom: 0;
-  left: calc(50% + 6px);
+  left: calc(50% + 6 * var(--nb-u));
   width: 0;
   border-left: 1px solid var(--nb-fold);
   pointer-events: none;
 }
 .nb-label {
   font-family: var(--nb-font-mono);
-  font-size: 12px;
+  font-size: calc(12 * var(--nb-u));
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--nb-ink-quiet);
 }
 .nb-button {
-  min-height: 40px;
-  padding: 0 16px;
+  min-height: calc(40 * var(--nb-u));
+  padding: 0 calc(16 * var(--nb-u));
   border: 0;
   border-radius: 3px;
   background: var(--nb-button);
   color: var(--nb-button-ink);
   font-family: var(--nb-font-mono);
-  font-size: 12.5px;
+  font-size: calc(12.5 * var(--nb-u));
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
@@ -434,19 +436,19 @@
  * whole, inside the notebook and reachable at any window size. */
 .nb-tabs {
   position: absolute;
-  right: -44px;
-  top: 12px;
-  bottom: 12px;
+  right: calc(-44 * var(--nb-u));
+  top: calc(12 * var(--nb-u));
+  bottom: calc(12 * var(--nb-u));
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 4px;
+  gap: calc(4 * var(--nb-u));
 }
 .nb-tab {
   flex: 0 1 auto;
-  width: 38px;
+  width: calc(38 * var(--nb-u));
   min-height: min-content;
-  padding: 8px 0;
+  padding: calc(8 * var(--nb-u)) 0;
   border: 0;
   border-radius: 0 6px 6px 0;
   background: var(--nb-tab-limits);
@@ -455,7 +457,7 @@
   align-items: center;
   justify-content: center;
   font-family: var(--nb-font-mono);
-  font-size: 11px;
+  font-size: calc(11 * var(--nb-u));
   line-height: 1.2;
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -467,16 +469,16 @@
  * follows its width. */
 @container (min-height: 580px) {
   .nb-tabs {
-    top: 40px;
-    gap: 6px;
+    top: calc(40 * var(--nb-u));
+    gap: calc(6 * var(--nb-u));
   }
   .nb-tabs .nb-tab-label {
     max-inline-size: none;
   }
   .nb-tab {
-    min-height: 80px;
-    padding: 10px 0;
-    font-size: 12px;
+    min-height: calc(80 * var(--nb-u));
+    padding: calc(10 * var(--nb-u)) 0;
+    font-size: calc(12 * var(--nb-u));
     letter-spacing: 0.08em;
   }
 }
@@ -486,7 +488,7 @@
   writing-mode: vertical-rl;
   /* A long name wraps into a second column rather than pushing the tabs
    * past the notebook in a short window (T017). */
-  max-inline-size: 76px;
+  max-inline-size: calc(76 * var(--nb-u));
 }
 .nb-tab--protection { background: var(--nb-tab-protection); }
 .nb-tab--trail { background: var(--nb-tab-trail); }
@@ -497,7 +499,7 @@
   filter: brightness(1.04);
 }
 .nb-tab[aria-current='page'] {
-  width: 44px;
+  width: calc(44 * var(--nb-u));
   background: var(--nb-paper);
   color: var(--nb-ink);
 }

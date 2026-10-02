@@ -287,7 +287,7 @@ describe('the lined writing space (D24)', () => {
   const write = () => bodyOf('.nb-checkin-write', base);
   const shellPitch = Number(
     noComments(notebook)
-      .match(/\.nb-page--ruled\s*\{[^}]*background-size:\s*100%\s*([\d.]+)px/)?.[1],
+      .match(/\.nb-page--ruled\s*\{[^}]*background-size:\s*100%\s*calc\(([\d.]+) \* var\(--nb-u\)\)/)?.[1], // N of the pitch: 32 units, T005
   );
 
   it('reads the notebook\'s ruling pitch as 32px', () => {

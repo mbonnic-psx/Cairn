@@ -211,8 +211,8 @@ describe('the shell contract in the stylesheet (contracts/ui-shell.md)', () => {
   it('bounds the tab column by the notebook so no tab can leave it', () => {
     const col = ruleFor('.nb-tabs').map((r) => r.body).join('');
     expect(col).toMatch(/position:\s*absolute/);
-    expect(col).toMatch(/top:\s*\d+px/);
-    expect(col).toMatch(/bottom:\s*\d+px/);
+    expect(col).toMatch(/top:\s*calc\(\d+ \* var\(--nb-u\)\)/);
+    expect(col).toMatch(/bottom:\s*calc\(\d+ \* var\(--nb-u\)\)/);
     expect(ruleFor('.nb-tab')[0]!.body).toMatch(/flex:\s*0 1 auto/);
     expect(ruleFor('.nb-tab')[0]!.body).toMatch(/min-height:\s*min-content/);
   });
@@ -220,7 +220,7 @@ describe('the shell contract in the stylesheet (contracts/ui-shell.md)', () => {
   it('draws the margin line in one place, .nb-margin, from --nb-margin', () => {
     const drawers = rules.filter((r) => /background:\s*var\(--nb-margin\)/.test(r.body));
     expect(drawers.map((r) => r.selector)).toEqual(['.nb-margin']);
-    expect(ruleFor('.nb-margin')[0]!.body).toMatch(/left:\s*38px/);
+    expect(ruleFor('.nb-margin')[0]!.body).toMatch(/left:\s*calc\(38 \* var\(--nb-u\)\)/);
     expect(notebook).not.toMatch(/\.nb-page-area::before/);
   });
 
@@ -232,10 +232,11 @@ describe('the shell contract in the stylesheet (contracts/ui-shell.md)', () => {
 
   it('tiles the rules at exactly one pitch, so no seam skips or doubles a rule (T025)', () => {
     const body = ruleFor('.nb-page--ruled')[0]!.body;
-    expect(body).toMatch(/background-size:\s*100%\s+32px/);
-    expect(body).toMatch(/var\(--nb-rule\)\s+31px,\s*var\(--nb-rule\)\s+32px/);
-    const y = Number(body.match(/background-position:\s*0\s+(\d+)px/)?.[1]);
-    expect(y % 32, 'the ruling starts 22px into the pitch, where the first line of writing sits').toBe(22);
+    // The pitch and the offset are N x s (D39); the rule itself stays a 1px line at the end of each pitch.
+    expect(body).toMatch(/background-size:\s*100%\s+calc\(32 \* var\(--nb-u\)\)/);
+    expect(body).toMatch(/var\(--nb-rule\)\s+calc\(32 \* var\(--nb-u\) - 1px\),\s*var\(--nb-rule\)\s+calc\(32 \* var\(--nb-u\)\)/);
+    const y = Number(body.match(/background-position:\s*0\s+calc\((\d+) \* var\(--nb-u\)\)/)?.[1]);
+    expect(y % 32, 'the ruling starts 22 units into the pitch, where the first line of writing sits').toBe(22);
   });
 
   it('draws the fold in one place, .nb-fold, from --nb-fold', () => {

@@ -35,6 +35,8 @@ const rootNarrow = ruleIn(narrowBlock, '.nb-root');
 
 const num = (v: string | undefined) => Number(v);
 const px = (v: string | undefined) => Number(v?.match(/^(-?[\d.]+)px$/)?.[1]);
+/** N of a length written `calc(N * var(--nb-u))`: the length at s = 1. NaN where it is not written so. */
+const scaledN = (v: string | undefined) => Number(v?.match(/^calc\((-?[\d.]+) \* var\(--nb-u\)\)$/)?.[1]);
 const vh = (v: string | undefined) => Number(v?.match(/^([\d.]+)vh$/)?.[1]);
 
 // The two shared lengths, read from the sheet.
@@ -231,13 +233,14 @@ describe('the board scaled to the window: places and sizes (FR-036, D37, D38)', 
   });
 
   it('keeps the tab column inside the window (research R5)', () => {
-    const offset = -px(declOf(ruleIn(base, '.nb-tabs'), 'right')); // how far past the notebook's right edge
-    expect(offset).toBe(44);
+    // how far past the notebook's right edge: N x s (D39)
+    const overhang = -scaledN(declOf(ruleIn(base, '.nb-tabs'), 'right'));
+    expect(overhang).toBe(44);
     const bad: string[] = [];
     for (let w = 1100; w <= 3840; w += 20) {
       for (let h = 600; h <= 2160; h += 20) {
         const p = place(w, h);
-        if (p.left + p.width + offset > w) bad.push(`${w}x${h}`);
+        if (p.left + p.width + overhang * sOf(w, h) > w) bad.push(`${w}x${h}`);
       }
     }
     expect(bad.slice(0, 8)).toEqual([]);
@@ -270,32 +273,58 @@ describe('the board scaled to the window: places and sizes (FR-036, D37, D38)', 
 // in is at least as tall as the label's longest word.
 describe('the tab column fits the notebook at every window the model covers (FR-035)', () => {
   const tabRule = (text: string) => ruleIn(text, '.nb-tab');
-  const largeHeader = css.match(/@(media|container)\s*\(min-height:\s*(\d+)px\)\s*\{(?=[\s\S]*?min-height:\s*80px)/);
-  const largeBlock = largeHeader ? blocksOf(css, new RegExp(largeHeader[0].replace(/[()]/g, '\\$&'))).find((b) => /min-height:\s*80px/.test(b)) ?? '' : '';
+  const largeHeader = css.match(/@(media|container)\s*\(min-height:\s*(\d+)px\)\s*\{(?=[\s\S]*?min-height:\s*calc\(80 \* var\(--nb-u\)\))/);
+  const largeBlock = largeHeader ? blocksOf(css, new RegExp(largeHeader[0].replace(/[()]/g, '\\$&'))).find((b) => /min-height:\s*calc\(80 \* var\(--nb-u\)\)/.test(b)) ?? '' : '';
   const largeFrom = Number(largeHeader?.[2]);
   const keyedTo = largeHeader?.[1]; // 'media' (the window) or 'container' (the notebook)
 
-  const advance = (ruleBody: Rule | undefined, font: number) => {
+  // Every length of a tab is N x s (D39). N is read from the sheet; s from the window, as `--nb-u` resolves.
+  const advance = (ruleBody: Rule | undefined) => {
+    const font = scaledN(declOf(ruleBody, 'font-size'));
     const ls = Number(declOf(ruleBody, 'letter-spacing')?.match(/^([\d.]+)em$/)?.[1]);
-    return 0.6 * font + ls * font; // a monospace glyph is 0.6em wide
+    return 0.6 * font + ls * font; // a monospace glyph is 0.6em wide; at s = 1
   };
   const smallRule = tabRule(css.replace(largeBlock, ''));
   const largeRule = tabRule(largeBlock);
+  const tabsRule = ruleIn(css.replace(largeBlock, ''), '.nb-tabs');
+  const largeTabsRule = ruleIn(largeBlock, '.nb-tabs');
+  const labelRule = ruleIn(css, '.nb-tab-label');
   const labels = ['Protection', 'What is protected', 'Today', 'Tonight', 'What Cairn covers'];
   const longest = (l: string) => Math.max(...l.split(' ').map((w) => w.length));
 
-  const small = { adv: advance(smallRule, 11), pad: 8, gap: 4, top: 12, floorMin: 0, wrapAt: 76 };
-  const large = { adv: advance(largeRule, 12), pad: 10, gap: 6, top: 40, floorMin: 80, wrapAt: Infinity };
+  // N at s = 1, from the sheet: padding is `N 0`, so its first value is read.
+  const firstOf = (v: string | undefined) => scaledN(v?.match(/^(calc\([^)]*\)\))/)?.[1] ?? v?.split(' ')[0]);
+  const small = {
+    adv: advance(smallRule),
+    pad: firstOf(declOf(smallRule, 'padding')),
+    gap: scaledN(declOf(tabsRule, 'gap')),
+    top: scaledN(declOf(tabsRule, 'top')),
+    bottom: scaledN(declOf(tabsRule, 'bottom')),
+    floorMin: 0,
+    wrapAt: scaledN(declOf(labelRule, 'max-inline-size')),
+  };
+  const large = {
+    adv: advance(largeRule),
+    pad: firstOf(declOf(largeRule, 'padding')),
+    gap: scaledN(declOf(largeTabsRule, 'gap')),
+    top: scaledN(declOf(largeTabsRule, 'top')),
+    bottom: small.bottom,
+    floorMin: scaledN(declOf(largeRule, 'min-height')),
+    wrapAt: Infinity,
+  };
 
-  /** Final tab heights after flex-shrink (weighted by base size, clamped at each floor). */
-  function tabs(mode: typeof small, available: number): number[] {
-    const base = labels.map((l) => Math.min(l.length * mode.adv, mode.wrapAt) + 2 * mode.pad);
-    // min-height: 80px replaces min-height: min-content in the large rules.
-    const floor = labels.map((l) => (mode.floorMin > 0 ? mode.floorMin : longest(l) * mode.adv + 2 * mode.pad));
+  /** Final tab heights after flex-shrink (weighted by base size, clamped at each floor), every length scaled by s. */
+  function tabs(mode: typeof small, available: number, s: number): number[] {
+    const adv = mode.adv * s;
+    const pad = mode.pad * s;
+    const gap = mode.gap * s;
+    const base = labels.map((l) => Math.min(l.length * adv, mode.wrapAt * s) + 2 * pad);
+    // min-height: N replaces min-height: min-content in the large rules.
+    const floor = labels.map((l) => (mode.floorMin > 0 ? mode.floorMin * s : longest(l) * adv + 2 * pad));
     let size = base.map((b) => Math.max(b, 0));
     const frozen = size.map(() => false);
     for (let pass = 0; pass < 6; pass++) {
-      const free = available - mode.gap * (labels.length - 1) - size.reduce((a, b) => a + b, 0);
+      const free = available - gap * (labels.length - 1) - size.reduce((a, b) => a + b, 0);
       if (free >= 0) break;
       const weight = size.reduce((a, b, i) => a + (frozen[i] ? 0 : b), 0);
       let clamped = false;
@@ -315,17 +344,26 @@ describe('the tab column fits the notebook at every window the model covers (FR-
   }
 
   function fits(w: number, h: number): string | null {
+    const s = sOf(w, h);
     const nbHeight = size(w, h).height;
     const isLarge = keyedTo === 'container' ? nbHeight >= largeFrom : h >= largeFrom;
     const mode = isLarge ? large : small;
-    const available = nbHeight - mode.top - 12;
-    const final = tabs(mode, available);
-    const total = final.reduce((a, b) => a + b, 0) + mode.gap * (labels.length - 1);
+    const available = nbHeight - (mode.top + mode.bottom) * s;
+    const final = tabs(mode, available, s);
+    const total = final.reduce((a, b) => a + b, 0) + mode.gap * s * (labels.length - 1);
     if (total > available + 0.5) return `tabs ${total.toFixed(0)} do not fit ${available.toFixed(0)}`;
-    const cut = labels.findIndex((l, i) => final[i]! + 0.5 < longest(l) * mode.adv);
-    if (cut >= 0) return `${labels[cut]} is ${(longest(labels[cut]!) * mode.adv).toFixed(0)} in a ${final[cut]!.toFixed(0)} tab`;
+    const cut = labels.findIndex((l, i) => final[i]! + 0.5 < longest(l) * mode.adv * s);
+    if (cut >= 0) return `${labels[cut]} is ${(longest(labels[cut]!) * mode.adv * s).toFixed(0)} in a ${final[cut]!.toFixed(0)} tab`;
     return null;
   }
+
+  it('reads every tab length from the sheet as calc(N * var(--nb-u)), N today\'s', () => {
+    expect([small.pad, small.gap, small.top, small.bottom, small.wrapAt]).toEqual([8, 4, 12, 12, 76]);
+    expect([large.pad, large.gap, large.top, large.floorMin]).toEqual([10, 6, 40, 80]);
+    expect([scaledN(declOf(smallRule, 'font-size')), scaledN(declOf(largeRule, 'font-size'))]).toEqual([11, 12]);
+    expect(scaledN(declOf(smallRule, 'width'))).toBe(38);
+    expect(scaledN(declOf(ruleIn(base, ".nb-tab[aria-current='page']"), 'width'))).toBe(44);
+  });
 
   it('the model reproduces the measured case: Protection runs past its tab at 1100x800', () => {
     expect(largeHeader, 'a min-height block holding the large tab rules').not.toBeNull();
