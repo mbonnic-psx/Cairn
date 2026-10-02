@@ -202,7 +202,7 @@ is the same either way); Q2 changes Y6's clause cases and `acrossInWords` in Y15
 
 Pass 1 (2026-10-02). Only `CRITICAL` and `HIGH` re-open the loop; neither task below does.
 
-- [ ] Y23 [US2] [MEDIUM] [W7, FR-022; Principle III] The screen never hides a count the core sent, and the contract
+- [X] Y23 [US2] [MEDIUM] [W7, FR-022; Principle III] The screen never hides a count the core sent, and the contract
   states only what the core guarantees. Evidence: `check_offsets` accepts, for London 2026-09-15 alone, offsets
   `[{range_start, 14 400}]` (3 hours above the implied +3 600, inside both the start rule and the end rule), and
   `by_weekday` then puts a reach at `range_end − 1 800` on Wednesday, giving counts `[0, 0, 1, 0, 0, 0, 0]` beside
@@ -218,7 +218,7 @@ Pass 1 (2026-10-02). Only `CRITICAL` and `HIGH` re-open the loop; neither task b
   `Reaches.tsx` drops or hides a value it was sent — `absent`, `isQuiet`, and `rowsOf`'s `find`, which drops a
   weekday missing from the answer instead of drawing all seven (W3) — and every sentence in the two contract
   amendments that claims an invariant of `by_weekday` or `by_hour` that `check_offsets` does not enforce.
-- [ ] Y24 [US2] [LOW] [W2, W9] Every branch of the week's first day is pinned, and finding it can never take the
+- [X] Y24 [US2] [LOW] [W2, W9] Every branch of the week's first day is pinned, and finding it can never take the
   reaches screen down. Evidence: changing `firstWeekdayOf` (`src/localDays.ts:181`) to fall through to `weekInfo`
   when `getWeekInfo()` returns a `firstDay` outside 1–7 left all 82 tests of `weekdays.test.ts`,
   `ReachesByDay*.test.tsx` and `ReachesRowGuard.test.tsx` green: the case is unpinned. Separately,
