@@ -18,6 +18,7 @@ import {
   lateEvening,
   loadRefusal,
   quoteLine,
+  sealedSentence,
   saveRefusal,
   switchRefusal,
   reachesOfTheDay,
@@ -593,6 +594,78 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (name) 
       onPage.unmount();
       core?.remove();
       expect(found).toEqual(await wordsOutside(c, perform, typed));
+    });
+  });
+
+  describe('a sealed day', () => {
+    const sealedHidden = tonightCases['sealed, quotes hidden']!;
+    const sealedQuote = tonightCases['sealed, with a quote']!;
+    const sealedUnknown: TonightCase = { ...sealedQuote, quotesShown: 'unknown' };
+    const sealedRefused: TonightCase = { ...sealedQuote, switchRefused: switchRefusal };
+    const sealedEnded: TonightCase = { ...sealedQuote, endsWhileOpen: true };
+    const REGION = '[role="status"], [aria-live]';
+
+    it.each([
+      ['quotes hidden', sealedHidden, ['nb-checkin-status', 'nb-checkin-switch']],
+      [
+        'a quote',
+        sealedQuote,
+        ['nb-checkin-quote', 'nb-checkin-status', 'nb-checkin-switch'],
+      ],
+      ['the setting unknown', sealedUnknown, ['nb-checkin-status']],
+    ])('%s: the heading and the sealed sentence on the left; the right page in the open day\u2019s order', async (_name, c, classes) => {
+      const { spread, left, right, main } = await show(c, true);
+      expect(spread).not.toBeNull();
+      expect(right).toHaveClass('nb-page--ruled');
+      const heading = within(left!).getByRole('heading', { level: 2, name: 'Tonight' });
+      expect(within(main).getAllByRole('heading', { level: 2 })).toEqual([heading]);
+      expect(left!.children).toHaveLength(2);
+      expect(left!.lastElementChild!.textContent).toBe(sealedSentence);
+      expect(left!.lastElementChild).toHaveClass('nb-checkin-sentence');
+      expect(left!.querySelector('li, .nb-checkin-note, .nb-checkin-empty')).toBeNull();
+      expect(Array.from(right!.children).map((el) => el.className)).toEqual(classes);
+      expect(spread!.querySelector('textarea')).toBeNull();
+      expect(within(spread!).queryByRole('button', { name: 'Keep this' })).toBeNull();
+      expect(spread!.querySelectorAll(REGION)).toHaveLength(1);
+      const status = right!.querySelector(REGION)!;
+      expect(status).toHaveAttribute('role', 'status');
+      expect(status).toHaveAttribute('aria-live', 'polite');
+      expect(status.textContent).toBe('');
+    });
+
+    it('a refused switch is heard in the same region', async () => {
+      const { right } = await show(sealedRefused, true, true);
+      expect(right!.querySelector('[role="status"]')!.textContent).toBe(switchRefusal);
+      expect(right!.querySelectorAll(REGION)).toHaveLength(1);
+    });
+
+    it('once the day has ended the heading is the date', async () => {
+      const { left } = await show(sealedEnded, true);
+      expect(within(left!).getByRole('heading', { level: 2 }).textContent).toBe(
+        'Wednesday 30 September',
+      );
+      expect(left!.lastElementChild!.textContent).toBe(sealedSentence);
+    });
+
+    it.each([
+      ['quotes hidden', sealedHidden, false],
+      ['a quote', sealedQuote, false],
+      ['the setting unknown', sealedUnknown, false],
+      ['a refused switch', sealedRefused, true],
+      ['ended', sealedEnded, false],
+    ])('%s: the words of both pages equal the same state outside any shell', async (_name, c, perform) => {
+      const onPage = await show(c, true, perform);
+      expect(onPage.right).toBeDefined();
+      const found = [...words(onPage.left!), ...words(onPage.right!)].sort();
+      onPage.unmount();
+      core?.remove();
+      expect(found).toEqual(await wordsOutside(c, perform));
+    });
+
+    it('outside any shell the sealed day is the Pin\u2019s card', async () => {
+      const outside = await show(sealedQuote, false);
+      expect(outside.container.querySelector('section.settle')).not.toBeNull();
+      expect(outside.container.querySelector('[class*="nb-"]')).toBeNull();
     });
   });
 });

@@ -375,6 +375,13 @@ export function CheckIn({ session }: { session?: CheckInSession }) {
       </button>
     );
 
+  // One polite region, where the open day and the sealed day both have it.
+  const pageStatus = (
+    <p role="status" aria-live="polite" className="nb-checkin-status">
+      {note ?? (kept ? keptFor(thisDay) : '')}
+    </p>
+  );
+
   if (!view && onPage) {
     return (
       <div className="nb-spread nb-checkin-leaves">
@@ -391,6 +398,22 @@ export function CheckIn({ session }: { session?: CheckInSession }) {
       <Card>
         <p className="text-ink-400">{loadNote ?? LOOKING}</p>
       </Card>
+    );
+  }
+
+  if (view.sealed && onPage) {
+    return (
+      <div className="nb-spread nb-checkin-leaves">
+        <div className="nb-page">
+          <h2 className="nb-checkin-title">{ended ? thisDay : TONIGHT}</h2>
+          <p className="nb-checkin-sentence">{view.sealed}</p>
+        </div>
+        <div className="nb-page nb-page--ruled">
+          {pageQuote}
+          {pageStatus}
+          {pageSwitch}
+        </div>
+      </div>
     );
   }
 
@@ -456,9 +479,7 @@ export function CheckIn({ session }: { session?: CheckInSession }) {
           >
             {KEEP_THIS}
           </button>
-          <p role="status" aria-live="polite" className="nb-checkin-status">
-            {note ?? (kept ? keptFor(thisDay) : '')}
-          </p>
+          {pageStatus}
           {pageSwitch}
         </div>
       </div>
