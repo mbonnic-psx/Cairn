@@ -21,6 +21,7 @@ import {
   rangeInWords,
 } from '../localDays';
 import {
+  largestCount,
   listTodaysReaches,
   summarizeReaches,
   type Patterns,
@@ -255,7 +256,7 @@ function RangeBody({ answer }: { answer: Answer }) {
     );
   }
 
-  const largest = Math.max(1, ...answer.by_site.map((site) => site.count));
+  const largest = largestCount(answer.by_site);
 
   return (
     <>

@@ -76,3 +76,7 @@ export const summarizeReaches = (
     rangeStart,
     rangeEnd,
   });
+
+/** The largest count among the sites, never less than 1: what each bar is a share of. */
+export const largestCount = (sites: SiteCount[]): number =>
+  sites.reduce((largest, site) => Math.max(largest, site.count), 1);
