@@ -30,6 +30,7 @@ const patterns = (over: Partial<Patterns> = {}): Patterns => ({
     { domain: 'c.example', count: 2 },
   ],
   by_hour: [],
+  by_weekday: [],
   gaps: [],
   coverage_note: null,
   estimates_excluded: 0,
@@ -458,7 +459,7 @@ describe('what the view never holds', () => {
     await screen.findByText('a.example');
 
     const names = screen.getAllByRole('button').map((b) => b.textContent);
-    expect(names).toEqual(['Today', 'Over time', 'By site', 'By hour']);
+    expect(names).toEqual(['Today', 'Over time', 'By site', 'By hour', 'By day']);
     expect(text()).not.toMatch(/\b(unblock|pause|turn off|allow|snooze|disable)\b/i);
   });
 });

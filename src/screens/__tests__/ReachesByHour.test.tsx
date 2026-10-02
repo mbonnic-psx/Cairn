@@ -38,6 +38,7 @@ const patterns = (over: Partial<Patterns> = {}): Patterns => ({
     { domain: 'b.example', count: 2 },
   ],
   by_hour: hours({ 2: 2, 14: 6, 15: 3 }),
+  by_weekday: [],
   gaps: [],
   coverage_note: null,
   estimates_excluded: 0,
@@ -84,7 +85,7 @@ const label = (hour: number) =>
 
 const NO_HOUR = 'because an estimate has no hour.';
 
-describe('Seen by: By site | By hour', () => {
+describe('Seen by: By site | By hour | By day', () => {
   it('stands under the range with By site pressed, and By hour not', async () => {
     const { read } = fakeRead();
     await openOverTime(read);
@@ -98,6 +99,7 @@ describe('Seen by: By site | By hour', () => {
     ).toEqual([
       ['By site', 'true'],
       ['By hour', 'false'],
+      ['By day', 'false'],
     ]);
     // Under the date boxes, and not in the header.
     const boxes = screen.getByLabelText('To').closest('div') as HTMLElement;
@@ -410,6 +412,7 @@ describe('what it never says', () => {
       'Over time',
       'By site',
       'By hour',
+      'By day',
     ]);
   });
 });

@@ -30,6 +30,7 @@ const answer = (over: Partial<Patterns> = {}): Patterns => ({
     { domain: 'video.example', count: 4 },
   ],
   by_hour: hours({ 2: 2, 14: 6, 15: 3 }),
+  by_weekday: [],
   gaps: [],
   coverage_note: null,
   estimates_excluded: 0,
@@ -94,6 +95,7 @@ describe('Seen by, on a notebook page', () => {
     expect(buttons.map((b) => [b.textContent, b.getAttribute('aria-pressed')])).toEqual([
       ['By site', 'true'],
       ['By hour', 'false'],
+      ['By day', 'false'],
     ]);
     for (const button of buttons) expect(button).toHaveClass('nb-reaches-which__button');
   });
