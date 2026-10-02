@@ -44,6 +44,16 @@ Added by `protection-page` (D6), before the other page slices build against it.
   and `.nb-trail-`), so two page slices never edit or override each other's rules. The spread classes above stay
   the shell's; a page slice uses them and never restyles them.
 
+## A step of more than one screen
+
+Added before `setup-pages` and `quiet-pages` (D13). The choosing step shows two screens and a button. Its composition
+moves out of `App` into one component beside the setup screens, which `App` renders in its place: on a page it lays
+the step out as one spread, otherwise it renders exactly today's elements in today's order. The two screens inside
+it keep their own components and state.
+
+Prefixes, one per screen: `setup-pages` uses `.nb-choosing-`, `.nb-categories-`, `.nb-custom-` and `.nb-disclosure-`;
+`quiet-pages` uses `.nb-limits-` and `.nb-teardown-`.
+
 ## Headings
 
 Added by `protection-page` (D9, frame T025). The notebook supplies one `h1`, "Cairn", visually hidden and read by
