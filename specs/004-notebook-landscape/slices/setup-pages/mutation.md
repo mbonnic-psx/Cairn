@@ -47,3 +47,13 @@ None. No survivor is a class string or visual constant.
 - Categories.tsx and Choosing.tsx are fully killed. Disclosure.tsx has 3 timeouts, counted as killed by the tool.
 - `.stryker-tmp` was cleaned by the tool; no `reports/` directory was left. The full log is at `~/.cache/cairn-scratch/setup-pages-stryker.log`.
 - `specs/004-notebook-landscape/slices/setup-pages/benchmark.json` showed as modified before this run; the run did not touch it.
+
+## After the follow-up tests
+
+`fa16577` adds `src/screens/__tests__/CustomEntryGuards.test.tsx` (both layouts, fakes in the test), each test observed failing on its surviving mutant applied by hand. Re-run of `npx stryker run --mutate src/screens/Setup/CustomEntry.tsx`:
+
+```
+ CustomEntry.tsx | 100.00 |  100.00 |       84 |         1 |          0 |        0 |        0 |
+```
+
+Every (a) survivor is killed; the two (b) survivors are equivalent and stay.
