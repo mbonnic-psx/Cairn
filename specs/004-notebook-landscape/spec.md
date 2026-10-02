@@ -50,6 +50,8 @@ and buttons that this design uses, and forbids it for body text read at length.
   - Q: Where does the testing switch sit? → A: Small, at the top right of the sky, labelled "Look (testing)", so it never reads as part of the product (FR-011).
   - Q: The 003 slice `history-by-site` may touch the Today screen. → A: It lands before this feature's Tonight-and-Today slice (story split, parking lot).
 
+- Gaps reviewed for slice `frame`, 2026-10-01. Checked: the tab set before and after protection is on (it follows today's header, US1 scenarios 1–2); a tab for an unbuilt part (scenario 4); unsaved check-in text across tabs (scenario 5); where the mark sits under each platform's own frame (FR-007, the top left of the sky); the greeting at narrow widths and keeping time (FR-029, FR-030); morning contrast for text on the sky as well as on paper (FR-021); scrolling inside the notebook while the scenery stays put (edge cases); the window opening at 1280×800 (FR-028). Added: in `frame`, an existing screen keeps its current single-column layout on the notebook's paper, across the spread. Its two-page layout arrives with its own page slice (story split, slices 3–6). Nothing else was missing.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - The window becomes a notebook in a landscape (Priority: P1)
