@@ -8,6 +8,7 @@ use std::path::{Path, PathBuf};
 
 use serde::{Deserialize, Serialize};
 
+use crate::domain::dates::LocalDate;
 use crate::domain::entries::{ReachMode, Trail};
 use crate::domain::gate::{PendingChange, TrustedClock};
 use crate::services::Trouble;
@@ -54,6 +55,15 @@ impl Default for ReachModeSetting {
     }
 }
 
+/// The day's one line, remembered with the day it was chosen for (slice
+/// `quote`, Q1 revised again). A setting, not a record of anything: it names a
+/// bundled line and a day, never a reach.
+#[derive(Clone, PartialEq, Eq, Debug, Serialize, Deserialize)]
+pub struct QuoteOfTheDay {
+    pub day: LocalDate,
+    pub line: String,
+}
+
 /// Everything Cairn remembers that is not a reach.
 #[derive(Clone, PartialEq, Eq, Debug, Default, Serialize, Deserialize)]
 pub struct Config {
@@ -74,6 +84,16 @@ pub struct Config {
     /// own editable data (FR-002).
     #[serde(default)]
     pub seeded: bool,
+    /// True once the person has hidden quotes on the check-in (slice `quote`,
+    /// Q2). Stored this way round so a file from before the switch, which has
+    /// no such key, means quotes are shown. A setting, not a record of
+    /// anything, so it is readable with no key.
+    #[serde(default)]
+    pub quotes_hidden: bool,
+    /// The line chosen for a local day, kept so it holds across restarts. A
+    /// file from before this has no such key, and means none chosen yet.
+    #[serde(default)]
+    pub quote_of_the_day: Option<QuoteOfTheDay>,
 }
 
 /// Reads and writes [`Config`] in the person's own user-data directory.

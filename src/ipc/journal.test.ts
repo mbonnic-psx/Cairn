@@ -1,11 +1,11 @@
 /**
- * The two wrappers name the core's commands and pass the day exactly as given.
+ * The wrappers name the core's commands and pass the day exactly as given.
  * The names are also checked against the Rust side by `ipc_surface.rs`.
  */
 import { invoke } from '@tauri-apps/api/core';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { getDayView, saveJournalEntry } from './journal';
+import { getDayView, getQuote, getQuotesShown, saveJournalEntry, setQuotesShown } from './journal';
 
 vi.mock('@tauri-apps/api/core', () => ({ invoke: vi.fn() }));
 
@@ -31,5 +31,23 @@ describe('the journal wrappers', () => {
       dayEnd: 200,
       text: 'how it went',
     });
+  });
+
+  it('asks for the day’s line by its date and returns what the core says', async () => {
+    vi.mocked(invoke).mockResolvedValue('a line');
+    await expect(getQuote('2026-09-30')).resolves.toBe('a line');
+    expect(invoke).toHaveBeenCalledWith('get_quote', { day: '2026-09-30' });
+  });
+
+  it('reads the quotes setting with no arguments and returns it', async () => {
+    vi.mocked(invoke).mockResolvedValue(true);
+    await expect(getQuotesShown()).resolves.toBe(true);
+    expect(invoke).toHaveBeenCalledWith('get_quotes_shown');
+  });
+
+  it('sets the quotes setting by its key and returns the setting as it stands', async () => {
+    vi.mocked(invoke).mockResolvedValue(false);
+    await expect(setQuotesShown(false)).resolves.toBe(false);
+    expect(invoke).toHaveBeenCalledWith('set_quotes_shown', { shown: false });
   });
 });

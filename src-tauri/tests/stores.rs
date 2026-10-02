@@ -98,6 +98,66 @@ fn a_configuration_from_the_announcement_era_still_loads() {
 }
 
 #[test]
+fn a_configuration_from_before_quotes_could_be_hidden_shows_them() {
+    // Slice `quote` added the switch. A file written before it has no key for
+    // it, and must load with quotes shown and everything else it held intact:
+    // stored contracts change additively (constitution, *Versioning and
+    // Compatibility*).
+    let directory = tempfile::tempdir().unwrap();
+    let store = ConfigStore::at(directory.path());
+
+    let clock = TrustedClock::started(1_700_000_000, 0);
+    let held = Config {
+        trail: a_trail(),
+        intent: ProtectionIntent::On,
+        pending_change: Some(PendingChange::request(
+            PendingKind::TurnOffProtection,
+            &clock,
+            1_700_000_000,
+        )),
+        trusted_clock: clock,
+        seeded: true,
+        ..Config::default()
+    };
+    let mut value = serde_json::to_value(&held).unwrap();
+    value.as_object_mut().unwrap().remove("quotes_hidden");
+    std::fs::write(store.path(), serde_json::to_vec_pretty(&value).unwrap()).unwrap();
+
+    let loaded = store.load().unwrap();
+    assert!(
+        !loaded.quotes_hidden,
+        "an older file means quotes are shown"
+    );
+    assert_eq!(loaded, held);
+
+    // And the smallest file an early build could have left.
+    std::fs::write(store.path(), r#"{ "intent": "on", "seeded": true }"#).unwrap();
+    let loaded = store.load().unwrap();
+    assert!(!loaded.quotes_hidden);
+    assert_eq!(loaded.intent, ProtectionIntent::On);
+}
+
+#[test]
+fn a_configuration_from_before_the_days_line_was_kept_loads_with_none() {
+    let directory = tempfile::tempdir().unwrap();
+    let store = ConfigStore::at(directory.path());
+    let held = Config {
+        trail: a_trail(),
+        intent: ProtectionIntent::On,
+        seeded: true,
+        quotes_hidden: true,
+        ..Config::default()
+    };
+    let mut value = serde_json::to_value(&held).unwrap();
+    value.as_object_mut().unwrap().remove("quote_of_the_day");
+    std::fs::write(store.path(), serde_json::to_vec_pretty(&value).unwrap()).unwrap();
+
+    let loaded = store.load().unwrap();
+    assert_eq!(loaded.quote_of_the_day, None);
+    assert_eq!(loaded, held);
+}
+
+#[test]
 fn configuration_holds_no_reach_data() {
     // FR-032 and the reason config is plain JSON at all: there is nothing
     // sensitive in it. If a reach ever appears here, this test is the tripwire.

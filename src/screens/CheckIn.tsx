@@ -9,13 +9,28 @@
  * The day is fixed when the check-in opens. Left open across midnight, it stays
  * attached to the day it was opened for rather than becoming tomorrow's.
  *
+ * So is the quote: one line from the set Cairn ships, asked for once when the
+ * check-in opens and kept while it stays open (slice `quote`, Q1). None is a
+ * complete check-in, with nothing in its place (FR-008). It is not about the
+ * day, so it shows on a sealed check-in too. A quiet switch at the foot of the
+ * check-in hides quotes, remembered across restarts (Q2); hidden, nothing
+ * stands where the line was. When Cairn cannot tell whether they were hidden,
+ * it shows neither the line nor the switch rather than guess.
+ *
  * Nothing here leads to a change in protection (Principle I).
  */
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { Button } from '../components/Button';
 import { Card } from '../components/Card';
-import { getDayView, saveJournalEntry, type DayView } from '../ipc/journal';
+import {
+  getDayView,
+  getQuote,
+  getQuotesShown,
+  saveJournalEntry,
+  setQuotesShown,
+  type DayView,
+} from '../ipc/journal';
 
 /**
  * Text that shows nothing is empty (G4), here as in the store: the same
@@ -114,6 +129,14 @@ export interface CheckInSession {
   note: string | undefined;
   kept: boolean;
   keeping: boolean;
+  /**
+   * The day's one line (Q1): asked for once per opened day and kept while the
+   * person walks round the header. Undefined until asked; a line of `null` is
+   * the answer "none to be had", also kept.
+   */
+  quote: { day: string; line: string | null } | undefined;
+  /** Keeps the line asked for `day`; ignored once Tonight has opened another day. */
+  holdQuote: (day: string, line: string | null) => void;
   type: (text: string) => void;
   keep: (when: Today, shown: string) => Promise<DayView | undefined>;
 }
@@ -134,6 +157,13 @@ export function useCheckInSession(): CheckInSession {
   // The space as it is now, for a save that returns after more was typed.
   const latest = useRef<string>();
   latest.current = draft;
+  const [quote, setQuote] = useState<{ day: string; line: string | null }>();
+  // The day now open, for a line that arrives after Tonight opened another.
+  const openDay = useRef(opened.day);
+  openDay.current = opened.day;
+  const holdQuote = useCallback((day: string, line: string | null) => {
+    if (day === openDay.current) setQuote({ day, line });
+  }, []);
 
   return {
     opened,
@@ -145,6 +175,8 @@ export function useCheckInSession(): CheckInSession {
       if (unsaved || now.day === opened.day) return;
       // A new day: nothing of the old one comes with it.
       setOpened(now);
+      openDay.current = now.day;
+      setQuote(undefined);
       setDraft(undefined);
       latest.current = undefined;
       setNote(undefined);
@@ -154,6 +186,8 @@ export function useCheckInSession(): CheckInSession {
     note,
     kept,
     keeping,
+    quote,
+    holdQuote,
     type(text) {
       latest.current = text;
       setDraft(text);
@@ -193,12 +227,23 @@ export function CheckIn({ session }: { session?: CheckInSession }) {
     note: saveNote,
     kept,
     keeping,
+    quote: held,
+    holdQuote,
     type,
     keep,
   } = session ?? own;
   const [view, setView] = useState<DayView>();
   const [loadNote, setLoadNote] = useState<string>();
   const [, tick] = useState(0);
+  // Whether this day's line has been asked for, readable from the effects.
+  const switching = useRef(false);
+  const heldDay = useRef<string>();
+  heldDay.current = held?.day;
+  const quote = held?.day === opened.day ? held.line : null;
+  // Why the quotes switch did not take, if it did not; said beside the save's own sentence.
+  const [switchNote, setSwitchNote] = useState<string>();
+  /** Unknown until the setting is read; then the person's choice. */
+  const [quotesShown, setShown] = useState<boolean>();
 
   useEffect(() => {
     let current = true;
@@ -211,6 +256,11 @@ export function CheckIn({ session }: { session?: CheckInSession }) {
       current = false;
     };
   }, [opened]);
+
+  // A note about the switch belongs to the day it was made on.
+  useEffect(() => {
+    setSwitchNote(undefined);
+  }, [opened.day]);
 
   // When the day ends under an open check-in, the screen stops calling it today.
   useEffect(() => {
@@ -228,8 +278,76 @@ export function CheckIn({ session }: { session?: CheckInSession }) {
   const ended = Date.now() >= opened.end * 1000;
   const thisDay = ended ? dateInWords(opened.day) : 'today';
 
-  const note = saveNote ?? loadNote;
+  // Everything the person should hear, together: a refusal of the switch does
+  // not hide a refusal of the save, nor the other way round.
+  const heard = [saveNote ?? loadNote, switchNote].filter((n) => n !== undefined);
+  const note = heard.length > 0 ? heard.join(' ') : undefined;
   const draft = typed ?? view?.entry ?? '';
+
+  useEffect(() => {
+    // Asked once per opening: when the check-in opens, or when Tonight opens a
+    // new day (G5). `stale` keeps a second run of this effect (React's
+    // development double-run) from swapping the line under the person.
+    let stale = false;
+    const day = opened.day;
+    getQuotesShown()
+      .then((shown) => {
+        if (!stale) setShown(shown);
+        // The day's line is asked for once; coming back to it keeps it (Q1).
+        if (!shown || heldDay.current === day) return undefined;
+        return getQuote(day).then((line) => {
+          if (!stale) holdQuote(day, line);
+        });
+      })
+      // A line that cannot be had is no line: nothing to report, nothing in its place.
+      .catch(() => undefined);
+    return () => {
+      stale = true;
+    };
+  }, [opened.day, holdQuote]);
+
+  async function switchQuotes(shown: boolean) {
+    // One request at a time: a second press while the first is out is not asked.
+    if (switching.current) return;
+    switching.current = true;
+    setSwitchNote(undefined);
+    let now: boolean;
+    try {
+      now = await setQuotesShown(shown);
+    } catch (problem) {
+      // The line stays as it was, and the person hears why.
+      setSwitchNote(
+        typeof problem === 'string'
+          ? problem
+          : 'Cairn could not change that just now. The quotes are as they were.',
+      );
+      return;
+    } finally {
+      switching.current = false;
+    }
+    setShown(now);
+    // Shown again in the same opening, it is the same line (Q1). Opened hidden,
+    // this is the one time a line is asked for; none to be had is none shown.
+    if (now && heldDay.current !== opened.day) {
+      holdQuote(opened.day, await getQuote(opened.day).catch(() => null));
+    }
+  }
+
+  const quoteSwitch =
+    quotesShown === undefined ? null : (
+      <div className="mt-10">
+        <Button tone="quiet" className="px-0" onClick={() => switchQuotes(!quotesShown)}>
+          {quotesShown ? 'Hide quotes' : 'Show quotes'}
+        </Button>
+      </div>
+    );
+
+  const line =
+    quotesShown && quote ? (
+      <figure className="mt-6">
+        <p className="reflective max-w-prose text-lg italic text-ink-500">{quote}</p>
+      </figure>
+    ) : null;
 
   if (!view) {
     return (
@@ -245,7 +363,16 @@ export function CheckIn({ session }: { session?: CheckInSession }) {
         <h2 className="reflective text-3xl text-ink-900">
           {ended ? thisDay : 'Tonight'}
         </h2>
+        {line}
         <p className="reflective mt-4 max-w-prose text-lg text-ink-700">{view.sealed}</p>
+        {quoteSwitch}
+        <p
+          role="status"
+          aria-live="polite"
+          className="reflective mt-4 max-w-prose text-ink-700"
+        >
+          {note ?? ''}
+        </p>
       </Card>
     );
   }
@@ -253,6 +380,7 @@ export function CheckIn({ session }: { session?: CheckInSession }) {
   return (
     <Card>
       <h2 className="reflective text-3xl text-ink-900">{ended ? thisDay : 'Tonight'}</h2>
+      {line}
 
       {view.reaches.length === 0 ? (
         <p className="reflective mt-4 max-w-prose text-lg text-ink-700">
@@ -306,6 +434,8 @@ export function CheckIn({ session }: { session?: CheckInSession }) {
       >
         {note ?? (kept ? `Kept for ${thisDay}.` : '')}
       </p>
+
+      {quoteSwitch}
     </Card>
   );
 }

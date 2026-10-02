@@ -264,6 +264,34 @@ Already stated, and held by this slice as written: the check-in stays attached t
 midnight (edge cases); closing without writing stores nothing (FR-014); the space is not offered when sealed
 (FR-029, `contracts/ui-ipc.md`).
 
+### Gaps reviewed — slice `quote` (2026-10-01)
+
+Checked against US1 scenario 1 (the optional quote), FR-008, FR-009, research R6 and the
+`get_quote` contract. Two states the artifacts did not settle, decided by the owner:
+
+- **Q1 — which line shows.** A line is chosen at random from the bundled set each time the
+  check-in opens, and stays the same while that check-in stays open; reopening may show
+  another. It is never tied to the date (R6 rejects that: it gives a reason to come back for
+  the quote, and repeats every year).
+- **Q1, revised (owner, 2026-10-01, after the demo: "Its a different quote everytime I switch the page").** One
+  line holds for the whole day: moving to another screen and back to the check-in keeps it. A fresh line is chosen
+  only when Tonight opens a new day (G5) or Cairn is started again. It is still never derived from the date.
+- **Q1, revised again (owner, 2026-10-01: a different line after a restart; "yes" to keeping it).** The line holds
+  for the whole local day, across restarts too: once a line is chosen for a day, Cairn remembers it with that day
+  and shows it again until a new day opens. It is still chosen at random and never derived from the date. What is
+  remembered is a setting, not reach or journal data, so it is readable without the key; a line that is no longer
+  in the bundled set, or a remembered day that is not today, means a fresh line.
+- **Q2 — turning quotes off.** The person can hide quotes with a quiet switch on the check-in
+  itself, since there is no settings screen to hold one. Hidden, the check-in shows no quote
+  and nothing in its place; it reads as complete (FR-008). The choice is remembered across
+  restarts, can be turned back on the same way, and is a setting, not reach or journal data,
+  so it is readable without the key.
+
+Already stated, and held by this slice as written: quotes are bundled and never fetched
+(FR-009); a check-in without one is complete (FR-008); every line passes R6's rules and the
+banned-words check. A quote shows the same whether today held reaches or none, and whether
+the journal is sealed, because it is not about the day.
+
 ## Requirements *(mandatory)*
 
 ### Functional Requirements

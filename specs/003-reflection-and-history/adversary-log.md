@@ -32,3 +32,28 @@ Findings (triaged by the host; J1 and T1 re-run by the host and reproduced):
 | L1 | LOW | duplicate of J3 | — | Zero-width space saved as an entry, from the screen side |
 
 Held: no plaintext anywhere on disk (marker scan, no side files, `secure_delete` on); an unreadable or wrong-key store is never rewritten (random, zeroed, truncated, plaintext-SQLite, wrong key, one corrupt page); `LocalDate` parsing is strict; day bounds right on 23 h, 25 h, 23.5 h and a day with no midnight; a save after midnight goes to the day opened; a reach at 23:59 and at 00:01 fall in their own days; double-click saves once; closing without writing stores nothing.
+
+## quote · abfa7ee · 2026-10-01
+
+| Trigger | Status | Evidence |
+|---|---|---|
+| driving adapter (HTTP route, CLI command, queue consumer) | widened | `src-tauri/src/ipc/commands.rs`: `get_quote`, `get_quotes_shown`, `set_quotes_shown` |
+| driven adapter or the provider types behind one | widened | `src-tauri/src/store/config.rs`: the hide-quotes setting; `src-tauri/resources/quotes/quotes.json` read from disk |
+| authorisation decision (who can reach one that already exists) | not present | single local user; the switch changes no protection (`tests/ipc_surface.rs` classifies it) |
+| concurrency, idempotency, ordering, retention, or time | widened | `src/screens/CheckIn.tsx`: a line kept per opening, a fresh one when Tonight opens a new day (G5) |
+
+Spawned: the quote and its switch · `drive-adversary` · host (Opus 5.5) · delegated, fresh context · manifest: `src-tauri/src/reflection/quote.rs`, `src-tauri/src/ipc/state.rs`, `src-tauri/src/ipc/commands.rs`, `src-tauri/src/store/config.rs`, `src-tauri/src/main.rs`, `src-tauri/resources/quotes/quotes.json`, `src-tauri/tauri.conf.json`, `src-tauri/tests/us1_quote.rs`, `src-tauri/tests/quote_choice.rs`, `src-tauri/tests/stores.rs`, `src-tauri/tests/ipc_surface.rs`, `src/screens/CheckIn.tsx`, `src/ipc/journal.ts`, `src/screens/__tests__/CheckIn.test.tsx`, `src/screens/__tests__/CheckInQuoteDays.test.tsx`
+Omitted: authorisation · not present
+
+Findings (triaged by the host):
+
+| # | Severity | Triage | State | Finding |
+|---|---|---|---|---|
+| A1 | LOW | confirmed | open — owner approved extending the guard on `main` (2026-10-01) | No guard holds the bundled lines to R6: `check-no-streaks.mjs` does not scan `src-tauri/resources`, so a streak or "stay strong" line ships green. The guard is the host's (`scripts/`), not the slice's |
+| A2 | LOW | confirmed | open | A bundled line that shows nothing (U+200B, U+2800, U+3164) passes `trim().is_empty()` and renders as an empty quote; `domain::visible::shows_nothing` (G4) is not used |
+| A3 | LOW | confirmed | open | Double-clicking "Show quotes" while the save is in flight asks twice and swaps the line while the check-in stays open (Q1) |
+| A4 | LOW | confirmed | open | A line asked for on the old day lands after Tonight opened a new day, replacing the new day's line (Q1, G5) |
+| A5 | LOW | confirmed | open | The switch's failure note shows any rejection verbatim (`Error: …`); it is hidden behind a save refusal, and not cleared on a new day |
+| A6 | LOW | confirmed | deferred — the owner (matthew-volaris), 2026-10-01: agreed to leave it after the explanation that it needs administrator access, which can already switch Cairn off (README) | A FIFO in place of the quotes file blocks `get_quote` (a sync command), which would freeze the window. Needs write access to the install's resources, i.e. admin |
+
+Held: missing, empty and pre-slice config read as shown; a malformed setting makes the config unreadable and shows neither line nor switch (fail closed); a save never loses trail, pending change or trusted clock, and a half-way save leaves the old file; hostile quotes files (empty, non-strings, invalid UTF-8, a directory, missing, 100k lines, a 50 MB line) give no line or a line, never a panic; the roll is never the date; the quote is only reachable from `CheckIn.tsx`; the shipped 24 lines pass the banned-words check and read clean against R6.

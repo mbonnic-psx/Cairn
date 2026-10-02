@@ -26,7 +26,7 @@ use crate::services::{
     Capability, ElevationService, HelperStatus, HostsService, Trouble,
 };
 use crate::store::config::{
-    ChosenBy, Config, ConfigStore, ProtectionIntent, ReachModeSetting,
+    ChosenBy, Config, ConfigStore, ProtectionIntent, QuoteOfTheDay, ReachModeSetting,
 };
 use crate::store::gaps::Gap;
 
@@ -148,12 +148,18 @@ pub struct AppState {
     pub credentials: Box<dyn crate::services::CredentialStore>,
     pub categories: CategoryStore,
     pub shipped_categories: PathBuf,
+    /// The set of lines Cairn ships for the check-in, beside the application.
+    /// Read, never written, and never copied into the person's data.
+    pub shipped_quotes: PathBuf,
     pub hosts: Box<dyn HostsService>,
     pub helper: Box<dyn HelperChannel>,
     pub elevation: Box<dyn ElevationService>,
     pub reserved: ReservedNames,
     /// Supplied rather than read, so the same journey can be replayed in a test.
     pub now: fn() -> i64,
+    /// A fresh random number on each call, supplied for the same reason: a
+    /// test chooses the line (slice `quote`, Q1).
+    pub roll: fn() -> u64,
 }
 
 impl AppState {
@@ -753,6 +759,59 @@ impl AppState {
             History::Open(history) => Ok(history),
             History::Sealed { because } => Err(explained.unwrap_or(because)),
         }
+    }
+
+    /// A line for the check-in `day` is for, or nothing, which is a complete
+    /// answer (FR-008).
+    ///
+    /// One line holds for the whole local day, across restarts (Q1, revised
+    /// again): the first ask for a day rolls a line at random and remembers it
+    /// with the day, as a setting; later asks for that day return it. A
+    /// remembered line for another day, one no longer in the bundled set, or
+    /// one that shows nothing, is replaced by a fresh roll. Never derived from
+    /// the date.
+    ///
+    /// Nothing, and nothing remembered, when the person has hidden quotes, and
+    /// nothing when their configuration cannot be read: unsure whether they
+    /// hid them, Cairn shows none rather than guess. If the line cannot be
+    /// saved it is still shown; after a restart the day then rolls again.
+    pub fn get_quote(&self, day: LocalDate) -> Option<String> {
+        let mut config = self.config.load().ok()?;
+        if config.quotes_hidden {
+            return None;
+        }
+        let lines = crate::reflection::quote::bundled_lines(&self.shipped_quotes);
+        if let Some(kept) = &config.quote_of_the_day {
+            if kept.day == day && lines.contains(&kept.line) {
+                return Some(kept.line.clone());
+            }
+        }
+        let line = crate::domain::quotes::choose(&lines, (self.roll)())?.to_string();
+        config.quote_of_the_day = Some(QuoteOfTheDay {
+            day,
+            line: line.clone(),
+        });
+        let _ = self.config.save(&config);
+        Some(line)
+    }
+
+    /// Whether the person wants a quote on the check-in. Shown until they say
+    /// otherwise (Q2).
+    pub fn get_quotes_shown(&self) -> Result<bool, Trouble> {
+        Ok(!self.config.load()?.quotes_hidden)
+    }
+
+    /// The quiet switch on the check-in, either way, remembered. It touches
+    /// that one setting and nothing about protection. A configuration that
+    /// cannot be read is refused before anything is written, so it is never
+    /// overwritten.
+    pub fn set_quotes_shown(&self, shown: bool) -> Result<bool, Trouble> {
+        let mut config = self.config.load()?;
+        if config.quotes_hidden == shown {
+            config.quotes_hidden = !shown;
+            self.config.save(&config)?;
+        }
+        Ok(!config.quotes_hidden)
     }
 
     /// What is true about coverage on this machine, in this release.

@@ -2,7 +2,12 @@
  * The check-in: today's reaches beside a space to write, and nothing else.
  *
  * Slice `write-tonight` — T027 without the quote, plus the gaps review G1 and
- * G3 (`specs/003-reflection-and-history/spec.md`).
+ * G3 (`specs/003-reflection-and-history/spec.md`). Slice `quote` — T027's
+ * quote half, and the gaps review Q1 and Q2: one line, in serif, asked for
+ * once and kept while the check-in is open; none is a complete check-in.
+ *
+ * The quote, when there is one, is the check-in's only `figure`, so "nothing in
+ * its place" can be asserted as no figure at all.
  *
  * Accessible names the screen must use, so these tests can find it:
  *   - the journaling space: the only element with role `textbox`
@@ -21,15 +26,31 @@ import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { CheckIn } from '../CheckIn';
-import { getDayView, saveJournalEntry, type DayView } from '../../ipc/journal';
+import {
+  getDayView,
+  getQuote,
+  getQuotesShown,
+  saveJournalEntry,
+  setQuotesShown,
+  type DayView,
+} from '../../ipc/journal';
 
 vi.mock('../../ipc/journal', () => ({
   getDayView: vi.fn(),
   saveJournalEntry: vi.fn(),
+  getQuote: vi.fn(),
+  getQuotesShown: vi.fn(),
+  setQuotesShown: vi.fn(),
 }));
 
 const mockedGetDayView = vi.mocked(getDayView);
 const mockedSave = vi.mocked(saveJournalEntry);
+const mockedGetQuote = vi.mocked(getQuote);
+const mockedGetQuotesShown = vi.mocked(getQuotesShown);
+const mockedSetQuotesShown = vi.mocked(setQuotesShown);
+
+const A_LINE = 'The window is either open or it isn’t.';
+const ANOTHER_LINE = 'Somewhere it is already tomorrow.';
 
 // 8pm local time on 30 September 2026.
 const NOW = new Date(2026, 8, 30, 20, 0, 0);
@@ -96,6 +117,11 @@ beforeEach(() => {
   vi.setSystemTime(NOW);
   mockedGetDayView.mockReset();
   mockedSave.mockReset();
+  // Quotes shown, and no line to show, unless a test says otherwise: the
+  // write-tonight tests below read the check-in as it was.
+  mockedGetQuotesShown.mockReset().mockResolvedValue(true);
+  mockedGetQuote.mockReset().mockResolvedValue(null);
+  mockedSetQuotesShown.mockReset();
 });
 
 afterEach(() => {
@@ -267,5 +293,186 @@ describe('the check-in', () => {
     await user.click(screen.getByRole('button', { name: /save|keep/i }));
     await waitFor(() => expect(screen.getByRole('status')).not.toHaveTextContent(REFUSED));
     expect(screen.getByRole('status').textContent ?? '').not.toBe('');
+  });
+});
+
+describe('the quote on the check-in', () => {
+  it('shows one line in serif, asked for once, and keeps it while the check-in is open', async () => {
+    const user = userEvent.setup();
+    mockedGetDayView.mockResolvedValue(withReaches);
+    mockedGetQuote.mockResolvedValueOnce(A_LINE).mockResolvedValue(ANOTHER_LINE);
+    mockedSave.mockResolvedValue({ ...withReaches, entry: 'A long day.' });
+    render(<CheckIn />);
+
+    const line = await screen.findByText(A_LINE);
+    expect(line.closest('.reflective')).not.toBeNull();
+    expect(screen.getAllByRole('figure')).toHaveLength(1);
+
+    await user.type(screen.getByRole('textbox'), 'A long day.');
+    await user.click(screen.getByRole('button', { name: /save|keep/i }));
+    await screen.findByText('Kept for today.');
+
+    expect(screen.getByText(A_LINE)).toBeInTheDocument();
+    expect(screen.queryByText(ANOTHER_LINE)).not.toBeInTheDocument();
+    expect(mockedGetQuote).toHaveBeenCalledTimes(1);
+  });
+
+  it('reads as complete with no line: nothing in its place, the space as always', async () => {
+    mockedGetDayView.mockResolvedValue(withReaches);
+    mockedGetQuote.mockResolvedValue(null);
+    render(<CheckIn />);
+
+    expect(await screen.findByRole('textbox')).toBeInTheDocument();
+    await waitFor(() => expect(mockedGetQuote).toHaveBeenCalled());
+    expect(screen.queryByRole('figure')).not.toBeInTheDocument();
+    expect(bodyText()).not.toMatch(/no quote|unavailable|could not|loading/i);
+  });
+
+  it('reads as complete when the line cannot be had at all', async () => {
+    mockedGetDayView.mockResolvedValue(withReaches);
+    mockedGetQuote.mockRejectedValue('Something went sideways.');
+    render(<CheckIn />);
+
+    expect(await screen.findByRole('textbox')).toBeInTheDocument();
+    await waitFor(() => expect(mockedGetQuote).toHaveBeenCalled());
+    expect(screen.queryByRole('figure')).not.toBeInTheDocument();
+    expect(bodyText()).not.toMatch(/sideways/i);
+  });
+
+  it('shows the line on a sealed check-in too: a quote is not about the day', async () => {
+    mockedGetDayView.mockResolvedValue(sealed);
+    mockedGetQuote.mockResolvedValue(A_LINE);
+    render(<CheckIn />);
+
+    expect(await screen.findByText(/protection is unaffected/i)).toBeInTheDocument();
+    expect(await screen.findByText(A_LINE)).toBeInTheDocument();
+  });
+
+  it('shows the same line whether today held reaches or none', async () => {
+    mockedGetDayView.mockResolvedValue(noReaches);
+    mockedGetQuote.mockResolvedValue(A_LINE);
+    render(<CheckIn />);
+
+    expect(await screen.findByText(A_LINE)).toBeInTheDocument();
+    expect(screen.getByRole('textbox')).toBeInTheDocument();
+  });
+
+  it('uses no banned word with a line showing', async () => {
+    mockedGetDayView.mockResolvedValue(withReaches);
+    mockedGetQuote.mockResolvedValue(A_LINE);
+    render(<CheckIn />);
+
+    await screen.findByText(A_LINE);
+    expectNoBannedWord();
+  });
+});
+
+describe('the quiet switch for quotes', () => {
+  const SWITCH_REFUSED = 'Cairn could not save its settings (disk full). Your protection is unaffected.';
+
+  it('hides the line, leaves nothing in its place, and offers to show quotes again', async () => {
+    const user = userEvent.setup();
+    mockedGetDayView.mockResolvedValue(withReaches);
+    mockedGetQuote.mockResolvedValue(A_LINE);
+    mockedSetQuotesShown.mockResolvedValue(false);
+    render(<CheckIn />);
+    await screen.findByText(A_LINE);
+
+    await user.click(screen.getByRole('button', { name: 'Hide quotes' }));
+
+    expect(mockedSetQuotesShown).toHaveBeenCalledWith(false);
+    await waitFor(() => expect(screen.queryByText(A_LINE)).not.toBeInTheDocument());
+    expect(screen.queryByRole('figure')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Show quotes' })).toBeInTheDocument();
+    expect(screen.getByRole('textbox')).toBeInTheDocument();
+  });
+
+  it('brings the same line back when quotes are shown again', async () => {
+    const user = userEvent.setup();
+    mockedGetDayView.mockResolvedValue(withReaches);
+    mockedGetQuote.mockResolvedValueOnce(A_LINE).mockResolvedValue(ANOTHER_LINE);
+    mockedSetQuotesShown.mockImplementation(async (shown) => shown);
+    render(<CheckIn />);
+    await screen.findByText(A_LINE);
+
+    await user.click(screen.getByRole('button', { name: 'Hide quotes' }));
+    await user.click(await screen.findByRole('button', { name: 'Show quotes' }));
+
+    expect(mockedSetQuotesShown).toHaveBeenLastCalledWith(true);
+    expect(await screen.findByText(A_LINE)).toBeInTheDocument();
+    expect(screen.queryByText(ANOTHER_LINE)).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Hide quotes' })).toBeInTheDocument();
+  });
+
+  it('opened with quotes hidden, asks for no line and offers to show them', async () => {
+    const user = userEvent.setup();
+    mockedGetDayView.mockResolvedValue(withReaches);
+    mockedGetQuotesShown.mockResolvedValue(false);
+    mockedGetQuote.mockResolvedValue(A_LINE);
+    mockedSetQuotesShown.mockResolvedValue(true);
+    render(<CheckIn />);
+
+    const show = await screen.findByRole('button', { name: 'Show quotes' });
+    expect(mockedGetQuote).not.toHaveBeenCalled();
+    expect(screen.queryByRole('figure')).not.toBeInTheDocument();
+
+    await user.click(show);
+    expect(await screen.findByText(A_LINE)).toBeInTheDocument();
+    expect(mockedGetQuote).toHaveBeenCalledTimes(1);
+  });
+
+  it('leaves the line where it was when the switch cannot be kept, and says so', async () => {
+    const user = userEvent.setup();
+    mockedGetDayView.mockResolvedValue(withReaches);
+    mockedGetQuote.mockResolvedValue(A_LINE);
+    mockedSetQuotesShown.mockRejectedValue(SWITCH_REFUSED);
+    render(<CheckIn />);
+    await screen.findByText(A_LINE);
+
+    await user.click(screen.getByRole('button', { name: 'Hide quotes' }));
+
+    expect(await screen.findByRole('status')).toHaveTextContent(SWITCH_REFUSED);
+    expect(screen.getByText(A_LINE)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Hide quotes' })).toBeInTheDocument();
+    expectNoBannedWord();
+  });
+
+  it('is on the sealed check-in too', async () => {
+    const user = userEvent.setup();
+    mockedGetDayView.mockResolvedValue(sealed);
+    mockedGetQuote.mockResolvedValue(A_LINE);
+    mockedSetQuotesShown.mockResolvedValue(false);
+    render(<CheckIn />);
+    await screen.findByText(A_LINE);
+
+    await user.click(screen.getByRole('button', { name: 'Hide quotes' }));
+
+    await waitFor(() => expect(screen.queryByText(A_LINE)).not.toBeInTheDocument());
+    expect(screen.getByRole('button', { name: 'Show quotes' })).toBeInTheDocument();
+    expect(screen.getByText(/protection is unaffected/i)).toBeInTheDocument();
+  });
+
+  it('offers no switch when Cairn cannot tell whether quotes were hidden', async () => {
+    mockedGetDayView.mockResolvedValue(withReaches);
+    mockedGetQuotesShown.mockRejectedValue('Cairn could not read its settings. Your protection is unaffected.');
+    render(<CheckIn />);
+
+    expect(await screen.findByRole('textbox')).toBeInTheDocument();
+    await waitFor(() => expect(mockedGetQuotesShown).toHaveBeenCalled());
+    expect(screen.queryByRole('button', { name: /quotes/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('figure')).not.toBeInTheDocument();
+    expect(mockedGetQuote).not.toHaveBeenCalled();
+  });
+
+  it('says what it does in plain words, set apart from the reflective surface', async () => {
+    mockedGetDayView.mockResolvedValue(withReaches);
+    mockedGetQuote.mockResolvedValue(A_LINE);
+    render(<CheckIn />);
+    await screen.findByText(A_LINE);
+
+    const toggle = screen.getByRole('button', { name: 'Hide quotes' });
+    expect(toggle.classList.contains('reflective')).toBe(false);
+    expect(toggle.textContent ?? '').not.toMatch(/turn (protection )?off|pause|disable|unblock|allow/i);
+    expect(screen.getByRole('button', { name: /save|keep/i })).toBeInTheDocument();
   });
 });

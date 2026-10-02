@@ -103,11 +103,13 @@ fn nothing_in_force() -> Machine {
         credentials: Box::new(Keychain),
         categories: CategoryStore::at(&data),
         shipped_categories: shipped,
+        shipped_quotes: PathBuf::from("no-quotes-here.json"),
         hosts: Box::new(SystemHosts::at(&hosts_path)),
         helper: Box::new(NoHelper),
         elevation: Box::new(CannotRunHere),
         reserved: ReservedNames::default(),
         now: || 1_700_000_000,
+        roll: || 0,
     };
 
     Machine {

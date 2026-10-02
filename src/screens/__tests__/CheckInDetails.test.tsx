@@ -15,6 +15,8 @@ import { getDayView, saveJournalEntry, type DayView } from '../../ipc/journal';
 vi.mock('../../ipc/journal', () => ({
   getDayView: vi.fn(),
   saveJournalEntry: vi.fn(),
+  getQuote: vi.fn().mockResolvedValue(null),
+  getQuotesShown: vi.fn().mockResolvedValue(false),
 }));
 vi.mock('../../ipc', async () => {
   const actual = await vi.importActual<typeof import('../../ipc')>('../../ipc');
@@ -62,6 +64,8 @@ function sessionFor(year: number, month: number, date: number): CheckInSession {
     note: undefined,
     kept: false,
     keeping: false,
+    quote: undefined,
+    holdQuote: () => undefined,
     type: () => undefined,
     keep: () => Promise.resolve(undefined),
   };

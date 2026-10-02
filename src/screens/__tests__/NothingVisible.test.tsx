@@ -15,6 +15,8 @@ import { CheckIn, showsNothing } from '../CheckIn';
 vi.mock('../../ipc/journal', () => ({
   getDayView: vi.fn(),
   saveJournalEntry: vi.fn(),
+  getQuote: vi.fn().mockResolvedValue(null),
+  getQuotesShown: vi.fn().mockResolvedValue(false),
 }));
 
 const get = vi.mocked(getDayView);

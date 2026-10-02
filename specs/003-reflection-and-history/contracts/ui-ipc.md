@@ -10,7 +10,7 @@ shown to a person exactly as written and is covered by the banned-word check.
 
 `src-tauri/tests/ipc_surface.rs` holds a fixed-size array pairing every exposed command with
 its effect on protection, and the test fails if an exposed command is missing from it. Ten
-commands are added here, so that array grows from 15 to 25.
+commands were planned here, so that array was to grow from 15 to 25. *(Amended in slice `quote`, 2026-10-01: the announcement's commands are withdrawn, and the switch adds `get_quotes_shown` and `set_quotes_shown`, so the array's final size follows the commands below rather than this count. Each slice grows it by the commands it exposes.)*
 
 **All ten classify as `Effect::Reads`.** That variant means *no effect on protection* rather
 than *performs no write* — a convention slice `002` already set, since it classifies
@@ -90,13 +90,44 @@ many without the interface recomputing anything.
 `dst_approximate` is the honest reporting of R4's accepted approximation. When true the
 interface states that hour buckets across the range are approximate.
 
-### `get_quote() -> string | null`
+### `get_quote(day) -> string | null`
 
 A quote from the bundled set, or nothing. Never fetched. Null is a valid, complete answer —
 a check-in without a quote is not degraded (FR-008).
 
 Served only to the check-in. The single-day history screen does not ask for one; a quote
 belongs to the ritual, not to the record.
+
+**Chosen at random, never by the date** (slice `quote`, gaps review Q1). The interface asks
+once when the check-in opens and keeps the line while it stays open.
+
+*Amended in slice `quote`, 2026-10-01 (Q1, revised again): the command now takes `day`, the
+local date (YYYY-MM-DD) the check-in is for, and one line holds for that day across restarts.*
+The first ask for a day chooses a line at random and remembers `{day, line}` in the
+configuration (`quote_of_the_day`, a setting readable without the key); later asks for the
+same day return it. A fresh random line is chosen when the remembered day is not `day`, or
+the remembered line is no longer in the bundled set or shows nothing. Nothing is chosen or
+remembered while quotes are hidden. If the line cannot be saved it is still returned; after a
+restart the day then chooses again. A configuration written before this field existed loads
+with no line remembered. Returns
+null when the person has hidden quotes (`set_quotes_shown(false)`), when the configuration
+cannot be read, and when the bundled set is missing or holds no line. Readable with the key
+unavailable: it does not touch the history.
+
+### `get_quotes_shown() -> bool`
+
+*Added in slice `quote` (gaps review Q2).* Whether the person wants quotes on the check-in.
+`true` until they say otherwise, including for a configuration written before this setting
+existed. A configuration setting, not reach or journal data, so readable without the key.
+Errs with a plain sentence when the configuration cannot be read.
+
+### `set_quotes_shown(shown) -> bool`
+
+*Added in slice `quote` (gaps review Q2).* The quiet switch on the check-in, in either
+direction, remembered across restarts. Returns the setting as it now stands. Changes nothing
+about protection: the trail, the intent, any pending change and the trusted clock are left as
+they were, and it classifies as `Effect::Reads`. Errs with a plain sentence, and writes
+nothing, when the configuration cannot be read — Cairn never overwrites what it cannot read.
 
 ## The announcement — withdrawn
 

@@ -73,11 +73,13 @@ fn app(root: &Path, data: &Path) -> AppState {
         categories: CategoryStore::at(data),
         shipped_categories: Path::new(env!("CARGO_MANIFEST_DIR"))
             .join("resources/categories"),
+        shipped_quotes: PathBuf::from("no-quotes-here.json"),
         hosts: Box::new(SystemHosts::at(root.join("hosts"))),
         helper: Box::new(NoHelper),
         elevation: Box::new(NoElevation),
         reserved: ReservedNames::default(),
         now: || TODAY_START + 20 * 3600,
+        roll: || 0,
     }
 }
 

@@ -170,11 +170,13 @@ fn setup() -> Setup {
         credentials: Box::new(Keychain),
         categories: CategoryStore::at(&data),
         shipped_categories: shipped,
+        shipped_quotes: PathBuf::from("no-quotes-here.json"),
         hosts: Box::new(SystemHosts::at(&hosts_path)),
         helper: Box::new(helper.clone()),
         elevation: Box::new(Installed),
         reserved: ReservedNames::default(),
         now: || 1_700_000_000,
+        roll: || 0,
     };
 
     Setup {
