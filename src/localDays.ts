@@ -17,9 +17,27 @@ const pad = (n: number) => String(n).padStart(2, '0');
 const format = (d: Date) =>
   `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 
-function parse(day: string): [number, number, number] {
+function split(day: string): [number, number, number] {
   const [y, m, d] = day.split('-').map(Number);
   return [y, m - 1, d];
+}
+
+/**
+ * Whether `day` is a real calendar date written `YYYY-MM-DD` with a four-digit year:
+ * it survives a round trip through the calendar unchanged. A text field standing in
+ * for a date input can yield `2026-09-0`, `1` or `2026-02-30`; none is a day.
+ */
+export function isLocalDate(day: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(day)) return false;
+  const [y, m, d] = split(day);
+  return format(new Date(y, m, d)) === day;
+}
+
+/** The parts of a day that passed `isLocalDate`; anything else is a mistake of the caller. */
+function parse(day: string): [number, number, number] {
+  if (!isLocalDate(day))
+    throw new RangeError(`not a calendar date: ${JSON.stringify(day)}`);
+  return split(day);
 }
 
 const seconds = (d: Date) => Math.round(d.getTime() / 1000);

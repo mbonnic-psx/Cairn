@@ -9,7 +9,7 @@ process.env.TZ = 'Europe/London';
 
 import { describe, expect, it } from 'vitest';
 
-import { addDays, dayBounds, localToday, rangeBounds } from '../localDays';
+import { addDays, dayBounds, isLocalDate, localToday, rangeBounds } from '../localDays';
 
 const seconds = (d: Date) => Math.round(d.getTime() / 1000);
 
@@ -85,5 +85,37 @@ describe('addDays', () => {
   it('does not move across a clock change', () => {
     expect(addDays('2026-10-24', 1)).toBe('2026-10-25');
     expect(addDays('2026-10-25', 1)).toBe('2026-10-26');
+  });
+});
+
+describe('isLocalDate', () => {
+  it('accepts a real calendar date with a four-digit year', () => {
+    expect(isLocalDate('2026-09-30')).toBe(true);
+    expect(isLocalDate('2028-02-29')).toBe(true);
+  });
+
+  it('refuses what is not one', () => {
+    for (const s of [
+      '2026-02-30',
+      '2027-02-29',
+      '2026-09-0',
+      '1',
+      '',
+      '26-09-10',
+      '0026-09-10',
+      '12026-09-10',
+      '2026-9-10',
+      '2026-13-01',
+      ' 2026-09-10',
+    ]) {
+      expect(isLocalDate(s), s).toBe(false);
+    }
+  });
+
+  it('is what every entry point demands: none makes a day of a refused string', () => {
+    expect(() => addDays('2026-02-30', 1)).toThrow(RangeError);
+    expect(() => dayBounds('1')).toThrow(RangeError);
+    expect(() => rangeBounds('2026-09-10', '2026-09-0')).toThrow(RangeError);
+    expect(() => rangeBounds('26-09-10', '2026-09-10')).toThrow(RangeError);
   });
 });

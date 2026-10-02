@@ -12,7 +12,7 @@
 import { useEffect, useState } from 'react';
 
 import { Card } from '../components/Card';
-import { addDays, dayBounds, localToday, rangeBounds } from '../localDays';
+import { addDays, dayBounds, isLocalDate, localToday, rangeBounds } from '../localDays';
 import {
   listTodaysReaches,
   summarizeReaches,
@@ -192,10 +192,10 @@ function OverTimeView({ read, now }: { read: ReachesReader; now: () => Date }) {
   }, [firstDay, lastDay]);
 
   const changeFirst = (value: string) => {
-    if (value && value <= lastDay) setFirstDay(value);
+    if (isLocalDate(value) && value <= lastDay) setFirstDay(value);
   };
   const changeLast = (value: string) => {
-    if (value && value >= firstDay && value <= todayDay) setLastDay(value);
+    if (isLocalDate(value) && value >= firstDay && value <= todayDay) setLastDay(value);
   };
 
   return (

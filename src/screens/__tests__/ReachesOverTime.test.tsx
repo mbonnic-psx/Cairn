@@ -184,6 +184,43 @@ describe('the range it opens on', () => {
   });
 });
 
+describe('a date that is not a real calendar date', () => {
+  // What a text field standing in for a date input can hand over.
+  const notDates = [
+    '2026-02-30',
+    '2026-09-0',
+    '1',
+    '26-09-10',
+    '0026-09-10',
+    '12026-09-10',
+    '2026-9-10',
+  ];
+
+  it.each(notDates)('is not turned into a range: From %s', async (value) => {
+    const { calls, read } = fakeRead();
+    await openOverTime(read);
+    await screen.findByText('a.example');
+
+    fireEvent.change(screen.getByLabelText('From'), { target: { value } });
+
+    expect(calls).toHaveLength(1);
+    expect(screen.getByLabelText('From')).toHaveValue('2026-09-03');
+    expect(text()).not.toMatch(/could not read/i);
+  });
+
+  it.each(notDates)('is not turned into a range: To %s', async (value) => {
+    const { calls, read } = fakeRead();
+    await openOverTime(read);
+    await screen.findByText('a.example');
+
+    fireEvent.change(screen.getByLabelText('To'), { target: { value } });
+
+    expect(calls).toHaveLength(1);
+    expect(screen.getByLabelText('To')).toHaveValue('2026-09-30');
+    expect(text()).not.toMatch(/could not read/i);
+  });
+});
+
 describe('how it reads', () => {
   it('keeps the order given, each site with its count and a bar', async () => {
     const { read } = fakeRead();
