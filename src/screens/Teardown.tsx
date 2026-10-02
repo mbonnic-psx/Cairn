@@ -17,6 +17,7 @@ const COMPLETE_SENTENCE =
   'Cairn checked each change it had made and undid it. What Cairn did not write is untouched.';
 const PARTIAL_SENTENCE =
   'Cairn undid what it could and checked each one. These are still here, so you can decide what to do with them.';
+const STILL_HERE_LABEL = 'Still here';
 
 export function Teardown({ report }: { report: TeardownReport }) {
   const onPage = useNotebookPage();
@@ -37,6 +38,20 @@ export function Teardown({ report }: { report: TeardownReport }) {
                 </li>
               ))}
             </ul>
+          )}
+
+          {report.residue.length > 0 && (
+            <>
+              <h3 className="nb-label nb-teardown-label">{STILL_HERE_LABEL}</h3>
+              <ul className="nb-teardown-list nb-teardown-residue">
+                {report.residue.map((line) => (
+                  <li key={line} className="nb-teardown-line">
+                    <span aria-hidden className="nb-teardown-mark nb-teardown-mark--amber" />
+                    <span>{line}</span>
+                  </li>
+                ))}
+              </ul>
+            </>
           )}
         </div>
         <div className="nb-page nb-page--ruled" />
@@ -68,7 +83,7 @@ export function Teardown({ report }: { report: TeardownReport }) {
       {report.residue.length > 0 && (
         <>
           <h3 className="mt-10 text-sm font-medium tracking-wide text-ink-400 uppercase">
-            Still here
+            {STILL_HERE_LABEL}
           </h3>
           <ul className="mt-3 space-y-3 text-ink-700">
             {report.residue.map((line) => (
