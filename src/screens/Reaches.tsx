@@ -208,7 +208,9 @@ function TodayView({
           <p className="nb-reaches-note">{day.coverage_note ?? COUNTED_ONLY_TODAY}</p>
         </div>
         <div className="nb-page nb-page--ruled">
-          {day.reaches.length > 0 && (
+          {day.reaches.length === 0 ? (
+            <p className="nb-reaches-empty">{NOTHING_TODAY}</p>
+          ) : (
             <ul className="nb-reaches-log">
               {day.reaches.map((reach, index) => (
                 <li

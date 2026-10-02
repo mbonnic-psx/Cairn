@@ -230,4 +230,45 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (name) 
       },
     );
   });
+
+  describe('Today with nothing yet on a notebook page', () => {
+    const emptyCases = [
+      'nothing yet, a coverage note',
+      'nothing yet, the fallback note',
+    ] as const;
+
+    it.each(emptyCases)(
+      'left page as for a log; right page begins with the sentence: %s',
+      (state) => {
+        const today = todayCases[state]!;
+        const { left, right } = onPage(<Reaches today={today} now={now} />);
+        expect(left!.firstElementChild).toHaveTextContent('Today');
+        const note = left!.lastElementChild as HTMLElement;
+        expect(note).toHaveTextContent(today.coverage_note ?? FALLBACK_NOTE);
+        expect(note).toHaveClass('nb-reaches-note');
+        expect(right).toHaveClass('nb-page--ruled');
+        expect(right!.textContent).toBe('Nothing here for today.');
+        expect(within(right!).queryAllByRole('listitem')).toHaveLength(0);
+      },
+    );
+
+    it('does not put the sentence on the left page', () => {
+      const { left } = onPage(<Reaches today={todayCases[emptyCases[0]]} now={now} />);
+      expect(within(left!).queryByText('Nothing here for today.')).toBeNull();
+    });
+
+    it.each(emptyCases)(
+      'says the same words as outside any shell, the note moved: %s',
+      (state) => {
+        const today = todayCases[state];
+        const outside = wordsOutside(
+          <Reaches today={today} read={silentReader} now={now} />,
+        );
+        const { spread } = onPage(
+          <Reaches today={today} read={silentReader} now={now} />,
+        );
+        expect(words(spread!)).toEqual(outside);
+      },
+    );
+  });
 });
