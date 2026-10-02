@@ -230,3 +230,27 @@ export function acrossInWords(weekday: number, days: number): string {
   if (days === 0) return 'not in these days';
   return `across ${days} ${weekdayInWords(weekday)}${days === 1 ? '' : 's'}`;
 }
+
+/**
+ * A date as the computer writes it short, `Oct 6` or `6 Oct`, with the year when asked. Made from a
+ * fixed instant in UTC, so no zone can move the date; `setUTCFullYear`, not `Date.UTC`, so years 0 to
+ * 99 are not read as 1900 to 1999.
+ */
+export function shortDateInWords(day: string, withYear: boolean): string {
+  // Not `parse`: `isLocalDate` round-trips through `new Date(y, ...)`, which reads year 100 as 2000.
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(day))
+    throw new RangeError(`not a calendar date: ${JSON.stringify(day)}`);
+  const [y, m, d] = split(day);
+  const at = new Date(0);
+  at.setUTCFullYear(y, m, d);
+  return at.toLocaleDateString([], {
+    day: 'numeric',
+    month: 'short',
+    ...(withYear ? { year: 'numeric' as const } : {}),
+    timeZone: 'UTC',
+  });
+}
+
+/** A week's name: `week of` and the date it begins on. */
+export const weekOfInWords = (day: string, withYear: boolean): string =>
+  `week of ${shortDateInWords(day, withYear)}`;
