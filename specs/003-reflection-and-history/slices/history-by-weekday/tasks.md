@@ -27,7 +27,7 @@ is the same either way); Q2 changes Y6's clause cases and `acrossInWords` in Y15
 
 ## Phase 0 — Pin: before code that was here changes
 
-- [ ] Y1 [US2] [pin] On the branch head, before any edit, re-read the constitution's version line (v1.5.0 when
+- [X] Y1 [US2] [pin] On the branch head, before any edit, re-read the constitution's version line (v1.5.0 when
   this was written), then run and record green: `ipc_surface`, `gaps`, `patterns`, `patterns_by_hour`,
   `offset_changes`, `range_bounds`, `range_coverage`, `us2_by_site`, `us2_by_hour`, `patterns_at_scale`
   (`cd src-tauri && cargo test -p cairn --no-default-features --features history --test …`), and
@@ -37,7 +37,7 @@ is the same either way); Q2 changes Y6's clause cases and `acrossInWords` in Y15
 
 ## Phase 1 — RED: the behaviour, stated as failing tests
 
-- [ ] Y2 [P] [US2] [T043; scenarios 1–11] Write `src-tauri/tests/patterns_by_weekday.rs` (no feature gate: the
+- [X] Y2 [P] [US2] [T043; scenarios 1–11] Write `src-tauri/tests/patterns_by_weekday.rs` (no feature gate: the
   domain builds with `--no-default-features`) against `domain::patterns::by_weekday(reaches, first_offset, changes,
   from, to)` and `domain::patterns::weekdays_in(first_day, last_day)`, with `proptest` as `tests/patterns_by_hour.rs`
   uses it. Properties of `by_weekday`: always 7 entries; the sum equals the reaches in `[from, to)` and equals
@@ -51,7 +51,7 @@ is the same either way); Q2 changes Y6's clause cases and `acrossInWords` in Y15
   Examples at the plan's fixture instants: scenarios 4–9 for `by_weekday`, and the 1-day, 3-day, 10-day
   (`[2, 1, 1, 1, 1, 2, 2]`) and 2026 (`[52, 52, 52, 53, 52, 52, 52]`) ranges for `weekdays_in`. Every expected value
   is derived from the calendar, not from running the code. It fails only because the two functions do not exist.
-- [ ] Y3 [P] [US2] [T039, T040, T043, T044, T047, T049; scenarios 1–17, 19] Write `src-tauri/tests/us2_by_weekday.rs`
+- [X] Y3 [P] [US2] [T039, T040, T043, T044, T047, T049; scenarios 1–17, 19] Write `src-tauri/tests/us2_by_weekday.rs`
   against `AppState::summarize_reaches`, the driving port, seeding the history through `OpenHistory` as
   `us2_by_hour.rs` does, with the plan's London, Cairo and New York bounds and offsets as fixtures. It covers: all
   seven days in the core's order, and seven zeros for a quiet range with `days` kept; every day present; the edges
@@ -65,14 +65,14 @@ is the same either way); Q2 changes Y6's clause cases and `acrossInWords` in Y15
   unreadable, with `by_weekday` `[]`; the no-history build (`#[cfg(not(feature = "history"))]`, as `us2_by_hour.rs`
   does it); and the eight serialised keys, with each entry holding exactly `weekday`, `count` and `days`. Every
   sentence is checked for voice. Written by a different agent than Y12–Y14.
-- [ ] Y4 [P] [US2] [the pin, row 2] `src-tauri/tests/us2_by_site.rs` and `src-tauri/tests/us2_by_hour.rs`: each
+- [X] Y4 [P] [US2] [the pin, row 2] `src-tauri/tests/us2_by_site.rs` and `src-tauri/tests/us2_by_hour.rs`: each
   wire-shape test (`the_answer_serialises_to_exactly_seven_keys…`) becomes `…_eight_keys…`, naming `by_weekday`, and
   its message says `movement` is still absent because nothing computed it. No other expectation changes. Both fail
   because the answer has seven keys.
-- [ ] Y5 [P] [US2] [T041; scenario 18] `src-tauri/tests/patterns_at_scale.rs`: assert that `by_weekday`'s counts
+- [X] Y5 [P] [US2] [T041; scenario 18] `src-tauri/tests/patterns_at_scale.rs`: assert that `by_weekday`'s counts
   sum to every reach seeded, and that its `days` sum to the two years' 730 days, inside the same 1 000 ms bound. The
   header gains one sentence: the days are counted in the same pass, and the bound is unchanged.
-- [ ] Y6 [P] [US2] [scenarios 20–21] Write `src/__tests__/weekdays.test.ts`, with `process.env.TZ =
+- [X] Y6 [P] [US2] [scenarios 20–21] Write `src/__tests__/weekdays.test.ts`, with `process.env.TZ =
   'Pacific/Kiritimati'` at the top, for `firstWeekday`, `weekdayInWords` and `acrossInWords` in `src/localDays.ts`.
   `firstWeekday('en-GB')`, `('fr-FR')` and `('en-AE')` give 0; `('en-US')`, `('he-IL')` and `('pt-BR')` give 6;
   `('ar-EG')` and `('fa-IR')` give 5 (the plan's table, Node v22.22.1). The parser it is built on is given plain
@@ -83,7 +83,7 @@ is the same either way); Q2 changes Y6's clause cases and `acrossInWords` in Y15
   across the file's +14 zone. `acrossInWords(0, 1)` is `across 1 ` plus name 0, `(0, 4)` is `across 4 ` plus name 0
   plus `s`, `(3, 2)` uses name 3, and `(n, 0)` is `not in these days` for every `n`. Fails because none of the three
   exists.
-- [ ] Y7 [P] [US2] [T042, T045, T047, T049; scenarios 22–29] Write `src/screens/__tests__/ReachesByDay.test.tsx`,
+- [X] Y7 [P] [US2] [T042, T045, T047, T049; scenarios 22–29] Write `src/screens/__tests__/ReachesByDay.test.tsx`,
   with `process.env.TZ = 'Europe/London'` at the top, a fake `read`, a fixed `now` and a `firstDay` prop, and no
   `vi.mock`. It covers: *Seen by* holding *By site* (pressed), *By hour* and *By day*, in that order; *By day*
   showing the days with no second read; a change of *From* reading again and staying on *By day*; going to *Today*
@@ -98,19 +98,19 @@ is the same either way); Q2 changes Y6's clause cases and `acrossInWords` in Y15
   and none at 0; the standing sentence; a quiet range with the sentence and the seven days under it; sealed, and a
   read that throws, as *By site* shows them; and no streak, *day N*, chain, banned word, or control that changes
   protection. Expected names come from `weekdayInWords`, and clauses from `acrossInWords`.
-- [ ] Y8 [P] [US2] [scenario 30] Write `src/screens/__tests__/ReachesByDayPage.test.tsx`, inside the notebook as
+- [X] Y8 [P] [US2] [scenario 30] Write `src/screens/__tests__/ReachesByDayPage.test.tsx`, inside the notebook as
   `ReachesByHourPage.test.tsx` renders it: the three-option group on the left page under the date boxes; the days on
   the right page, ruled, one to a line (name, clause, bar, count; or name and *not in these days*); the notes off the
   right page; no inline height or overflow; *Which days* still the spread's first child and the same node; focus kept
   on *By day* after pressing it; the same words as Current.
-- [ ] Y9 [P] [US2] [the list guard] `src/screens/__tests__/ReachesRowGuard.test.tsx`: add the corners for *By day*,
+- [X] Y9 [P] [US2] [the list guard] `src/screens/__tests__/ReachesRowGuard.test.tsx`: add the corners for *By day*,
   on the card and on the page: a quiet range keeps its seven days under the sentence, and a non-quiet one draws
   them. *By site*'s and *By hour*'s corners are unchanged, so no part of `seen !== 'site' || !isQuiet(rows)` can
   change without a case failing.
-- [ ] Y10 [P] [US2] [W1] `src/screens/__tests__/ReachesByHour.test.tsx` and
+- [X] Y10 [P] [US2] [W1] `src/screens/__tests__/ReachesByHour.test.tsx` and
   `src/screens/__tests__/ReachesByHourPage.test.tsx`: where a test lists the *Seen by* group's buttons, it lists
   three, *By day* `aria-pressed="false"` last. No other expectation changes. They fail because the group has two.
-- [ ] Y11 [P] [US2] [W1; the pin, row 1] `src/screens/__tests__/TonightCurrentPin.test.tsx`: rewrite each
+- [X] Y11 [P] [US2] [W1; the pin, row 1] `src/screens/__tests__/TonightCurrentPin.test.tsx`: rewrite each
   `OVER_TIME` case by hand with a third button inserted after *By hour* in the *Seen by* group (Current's *Which
   days* classes, `aria-pressed="false"`, text *By day*). Do not re-capture, and do not touch the `TODAY` or Tonight
   cases. Add `by_weekday` to `tonightCases.ts`'s answers (seven entries, through one helper) only where the type
@@ -118,39 +118,39 @@ is the same either way); Q2 changes Y6's clause cases and `acrossInWords` in Y15
 
 ## Phase 2 — GREEN: the least that passes
 
-- [ ] Y12 [US2] [T043; Y2] `src-tauri/src/domain/patterns.rs`: move `by_hour`'s lookup into a private
+- [X] Y12 [US2] [T043; Y2] `src-tauri/src/domain/patterns.rs`: move `by_hour`'s lookup into a private
   `offset_in_force(first_offset, changes, at) -> i32` and call it from `by_hour`, with no change in behaviour
   (`patterns_by_hour.rs` stays green). Add `by_weekday(reaches, first_offset, changes, from, to) -> [u32; 7]` beside
   it, reusing `offset_in_force`, `local_day` and `LocalDate::weekday`. Add `weekdays_in(first_day, last_day) ->
   [u32; 7]`, with `i64` arithmetic, `checked_*` throughout, and saturation to `u32`. `summarize` and
   `crosses_offset_change` are not edited. The module doc gains a line, and `domain/mod.rs`'s table a row for each.
   `check-domain-purity.sh` is clean.
-- [ ] Y13 [US2] [T043; Y3] `src-tauri/src/reflection/over_time.rs`: `Range` gains `by_weekday: [u32; 7]`, from
+- [X] Y13 [US2] [T043; Y3] `src-tauri/src/reflection/over_time.rs`: `Range` gains `by_weekday: [u32; 7]`, from
   `by_weekday` over the same reaches `by_site` and `by_hour` read, with no estimates, and `weekdays: [u32; 7]`, from
   `weekdays_in(first_day, last_day)`. `assemble`'s signature does not change. `check_range` and `check_offsets` are
   not edited. Depends on Y12.
-- [ ] Y14 [US2] [T044; Y3, Y4, Y5] `src-tauri/src/ipc/state.rs`: `WeekdayCount { weekday: u8, count: u32, days: u32
+- [X] Y14 [US2] [T044; Y3, Y4, Y5] `src-tauri/src/ipc/state.rs`: `WeekdayCount { weekday: u8, count: u32, days: u32
   }`. `Patterns` gains `by_weekday` (seven entries zipped from `range.by_weekday` and `range.weekdays`, weekday 0 to 6,
   or `[]` when sealed), with a doc comment naming the numbering (0 = Monday) and W6. `Patterns::sealed` and the
   no-history branch set it to `[]`. The struct's doc no longer says `by_weekday` is absent. `ipc/commands.rs`: only
   the doc comment (*by site, by hour and by day of week*), with the reaches screen still named as the only caller.
   `main.rs` and `ipc_surface.rs` are not touched. Depends on Y13.
-- [ ] Y15 [P] [US2] [Y6] `src/localDays.ts`: `firstWeekday(locale?)`, built on an exported pure parser of week info
+- [X] Y15 [P] [US2] [Y6] `src/localDays.ts`: `firstWeekday(locale?)`, built on an exported pure parser of week info
   (preferring `getWeekInfo()`, then `weekInfo`, then Monday, refusing any `firstDay` that is not an integer 1–7) and
   defaulting to `Intl.DateTimeFormat().resolvedOptions().locale`; `weekdayInWords(weekday)`, formatting
   `Date.UTC(2024, 0, 1 + weekday)` with `{ weekday: 'long', timeZone: 'UTC' }`; and `acrossInWords(weekday, days)`.
   None of the three holds reach data or names a `by_*` field.
-- [ ] Y16 [P] [US2] [T034] `src/ipc/reaches.ts`: `WeekdayCount { weekday, count, days }`, documented with the
+- [X] Y16 [P] [US2] [T034] `src/ipc/reaches.ts`: `WeekdayCount { weekday, count, days }`, documented with the
   numbering (0 = Monday, not `getDay`'s Sunday), and `Patterns.by_weekday`. The header and `Patterns`' doc say *by
   site, by hour and by day of week*. `summarizeReaches` does not change. In `ReachesOverTime`, `ReachesEdges`,
   `ReachesToday`, `ReachesPage`, `ReachesByHour`, `ReachesByHourPage` and `ReachesRowGuard`'s test fixtures, and only
   where `npm run build`'s typecheck asks, add `by_weekday` to the answer an existing helper builds. No expectation
   changes.
-- [ ] Y17 [P] [US2] [scenario 30] `src/styles/tonight-page.css`, only if Y8 shows the clause does not sit on one
+- [X] Y17 [P] [US2] [scenario 30] `src/styles/tonight-page.css`, only if Y8 shows the clause does not sit on one
   ruled line beside the name: a layout rule for it. No colour, font or focus rule of its own: the clause takes
   `nb-reaches-time`'s face, as *Today*'s times do. The 004 contrast and focus guards (`npm run check`) stay green
   unedited. If no rule is needed, close this task saying so.
-- [ ] Y18 [US2] [T042, T045, T047, T049; Y7, Y8, Y9, Y10, Y11] `src/screens/Reaches.tsx`: `Seen` gains `'weekday'`,
+- [X] Y18 [US2] [T042, T045, T047, T049; Y7, Y8, Y9, Y10, Y11] `src/screens/Reaches.tsx`: `Seen` gains `'weekday'`,
   and *Seen by* gains *By day* after *By hour*. `Reaches` takes `firstDay?: number`, defaulting to `firstWeekday()`
   read once, and passes it to *Over time*. `rowsOf` for `'weekday'` gives seven rows from the first day, each picked
   by its `weekday` value, named with `weekdayInWords`, and carrying `acrossInWords(weekday, days)`. A row with `days`
