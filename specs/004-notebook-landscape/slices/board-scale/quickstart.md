@@ -3,11 +3,17 @@
 ## Run it
 
 ```sh
-npm run dev -- --port 1420 --strictPort
+# from /home/mbonnic/Cairn-worktrees/board-scale; 1420 is the main checkout's own dev server, which shows main's layout
+npm run dev -- --port 1455 --strictPort
 agent-browser --allowed-domains 127.0.0.1 \
   --init-script specs/004-notebook-landscape/slices/protection-page/demo/fake-core.js \
-  open 'http://127.0.0.1:1420/'
+  open 'http://127.0.0.1:1455/'
+agent-browser set viewport 1280 800    # then 1920 1080, 2560 1440, 800 600
 ```
+
+The sizes below are the window's inner area (the viewport), which `agent-browser set viewport` sets exactly. A maximised
+desktop window on a 1920×1080 screen is about 1920×1000 inside, so its notebook is about 1245×850 (s ≈ 1.25), not 918
+tall: the same rule, a shorter window.
 
 Choose Morning, Midday or Night on the switch (top of the sky, development builds only). Setup screens use
 `slices/setup-pages/demo/` and Tonight/Today `slices/tonight-page/demo/`'s fake cores, as earlier demos did.

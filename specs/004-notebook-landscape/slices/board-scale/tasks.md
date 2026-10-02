@@ -73,7 +73,7 @@ measure's weight or is named as a box narrower than its leaf before this slice (
 `.nb-checkin-leaves > .nb-page > .nb-checkin-status { max-inline-size: none; }` (`tonight-page.css`) and one sentence in
 the contract's measure paragraph. Measured in Chromium at 1920×800 on Tonight: leaf 1065–1497, status 1065–1497, no stub.
 The loop stopped after one pass: pass 1 found no CRITICAL or HIGH, so no confirming pass was owed. **T011 and T012 (LOW)
-are carried to Phase 4**, after acceptance. T012's corners and soft shadows (the notebook's and tabs' 6px radius, the drop
+are carried to Phase 4** (the method's after-acceptance phase, not this file's Phase 4), after acceptance. T012's corners and soft shadows (the notebook's and tabs' 6px radius, the drop
 shadow, the lamp and stone glows not growing) are a line for the owner's demo as well: D39 says "everything inside the
 notebook", and whether a corner or a shadow is "inside" is the owner's taste.
 
@@ -92,7 +92,7 @@ What the diff proves, level by level:
   - **Nothing is clipped.** No element runs past the window or its leaf, and the document never scrolls (scroll size equals the window everywhere). The only hits are the visually hidden `h1` and the landscape, whose hills are meant to overrun.
   - **The board.** At 1280×800 the screenshot lays over `slices/looks/demo/board-G-Morning.png`: the notebook, greeting, sun (192, 296, 96) and cairn are in the board's places.
   - **The narrow block** is byte-identical to main's (diff of the `@media (max-width: 1099px)` block is empty).
-  - **Not proved:** 3840×2160 and 1280×1024 (model only). A classic scrollbar's effect on `100vw` is also unproved (headless Chromium draws overlay scrollbars, and `.nb-root` has `overflow: hidden`, so the document itself never scrolls). The status stub is T010. The radii and shadows that do not grow are T012.
+  - **Not proved at this pass:** 3840×2160 and 1280×1024 (model only; measured at the after-converge gaps review: 2490×1836 at (1050, 189), tabs ending at x 3628 and y 1475, words 120px, page font 32px; and 830×680 at (350, 89.6), words 40px; all three looks, nothing clipped). A classic scrollbar's effect on `100vw` is also unproved (headless Chromium draws overlay scrollbars, and `.nb-root` has `overflow: hidden`, so the document itself never scrolls). The status stub is T010. The radii and shadows that do not grow are T012.
 - **Shell** (`src/shell/`). Unchanged, and that is right: the composition is entirely the sheet's (grid tracks, padding and the two lengths), and `NotebookShell.tsx` already renders every element the sheet places. `git diff --stat main..HEAD -- src/shell/*.tsx` is empty. The new `AppBoardScale.test.tsx` renders every notebook screen in each look through the real App and finds no Tailwind size utility or inline length inside the page area. Its prefix list misses positional utilities (T012).
 - **Screens.** Unchanged (`git diff --stat main..HEAD -- src/screens src/components src/App.tsx` is empty), and every notebook screen still lays out at every size measured, as above. Every spread is `.nb-spread > .nb-page × 2`, so the measure selector reaches each leaf's children. Reaches' view switch is a direct spread child and is correctly outside it. One screen shows a visible defect from the measure: Tonight's status band (T010).
 - **Published contract** (`contracts/ui-shell.md:68-89, 113-114`). True to the sheet: `--nb-u` and `--nb-g` with their exact values, the page-sheet rule, why the lengths are in viewport units, the measure and its selector, and the shell owning the place and size. It is guarded by the T008 block in `tokens.test.ts`, which derives the shared lengths from the sheet. It does not yet say that a paper-painting leaf child must not be capped (T010). Its "everything inside the notebook … are N × this" is not quite true of the tabs' corners (T012).
@@ -107,3 +107,20 @@ Constitution, the principles this diff touches:
 - **I, II, IV, V, VII.** Not touched. Nothing reacts to a blocked request, no dependency or network path is added (`package.json` and the lock are unchanged), no system file is written, nothing notifies or prompts, and nothing is gated.
 
 The design review's "Reviewed:" line (above) is still empty. It is /drive's rung before the demo, not this pass's.
+
+## Phase 7: After converge (gaps review, 2026-10-02)
+
+`drive-gaps` · model: host · delegated, fresh context. Measured in Chromium in all three looks at 1280×800, 1920×1080,
+2560×1440, 800×600, 1100×700, 1100×600, 2560×1080, 3840×2160 and 1280×1024: places and sizes as `data-model.md` to 0.1px,
+tabs inside the window and the notebook, no label past its tab, the greeting inside its column, no scroll, nothing past
+its leaf; Tonight's writing stays on its rules at s = 1.35 through 14 lines. No CRITICAL, HIGH or MEDIUM.
+
+- [ ] T013 **LOW** [US1] Rule: no notebook screen, in any state it can show, carries a Tailwind size class inside the page area (D39; contract). `src/shell/__tests__/AppBoardScale.test.tsx:101-157` renders each screen in its usual state only; the page branches for Protection checking or unreadable (`Protection.tsx:53-75`), the waiting change (`:172-180`), the custom entry's added/refused sentence (`CustomEntry.tsx:93-105`), Over time looking/unreadable/sealed (`Reaches.tsx:319-330`) and Tonight loading/sealed (`CheckIn.tsx:389-420`) are clean today (only `nb-` classes) but unguarded. RED: add those states through the fake core to the `describe.each(LOOKS)` block; plant `text-sm` in one branch, see it fail, restore with `git checkout --`. GREEN: none expected. Sweep: every page branch of every notebook screen. Carried to Phase 4 (after acceptance). Files: `src/shell/__tests__/AppBoardScale.test.tsx`.
+- [x] T014 **LOW** Rule: the quickstart's owner checks can be met as written on the slice's own build. Port 1420 is held by the main checkout's dev server (main's layout), and the sizes are viewport sizes. GREEN (host): the quickstart runs on 1455, sets each size with `agent-browser set viewport`, and says a maximised 1920×1080 window is about 1920×1000 inside. Files: `quickstart.md`.
+- [x] T015 **LOW** Rule: the converge record says what was later measured. GREEN (host): the Stylesheet bullet's "Not proved" line cites the gaps review's 3840×2160 and 1280×1024 measurements. Files: `tasks.md`.
+
+Lines for the owner's demo (not gaps): at midday the sun sits behind the time line and "Midday." at every size, as on the
+board, and the band model guards its contrast; in a short wide window (1920×800) the greeting grows with the width (60px)
+while the writing stays today's size (FR-036); the title row and the testing switch stay 12px and 11px on large windows (a
+reading the plan records); the notebook's corners and soft shadows do not grow (T012).
+
