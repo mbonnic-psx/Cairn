@@ -25,10 +25,11 @@ export function NotebookShell({
 }) {
   return (
     <div className="nb-root" data-look={look}>
+      <h1 className="sr-only">Cairn</h1>
       <Landscape look={look} />
       <div className="nb-titlebar">
         <CairnMark />
-        <span className="nb-titlebar__name">Cairn</span>
+        <span className="nb-titlebar__name" aria-hidden="true">Cairn</span>
       </div>
       <aside className="nb-aside">
         <Greeting look={look} />
