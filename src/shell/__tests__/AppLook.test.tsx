@@ -186,4 +186,22 @@ describe('the production build', () => {
       expect(document.activeElement?.closest('.nb-switch')).toBeNull();
     }
   });
+
+  // FR-013: whatever the hour, a released build wears the morning. Only Date is faked, so findBy still polls.
+  it.each([
+    ['22:00', new Date(2026, 9, 2, 22, 0, 0)],
+    ['12:30', new Date(2026, 9, 2, 12, 30, 0)],
+  ])('wears the morning at %s', async (_hour, now) => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(now);
+    try {
+      const { container } = render(<App devBuild={false} />);
+      await screen.findByText('What would you like to protect?');
+      expect(container.querySelector('[data-look="morning"]')).not.toBeNull();
+      expect(container.querySelector('[data-look="midday"], [data-look="night"]')).toBeNull();
+      expect(screen.getByText('Good morning.')).toBeInTheDocument();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
 });
