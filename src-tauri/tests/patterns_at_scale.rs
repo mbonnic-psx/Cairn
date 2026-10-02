@@ -13,7 +13,9 @@
 //!
 //! The hours (slice `history-by-hour`, scenario 15) are counted in the same
 //! pass, against London's five offsets for the two years, and the bound is
-//! unchanged.
+//! unchanged. So are the days of the week and how many of each the range holds
+//! (slice `history-by-weekday`, scenario 18): the days are counted in the same
+//! pass, and the bound is unchanged.
 //!
 //! The history is written before the clock starts, through the store's own
 //! connection layer, and the bound is 1 000 ms, as `at_scale.rs` bounds its
@@ -173,8 +175,17 @@ fn two_years_by_site_and_hour_are_read_quickly() {
         DAYS * REACHES_A_DAY,
         "every reach in the range is in an hour"
     );
+    assert_eq!(patterns.by_weekday.len(), 7);
+    let in_weekdays: u32 = patterns.by_weekday.iter().map(|day| day.count).sum();
+    assert_eq!(
+        i64::from(in_weekdays),
+        DAYS * REACHES_A_DAY,
+        "every reach in the range is on a day of the week"
+    );
+    let days_held: u32 = patterns.by_weekday.iter().map(|day| day.days).sum();
+    assert_eq!(i64::from(days_held), DAYS, "the two years' 730 days");
     assert!(
         elapsed.as_millis() < 1_000,
-        "two years by site and hour took {elapsed:?} - something is quadratic"
+        "two years by site, hour and day took {elapsed:?} - something is quadratic"
     );
 }

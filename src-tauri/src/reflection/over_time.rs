@@ -1,7 +1,9 @@
 //! A range of days, assembled from the history (slice `history-by-site`).
 
 use crate::domain::dates::LocalDate;
-use crate::domain::patterns::{by_hour, by_site, OffsetChange, Reach};
+use crate::domain::patterns::{
+    by_hour, by_site, by_weekday, weekdays_in, OffsetChange, Reach,
+};
 use crate::reflection::checkin::{could_begin, offset_from_midnight};
 use crate::services::Trouble;
 use crate::store::gaps::{clipped, Gap};
@@ -54,7 +56,8 @@ pub fn check_range(
     Ok(())
 }
 
-/// A range of days as the history holds it, by site and by hour.
+/// A range of days as the history holds it, by site, by hour and by day of the
+/// week.
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct Range {
     /// Most first; equal counts by domain name.
@@ -62,6 +65,13 @@ pub struct Range {
     /// Exactly 24, index = hour of the day by the computer's clock at each
     /// reach's own instant. Zeros included.
     pub by_hour: [u32; 24],
+    /// Exactly 7, index = weekday (0 = Monday .. 6 = Sunday) of the local day
+    /// each reach fell in, by the computer's clock at its own instant. Zeros
+    /// included, estimates never (W6).
+    pub by_weekday: [u32; 7],
+    /// How many of each weekday the range holds (W4), by the calendar alone:
+    /// the same index as `by_weekday`.
+    pub weekdays: [u32; 7],
     /// What Cairn did not see, each cut to the part inside the range.
     pub gaps: Vec<Gap>,
     /// How many days in the range hold the person's own estimate.
@@ -75,8 +85,9 @@ pub struct Range {
 /// list: an empty list reads as a quiet range, which would be untrue
 /// (Principle III).
 ///
-/// `by_site` and `by_hour` are given the reaches and no estimates: an estimate
-/// has no site and no hour (FR-023). `first_offset` and `changes` are what
+/// `by_site`, `by_hour` and `by_weekday` are given the reaches and no
+/// estimates: an estimate has no site and no hour (FR-023), and is counted in
+/// no day of the week (W6). `first_offset` and `changes` are what
 /// [`check_offsets`] returned for this range. Estimates are counted here, by their own dates, because a window
 /// derived from one offset can take in a day beyond `last_day` at a clock
 /// change.
@@ -112,6 +123,8 @@ pub fn assemble(
     Ok(Range {
         by_site: by_site(&reaches, range_start, range_end),
         by_hour: by_hour(&reaches, first_offset, changes, range_start, range_end),
+        by_weekday: by_weekday(&reaches, first_offset, changes, range_start, range_end),
+        weekdays: weekdays_in(first_day, last_day),
         gaps: clipped(&gaps, range_start, range_end),
         estimates_excluded: u32::try_from(estimates.len()).unwrap_or(u32::MAX),
     })
