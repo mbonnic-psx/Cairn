@@ -20,7 +20,7 @@ as earlier demos did.
    one-page screen (What Cairn covers, a Protection with no waiting change) it runs down the blank ruled right
    page's left edge. It does not move when the pages scroll. At night it is a little darker, on the lamp-lit paper.
 2. **The width.** At 1280×800 the notebook is 830×680, as before. At 1920×1080 it is about 1172×960, at 2560×1440
-   1200×982 with the greeting beside it and the group centred. At 800×600 the greeting sits above it as before and
+   1200×983 with the greeting beside it and the group centred. At 800×600 the greeting sits above it as before and
    it is as wide as before. In every case it is wider than it is tall; the tabs sit on its right edge and the
    greeting at its left, as before.
 
