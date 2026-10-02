@@ -317,6 +317,28 @@ keeps reach numbers on the reaches screen alone. Decided by the owner:
 Already stated, and held by this slice as written: a range with no reaches reads as a quiet range (FR-024); no
 streak, day count or chain (scenario 5); everything is available with no journal entry ever written (scenario 3).
 
+### Gaps reviewed — slice `history-by-hour` (2026-10-02)
+
+Checked against US2 scenario 1 (by hour), FR-019, FR-023, the `by_hour` and `dst_approximate` fields of
+`contracts/ui-ipc.md`, and research R4. Decided by the owner ("1. yes, 2. show all the hours even if empty, 3. do
+this, 4. … just match the time of the computer"):
+
+- **B1 — where it lives.** Inside *Over time*, a choice between *By site* and *By hour*, sharing the same range.
+  Not a screen of its own, and nothing in the header (H1 holds).
+- **B2 — every hour, quiet ones too.** All 24 hours of the day are shown, an hour with no reaches as plainly as
+  any other, because the pattern a person is looking for ("always between two and four") only shows against the
+  quiet hours.
+- **B3 — how it reads.** The hours in order from midnight, each with its count and the same soft bar as by site.
+  No *peak*, *worst hour* or other ranking word, no colour that means good or bad, nothing that congratulates a
+  quiet hour.
+- **B4 — the hour is the computer's.** A reach counts in the hour the computer's own clock showed when it
+  happened, with the offset in force at that instant. So a range that crosses a clock change, or a time zone
+  change, is not approximate, and there is no "approximate" note. This supersedes R4's accepted approximation for
+  the hour breakdown; `dst_approximate` stays false whenever the hours are exact.
+
+Already stated, and held by this slice as written: day-level estimates are excluded from the hour breakdown and
+the exclusion is stated (FR-023); the time Cairn did not see is stated above the hours, as for by site (H4, H5).
+
 ## Requirements *(mandatory)*
 
 ### Functional Requirements
