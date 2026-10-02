@@ -28,10 +28,11 @@ describe('Landscape', () => {
 });
 
 describe('CairnMark', () => {
-  it('is inline SVG with an accessible name and five stones', () => {
+  it('is inline SVG, decorative to assistive tech, with five stones', () => {
     const { container } = render(<CairnMark />);
-    const mark = screen.getByRole('img', { name: 'Cairn' });
-    expect(mark.tagName.toLowerCase()).toBe('svg');
+    const mark = container.querySelector('svg')!;
+    expect(mark).toHaveAttribute('aria-hidden', 'true');
+    expect(screen.queryByRole('img')).toBeNull();
     expect(container.querySelectorAll('[data-testid="stone"]')).toHaveLength(5);
     expect(container.innerHTML).not.toMatch(/lock|shield|chain/i);
   });

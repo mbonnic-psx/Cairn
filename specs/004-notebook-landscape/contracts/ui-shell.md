@@ -5,8 +5,11 @@ slice `frame`, extended by slice `looks` (more `Look` values and tokens) and by 
 
 ## Navigation
 
-- `tabsFor(step, protectionOn): Tab[]` in `src/navigation.ts` is the only place that decides which destinations
-  exist and which one is current. A page slice never adds, removes or reorders a tab.
+- `tabsFor(step, protectionOn, status?): Tab[]` in `src/navigation.ts` is the only place that decides which destinations
+  exist and which one is current. The optional `status` (a `ProtectionStatus`) decides only the trail tab's
+  label. A page slice never adds, removes or reorders a tab.
+- The tab column belongs to the shell and is bounded by the notebook's height: a tab that cannot fit its label on
+  one line shrinks and wraps it, so every tab stays whole and reachable down to an 800x600 window.
 - Tab accessible names are exactly today's header labels. The existing tests find them by role `button` and name.
 
 ## The page area
@@ -15,10 +18,12 @@ slice `frame`, extended by slice `looks` (more `Look` values and tokens) and by 
   screen receives no new props from the shell.
 - A page slice that lays a screen out as two pages does so inside that screen's own component, using the shell's
   spread classes:
-  - `.nb-spread`: a two-column grid matching the notebook's fold;
+  - `.nb-spread`: a grid of two equal columns (the notebook draws no fold);
   - `.nb-page`: one page;
-  - `.nb-page--ruled`: a page with rule lines;
-  - `.nb-margin`: the left margin line.
+  - `.nb-page--ruled`: a page with rule lines.
+
+  The margin line is the shell's, drawn once as a single `.nb-margin` element inside the notebook; it does not
+  scroll with the page. A page slice never adds a `.nb-margin` of its own.
   A screen whose content fits one page leaves the right page as `.nb-page--ruled` and empty (FR-031).
 
 ## Look tokens
@@ -37,6 +42,10 @@ Every page reads colour and type only from CSS custom properties set on the shel
 | `--nb-button` | the primary button's fill, with `--nb-button-ink` |
 | `--nb-font-serif` | headings, lists, reflective text |
 | `--nb-font-mono` | tab names, small labels, buttons only |
+
+Screens that still colour their text with the theme's palette (`text-ink-*`, `text-amber-*`, `text-moss-*`) are
+covered too: inside `[data-look]` the shell re-points those palette properties to darker warm values, and the
+contrast test checks every text colour the screens use against `--nb-paper`.
 
 A page slice never hard-codes a colour. That way, slice `looks` can re-light every page by changing tokens only,
 and the contrast test (research R6) covers every page by covering the tokens.

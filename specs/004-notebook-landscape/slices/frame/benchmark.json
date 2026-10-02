@@ -169,6 +169,32 @@
         "cycle": "rule",
         "split": 0
       }
+    },
+    {
+      "stage": "converge",
+      "started": "2026-10-02T03:10:28Z",
+      "planned": "converge: strong → host model — `strong` maps to the host model",
+      "tasks": {
+        "start": {
+          "open": 0,
+          "done": 16
+        }
+      },
+      "cursor": {
+        "source": "claude",
+        "session": "1aaf8c2c-95cc-4d60-8c0a-547f149a5b32",
+        "files": {
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1aaf8c2c-95cc-4d60-8c0a-547f149a5b32.jsonl": 2738352
+        },
+        "subagents": {
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1aaf8c2c-95cc-4d60-8c0a-547f149a5b32/subagents/agent-a049bade4053e9d5a.jsonl": 298626,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1aaf8c2c-95cc-4d60-8c0a-547f149a5b32/subagents/agent-a6657b751106302f3.jsonl": 533091,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1aaf8c2c-95cc-4d60-8c0a-547f149a5b32/subagents/agent-a6b15e5ea48727f36.jsonl": 283714,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1aaf8c2c-95cc-4d60-8c0a-547f149a5b32/subagents/agent-a965a1db74cf6fbf5.jsonl": 369452,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1aaf8c2c-95cc-4d60-8c0a-547f149a5b32/subagents/agent-ab6054538d935295f.jsonl": 341473,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1aaf8c2c-95cc-4d60-8c0a-547f149a5b32/subagents/agent-adeb4c1fced2516b4.jsonl": 422714
+        }
+      }
     }
   ]
 }

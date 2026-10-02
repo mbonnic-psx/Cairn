@@ -10,6 +10,11 @@ const currentIds = (step: Step, on: boolean) =>
     .map((t) => t.id);
 
 describe('tabsFor', () => {
+  it('takes the step, whether protection is on, and optionally the status (contracts/ui-shell.md)', () => {
+    expect(tabsFor.length).toBe(3);
+    expect(tabsFor('trail', true).map((t) => t.label)).toEqual(tabsFor('trail', true, undefined).map((t) => t.label));
+  });
+
   it('offers only protection, tonight and what cairn covers while protection is off, in header order', () => {
     expect(ids('choosing', false)).toEqual(['protection', 'checkin', 'limits']);
   });

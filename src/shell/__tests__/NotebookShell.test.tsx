@@ -76,10 +76,38 @@ describe('NotebookShell tabs', () => {
 describe('NotebookShell assembly', () => {
   it('shows the mark, the greeting and the landscape around the untouched children', () => {
     const { container } = shell();
-    expect(screen.getByRole('img', { name: 'Cairn' })).toBeInTheDocument();
+    expect(container.querySelector('svg.nb-mark')).toHaveAttribute('aria-hidden', 'true');
     expect(screen.getByText('Good morning.')).toBeInTheDocument();
     expect(container.querySelector('[data-testid="landscape"]')).not.toBeNull();
     expect(screen.getByText('the screen')).toBeInTheDocument();
+  });
+
+  it('is called "Cairn" once, and the tab landmark is named for what it does', () => {
+    const { container } = shell();
+    expect(screen.queryByRole('img')).toBeNull();
+    expect(screen.getByRole('navigation', { name: 'Pages' })).toBeInTheDocument();
+    const named = [...container.querySelectorAll('*')].filter(
+      (el) => el.getAttribute('aria-label') === 'Cairn' || (el.children.length === 0 && el.textContent === 'Cairn'),
+    );
+    expect(named).toHaveLength(1);
+  });
+
+  it('draws one margin line, hidden from assistive tech, beside the page area', () => {
+    const { container } = shell();
+    const margins = container.querySelectorAll('.nb-margin');
+    expect(margins).toHaveLength(1);
+    expect(margins[0]).toHaveAttribute('aria-hidden', 'true');
+    expect(container.querySelector('.nb-notebook')).toContainElement(margins[0] as HTMLElement);
+  });
+
+  it('gives a page slice the spread classes to build on', () => {
+    const { container } = render(
+      <NotebookShell tabs={fakeTabs} onSelect={vi.fn()}>
+        <div className="nb-page nb-page--ruled">ruled</div>
+      </NotebookShell>,
+    );
+    expect(container.querySelector('.nb-page--ruled')).not.toBeNull();
+    expect(container.querySelector('.nb-spread')).toContainElement(container.querySelector('.nb-page--ruled') as HTMLElement);
   });
 
   it('imports nothing reach-related and shows no count', () => {

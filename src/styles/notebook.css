@@ -12,7 +12,6 @@
   --nb-ink-quiet: #6b5a47;
   --nb-rule: #ebe0cb;
   --nb-margin: #c99a83;
-  --nb-fold: #e3d6bf;
   --nb-accent-amber: #7d5a22;
   --nb-button: #33291f;
   --nb-button-ink: #f8f1e3;
@@ -44,6 +43,15 @@
 
   --nb-font-serif: var(--font-notebook-serif);
   --nb-font-mono: var(--font-notebook-mono);
+
+  /* Today's screens colour their text with the theme's palette. On the paper
+   * the lighter shades fall under 4.5:1, so inside the notebook alone they
+   * are re-pointed to darker warm values of the same families. */
+  --color-ink-500: #5c5245;
+  --color-ink-400: #6b5f52;
+  --color-amber-600: #7d5a22;
+  --color-amber-500: #8a6325;
+  --color-moss-600: #4a5e41;
 }
 
 /* The window. */
@@ -206,15 +214,6 @@
   color: var(--nb-ink-body);
   line-height: 1.65;
 }
-.nb-page-area::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 38px;
-  width: 1px;
-  background: var(--nb-margin);
-}
 .nb-page--ruled {
   background-image: repeating-linear-gradient(
     to bottom,
@@ -232,6 +231,7 @@
   left: 38px;
   width: 1px;
   background: var(--nb-margin);
+  pointer-events: none;
 }
 .nb-label {
   font-family: var(--nb-font-mono);
@@ -253,30 +253,49 @@
   text-transform: uppercase;
 }
 
-/* The tabs, fixed to the notebook's right edge. */
+/* The tabs, fixed to the notebook's right edge. The column is bounded by the
+ * notebook's own height (top and bottom), and a tab that cannot fit its label
+ * on one line shrinks and wraps it onto a second column, so every tab stays
+ * whole, inside the notebook and reachable at any window size. */
 .nb-tabs {
   position: absolute;
   right: -44px;
-  top: 40px;
+  top: 12px;
+  bottom: 12px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  align-items: flex-start;
+  gap: 4px;
 }
 .nb-tab {
+  flex: 0 1 auto;
   width: 38px;
-  min-height: 80px;
-  padding: 10px 0;
+  min-height: min-content;
+  padding: 8px 0;
   border: 0;
   border-radius: 0 6px 6px 0;
   background: var(--nb-tab-limits);
   color: var(--nb-tab-ink);
   writing-mode: vertical-rl;
   font-family: var(--nb-font-mono);
-  font-size: 12px;
-  letter-spacing: 0.08em;
+  font-size: 11px;
+  line-height: 1.2;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
   cursor: pointer;
   transition: filter 160ms ease;
+}
+@media (min-height: 800px) {
+  .nb-tabs {
+    top: 40px;
+    gap: 6px;
+  }
+  .nb-tab {
+    min-height: 80px;
+    padding: 10px 0;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+  }
 }
 .nb-tab--protection { background: var(--nb-tab-protection); }
 .nb-tab--trail { background: var(--nb-tab-trail); }
@@ -292,7 +311,7 @@
   color: var(--nb-ink);
 }
 .nb-tab:focus-visible,
-.nb-switch:focus-visible {
+.nb-switch select:focus-visible {
   outline: 2px solid var(--nb-ink);
   outline-offset: 2px;
 }
@@ -324,9 +343,9 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  [data-look] *,
+  [data-look] *::before,
+  [data-look] *::after {
     animation: none !important;
     transition: none !important;
   }
@@ -342,5 +361,15 @@
   }
   .nb-landscape {
     forced-color-adjust: none;
+  }
+  /* The scene keeps its own colours, so text laid over it sits on the
+   * system's own ground and takes the system's own ink. */
+  .nb-titlebar,
+  .nb-greeting,
+  .nb-switch {
+    background: Canvas;
+    color: CanvasText;
+    border-radius: 3px;
+    padding: 4px 8px;
   }
 }

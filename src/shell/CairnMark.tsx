@@ -1,4 +1,5 @@
-/** The five-stone cairn, as the mark of the notebook. Inline, so it needs no file. */
+/** The five-stone cairn, as the mark of the notebook. Inline, so it needs no file.
+ * Decorative: the word "Cairn" beside it is the name a reader hears. */
 const STONES = [
   { x: 590, y: 236, w: 196, h: 44, fill: 'var(--nb-stone-base)' },
   { x: 616, y: 184, w: 152, h: 44, fill: 'var(--nb-stone-moss)' },
@@ -11,8 +12,8 @@ export function CairnMark({ size = 16 }: { size?: number }) {
   return (
     <svg
       className="nb-mark"
-      role="img"
-      aria-label="Cairn"
+      aria-hidden="true"
+      focusable="false"
       width={size}
       height={size}
       viewBox="570 40 236 260"

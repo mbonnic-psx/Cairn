@@ -22,7 +22,7 @@ Nothing is stored. These are the in-memory values the interface works with.
 | `label` | string | The words today's header uses: "Protection", the trail title, "Today", "Tonight", "What Cairn covers". |
 | `current` | boolean | True for the destination now showing (FR-005). |
 
-Rules (from `tabsFor(step, protectionOn)`, research R7):
+Rules (from `tabsFor(step, protectionOn, status?)`, research R7; `status` only decides the trail tab's label):
 
 - `protection` is always present. It is current for steps `choosing`, `disclosure` and `protected`.
 - `trail` and `reaches` are present only when protection is on.

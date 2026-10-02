@@ -30,8 +30,9 @@ export function NotebookShell({
         <Greeting />
       </aside>
       <div className="nb-notebook nb-spread">
+        <span className="nb-margin" aria-hidden="true" />
         <main className="nb-page-area nb-page">{children}</main>
-        <nav className="nb-tabs" aria-label="Cairn">
+        <nav className="nb-tabs" aria-label="Pages">
           {tabs.map((tab) => (
             <button
               key={tab.id}
