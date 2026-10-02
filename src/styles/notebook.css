@@ -137,6 +137,22 @@
   --nb-sun-top: 41%;
   --nb-sun: #f3e6cf;
   --nb-sun-glow: #f3e6cf2e;
+  --nb-star: #f3e6cf;
+  --nb-star-size: 3px;
+  --nb-star-1-left: 7%;
+  --nb-star-1-top: 10%;
+  --nb-star-2-left: 19%;
+  --nb-star-2-top: 15%;
+  --nb-star-3-left: 23%;
+  --nb-star-3-top: 8%;
+  --nb-star-4-left: 3%;
+  --nb-star-4-top: 21%;
+  --nb-star-5-left: 95%;
+  --nb-star-5-top: 7.5%;
+  --nb-star-6-left: 98%;
+  --nb-star-6-top: 17.5%;
+  --nb-stone-glow: #f3e6cf59;
+  --nb-lamp-glow: #f3c88c40;
   --nb-hill-far: #4c3a33;
   --nb-hill-mid: #352c27;
   --nb-hill-near: #221d1a;
@@ -196,7 +212,8 @@
   inset: 0;
   background: linear-gradient(to bottom, var(--nb-sky-top) 0%, var(--nb-sky-mid) 60%, var(--nb-sky-bottom) 100%);
 }
-.nb-sun {
+.nb-sun,
+.nb-moon {
   position: absolute;
   width: var(--nb-sun-size);
   height: var(--nb-sun-size);
@@ -206,6 +223,19 @@
   background: var(--nb-sun);
   box-shadow: 0 0 80px 30px var(--nb-sun-glow);
 }
+.nb-star {
+  position: absolute;
+  width: var(--nb-star-size);
+  height: var(--nb-star-size);
+  border-radius: 50%;
+  background: var(--nb-star);
+}
+.nb-star--1 { left: var(--nb-star-1-left); top: var(--nb-star-1-top); }
+.nb-star--2 { left: var(--nb-star-2-left); top: var(--nb-star-2-top); }
+.nb-star--3 { left: var(--nb-star-3-left); top: var(--nb-star-3-top); }
+.nb-star--4 { left: var(--nb-star-4-left); top: var(--nb-star-4-top); }
+.nb-star--5 { left: var(--nb-star-5-left); top: var(--nb-star-5-top); }
+.nb-star--6 { left: var(--nb-star-6-left); top: var(--nb-star-6-top); }
 .nb-hill {
   position: absolute;
   border-radius: 50%;
@@ -240,8 +270,10 @@
   align-items: center;
   gap: 4px;
 }
+/* The glow is night's alone: only that look sets --nb-stone-glow. */
 .nb-stone {
   border-radius: 999px;
+  box-shadow: 0 0 14px 2px var(--nb-stone-glow, transparent);
 }
 .nb-stone--base { background: var(--nb-stone-base); }
 .nb-stone--moss { background: var(--nb-stone-moss); }
@@ -301,7 +333,7 @@
   min-height: 480px;
   background: var(--nb-paper);
   border-radius: 6px;
-  box-shadow: 0 1px 0 var(--nb-shadow-edge), 0 24px 50px -20px var(--nb-shadow-soft);
+  box-shadow: 0 1px 0 var(--nb-shadow-edge), 0 24px 50px -20px var(--nb-shadow-soft), 0 0 90px 10px var(--nb-lamp-glow, transparent);
 }
 .nb-spread {
   display: grid;

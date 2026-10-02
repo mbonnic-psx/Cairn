@@ -379,3 +379,54 @@ describe('the mark on every look\'s own sky (FR-033, D4)', () => {
     },
   );
 });
+
+describe('night\'s scene: moon, stars, glow and lamp, all static (FR-001, FR-023, D3; research L3, L4)', () => {
+  const outsideReduced = rulesOf(noComments(notebook).replace(/@media \(prefers-reduced-motion: reduce\)\s*\{[\s\S]*?\n\}\s*\n/, ''));
+
+  it('draws the moon from the sun\'s tokens, as the one body in the sky', () => {
+    const body = ruleFor('.nb-moon').map((r) => r.body).join('');
+    expect(body).toMatch(/width:\s*var\(--nb-sun-size\)/);
+    expect(body).toMatch(/left:\s*var\(--nb-sun-left\)/);
+    expect(body).toMatch(/top:\s*var\(--nb-sun-top\)/);
+    expect(body).toMatch(/background:\s*var\(--nb-sun\)/);
+    expect(body).toMatch(/box-shadow:[^;]*var\(--nb-sun-glow\)/);
+  });
+
+  it('draws six stars whose colour, size and place are all tokens', () => {
+    const star = ruleFor('.nb-star').map((r) => r.body).join('');
+    expect(star).toMatch(/background:\s*var\(--nb-star\)/);
+    expect(star).toMatch(/width:\s*var\(--nb-star-size\)/);
+    expect(star).not.toMatch(/#[0-9a-fA-F]{3,8}\b|(width|height|left|top):\s*[\d.]+/);
+    for (const n of [1, 2, 3, 4, 5, 6]) {
+      const body = ruleFor(`.nb-star--${n}`).map((r) => r.body).join('');
+      expect(body).toContain(`left: var(--nb-star-${n}-left)`);
+      expect(body).toContain(`top: var(--nb-star-${n}-top)`);
+      expect(blockOf('night')).toContain(`--nb-star-${n}-left:`);
+      expect(blockOf('night')).toContain(`--nb-star-${n}-top:`);
+    }
+    expect(token('--nb-star', 'night')).toBeDefined();
+  });
+
+  it('lights the stones and the notebook with night\'s glow tokens, and no other look has them', () => {
+    expect(token('--nb-stone-glow', 'night')).toBeDefined();
+    expect(token('--nb-lamp-glow', 'night')).toBeDefined();
+    for (const look of ['morning', 'midday'] as const) {
+      expect(blockOf(look)).not.toMatch(/--nb-(stone|lamp)-glow/);
+    }
+    expect(ruleFor('.nb-stone').map((r) => r.body).join('')).toMatch(/box-shadow:[^;]*var\(--nb-stone-glow/);
+    expect(ruleFor('.nb-notebook').map((r) => r.body).join('')).toMatch(/box-shadow:[^;]*var\(--nb-lamp-glow/);
+  });
+
+  it('animates nothing, and transitions only the tab\'s hover filter', () => {
+    expect(outsideReduced.filter((r) => /animation/.test(r.body))).toEqual([]);
+    const transitioning = outsideReduced.filter((r) => /transition/.test(r.body));
+    expect(transitioning.map((r) => r.selector)).toEqual(['.nb-tab']);
+    expect(transitioning[0]!.body).toMatch(/transition:\s*filter\b[^;,]*;/);
+  });
+
+  it('keeps the reduced-motion block scoped to [data-look]', () => {
+    const block = noComments(notebook).match(/@media \(prefers-reduced-motion: reduce\)\s*\{([\s\S]*?\n\})\s*\n/);
+    expect(block).not.toBeNull();
+    for (const r of rulesOf(block![1]!)) for (const one of r.selector.split(',')) expect(one.trim()).toMatch(/^\[data-look\]/);
+  });
+});

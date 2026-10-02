@@ -57,6 +57,16 @@ describe('Landscape by look', () => {
   });
 });
 
+describe('Landscape night sky', () => {
+  it('places the moon and every star by stylesheet token, never by an inline style', () => {
+    render(<Landscape look="night" />);
+    const scene = screen.getByTestId('landscape');
+    for (const el of scene.querySelectorAll<HTMLElement>('[data-testid="moon"], [data-testid="star"]')) {
+      expect(el.getAttribute('style')).toBeNull();
+    }
+  });
+});
+
 describe('CairnMark', () => {
   it('is inline SVG, decorative to assistive tech, with five stones', () => {
     const { container } = render(<CairnMark />);
