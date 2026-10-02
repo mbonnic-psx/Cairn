@@ -174,9 +174,10 @@ function Waiting({
       <div className="nb-protection-note">
         <p className="nb-protection-note__what">{pending.what}</p>
         <p className="nb-protection-note__sentence">{sentence}</p>
-        <Button tone="quiet" className="nb-protection-note__button" onClick={cancel}>
+        {/* A plain button: nothing a look re-points fades, so none of the shared button's transition is carried here. */}
+        <button type="button" className="nb-protection-note__button" onClick={cancel}>
           Keep things as they are
-        </Button>
+        </button>
       </div>
     );
   }
