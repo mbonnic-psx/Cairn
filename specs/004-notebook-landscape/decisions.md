@@ -383,6 +383,7 @@ Every product decision a `/cruise` run took, in order. A person overrides one by
 - **Confidence:** medium · **Would reverse if:** the owner, at the reveal demo, wants the fold darker, or reads it as something a person needs to tell the pages apart
 - **Written to:** `specs/004-notebook-landscape/spec.md` (Clarifications, FR-034)
 - **Status:** standing
+- **Note, 2026-10-02 (after-converge gaps):** "more than the ruled lines' 1.16:1" holds for morning only. On midday and night the fold is the ruled lines' own colour (`--nb-fold` = `--nb-rule`), as on the canvas, so on a blank ruled page only its direction sets it apart. A line for the owner's reveal demo.
 
 ## D35 — How wide may the notebook grow, and what happens past that?
 - **Stage:** slice gaps · **Slice:** fold-and-width · **When:** 2026-10-02T16:20:00Z · **Iteration:** 8
