@@ -45,7 +45,8 @@ const label = /<span>([^<]+)<\/span>/.exec(switchSource)?.[1] ?? '';
 const choices = [...switchSource.matchAll(/name: '([^']+)'/g)].map((m) => m[1]);
 const words = [label, ...choices].filter((w) => w !== '');
 
-function build(mode: 'prod' | 'dev'): { dir: string; files: string } {
+/** Builds, reads every emitted file, and removes the scratch directory on every exit path. */
+function build(mode: 'prod' | 'dev'): string {
   const dir = path.join(
     os.homedir(),
     '.cache',
@@ -65,11 +66,15 @@ function build(mode: 'prod' | 'dev'): { dir: string; files: string } {
     'silent',
   ];
   if (mode === 'dev') args.push('--mode', 'development');
-  const result = cp.spawnSync(proc.execPath, args, { env, encoding: 'utf8' });
-  if (result.status !== 0) {
-    throw new Error(`vite build (${mode}) exited ${result.status}: ${result.stderr}`);
+  try {
+    const result = cp.spawnSync(proc.execPath, args, { env, encoding: 'utf8' });
+    if (result.status !== 0) {
+      throw new Error(`vite build (${mode}) exited ${result.status}: ${result.stderr}`);
+    }
+    return readAll(dir);
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
   }
-  return { dir, files: readAll(dir) };
 }
 
 function readAll(dir: string): string {
@@ -103,15 +108,10 @@ describe('the released interface (SC-002)', () => {
     () => {
       const prod = build('prod');
       const dev = build('dev');
-      try {
-        expect(found(dev.files).sort(), 'the development build must carry every word').toEqual(
-          [...words].sort(),
-        );
-        expect(found(prod.files), 'the released build must carry none').toEqual([]);
-      } finally {
-        fs.rmSync(prod.dir, { recursive: true, force: true });
-        fs.rmSync(dev.dir, { recursive: true, force: true });
-      }
+      expect(found(dev).sort(), 'the development build must carry every word').toEqual(
+        [...words].sort(),
+      );
+      expect(found(prod), 'the released build must carry none').toEqual([]);
     },
     TIMEOUT,
   );
