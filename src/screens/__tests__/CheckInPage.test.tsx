@@ -15,6 +15,7 @@ import { installFakeCore, never, type FakeCore } from './fakeCore';
 import {
   dayCoverageNote,
   evening,
+  lateEvening,
   loadRefusal,
   quoteLine,
   saveRefusal,
@@ -38,8 +39,13 @@ const settle = () =>
   });
 
 /** Renders a case, on a page when `shell` is true, and does what the person does in it. */
-async function show(c: TonightCase, shell: boolean, perform = false) {
-  vi.setSystemTime(evening());
+async function show(
+  c: TonightCase,
+  shell: boolean,
+  perform = false,
+  typed?: string,
+) {
+  vi.setSystemTime(c.endsWhileOpen ? lateEvening() : evening());
   core = installFakeCore(tonightCore(c));
   const ui = <CheckIn />;
   const view = render(
@@ -61,6 +67,14 @@ async function show(c: TonightCase, shell: boolean, perform = false) {
     fireEvent.click(screen.getByRole('button', { name: 'Hide quotes' }));
     await settle();
   }
+  if (typed !== undefined) {
+    fireEvent.change(screen.getByRole('textbox'), { target: { value: typed } });
+  }
+  if (c.endsWhileOpen) {
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(11 * 60 * 1000);
+    });
+  }
   const main = (view.container.querySelector('main') ?? view.container) as HTMLElement;
   const spread = main.querySelector<HTMLElement>('.nb-spread');
   const pages = spread
@@ -77,8 +91,12 @@ function words(root: HTMLElement): string[] {
     .sort();
 }
 
-async function wordsOutside(c: TonightCase, perform = false): Promise<string[]> {
-  const view = await show(c, false, perform);
+async function wordsOutside(
+  c: TonightCase,
+  perform = false,
+  typed?: string,
+): Promise<string[]> {
+  const view = await show(c, false, perform, typed);
   const found = words(view.container);
   view.unmount();
   core?.remove();
@@ -524,6 +542,57 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (name) 
       onPage.unmount();
       core?.remove();
       expect(right).toEqual(without(await wordsOutside(c, true), left));
+    });
+  });
+
+  describe('a day that ended while the check-in was open', () => {
+    const DATE = 'Wednesday 30 September';
+    const emptyDay = tonightCases['a day that ended while open']!;
+    const keptDay: TonightCase = { ...tonightCases['an entry kept']!, endsWhileOpen: true };
+    const typedDay: TonightCase = {
+      ...tonightCases['reaches, no coverage note, quotes hidden']!,
+      endsWhileOpen: true,
+    };
+    const TYPED = 'Written before midnight.';
+
+    it('the heading becomes the date in words and the empty log says it too', async () => {
+      const { left, main } = await show(emptyDay, true);
+      expect(left).toBeDefined();
+      const heading = within(left!).getByRole('heading', { level: 2 });
+      expect(heading).toHaveTextContent(DATE);
+      expect(heading.textContent).toBe(DATE);
+      expect(within(main).queryByText('Tonight')).toBeNull();
+      expect(within(left!).getByText(`Nothing here for ${DATE}.`)).toHaveClass(
+        'nb-checkin-empty',
+      );
+      expect(left!.textContent).not.toContain('today');
+    });
+
+    it('a kept entry reads "Kept for {date}." in the one region', async () => {
+      const { right } = await show(keptDay, true, true);
+      expect(right).toBeDefined();
+      expect(right!.querySelector('[role="status"]')!.textContent).toBe(`Kept for ${DATE}.`);
+    });
+
+    it('the text typed before the day ended stays in the writing space', async () => {
+      const { right, left } = await show(typedDay, true, false, TYPED);
+      expect(left).toBeDefined();
+      expect(within(left!).getByRole('heading', { level: 2 })).toHaveTextContent(DATE);
+      const space = within(right!).getByLabelText('How the day went') as HTMLTextAreaElement;
+      expect(space.value).toBe(TYPED);
+    });
+
+    it.each([
+      ['an empty log', emptyDay, false, undefined],
+      ['a kept entry', keptDay, true, undefined],
+      ['text typed', typedDay, false, TYPED],
+    ])('%s: the words equal the same state outside any shell', async (_name, c, perform, typed) => {
+      const onPage = await show(c, true, perform, typed);
+      expect(onPage.spread).not.toBeNull();
+      const found = words(onPage.spread!);
+      onPage.unmount();
+      core?.remove();
+      expect(found).toEqual(await wordsOutside(c, perform, typed));
     });
   });
 });
