@@ -119,6 +119,25 @@ gives seven zeros when `first_day > last_day`. It takes no offset and no reach. 
 The first day of the week, and the days' names, are not here. `by_weekday` returns `0–6`, as *Deliberately not in
 this module* says. The interface orders and names the days. See `slices/history-by-weekday/plan.md`.
 
+#### Amended in slice `history-movement` (2026-10-02)
+
+Added beside `by_hour`, `by_weekday` and `weekdays_in`, which are unchanged:
+
+```rust
+pub struct LocalRange<'a> {
+    pub first_day: LocalDate, pub last_day: LocalDate,
+    pub from: i64, pub to: i64,                 // the range's bounds, as the interface computed them
+    pub first_offset: i32, pub changes: &'a [OffsetChange],   // as `check_offsets` returned them
+}
+pub fn movement(reaches: &[Reach], range: &LocalRange<'_>, unseen: &[(i64, i64)], now: i64) -> Vec<MovementRow>
+```
+
+`unseen` is the range's gaps, sorted, merged and inside `[from, to)`. `now` is supplied by the caller and never
+read here. Properties: the rows are contiguous from `first_day`, one per date up to 56 dates and one per seven
+dates beyond; every reach in `[from, to)` is in exactly one row, so the counts sum to `by_hour`'s; a reach's row
+holds its instant; the reaches' order does not matter; estimates never come in; adding unseen time never makes a
+row more seen; no row holding a reach is `None`; nothing is allocated per date.
+
 ### Deliberately not in this module
 
 No formatting, no labels, no words. `by_weekday` returns `0–6`, not "Monday". The pure layer
