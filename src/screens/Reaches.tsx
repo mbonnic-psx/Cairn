@@ -315,18 +315,50 @@ function OverTimeView({
         : answer === 'unreadable'
           ? COULD_NOT_READ
           : answer.sealed;
+    const sites = typeof answer === 'string' || sentence ? [] : answer.by_site;
+    const largest = largestCount(sites);
     return (
       <>
         <div className="nb-page">
           <h2 className="nb-reaches-title">{rangeInWords(firstDay, lastDay)}</h2>
           {boxes}
-          {sentence ? (
+          {sentence || typeof answer === 'string' ? (
             <p className="nb-reaches-sentence">{sentence}</p>
           ) : (
-            <RangeBody answer={answer} />
+            <>
+              {answer.coverage_note && (
+                <p className="nb-reaches-sentence">{answer.coverage_note}</p>
+              )}
+              {answer.estimates_excluded > 0 && (
+                <p className="nb-reaches-sentence">
+                  {answer.estimates_excluded === 1
+                    ? ESTIMATE_ONE
+                    : estimatesMany(answer.estimates_excluded)}
+                </p>
+              )}
+              <p className="nb-reaches-note">{COUNTED_ONLY_WHILE_RUNNING}</p>
+            </>
           )}
         </div>
-        <div className="nb-page nb-page--ruled" />
+        <div className="nb-page nb-page--ruled">
+          {sites.length > 0 && (
+            <ul className="nb-reaches-log">
+              {sites.map((site) => (
+                <li key={site.domain} className="nb-reaches-line">
+                  <span className="nb-reaches-site">{site.domain}</span>
+                  <div aria-hidden="true" className="nb-reaches-bar">
+                    <div
+                      data-testid="bar"
+                      className="nb-reaches-bar__fill"
+                      style={{ width: `${Math.round((site.count / largest) * 100)}%` }}
+                    />
+                  </div>
+                  <span className="nb-reaches-count">{site.count}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       </>
     );
   }

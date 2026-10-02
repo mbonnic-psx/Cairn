@@ -10,6 +10,7 @@ import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { rangeInWords } from '../../localDays';
+import type { Patterns } from '../../ipc/reaches';
 import type { NotebookLook } from '../../look/look';
 import { NotebookShell } from '../../shell/NotebookShell';
 import { Reaches } from '../Reaches';
@@ -17,6 +18,7 @@ import {
   evening,
   overTimeCases,
   overTimeReader,
+  rangeCoverageNote,
   sealedSentence,
   silentReader,
   todayCases,
@@ -406,6 +408,171 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (name) 
         await waitFor(() =>
           expect(left!.lastElementChild).toHaveTextContent(sentenceFor[state]!),
         );
+        expect(words(spread!)).toEqual(expected);
+      },
+    );
+  });
+
+  describe('Over time with sites on a notebook page', () => {
+    const CLOSING =
+      'Cairn counts only while it is running. This is what it saw over these days.';
+    const ONE =
+      'Your own estimate for 1 day is not counted here, because an estimate has no site.';
+    const MANY =
+      'Your own estimates for 3 days are not counted here, because an estimate has no site.';
+    const RANGE = rangeInWords('2026-09-03', '2026-09-30');
+
+    const listCases: Array<[string, string[]]> = [
+      ['a list', [CLOSING]],
+      ['a list, one estimate', [ONE, CLOSING]],
+      [
+        'a list, a coverage note and several estimates',
+        [rangeCoverageNote, MANY, CLOSING],
+      ],
+    ];
+
+    async function listed(answer: Patterns) {
+      const user = userEvent.setup();
+      const read = {
+        listTodaysReaches: silentReader.listTodaysReaches,
+        summarizeReaches: async () => answer,
+      };
+      const view = onPage(<Reaches today={todayCases.sealed} read={read} now={now} />);
+      await user.click(
+        within(view.spread!.firstElementChild as HTMLElement).getByRole('button', {
+          name: 'Over time',
+        }),
+      );
+      const pages = Array.from(
+        view.spread!.querySelectorAll<HTMLElement>(':scope > .nb-page'),
+      );
+      await waitFor(() => expect(pages[1]!.textContent).not.toBe(''));
+      return { ...view, left: pages[0]!, right: pages[1]! };
+    }
+
+    it.each(listCases)(
+      'left page: range, From and To, then the notes, the closing sentence last: %s',
+      async (state, notes) => {
+        const { left } = await listed(overTimeCases[state] as Patterns);
+        const [heading, range, ...rest] = Array.from(left.children) as HTMLElement[];
+        expect(heading).toHaveTextContent(RANGE);
+        expect(range).toHaveClass('nb-reaches-range');
+        expect(rest.map((el) => el.textContent)).toEqual(notes);
+        expect(rest[rest.length - 1]).toHaveClass('nb-reaches-note');
+      },
+    );
+
+    it('says nothing about estimates when none are left out', async () => {
+      const { left } = await listed(overTimeCases['a list'] as Patterns);
+      expect(left.textContent).not.toMatch(/estimate/);
+    });
+
+    it('right page: ruled, a line a site in the core order, the site, the bar, the count', async () => {
+      const answer = overTimeCases['a list'] as Patterns;
+      const { right } = await listed(answer);
+      expect(right).toHaveClass('nb-page--ruled');
+      const lines = within(right).getAllByRole('listitem');
+      expect(lines).toHaveLength(answer.by_site.length);
+      lines.forEach((line, i) => {
+        const site = answer.by_site[i]!;
+        const [name, bar, count] = Array.from(line.children) as HTMLElement[];
+        expect(line.children).toHaveLength(3);
+        expect(name).toHaveTextContent(site.domain);
+        expect(name).toHaveClass('nb-reaches-site');
+        expect(bar).toHaveAttribute('aria-hidden', 'true');
+        expect(count).toHaveTextContent(String(site.count));
+        expect(count).toHaveClass('nb-reaches-count');
+      });
+    });
+
+    it('keeps each bar as wide as Current draws it, from the sheet and no other colour', async () => {
+      const { right } = await listed(overTimeCases['a list'] as Patterns);
+      const bars = within(right).getAllByTestId('bar');
+      expect(bars.map((b) => b.style.width)).toEqual(['100%', '44%', '11%']);
+      for (const el of Array.from(right.querySelectorAll<HTMLElement>('*'))) {
+        expect(el.className).not.toMatch(
+          /transition|duration-|animate-|bg-|text-|settle/,
+        );
+        expect(el.getAttribute('style') ?? '').not.toMatch(
+          /color|background|transition|animation/,
+        );
+      }
+    });
+
+    it('keeps the date boxes the same nodes when the answer arrives', async () => {
+      const user = userEvent.setup();
+      let answer!: (patterns: Patterns) => void;
+      const read = {
+        listTodaysReaches: silentReader.listTodaysReaches,
+        summarizeReaches: () => new Promise<Patterns>((resolve) => (answer = resolve)),
+      };
+      const { spread } = onPage(
+        <Reaches today={todayCases.sealed} read={read} now={now} />,
+      );
+      await user.click(
+        within(spread!.firstElementChild as HTMLElement).getByRole('button', {
+          name: 'Over time',
+        }),
+      );
+      const left = spread!.querySelector<HTMLElement>(':scope > .nb-page')!;
+      const from = within(left).getByLabelText('From');
+      const to = within(left).getByLabelText('To');
+      answer(overTimeCases['a list'] as Patterns);
+      await waitFor(() => expect(left.textContent).toContain(CLOSING));
+      expect(within(left).getByLabelText('From')).toBe(from);
+      expect(within(left).getByLabelText('To')).toBe(to);
+    });
+
+    it('updates the heading and the list when From changes', async () => {
+      const user = userEvent.setup();
+      const read = {
+        listTodaysReaches: silentReader.listTodaysReaches,
+        summarizeReaches: async (first: string) =>
+          first === '2026-09-10'
+            ? {
+                ...(overTimeCases['a list'] as Patterns),
+                by_site: [{ domain: 'later.example', count: 2 }],
+              }
+            : (overTimeCases['a list'] as Patterns),
+      };
+      const { spread } = onPage(
+        <Reaches today={todayCases.sealed} read={read} now={now} />,
+      );
+      await user.click(
+        within(spread!.firstElementChild as HTMLElement).getByRole('button', {
+          name: 'Over time',
+        }),
+      );
+      const [left, right] = Array.from(
+        spread!.querySelectorAll<HTMLElement>(':scope > .nb-page'),
+      );
+      await waitFor(() => expect(right!.textContent).toContain('news.example'));
+      fireEvent.change(within(left!).getByLabelText('From'), {
+        target: { value: '2026-09-10' },
+      });
+      await waitFor(() => expect(right!.textContent).toContain('later.example'));
+      expect(within(left!).getByRole('heading', { level: 2 })).toHaveTextContent(
+        rangeInWords('2026-09-10', '2026-09-30'),
+      );
+    });
+
+    it.each(listCases)(
+      'says the same words as outside any shell, notes moved: %s',
+      async (state) => {
+        const user = userEvent.setup();
+        const answer = overTimeCases[state] as Patterns;
+        const read = {
+          listTodaysReaches: silentReader.listTodaysReaches,
+          summarizeReaches: async () => answer,
+        };
+        const outside = render(
+          <Reaches today={todayCases.sealed} read={read} now={now} />,
+        );
+        await user.click(screen.getByRole('button', { name: 'Over time' }));
+        await screen.findByText(CLOSING);
+        const expected = words(outside.container);
+        outside.unmount();
+        const { spread } = await listed(answer);
         expect(words(spread!)).toEqual(expected);
       },
     );
