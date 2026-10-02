@@ -131,8 +131,8 @@
 .nb-reaches-seen {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px 20px;
-  margin: 12px 0 0;
+  gap: calc(4 * var(--nb-u)) calc(20 * var(--nb-u));
+  margin: calc(12 * var(--nb-u)) 0 0;
 }
 
 /* From and To: typewriter labels over serif boxes. The box's edge is drawn here, because a native one is a
