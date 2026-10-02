@@ -36,7 +36,7 @@ specification is a guess, and the entry says which.]
 
 ## Out of scope
 
-- **The `reveal` slice of 004-notebook-landscape is never run by `/cruise`.** It makes the notebook the default and removes today's interface. It runs only after the owner has seen all three looks (morning, midday, night) in a demo and accepted them (spec SC-008, FR-032). The owner said so on 2026-10-01: "Stop it before the reveal? — yes". A run that reaches it parks with `cruise: parked: reveal needs the owner's own demo of all three looks`.
+- **The `reveal` slice of 004-notebook-landscape: the owner said go, 2026-10-02.** They demoed all three looks themselves (frame, fold-and-width, board-scale), accepted them, and asked for the reveal ("go reveal"). `/cruise` may now run it. The D1 condition is met.
 - The clock choosing the look is a later feature, not part of 004.
 - Anything this brief leaves as a placeholder: decide from the specification, the constitution and the standing decisions, and say so.
 
