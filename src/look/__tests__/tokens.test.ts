@@ -937,3 +937,17 @@ describe('the switch is readable on every look\'s sky (FR-021, FR-011, FR-012; r
     expect(contrastRatio(token('--nb-greeting-body', look), token('--nb-sky-top', look))).toBeGreaterThanOrEqual(TEXT);
   });
 });
+
+describe('the released build\'s first paint (D45)', () => {
+  it('paints html and body in the morning sky\'s top colour until React mounts, not sand', () => {
+    const morning = notebook.match(/\[data-look="morning"\]\s*\{[^}]*\}/)![0];
+    const skyTop = morning.match(/--nb-sky-top:\s*(#[0-9a-fA-F]{6})/)![1]!;
+    const paint = (sel: string) =>
+      rulesOf(theme)
+        .filter((r) => r.selector.split(',').map((x) => x.trim()).includes(sel))
+        .map((r) => r.body.match(/background:\s*([^;]+);/)?.[1]?.trim())
+        .find(Boolean);
+    expect(paint('html')?.toLowerCase()).toBe(skyTop.toLowerCase());
+    expect(paint('body')?.toLowerCase()).toBe(skyTop.toLowerCase());
+  });
+});

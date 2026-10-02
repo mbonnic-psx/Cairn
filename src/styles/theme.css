@@ -70,9 +70,15 @@
     'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
 }
 
+/* Until React mounts the page is the morning sky's top colour, so a released build's first paint is not sand (D45).
+ * The value is the morning --nb-sky-top; tokens.test.ts holds the two together. */
+html,
+body {
+  background: #f7e7cc;
+}
+
 body {
   margin: 0;
-  background: var(--color-sand-50);
   color: var(--color-ink-700);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
