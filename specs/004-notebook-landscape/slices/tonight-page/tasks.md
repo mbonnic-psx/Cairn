@@ -114,6 +114,15 @@ Constitution, per principle the diff touches:
 
 Start: the slice adds one stylesheet import to the composition root, so the interface was started with it in place: `scripts/smoke.sh interface` answered on 127.0.0.1:1420. `scripts/smoke.sh app` was not run: it rebuilds the Rust core, which this slice does not touch. `make -f delivery/Makefile verify` green at `83a3ad2` (after projecting the gitignored harness files the fresh worktree lacked). Map: `make check-convergence` unchanged, 3 of 9 axes at target; the slice reached no new rung (its pin is the per-slice *pinned* rung, held in the ledger row handed back above), so no row moves.
 
+After-converge gaps (`drive-gaps` · model: opus · delegated, fresh context, 2026-10-02, over `94e9bb9..59d84ce`): about 60 criteria traced, 3 findings, none CRITICAL, HIGH or MEDIUM. Every `?core=` state and quickstart step was run in a browser on the demo core and matched; the demo core's sentences match the core's source word for word. Triage:
+- LOW, fixed in `quickstart.md`: step 3 promised the list follows a change of From, which the demo core (one fixed list) cannot show; reworded, and `?core=refuse-save` and the states the demo cannot show are named.
+- LOW, unconfirmed lead, carried to Phase 4 as T026: a writing space dragged taller may push the status sentence off the ruling.
+- LOW, product question, handed back (`plan.md`, *Open questions*): whether "How the day went" is a small label (typewriter) or the writing's heading (serif). The slice renders the serif, as Current does and as recommended.
+
 ## Phase 4: Convergence
 
 (Tasks from the after-acceptance passes — the adversary pass, converge, the archive — are appended here, in this slice's own PR.)
+
+Carried from the after-converge gaps review (LOW):
+
+- [ ] T026 [US3] LOW — a lead, verify before acting. Rule: whatever height the person drags the writing space to, the words under it ("Keep this", the status sentence, the quotes switch) stay legible and are not struck through by a rule (FR-019, D24). Evidence (unconfirmed, read from the sheet): `src/styles/tonight-page.css:271` lets the writing space resize; "Keep this" (`:280`, sized from the 226px minimum per `:279`) and the status sentence (`:306`) sit on the 32px pitch only at that minimum, and the status sentence has no paper ground, unlike the switch (`:320`) and the disabled button (`:297`). First confirm in a browser on the demo core (drag the box to a height that is not a multiple of 32px, keep an entry, look at "Kept for today."). If confirmed — Sweep: every element after the writing space on both the open and the sealed page. RED in `src/look/__tests__/tonightPage.test.ts`: each such element either has a `--nb-paper` ground or the writing space's resize keeps the pitch (`resize: none`, or a height step of 32px). GREEN in `tonight-page.css` only. Files: `src/styles/tonight-page.css`, `src/look/__tests__/tonightPage.test.ts`.

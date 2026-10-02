@@ -17,7 +17,8 @@ agent-browser --init-script specs/004-notebook-landscape/slices/tonight-page/dem
    note under a rule. Right page: the typed log, one site and its time to a ruled line.
 3. Press **Over time**. Focus stays on it. Left page: the range in words, **From** and **To**, the coverage note, the
    estimates line, and "Cairn counts only while it is running…" under a rule. Right page: the sites, one to a line,
-   each with a soft bar and its count. Change **From**: the heading and the list follow.
+   each with a soft bar and its count. Change **From**: the heading follows. (The demo core answers the same sites for
+   any range; that the list follows the range is proved by `ReachesPage.test.tsx`, and in the app by what was counted.)
 4. Choose the **Tonight** tab. Left page: "Tonight", today's reaches with times, the coverage note. Right page: the
    quote, "How the day went" over a lined writing space, **Keep this**, and **Hide quotes** at the foot. Type two
    lines: each sits on its own rule, and the rules move with the text when it scrolls. Go to **Today** and back: the
@@ -27,7 +28,8 @@ agent-browser --init-script specs/004-notebook-landscape/slices/tonight-page/dem
 6. Choose **Current**: Today and Tonight are exactly as before this slice, the Tonight text kept (D5).
 
 Other states: `?core=empty` (nothing yet today, nothing over the range), `?core=sealed` (the history cannot be opened),
-`?core=unreadable` (Over time could not read the history), `?core=quotes-off` (quotes hidden).
+`?core=unreadable` (Over time could not read the history), `?core=quotes-off` (quotes hidden), `?core=refuse-save`
+(the journal's save is refused: the core's sentence shows under "Keep this" and the text stays).
 
 **The application** (`npm ci`, then `npm run tauri dev`): the same steps from the Today and Tonight tabs, with whatever
 the machine has counted.
@@ -44,5 +46,6 @@ npm run build && ! grep -rl "Look (testing)" dist/
 
 - No real-browser layout check runs in CI (frame T024): the fit at 800×600 and the lines under the text are checked by
   eye in the demo.
-- A day that ends while Tonight is open, a refused save and a load that could not be made are proved by the tests in
-  every look; the demo core can show the refused save only (`?core=refuse-save`).
+- A day that ends while Tonight is open, a load that could not be made, a refused quotes switch and a quotes setting
+  that could not be read are proved by the tests in every look; the demo core cannot show them. It shows a refused save
+  (`?core=refuse-save`).

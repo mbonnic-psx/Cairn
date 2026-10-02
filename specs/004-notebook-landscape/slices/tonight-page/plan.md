@@ -162,7 +162,18 @@ None.
 
 ## Open questions
 
-None. Every product question about this slice was answered at slice gaps (D21–D24) or by standing decisions (D5, D6,
+One, raised by the after-converge gaps review, LOW, handed back to the driver. It does not block the demo: the slice
+renders today's choice, which is the recommendation.
+
+- **Is "How the day went" a small label (typewriter face) or the writing's heading (serif)?** It is the `<label>` of
+  the writing space, set in the serif at 20px on the page (`src/styles/tonight-page.css:238-243`,
+  `src/screens/CheckIn.tsx:468-469`), as Current sets it (`reflective text-xl`). FR-014 and US3 scenario 3 put small
+  labels in the typewriter face; D12 made the 14px "added with its root address" one. Options: (a) keep the serif — it
+  reads as the prompt that opens the journal page, not a small label, at the size of a subheading, and Principle VI keeps
+  the serif for reflective writing (recommended by the gaps review and the host); (b) set it in the typewriter face like
+  From and To. If (b), the GREEN is one rule in `tonight-page.css` and the mono list in `tonightPage.test.ts`.
+
+Every other product question about this slice was answered at slice gaps (D21–D24) or by standing decisions (D5, D6,
 D8, D15, D17). Two readings this plan takes, each keeping every MUST, are recorded in research rather than asked:
 T1 (the Which days buttons stay mounted across views, so focus is never lost) and T3 (the status sentence is one polite
 live region in every state that has it today; the loading state gains none).
