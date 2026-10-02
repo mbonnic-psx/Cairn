@@ -246,6 +246,37 @@ describe('the shell contract in the stylesheet (contracts/ui-shell.md)', () => {
   });
 });
 
+describe('the published shell contract says what the stylesheet and the shell do (contracts/ui-shell.md)', () => {
+  const contract = readFileSync('specs/004-notebook-landscape/contracts/ui-shell.md', 'utf8');
+  const shellSource = readFileSync('src/shell/NotebookShell.tsx', 'utf8');
+  // The scene is grouped by the table's own rows or lives in the look's sky, hills, stones and tabs.
+  const scene = /^--nb-(sky-|greeting-|hill-|shadow-|tab-|star|sun$|sun-glow$|stone-(base|moss|amber|pale)$)/;
+  const tableRows = contract.slice(contract.indexOf('| Token |'));
+
+  it('lists in its token table every token a look block defines, apart from the scene', () => {
+    const defined = new Set(
+      [...noComments(notebook).matchAll(/(--nb-[a-z-]+)\s*:/g)].map((m) => m[1]!),
+    );
+    const missing = [...defined].filter((t) => !scene.test(t) && !tableRows.includes('`' + t + '`'));
+    expect(missing, 'tokens the contract does not name').toEqual([]);
+  });
+
+  it('names every aria-hidden element the shell draws inside the notebook as the shell\'s', () => {
+    const drawn = [...shellSource.matchAll(/className="(nb-[a-z-]+)"\s+aria-hidden="true"/g)].map((m) => m[1]!);
+    expect(drawn).toEqual(expect.arrayContaining(['nb-margin', 'nb-fold']));
+    for (const name of drawn) {
+      expect(contract, `.${name} is not named`).toMatch(new RegExp('`\\.' + name + '`[^\\n]*|[^\\n]*`\\.' + name + '`'));
+      expect(contract, `.${name} is not called the shell's`).toMatch(
+        new RegExp('`\\.' + name + '`[^.]*shell|shell[^.]*`\\.' + name + '`'),
+      );
+    }
+  });
+
+  it('does not say the notebook draws no fold', () => {
+    expect(contract).not.toContain('draws no fold');
+  });
+});
+
 describe.each(['morning', 'midday', 'night'] as const)('the state badge\'s pill in the %s look (T026)', (look) => {
   it('is visibly a different surface from the paper', () => {
     expect(contrastRatio(token('--nb-rule', look), token('--nb-paper', look))).toBeGreaterThanOrEqual(1.1);
