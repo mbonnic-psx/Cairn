@@ -2,7 +2,8 @@
 
 What the page slices (`protection-page`, `tonight-page`, `setup-pages`, `quiet-pages`) build against. Settled by
 slice `frame`, extended by slice `looks` (more `Look` values and tokens), by `protection-page` (knowing it is on a
-page, headings), by `fold-and-width` (the fold) and by `board-scale` (the scale length, the measure), and by nothing else.
+page, headings), by `fold-and-width` (the fold), by `board-scale` (the scale length, the measure) and by `reveal`
+(one shell, every screen only a spread), and by nothing else.
 
 ## Navigation
 
@@ -12,6 +13,11 @@ page, headings), by `fold-and-width` (the fold) and by `board-scale` (the scale 
 - The tab column belongs to the shell and is bounded by the notebook's height: a tab that cannot fit its label on
   one line shrinks and wraps it, so every tab stays whole and reachable down to an 800x600 window.
 - Tab accessible names are exactly today's header labels. The existing tests find them by role `button` and name.
+- Order (D47): `<nav aria-label="Pages">` comes before `<main>` inside the notebook, in the DOM, so it comes first in
+  reading order and in Tab order. From the start of the shell, Tab reaches every tab in `tabsFor` order, then the page
+  area (D19), then the page's own controls; on What is protected the left page (D30) is a stop after the page area. Only
+  the order changed: the tabs are still placed absolutely outside the notebook's right edge, with a stacking order so
+  the page area never paints over them. `NotebookShell.test.tsx` pins the sequence.
 
 ## The page area
 
@@ -37,18 +43,14 @@ page, headings), by `fold-and-width` (the fold) and by `board-scale` (the scale 
 
   A screen whose content fits one page leaves the right page as `.nb-page--ruled` and empty (FR-031).
 
-## Knowing it is on a page
+## Every screen is a page
 
-Added by `protection-page` (D6), before the other page slices build against it.
+Added by `protection-page` (D6) as "Knowing it is on a page"; rewritten by `reveal` (D42). `CurrentShell` and the
+"on a notebook page" signal (`NotebookPageContext`, `useNotebookPage`) are gone.
 
-- `NotebookShell` tells the screens it wraps that they are on a notebook page, through React context; it is not a
-  prop, so the rule above holds. `CurrentShell` provides nothing, and a screen rendered outside any shell (as the
-  existing screen tests render it) reads the same as Current.
-- A screen asks with one hook exported from `src/shell/`. When it is told it is on a page, it may lay its content
-  out with the spread classes above. Otherwise it renders exactly what it renders today, element for element, so
-  Current and every existing screen test are unchanged (SC-009).
-- Both layouts come from the one component and the one set of state and handlers. A page slice never copies a
-  screen into a second component.
+- Every screen renders only its spread, wherever it is rendered: inside `NotebookShell`, or alone, as a screen test
+  renders it. A screen reads nothing to decide its layout, and has one layout.
+- One component, one set of state and handlers per screen. A page slice never copies a screen into a second component.
 - A page slice's own styles live in a stylesheet of its own under `src/styles/`, imported once from `src/main.tsx`.
   Every selector in it starts with one prefix per screen, `.nb-<screen>-` (`protection-page` uses `.nb-protection-`
   and `.nb-trail-`), so two page slices never edit or override each other's rules. The spread classes above stay
@@ -57,9 +59,8 @@ Added by `protection-page` (D6), before the other page slices build against it.
 ## A step of more than one screen
 
 Added before `setup-pages` and `quiet-pages` (D13). The choosing step shows two screens and a button. Its composition
-moves out of `App` into one component beside the setup screens, which `App` renders in its place: on a page it lays
-the step out as one spread, otherwise it renders exactly today's elements in today's order. The two screens inside
-it keep their own components and state.
+moves out of `App` into one component beside the setup screens, which `App` renders in its place, and it lays
+the step out as one spread. The two screens inside it keep their own components and state.
 
 Prefixes, one per screen: `setup-pages` uses `.nb-choosing-`, `.nb-categories-`, `.nb-custom-` and `.nb-disclosure-`;
 `quiet-pages` uses `.nb-limits-` and `.nb-teardown-`; `tonight-page` uses `.nb-reaches-` (the Today screen, both views)
@@ -119,9 +120,9 @@ by every look with no change of its own:
 | `--nb-lamp-glow` | the lamp's glow on the notebook; set by night alone (`looks`) |
 | `--nb-focus-sky` | the focus outline of anything drawn over the sky (tabs, the switch); added by `looks` |
 
-Screens that still colour their text with the theme's palette (`text-ink-*`, `text-amber-*`, `text-moss-*`) are
-covered too: inside `[data-look]` the shell re-points those palette properties to darker warm values, and the
-contrast test checks every text colour the screens use against `--nb-paper`.
+No screen colours its text with the theme's palette classes (`text-ink-*`, `text-amber-*`, `text-moss-*`); the
+contrast test holds that none does. The one palette value a page sheet reads, `--color-moss-600` (`setup-pages.css`),
+is re-pointed inside each `[data-look]` to a darker warm value, and the contrast test checks it against `--nb-paper`.
 
 A page slice never hard-codes a colour. That way, slice `looks` can re-light every page by changing tokens only,
 and the contrast test (research R6) covers every page by covering the tokens.
@@ -130,6 +131,5 @@ and the contrast test (research R6) covers every page by covering the tokens.
 
 - The shell holds no reach data, imports nothing from `ipc/reaches`, and shows no count, badge or streak
   (the `check-no-ambient-counts` rule 3, FR-008).
-- `NotebookShell` takes the look (`'morning' | 'midday' | 'night'`) and sets it as `data-look` on its root; the
-  screens it wraps still receive no new props.
-- With `look === 'current'` the shell is `CurrentShell`, whose output is today's interface byte for byte (SC-009).
+- `NotebookShell` takes the look (`'morning' | 'midday' | 'night'`, the whole of `Look`) and sets it as `data-look` on
+  its root; the screens it wraps still receive no new props. It is the only shell (FR-032).

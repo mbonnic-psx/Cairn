@@ -16,7 +16,6 @@ import { Choosing } from './screens/Setup/Choosing';
 import { Trail } from './screens/Trail';
 import { LookSwitch } from './look/LookSwitch';
 import type { Look } from './look/look';
-import { CurrentShell } from './shell/CurrentShell';
 import { NotebookShell } from './shell/NotebookShell';
 import {
   getDisclosures,
@@ -33,9 +32,9 @@ import {
 } from './ipc';
 
 export default function App({ devBuild = import.meta.env.DEV }: { devBuild?: boolean }) {
-  // Chosen at the switch, kept nowhere, and always 'current' outside a dev build.
-  const [chosenLook, setLook] = useState<Look>('current');
-  const look: Look = devBuild ? chosenLook : 'current';
+  // Chosen at the switch, kept nowhere, and always 'morning' outside a dev build.
+  const [chosenLook, setLook] = useState<Look>('morning');
+  const look: Look = (import.meta.env.DEV && devBuild) ? chosenLook : 'morning';
   const [step, setStep] = useState<Step>('choosing');
   const [categories, setCategories] = useState<CategoryPreset[]>([]);
   const [trail, setTrail] = useState<TrailData>();
@@ -152,15 +151,9 @@ export default function App({ devBuild = import.meta.env.DEV }: { devBuild?: boo
     <>
       {/* `import.meta.env.DEV` is a build-time constant, so the bundler drops the switch from a production build. */}
       {import.meta.env.DEV && devBuild && <LookSwitch look={look} onChange={setLook} />}
-      {look === 'current' ? (
-        <CurrentShell tabs={tabs} onSelect={onSelect}>
-          {screen}
-        </CurrentShell>
-      ) : (
-        <NotebookShell tabs={tabs} onSelect={onSelect} look={look} page={step}>
-          {screen}
-        </NotebookShell>
-      )}
+      <NotebookShell tabs={tabs} onSelect={onSelect} look={look} page={step}>
+        {screen}
+      </NotebookShell>
     </>
   );
 }

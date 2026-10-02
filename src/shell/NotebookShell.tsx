@@ -5,12 +5,11 @@
  */
 import { useEffect, useRef, type ReactNode } from 'react';
 
-import type { NotebookLook } from '../look/look';
+import type { Look } from '../look/look';
 import type { Tab, TabId } from '../navigation';
 import { CairnMark } from './CairnMark';
 import { Greeting } from './Greeting';
 import { Landscape } from './Landscape';
-import { NotebookPageContext } from './notebookPage';
 
 export function NotebookShell({
   tabs,
@@ -21,7 +20,7 @@ export function NotebookShell({
 }: {
   tabs: Tab[];
   onSelect: (id: TabId) => void;
-  look: NotebookLook;
+  look: Look;
   /** Which screen is open, where one tab holds several (choosing and its disclosure); the current tab otherwise. */
   page?: string;
   children: ReactNode;
@@ -47,9 +46,6 @@ export function NotebookShell({
       <div className="nb-notebook nb-spread">
         <span className="nb-margin" aria-hidden="true" />
         <span className="nb-fold" aria-hidden="true" />
-        <main ref={pageArea} className="nb-page-area nb-page" tabIndex={0}>
-          <NotebookPageContext.Provider value={true}>{children}</NotebookPageContext.Provider>
-        </main>
         <nav className="nb-tabs" aria-label="Pages">
           {tabs.map((tab) => (
             <button
@@ -63,6 +59,9 @@ export function NotebookShell({
             </button>
           ))}
         </nav>
+        <main ref={pageArea} className="nb-page-area nb-page" tabIndex={0}>
+          {children}
+        </main>
       </div>
     </div>
   );

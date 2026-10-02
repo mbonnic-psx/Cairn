@@ -1,0 +1,47 @@
+# Demo log — slice `reveal`
+
+## 2026-10-02T18:38:00Z — accepted · iteration 11 · drive-hand (claude-opus-5-5)
+- **Started with:** the two servers the host had running, which were not started or stopped here. The released build (production bundle, `vite preview`) was at `http://127.0.0.1:1461/` and the development build (`vite`) at `http://127.0.0.1:1460/`. Port 1420 was not touched. Each session ran `agent-browser --session <s> --allowed-domains 127.0.0.1 --init-script <fake core> open <url>`, then `agent-browser set viewport <w> <h>`. Released: `rel` with protection-page's fake core on `/`, `reltn` with tonight-page's on `/?core=in_force`, `relsu` with setup-pages' on `/`, and `relqp` with quiet-pages' on `/?core=in_force`. Development: `dev` with tonight-page's on `/?core=in_force`. One extra released session, `relfp`, had every `/assets/*.js` request aborted, to see the first paint before any script runs. · **Seeded:** only the in-page fake cores, at their defaults. Nothing was written or sent outside the page. On the setup step, "Turn protection on" was pressed and only the in-page fake answered it. On Before Cairn changes anything, "Not yet" was pressed and "Yes, set this up" was not. On Tonight, text was typed and "Keep this" was not pressed.
+- **Driven through:** agent-browser, the rung the setting names. Nothing fell through to a lower rung. Tab order was walked with real `press Tab` keystrokes, reading `document.activeElement` after each one. Screenshots were compared pixel by pixel with a small PNG decoder from the Python standard library, kept outside the repository.
+- **Examples:**
+  - Item 1, released build at 1280×800: passed.
+    - It opens on the morning notebook. "Good morning." sits beside it, with "FRIDAY 1:33 PM", at 1:33 in the afternoon (FR-013: any hour).
+    - Nothing is at the top right of the sky.
+    - Starting from a fresh load, Tab runs: the five tabs, then the page area, then the body, then back to the first tab. No `select` is in the document. "Look (testing)" appears nowhere in the DOM or in the accessibility tree.
+    - With scripts blocked, the first paint is `#f7e7cc` (rgb 247,231,204) on `html` and `body`. That is the sky's top pixel in the live screenshot (T017, D45).
+  - Item 2, every tab opens its spread, released build: passed. Each was checked at 1280×800, 1920×1080 and 800×600.
+    - Protection: "Protection is on", with Addresses in force and Last checked.
+    - What is protected: "What you are protecting", the count, the note on taking things out, and the ruled list.
+    - Today: the Today / Over time switch, the coverage note and the five-line log. Over time: the range heading, From and To, By site / By hour, the two notes and the five sites with their bars.
+    - Tonight: the log, the note, the quote, "How the day went", "Keep this" (disabled until something is written) and "Hide quotes".
+    - Setup, with protection off: the choosing step has its nine categories and Anywhere else?. "Turn protection on" leads to Before Cairn changes anything, with every word and both buttons, and "Not yet" goes back.
+    - What Cairn covers: both covered lines, both limits, what is kept, and the administrators note.
+    - At every size and on every screen, the notebook (`.nb-fold`, `nav[aria-label=Pages]`) is present. None of the one-column interface's markers (`.min-h-screen.px-6.py-12`, `.settle.rounded-2xl`, `header button`) is present. The document is exactly the window's size (`demo/released-sizes.txt`).
+  - Item 3, keyboard order (D47): passed.
+    - Protection, from a fresh load: Protection (`aria-current=page`), What is protected, Today, Tonight, What Cairn covers, then the page area.
+    - What is protected: the five tabs, the page area, then the left page as its own stop (D30).
+    - Setup choosing: the four tabs, the page area, the nine checkboxes, the address box, then Turn protection on. "Protect it" is skipped while it is disabled.
+    - Tonight: the tabs, the page area, the writing space, then "Keep this" once something is written, then "Hide quotes".
+    - Today: the tabs, the page area, then Today (`aria-pressed=true`) and Over time.
+    - The current tab is wider and paper-coloured and carries `aria-current=page`. The tabs hang off the notebook's right edge where board-scale drew them.
+  - Item 4, development build: passed.
+    - It opens on Morning, with "Good morning.".
+    - "Look (testing)" sits at the top right, small (an 11px select at x=1203, y=9, 65×15). It reads Morning, and its choices are exactly Morning, Midday, Night. There is no Current.
+    - On Tonight with "Walked instead." typed, choosing Midday and then Night changed everything at once: sky, sun or moon, hills, cairn, the greeting ("Midday.", "Good evening.") and paper. Tonight stayed the open tab and the text stayed in the writing space.
+    - After a reload it was on Morning and Protection again, with nothing in localStorage or sessionStorage.
+  - Item 5, compared with board-scale and the G board: passed. Released 1280×800 Morning was compared with `slices/board-scale/demo/morning-1280x800-protection.png`. 843 pixels differ, all in two places: the time text ("1:33 PM" against "11:59 AM", x 120–200, y 80–120) and the switch's corner (x 1120–1280, y 0–40), which is now empty. Nothing else moved. Against `slices/looks/demo/board-G-Morning.png` the sky, sun, hills, cairn, greeting, notebook and tabs sit where they did. The differences, the page's content and the board's window chrome, were already there before this slice.
+  - Item 6, web-interface-guidelines: done. The notes are under Feedback. None of them blocks acceptance.
+- **Evidence:**
+  - Released 1280×800: `demo/released-morning-1280x800-protection.png`, `demo/released-1280x800-protected.png`, `demo/released-1280x800-today.png`, `demo/released-1280x800-overtime.png`, `demo/released-1280x800-tonight.png`, `demo/released-1280x800-setup-choosing.png`, `demo/released-1280x800-setup-disclosure.png`, `demo/released-1280x800-covers.png`
+  - Released, other sizes: `demo/released-1920x1080-protection.png`, `demo/released-1920x1080-what-is-protected.png`, `demo/released-1920x1080-today.png`, `demo/released-1920x1080-tonight.png`, `demo/released-1920x1080-what-cairn-covers.png`, `demo/released-1920x1080-setup-choosing.png`, `demo/released-800x600-protection.png`, `demo/released-800x600-what-is-protected.png`, `demo/released-800x600-today.png`, `demo/released-800x600-tonight.png`, `demo/released-800x600-what-cairn-covers.png`, `demo/released-800x600-setup-choosing.png`
+  - Released, focus and first paint: `demo/released-1280x800-focus-page-area.png`, `demo/released-1280x800-focus-tab-covers.png`, `demo/released-first-paint-no-script-1280x800.png`
+  - Released, text records: `demo/released-snapshot-1280x800.txt`, `demo/released-tab-cycle-protection.txt`, `demo/released-sizes.txt`, `demo/released-index.html`
+  - Development: `demo/dev-morning-1280x800-protection.png`, `demo/dev-morning-1280x800-tonight-typed.png`, `demo/dev-midday-1280x800-tonight-kept.png`, `demo/dev-night-1280x800-tonight-kept.png`, `demo/dev-after-reload-1280x800.png`
+- **Feedback:** Nothing re-enters the ladder. Notes for the next feature:
+  - design: in a development build the switch is the first Tab stop, before the paper tabs (`dev` walk: SELECT, then the five tabs). D47 is about the released shell and holds there. The switch is a tester's control and goes with FR-013a. Noted only so nobody mistakes it for a D47 regression.
+  - design: Midday's sun still sits behind the greeting at 1280×800. It touches the top of "Midday." and the time line (`demo/dev-midday-1280x800-tonight-kept.png`). fold-and-width and board-scale already noted this.
+  - design: on Over time the heading reads "From 5 September to 2 October", while the From and To boxes show the browser's own "09/05/2026" and "10/02/2026" (`demo/released-1280x800-overtime.png`). Two date spellings sit side by side on one page (guidelines: locale-aware formats). This was already the case before this slice.
+  - design: the page area's focus ring is a square 2px ink outline round the notebook's rounded paper, and it sits inside the notebook's edge (`demo/released-1280x800-focus-page-area.png`). It is visible and works, but it reads as a browser box, not a drawn edge.
+  - design: on Protection a screen reader hears "Protection is on" twice, once from the pill and once from the heading (`demo/released-snapshot-1280x800.txt`). This was already the case before this slice.
+  - design: in Night, `html` and `body` keep the morning colour `#f7e7cc` under the dark scene (`body` read as rgb 247,231,204 in Night). If the window grows or the scene repaints late, that peach colour could show at the edge for a moment. This is the other side of D45, and only a released build is fixed to Morning, so it matters only once the clock chooses the look.
+  - Seed note: with protection-page's fake core, What Cairn covers shows only its two small headings (`demo/released-1280x800-covers.png` was retaken with quiet-pages' fake, which answers it). That is a limit of the fake, not the app.

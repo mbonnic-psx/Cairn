@@ -101,17 +101,13 @@ describe('the day-end timer is set again when a new day is opened', () => {
     keep: () => Promise.resolve(undefined),
   });
 
-  it.each([
-    ['on a page', true],
-    ['outside any shell', false],
-  ])('each day, when it ends under the open check-in, is named %s', async (_name, shell) => {
+  it('each day, when it ends under the open check-in, is named on a page', async () => {
     core = installFakeCore({
       get_day: () => day({ reaches: [] }),
       get_quotes_shown: () => false,
       get_quote: () => null,
     });
-    const render1 = (session: CheckInSession) =>
-      shell ? onPage(<CheckIn session={session} />) : <CheckIn session={session} />;
+    const render1 = (session: CheckInSession) => onPage(<CheckIn session={session} />);
     vi.setSystemTime(new Date(2026, 8, 30, 23, 50));
     const view = render(render1(forDay(8, 30)));
     await settle();

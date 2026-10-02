@@ -1,19 +1,20 @@
 /**
- * What Cairn covers told it is on a notebook page (slice `quiet-pages`, T002): the same words as outside
- * any shell, laid out as a spread. Rendered inside `NotebookShell`, once per look.
+ * What Cairn covers told it is on a notebook page (slice `quiet-pages`, T002): the same words as before
+ * the notebook, laid out as a spread. Rendered inside `NotebookShell`, once per look.
  */
 import { render } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { Disclosures } from '../../ipc';
-import type { NotebookLook } from '../../look/look';
+import type { Look } from '../../look/look';
 import { NotebookShell } from '../../shell/NotebookShell';
 import { Limits } from '../Limits';
+import { baseline, LIMITS } from './beforeTheReveal';
 import { disclosureCases } from './quietCases';
 
 const tabs = [{ id: 'limits' as const, label: 'What Cairn covers', current: true }];
 
-let look: NotebookLook = 'morning';
+let look: Look = 'morning';
 
 function onPage(ui: React.ReactElement) {
   const view = render(
@@ -27,11 +28,9 @@ function onPage(ui: React.ReactElement) {
   return { ...view, main, spread, pages, left: pages[0]!, right: pages[1]! };
 }
 
-function outside(ui: React.ReactElement): string {
-  const view = render(ui);
-  const text = view.container.textContent ?? '';
-  view.unmount();
-  return text;
+/** The words the screen said before the notebook, from the baseline (`beforeTheReveal.ts`), never from a render. */
+function wasText(name: string): string {
+  return baseline(LIMITS[name]!).textContent ?? '';
 }
 
 /** The left page's direct children, as `tag: text` in order. */
@@ -46,7 +45,7 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (lookNa
     look = lookName;
   });
 
-  describe.each(Object.entries(disclosureCases))('What Cairn covers on a page, %s', (_name, d: Disclosures) => {
+  describe.each(Object.entries(disclosureCases))('What Cairn covers on a page, %s', (caseName, d: Disclosures) => {
     it('sits in one spread of two pages with the slice\'s own class, and runs no entrance', () => {
       const { spread, pages, main } = onPage(<Limits disclosures={d} />);
       expect(spread).not.toBeNull();
@@ -114,9 +113,9 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (lookNa
       expect(right.querySelector('button, a, input, ul, p, h2, h3')).toBeNull();
     });
 
-    it('says the same words as outside any shell', () => {
+    it('says the words it said before the notebook', () => {
       const { main } = onPage(<Limits disclosures={d} />);
-      expect(main.textContent).toBe(outside(<Limits disclosures={d} />));
+      expect(main.textContent).toBe(wasText(caseName));
     });
   });
 
@@ -135,9 +134,12 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (lookNa
   });
 });
 
-describe('outside any shell', () => {
-  it('renders no spread', () => {
-    const { container } = render(<Limits disclosures={disclosureCases['the background component can run']!} />);
-    expect(container.querySelector('.nb-spread, .nb-page')).toBeNull();
+describe('rendered alone', () => {
+  it.each(Object.entries(disclosureCases))('it is its spread, %s', (_name, d: Disclosures) => {
+    const { container } = render(<Limits disclosures={d} />);
+    const spread = container.querySelector('.nb-spread');
+    expect(spread).toHaveClass('nb-limits-leaves');
+    expect(spread!.querySelectorAll(':scope > .nb-page')).toHaveLength(2);
+    expect(container.querySelector('.settle')).toBeNull();
   });
 });

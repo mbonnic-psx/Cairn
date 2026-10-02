@@ -1,7 +1,7 @@
 /**
  * Through the real `App` (slice `setup-pages`, T011): in a notebook look, choosing what to protect and Before
- * Cairn changes anything open as spreads, the step's state survives a walk between looks, and Current is
- * unchanged. The core is a fake written in the test tree at the one seam the interface calls it through.
+ * Cairn changes anything open as spreads, the step's state survives a walk between looks, as before
+ * the reveal. The core is a fake written in the test tree at the one seam the interface calls it through.
  */
 import { cleanup, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -9,8 +9,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import App from '../../App';
 import type { CategoryPreset } from '../../ipc';
-import { Disclosure } from '../../screens/Disclosure';
-import { Choosing } from '../../screens/Setup/Choosing';
+import { SETUP_CALLS_CURRENT } from '../../screens/__tests__/beforeTheReveal';
 import { installFakeCore, type FakeCore } from '../../screens/__tests__/fakeCore';
 import {
   categories as cases,
@@ -46,21 +45,13 @@ beforeEach(() => {
 });
 afterEach(() => core.remove());
 
-const noop = () => undefined;
 const switchControl = () => screen.getByLabelText('Look (testing)');
 const headings = () => screen.getAllByRole('heading').map((h) => h.textContent);
 
-function outside(ui: React.ReactElement): string {
-  const view = render(ui);
-  const html = view.container.innerHTML;
-  view.unmount();
-  return html;
-}
-
-async function choosing(look: 'Morning' | 'Midday' | 'Night' | 'Current' = 'Morning') {
+async function choosing(look: 'Morning' | 'Midday' | 'Night' = 'Morning') {
   const view = render(<App devBuild />);
   await screen.findByText('Gambling');
-  if (look !== 'Current') await userEvent.selectOptions(switchControl(), look);
+  await userEvent.selectOptions(switchControl(), look);
   const pagesOf = () =>
     Array.from(view.container.querySelectorAll<HTMLElement>('.nb-page-area > .nb-spread > .nb-page'));
   return { ...view, pagesOf };
@@ -78,24 +69,17 @@ describe('the setup steps through App, in a notebook look', () => {
     expect(headings()).toEqual(['Cairn', 'What would you like to protect?', 'Anywhere else?']);
   });
 
-  it('asks the core the same things, with the same arguments, as Current does', async () => {
-    const script = async (look: 'Morning' | 'Current') => {
-      const view = await choosing(look);
-      await userEvent.click(screen.getByRole('checkbox', { name: /News/ }));
-      await userEvent.type(screen.getByLabelText('Address to protect'), 'Example.com/path');
-      await userEvent.click(screen.getByRole('button', { name: 'Protect it' }));
-      await screen.findByText(/example\.com, www\.example\.com/);
-      const asked = core.calls.map((c) => `${c.cmd} ${JSON.stringify(c.args)}`);
-      core.calls.length = 0;
-      view.unmount();
-      list = cases.map((c) => ({ ...c }));
-      return asked;
-    };
-    const current = await script('Current');
-    const morning = await script('Morning');
-    expect(current).toContain('set_category_enabled {"id":"news","on":true}');
-    expect(current).toContain('add_custom_entry {"input":"Example.com/path"}');
-    expect([...morning].sort()).toEqual([...current].sort());
+  it('asks the core the same things, with the same arguments, as Current did', async () => {
+    const view = await choosing('Morning');
+    await userEvent.click(screen.getByRole('checkbox', { name: /News/ }));
+    await userEvent.type(screen.getByLabelText('Address to protect'), 'Example.com/path');
+    await userEvent.click(screen.getByRole('button', { name: 'Protect it' }));
+    await screen.findByText(/example\.com, www\.example\.com/);
+    const asked = core.calls.map((c) => `${c.cmd} ${JSON.stringify(c.args)}`);
+    view.unmount();
+    expect(SETUP_CALLS_CURRENT).toContain('set_category_enabled {"id":"news","on":true}');
+    expect(SETUP_CALLS_CURRENT).toContain('add_custom_entry {"input":"Example.com/path"}');
+    expect([...asked].sort()).toEqual([...SETUP_CALLS_CURRENT].sort());
   });
 
   it('shows the sentence that comes back under the box on the right page', async () => {
@@ -215,17 +199,7 @@ describe.each(['Morning', 'Midday', 'Night'] as const)(
   },
 );
 
-describe('Current is unchanged', () => {
-  it("shows today's markup for both steps", async () => {
-    const { container } = await choosing('Current');
-    expect(container.querySelector('.nb-root')).toBeNull();
-    const shown = () => (container.querySelector('main > div.mx-auto') as HTMLElement).innerHTML;
-    expect(shown()).toBe(outside(<Choosing categories={cases} onToggle={noop} onTurnOn={noop} />));
-    await userEvent.click(screen.getByRole('button', { name: 'Turn protection on' }));
-    await screen.findByRole('heading', { level: 2, name: 'Before Cairn changes anything' });
-    expect(shown()).toBe(outside(<Disclosure disclosures={disclosures} onConfirm={noop} onBack={noop} />));
-  });
-
+describe('the core is asked nothing new', () => {
   it('asks the core nothing the screens did not ask before', async () => {
     await choosing('Morning');
     await userEvent.click(screen.getByRole('button', { name: 'Turn protection on' }));

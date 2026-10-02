@@ -21,8 +21,6 @@
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { Button } from '../components/Button';
-import { Card } from '../components/Card';
 import {
   getDayView,
   getQuote,
@@ -32,7 +30,6 @@ import {
   type DayView,
 } from '../ipc/journal';
 import { dayBounds, localToday } from '../localDays';
-import { useNotebookPage } from '../shell/notebookPage';
 
 /**
  * Text that shows nothing is empty (G4), here as in the store: the same
@@ -62,7 +59,7 @@ const NOTHING_VISIBLE = new RegExp(
   'u',
 );
 
-// The words, once: Current and the notebook page both read them.
+// The words, once: the page and the tests that hold them both read them.
 const TONIGHT = 'Tonight';
 const LOOKING = 'Looking…';
 const HOW_THE_DAY_WENT = 'How the day went';
@@ -227,7 +224,6 @@ export function useCheckInSession(): CheckInSession {
 }
 
 export function CheckIn({ session }: { session?: CheckInSession }) {
-  const onPage = useNotebookPage();
   const own = useCheckInSession();
   const {
     opened,
@@ -324,11 +320,7 @@ export function CheckIn({ session }: { session?: CheckInSession }) {
       now = await setQuotesShown(shown);
     } catch (problem) {
       // The line stays as it was, and the person hears why.
-      setSwitchNote(
-        typeof problem === 'string'
-          ? problem
-          : COULD_NOT_CHANGE,
-      );
+      setSwitchNote(typeof problem === 'string' ? problem : COULD_NOT_CHANGE);
       return;
     } finally {
       switching.current = false;
@@ -341,23 +333,7 @@ export function CheckIn({ session }: { session?: CheckInSession }) {
     }
   }
 
-  const quoteSwitch =
-    quotesShown === undefined ? null : (
-      <div className="mt-10">
-        <Button tone="quiet" className="px-0" onClick={() => switchQuotes(!quotesShown)}>
-          {quotesShown ? HIDE_QUOTES : SHOW_QUOTES}
-        </Button>
-      </div>
-    );
-
-  const line =
-    quotesShown && quote ? (
-      <figure className="mt-6">
-        <p className="reflective max-w-prose text-lg italic text-ink-500">{quote}</p>
-      </figure>
-    ) : null;
-
-  // The same two pieces as Current's, as the page draws them: the quote opens the right page, the switch ends it.
+  // The quote opens the right page, the switch ends it.
   const pageQuote =
     quotesShown && quote ? (
       <figure className="nb-checkin-quote">
@@ -375,7 +351,7 @@ export function CheckIn({ session }: { session?: CheckInSession }) {
       </button>
     );
 
-  // What the status region says, once, read by Current and by the page alike: an open day says what happened
+  // What the status region says, once: an open day says what happened
   // to the save, else that it was kept; a sealed day has nothing kept to speak of, so only a refusal.
   const openStatus = note ?? (kept ? keptFor(thisDay) : '');
   const sealedStatus = note ?? '';
@@ -386,7 +362,7 @@ export function CheckIn({ session }: { session?: CheckInSession }) {
     </p>
   );
 
-  if (!view && onPage) {
+  if (!view) {
     return (
       <div className="nb-spread nb-checkin-leaves">
         <div className="nb-page">
@@ -397,15 +373,7 @@ export function CheckIn({ session }: { session?: CheckInSession }) {
     );
   }
 
-  if (!view) {
-    return (
-      <Card>
-        <p className="text-ink-400">{loadNote ?? LOOKING}</p>
-      </Card>
-    );
-  }
-
-  if (view.sealed && onPage) {
+  if (view.sealed) {
     return (
       <div className="nb-spread nb-checkin-leaves">
         <div className="nb-page">
@@ -421,135 +389,51 @@ export function CheckIn({ session }: { session?: CheckInSession }) {
     );
   }
 
-  if (view.sealed) {
-    return (
-      <Card>
-        <h2 className="reflective text-3xl text-ink-900">
-          {ended ? thisDay : TONIGHT}
-        </h2>
-        {line}
-        <p className="reflective mt-4 max-w-prose text-lg text-ink-700">{view.sealed}</p>
-        {quoteSwitch}
-        <p
-          role="status"
-          aria-live="polite"
-          className="reflective mt-4 max-w-prose text-ink-700"
-        >
-          {sealedStatus}
-        </p>
-      </Card>
-    );
-  }
-
-  if (onPage) {
-    return (
-      <div className="nb-spread nb-checkin-leaves">
-        <div className="nb-page">
-          <h2 className="nb-checkin-title">{ended ? thisDay : TONIGHT}</h2>
-          {view.reaches.length === 0 ? (
-            <p className="nb-checkin-empty">{nothingHereFor(thisDay)}</p>
-          ) : (
-            <ul className="nb-checkin-log">
-              {view.reaches.map((reach, index) => (
-                <li
-                  key={`${reach.domain}-${reach.at}-${index}`}
-                  className="nb-checkin-line"
-                >
-                  <span className="nb-checkin-site">{reach.domain}</span>
-                  <span className="nb-checkin-time">{timeOfDay(reach.at)}</span>
-                </li>
-              ))}
-            </ul>
-          )}
-          {view.coverage_note && <p className="nb-checkin-note">{view.coverage_note}</p>}
-        </div>
-        <div className="nb-page nb-page--ruled">
-          {pageQuote}
-          <label className="nb-checkin-label">
-            <span className="nb-checkin-label__text">{HOW_THE_DAY_WENT}</span>
-            <textarea
-              className="nb-checkin-write"
-              value={draft}
-              onChange={(event) => {
-                type(event.target.value);
-              }}
-            />
-          </label>
-          <button
-            type="button"
-            className="nb-checkin-keep"
-            onClick={() => keep(opened, draft).then((after) => after && setView(after))}
-            disabled={keeping || showsNothing(draft)}
-          >
-            {KEEP_THIS}
-          </button>
-          {pageStatus(openStatus)}
-          {pageSwitch}
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <Card>
-      <h2 className="reflective text-3xl text-ink-900">{ended ? thisDay : TONIGHT}</h2>
-      {line}
-
-      {view.reaches.length === 0 ? (
-        <p className="reflective mt-4 max-w-prose text-lg text-ink-700">
-          {nothingHereFor(thisDay)}
-        </p>
-      ) : (
-        <ul className="mt-8 divide-y divide-sand-200">
-          {view.reaches.map((reach, index) => (
-            <li
-              key={`${reach.domain}-${reach.at}-${index}`}
-              className="flex items-baseline justify-between py-3"
-            >
-              <span className="text-ink-900">{reach.domain}</span>
-              <span className="text-sm text-ink-400">{timeOfDay(reach.at)}</span>
-            </li>
-          ))}
-        </ul>
-      )}
-
-      {view.coverage_note && (
-        <p className="reflective mt-6 text-ink-500">{view.coverage_note}</p>
-      )}
-
-      <label className="mt-10 block">
-        <span className="reflective text-xl text-ink-700">{HOW_THE_DAY_WENT}</span>
-        <textarea
-          className="reflective mt-3 block min-h-48 w-full rounded-lg border border-sand-200 bg-sand-50 p-4 text-lg leading-relaxed text-ink-900 focus:border-clay-500 focus:outline-none"
-          value={draft}
-          onChange={(event) => {
-            type(event.target.value);
-          }}
-        />
-      </label>
-
-      <div className="mt-4 flex items-center gap-4">
-        <Button
+    <div className="nb-spread nb-checkin-leaves">
+      <div className="nb-page">
+        <h2 className="nb-checkin-title">{ended ? thisDay : TONIGHT}</h2>
+        {view.reaches.length === 0 ? (
+          <p className="nb-checkin-empty">{nothingHereFor(thisDay)}</p>
+        ) : (
+          <ul className="nb-checkin-log">
+            {view.reaches.map((reach, index) => (
+              <li
+                key={`${reach.domain}-${reach.at}-${index}`}
+                className="nb-checkin-line"
+              >
+                <span className="nb-checkin-site">{reach.domain}</span>
+                <span className="nb-checkin-time">{timeOfDay(reach.at)}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+        {view.coverage_note && <p className="nb-checkin-note">{view.coverage_note}</p>}
+      </div>
+      <div className="nb-page nb-page--ruled">
+        {pageQuote}
+        <label className="nb-checkin-label">
+          <span className="nb-checkin-label__text">{HOW_THE_DAY_WENT}</span>
+          <textarea
+            className="nb-checkin-write"
+            value={draft}
+            onChange={(event) => {
+              type(event.target.value);
+            }}
+          />
+        </label>
+        <button
+          type="button"
+          className="nb-checkin-keep"
           onClick={() => keep(opened, draft).then((after) => after && setView(after))}
           disabled={keeping || showsNothing(draft)}
         >
           {KEEP_THIS}
-        </Button>
+        </button>
+        {pageStatus(openStatus)}
+        {pageSwitch}
       </div>
-
-      {/* One polite live region for what happened to the save, so a person
-          who cannot see the page hears it too: a refusal heard by nobody is
-          the lost entry G1 exists to prevent. */}
-      <p
-        role="status"
-        aria-live="polite"
-        className="reflective mt-4 max-w-prose text-ink-700"
-      >
-        {openStatus}
-      </p>
-
-      {quoteSwitch}
-    </Card>
+    </div>
   );
 }
 

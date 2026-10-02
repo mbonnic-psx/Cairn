@@ -8,10 +8,7 @@
  */
 import { useEffect, useState } from 'react';
 
-import { Button } from '../components/Button';
-import { Card } from '../components/Card';
 import { getDisclosures, type Disclosures } from '../ipc';
-import { useNotebookPage } from '../shell/notebookPage';
 
 export function Disclosure({
   onConfirm,
@@ -23,119 +20,66 @@ export function Disclosure({
   disclosures?: Disclosures;
 }) {
   const [details, setDetails] = useState<Disclosures | undefined>(disclosures);
-  const onPage = useNotebookPage();
 
   useEffect(() => {
     if (disclosures) return;
     getDisclosures().then(setDetails).catch(() => setDetails(undefined));
   }, [disclosures]);
 
-  if (onPage) {
-    return (
-      <div className="nb-spread nb-disclosure-spread">
-        <div className="nb-page nb-disclosure-left">
-          <h2 className="nb-disclosure-title">Before Cairn changes anything</h2>
-
-          <p className="nb-disclosure-lead">
-            Cairn protects this whole machine, so the changes it makes affect everyone who
-            uses it. It writes only inside its own marked section, and it keeps a copy of
-            what was there first.
-          </p>
-
-          {details && (
-            <>
-              <ul className="nb-disclosure-list">
-                {details.in_force.map((line) => (
-                  <li key={line} className="nb-disclosure-line">
-                    <span aria-hidden className="nb-disclosure-dot nb-disclosure-dot--in-force" />
-                    <span>{line}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <p className="nb-disclosure-helper">{details.helper}</p>
-            </>
-          )}
-        </div>
-
-        <div className="nb-page nb-disclosure-right">
-          {details && (
-            <>
-              <h3 className="nb-disclosure-subtitle">What this does not cover</h3>
-              <ul className="nb-disclosure-list">
-                {details.not_covered.map((line) => (
-                  <li key={line} className="nb-disclosure-line">
-                    <span aria-hidden className="nb-disclosure-dot nb-disclosure-dot--not-covered" />
-                    <span>{line}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <p className="nb-disclosure-administrator">{details.administrator}</p>
-            </>
-          )}
-
-          {/* The way forward is the foot of the right page, with the details or without them. */}
-          <div className="nb-disclosure-foot">
-            <button type="button" className="nb-disclosure-confirm" onClick={onConfirm}>
-              Yes, set this up
-            </button>
-            <button type="button" className="nb-disclosure-back" onClick={onBack}>
-              Not yet
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <Card className="max-w-2xl">
-      <h2 className="reflective text-3xl text-ink-900">Before Cairn changes anything</h2>
+    <div className="nb-spread nb-disclosure-spread">
+      <div className="nb-page nb-disclosure-left">
+        <h2 className="nb-disclosure-title">Before Cairn changes anything</h2>
 
-      <p className="reflective mt-4 text-lg text-ink-700">
-        Cairn protects this whole machine, so the changes it makes affect everyone who
-        uses it. It writes only inside its own marked section, and it keeps a copy of
-        what was there first.
-      </p>
+        <p className="nb-disclosure-lead">
+          Cairn protects this whole machine, so the changes it makes affect everyone who
+          uses it. It writes only inside its own marked section, and it keeps a copy of
+          what was there first.
+        </p>
 
-      {details && (
-        <>
-          <ul className="mt-8 space-y-3 text-ink-700">
-            {details.in_force.map((line) => (
-              <li key={line} className="flex gap-3">
-                <span aria-hidden className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-moss-500" />
-                <span>{line}</span>
-              </li>
-            ))}
-          </ul>
+        {details && (
+          <>
+            <ul className="nb-disclosure-list">
+              {details.in_force.map((line) => (
+                <li key={line} className="nb-disclosure-line">
+                  <span aria-hidden className="nb-disclosure-dot nb-disclosure-dot--in-force" />
+                  <span>{line}</span>
+                </li>
+              ))}
+            </ul>
 
-          <p className="mt-8 text-ink-700">{details.helper}</p>
-
-          <h3 className="mt-8 text-sm font-medium tracking-wide text-ink-400 uppercase">
-            What this does not cover
-          </h3>
-          <ul className="mt-3 space-y-3 text-ink-700">
-            {details.not_covered.map((line) => (
-              <li key={line} className="flex gap-3">
-                <span aria-hidden className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-sand-300" />
-                <span>{line}</span>
-              </li>
-            ))}
-          </ul>
-
-          <p className="reflective mt-8 border-t border-sand-200 pt-6 text-ink-500">
-            {details.administrator}
-          </p>
-        </>
-      )}
-
-      <div className="mt-10 flex items-center gap-3">
-        <Button onClick={onConfirm}>Yes, set this up</Button>
-        <Button tone="quiet" onClick={onBack}>
-          Not yet
-        </Button>
+            <p className="nb-disclosure-helper">{details.helper}</p>
+          </>
+        )}
       </div>
-    </Card>
+
+      <div className="nb-page nb-disclosure-right">
+        {details && (
+          <>
+            <h3 className="nb-disclosure-subtitle">What this does not cover</h3>
+            <ul className="nb-disclosure-list">
+              {details.not_covered.map((line) => (
+                <li key={line} className="nb-disclosure-line">
+                  <span aria-hidden className="nb-disclosure-dot nb-disclosure-dot--not-covered" />
+                  <span>{line}</span>
+                </li>
+              ))}
+            </ul>
+
+            <p className="nb-disclosure-administrator">{details.administrator}</p>
+          </>
+        )}
+
+        {/* The way forward is the foot of the right page, with the details or without them. */}
+        <div className="nb-disclosure-foot">
+          <button type="button" className="nb-disclosure-confirm" onClick={onConfirm}>
+            Yes, set this up
+          </button>
+          <button type="button" className="nb-disclosure-back" onClick={onBack}>
+            Not yet
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }

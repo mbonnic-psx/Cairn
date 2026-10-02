@@ -1,7 +1,8 @@
 /**
  * Every state the Protection and What is protected screens can show, as the
- * props that produce it. The pin renders each outside any shell; the page
- * tests render each on a notebook page and compare the words.
+ * props that produce it. Since the
+ * reveal, the words-kept tests render each on a notebook page and compare its words with the markup captured before the
+ * reveal (`beforeTheReveal.ts`).
  */
 import type {
   PendingChange,

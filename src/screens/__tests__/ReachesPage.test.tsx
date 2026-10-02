@@ -1,6 +1,6 @@
 /**
- * The Today screen told it is on a notebook page (slice `tonight-page`): the same words as outside any
- * shell, laid out as a spread, in both views. The reader and the clock are plain objects passed as props.
+ * The Today screen told it is on a notebook page (slice `tonight-page`): the same words as before the
+ * notebook, laid out as a spread, in both views. The reader and the clock are plain objects passed as props.
  */
 declare const process: { env: Record<string, string | undefined> };
 process.env.TZ = 'Europe/London';
@@ -11,7 +11,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { rangeInWords } from '../../localDays';
 import type { OffsetChange, Patterns } from '../../ipc/reaches';
-import type { NotebookLook } from '../../look/look';
+import type { Look } from '../../look/look';
 import { NotebookShell } from '../../shell/NotebookShell';
 import { Reaches } from '../Reaches';
 import {
@@ -23,11 +23,12 @@ import {
   silentReader,
   todayCases,
 } from './tonightCases';
+import { baseline, wordsOf, OVER_TIME, TODAY } from './beforeTheReveal';
 
 const tabs = [{ id: 'reaches' as const, label: 'Today', current: true }];
 
 /** The look the cases below run in: every case runs in all three. */
-let look: NotebookLook = 'morning';
+let look: Look = 'morning';
 
 function onPage(ui: React.ReactElement) {
   const view = render(
@@ -43,24 +44,14 @@ function onPage(ui: React.ReactElement) {
   return { ...view, main, spread, left: pages[0], right: pages[1], pages };
 }
 
-/** The text of every element with no element inside it, sorted: the words, wherever they sit. */
+/** The words, wherever they sit: the same reading the baseline gets, so text beside a child element counts on both sides. */
 function words(root: HTMLElement): string[] {
-  return Array.from(root.querySelectorAll('*'))
-    .filter((el) => el.children.length === 0 && el.textContent)
-    .map((el) => el.textContent as string)
-    .sort();
-}
-
-function wordsOutside(ui: React.ReactElement): string[] {
-  const view = render(ui);
-  const found = words(view.container);
-  view.unmount();
-  return found;
+  return wordsOf(root);
 }
 
 const now = evening;
 
-/** The time as Current writes it: the same call. */
+/** The time as the screen writes it: the same call. */
 const timeOf = (seconds: number) =>
   new Date(seconds * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
@@ -159,32 +150,23 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (name) 
     );
 
     it.each(['looking', 'sealed'])(
-      'says the same words as outside any shell: %s',
+      'says the words it said before the notebook: %s',
       (state) => {
         const today = todayCases[state];
-        const outside = wordsOutside(
-          <Reaches today={today} read={silentReader} now={now} />,
-        );
         const { spread } = onPage(
           <Reaches today={today} read={silentReader} now={now} />,
         );
-        expect(words(spread!)).toEqual(outside);
+        expect(words(spread!)).toEqual(wordsOf(baseline(TODAY[state]!)));
       },
     );
 
-    it('says the same words as outside any shell in Over time', async () => {
+    it('says the words it said before the notebook in Over time', async () => {
       const user = userEvent.setup();
-      const outside = render(
-        <Reaches today={todayCases.sealed} read={silentReader} now={now} />,
-      );
-      await user.click(screen.getByRole('button', { name: 'Over time' }));
-      const expected = words(outside.container);
-      outside.unmount();
       const { spread } = onPage(
         <Reaches today={todayCases.sealed} read={silentReader} now={now} />,
       );
       await user.click(screen.getByRole('button', { name: 'Over time' }));
-      expect(words(spread!)).toEqual(expected);
+      expect(words(spread!)).toEqual(wordsOf(baseline(OVER_TIME['looking']!)));
     });
   });
 
@@ -243,17 +225,14 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (name) 
     });
 
     it.each(logCases)(
-      'says the same words as outside any shell, the note moved: %s',
+      'says the words it said before the notebook, the note moved: %s',
       (state) => {
         const today = todayCases[state];
-        const outside = wordsOutside(
-          <Reaches today={today} read={silentReader} now={now} />,
-        );
         const { spread } = onPage(
           <Reaches today={today} read={silentReader} now={now} />,
         );
         // The words are compared as a sorted set, so where the note sits is the one thing allowed to differ.
-        expect(words(spread!)).toEqual(outside);
+        expect(words(spread!)).toEqual(wordsOf(baseline(TODAY[state]!)));
       },
     );
   });
@@ -285,16 +264,13 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (name) 
     });
 
     it.each(emptyCases)(
-      'says the same words as outside any shell, the note moved: %s',
+      'says the words it said before the notebook, the note moved: %s',
       (state) => {
         const today = todayCases[state];
-        const outside = wordsOutside(
-          <Reaches today={today} read={silentReader} now={now} />,
-        );
         const { spread } = onPage(
           <Reaches today={today} read={silentReader} now={now} />,
         );
-        expect(words(spread!)).toEqual(outside);
+        expect(words(spread!)).toEqual(wordsOf(baseline(TODAY[state]!)));
       },
     );
   });
@@ -369,7 +345,7 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (name) 
       },
     );
 
-    it('draws the date boxes as plain date inputs with the slice class and Current rules', async () => {
+    it('draws the date boxes as plain date inputs with the slice class and the rules it had before the reveal', async () => {
       const { left } = await overTime('looking');
       const from = within(left!).getByLabelText('From') as HTMLInputElement;
       const to = within(left!).getByLabelText('To') as HTMLInputElement;
@@ -417,22 +393,13 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (name) 
     });
 
     it.each(Object.keys(sentenceFor))(
-      'says the same words as outside any shell: %s',
+      'says the words it said before the notebook: %s',
       async (state) => {
-        const user = userEvent.setup();
-        const reader = overTimeReader(overTimeCases[state]!);
-        const outside = render(
-          <Reaches today={todayCases.sealed} read={reader} now={now} />,
-        );
-        await user.click(screen.getByRole('button', { name: 'Over time' }));
-        await screen.findByText(sentenceFor[state]!);
-        const expected = words(outside.container);
-        outside.unmount();
         const { spread, left } = await overTime(state);
         await waitFor(() =>
           expect(left!.lastElementChild).toHaveTextContent(sentenceFor[state]!),
         );
-        expect(words(spread!)).toEqual(expected);
+        expect(words(spread!)).toEqual(wordsOf(baseline(OVER_TIME[state]!)));
       },
     );
   });
@@ -512,7 +479,7 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (name) 
       });
     });
 
-    it('keeps each bar as wide as Current draws it, from the sheet and no other colour', async () => {
+    it('keeps each bar as wide as it was drawn before the reveal, from the sheet and no other colour', async () => {
       const { right } = await listed(overTimeCases['a list'] as Patterns);
       const bars = within(right).getAllByTestId('bar');
       expect(bars.map((b) => b.style.width)).toEqual(['100%', '44%', '11%']);
@@ -584,23 +551,11 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (name) 
     });
 
     it.each(listCases)(
-      'says the same words as outside any shell, notes moved: %s',
+      'says the words it said before the notebook, notes moved: %s',
       async (state) => {
-        const user = userEvent.setup();
         const answer = overTimeCases[state] as Patterns;
-        const read = {
-          listTodaysReaches: silentReader.listTodaysReaches,
-          summarizeReaches: async () => answer,
-        };
-        const outside = render(
-          <Reaches today={todayCases.sealed} read={read} now={now} />,
-        );
-        await user.click(screen.getByRole('button', { name: 'Over time' }));
-        await screen.findByText(CLOSING);
-        const expected = words(outside.container);
-        outside.unmount();
         const { spread } = await listed(answer);
-        expect(words(spread!)).toEqual(expected);
+        expect(words(spread!)).toEqual(wordsOf(baseline(OVER_TIME[state]!)));
       },
     );
   });
@@ -694,24 +649,39 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (name) 
     });
 
     it.each(emptyCases)(
-      'says the same words as outside any shell, notes moved: %s',
+      'says the words it said before the notebook, notes moved: %s',
       async (state) => {
-        const user = userEvent.setup();
-        const answer = overTimeCases[state] as Patterns;
-        const read = {
-          listTodaysReaches: silentReader.listTodaysReaches,
-          summarizeReaches: async () => answer,
-        };
-        const outside = render(
-          <Reaches today={todayCases.sealed} read={read} now={now} />,
-        );
-        await user.click(screen.getByRole('button', { name: 'Over time' }));
-        await screen.findByText(CLOSING);
-        const expected = words(outside.container);
-        outside.unmount();
         const { spread } = await empty(state);
-        expect(words(spread!)).toEqual(expected);
+        expect(words(spread!)).toEqual(wordsOf(baseline(OVER_TIME[state]!)));
       },
     );
+  });
+});
+
+describe('Today and Over time rendered alone, with no shell around them', () => {
+  const twoPages = (container: HTMLElement) => {
+    const spreads = container.querySelectorAll('.nb-spread');
+    expect(spreads).toHaveLength(1);
+    expect(spreads[0]!.querySelectorAll(':scope > .nb-page')).toHaveLength(2);
+  };
+
+  it.each(Object.keys(todayCases))('Today, %s, is its spread', (state) => {
+    const { container } = render(
+      <Reaches today={todayCases[state]} read={silentReader} now={now} />,
+    );
+    twoPages(container);
+  });
+
+  it.each(Object.keys(overTimeCases))('Over time, %s, is its spread', async (state) => {
+    const user = userEvent.setup();
+    const { container } = render(
+      <Reaches
+        today={todayCases.sealed}
+        read={overTimeReader(overTimeCases[state]!)}
+        now={now}
+      />,
+    );
+    await user.click(screen.getByRole('button', { name: 'Over time' }));
+    await waitFor(() => twoPages(container));
   });
 });

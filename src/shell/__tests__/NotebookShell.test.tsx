@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
-import type { NotebookLook } from '../../look/look';
+import type { Look } from '../../look/look';
 import type { Tab } from '../../navigation';
 import { tabsFor } from '../../navigation';
 import { NotebookShell } from '../NotebookShell';
@@ -22,7 +22,7 @@ const fakeTabs: Tab[] = [
   { id: 'checkin', label: 'Tonight', current: false },
 ];
 
-function shell(tabs: Tab[] = fakeTabs, onSelect = vi.fn(), look: NotebookLook = 'morning') {
+function shell(tabs: Tab[] = fakeTabs, onSelect = vi.fn(), look: Look = 'morning') {
   const view = render(
     <NotebookShell tabs={tabs} onSelect={onSelect} look={look}>
       <p>the screen</p>
@@ -54,7 +54,6 @@ describe('NotebookShell tabs', () => {
   it('reports the chosen destination from the keyboard', async () => {
     const { onSelect } = shell();
     await userEvent.tab();
-    await userEvent.tab();
     expect(screen.getByRole('button', { name: 'Protection' })).toHaveFocus();
     await userEvent.keyboard('{Enter}');
     expect(onSelect).toHaveBeenCalledWith('protection');
@@ -70,6 +69,7 @@ describe('NotebookShell tabs', () => {
 
   it('lets the keyboard reach the page area on a spread with no control, so it can scroll it (D19)', async () => {
     const { container } = shell();
+    for (let i = 0; i < fakeTabs.length; i += 1) await userEvent.tab();
     await userEvent.tab();
     expect(container.querySelector('.nb-page-area')).toHaveFocus();
   });
@@ -254,7 +254,7 @@ describe('NotebookShell tab labels on every webview', () => {
 describe('NotebookShell looks', () => {
   it('admits only the three notebook looks (type-level, proved by tsc)', () => {
     render(
-      // @ts-expect-error Current is not a notebook look (contracts/ui-shell.md, FR-013b)
+      // @ts-expect-error 'current' is no look: there is no other interface to wear (contracts/ui-shell.md, FR-013b)
       <NotebookShell tabs={fakeTabs} onSelect={vi.fn()} look="current">
         <p>x</p>
       </NotebookShell>,
@@ -281,5 +281,54 @@ describe('each tab wears its own colour class (mutation, fold-and-width)', () =>
     for (const tab of fakeTabs) {
       expect(screen.getByRole('button', { name: tab.label })).toHaveClass('nb-tab', `nb-tab--${tab.id}`);
     }
+  });
+});
+
+describe('NotebookShell keyboard and reading order (D47)', () => {
+  const real = tabsFor('trail', true);
+
+  function withPage() {
+    return render(
+      <NotebookShell tabs={real} onSelect={vi.fn()} look="morning">
+        <div className="nb-page nb-trail-sticky" tabIndex={0} role="region" aria-label="Left page" />
+        <button type="button">First control</button>
+        <button type="button">Second control</button>
+      </NotebookShell>,
+    );
+  }
+
+  it('reaches every tab in tabsFor order, then the page area, then the left page, then the page controls', async () => {
+    const { container } = withPage();
+    for (const tab of real) {
+      await userEvent.tab();
+      expect(screen.getByRole('button', { name: tab.label })).toHaveFocus();
+    }
+    await userEvent.tab();
+    expect(container.querySelector('.nb-page-area')).toHaveFocus();
+    await userEvent.tab();
+    expect(screen.getByRole('region', { name: 'Left page' })).toHaveFocus();
+    await userEvent.tab();
+    expect(screen.getByRole('button', { name: 'First control' })).toHaveFocus();
+    await userEvent.tab();
+    expect(screen.getByRole('button', { name: 'Second control' })).toHaveFocus();
+  });
+
+  it('leaves aria-current on the current tab only', () => {
+    withPage();
+    const current = real.filter((t) => t.current).map((t) => t.label);
+    expect(current).toHaveLength(1);
+    expect(screen.getByRole('button', { name: current[0] })).toHaveAttribute('aria-current', 'page');
+    expect(screen.getAllByRole('button').filter((b) => b.hasAttribute('aria-current'))).toHaveLength(1);
+  });
+
+  it('meets navigation "Pages" before main in the reading order', () => {
+    withPage();
+    const nav = screen.getByRole('navigation', { name: 'Pages' });
+    const main = screen.getByRole('main');
+    expect(nav.compareDocumentPosition(main) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it('gives the tabs a stacking order, so the page area never paints over them', () => {
+    expect(notebook).toMatch(/\.nb-tabs\s*\{[^}]*z-index:\s*1/);
   });
 });

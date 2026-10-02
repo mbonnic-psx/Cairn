@@ -14,6 +14,7 @@ import { describe, expect, it, vi } from 'vitest';
 import type { Patterns } from '../../ipc/reaches';
 import { NotebookShell } from '../../shell/NotebookShell';
 import { Reaches } from '../Reaches';
+import { BY_HOUR_WORDS } from './beforeTheReveal';
 import { evening, rangeCoverageNote, sealedSentence, todayCases } from './tonightCases';
 import { never } from './fakeCore';
 
@@ -222,7 +223,7 @@ describe('the hours, on the right page', () => {
   });
 });
 
-describe('the same words as outside any shell', () => {
+describe('the words it said before the notebook', () => {
   it.each([
     ['a list', answer()],
     [
@@ -230,20 +231,10 @@ describe('the same words as outside any shell', () => {
       answer({ coverage_note: rangeCoverageNote, estimates_excluded: 1 }),
     ],
     ['a quiet range', answer({ by_site: [], by_hour: hours() })],
-  ])('by hour: %s', async (_name, patterns) => {
-    const user = userEvent.setup();
-    const outside = render(
-      <Reaches today={todayCases.sealed} read={readerOf(patterns)} now={now} />,
-    );
-    await user.click(screen.getByRole('button', { name: 'Over time' }));
-    await user.click(await screen.findByRole('button', { name: 'By hour' }));
-    await screen.findAllByRole('listitem');
-    const expected = words(outside.container);
-    outside.unmount();
-
+  ])('by hour: %s', async (name, patterns) => {
     const { spread, user: pageUser } = await byHourOnPage(patterns);
     await pageUser.click(choose('By hour'));
 
-    expect(words(spread)).toEqual(expected);
+    expect(words(spread)).toEqual(BY_HOUR_WORDS[name]);
   });
 });

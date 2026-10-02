@@ -1,16 +1,15 @@
 /**
  * Through the real `App` (slice `tonight-page`, T018): in a notebook look the Today tab opens the Today spread
  * and "Over time" switches the view inside the notebook, the Tonight tab opens the Tonight spread, what is
- * typed in the writing space survives a trip to another tab and a change of look, and Current is unchanged.
+ * typed in the writing space survives a trip to another tab and a change of look, as it did before the reveal.
  * The core is a fake written in the test tree at the one seam the interface calls it through.
  */
-import { render, screen, within } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import App from '../../App';
-import { CheckIn } from '../../screens/CheckIn';
-import { Reaches } from '../../screens/Reaches';
+import { TONIGHT_CALLS_CURRENT } from '../../screens/__tests__/beforeTheReveal';
 import { installFakeCore, type FakeCore } from '../../screens/__tests__/fakeCore';
 import { reachesOfTheDay } from '../../screens/__tests__/tonightCases';
 
@@ -52,10 +51,10 @@ const headings = () =>
 const tab = (name: string) => userEvent.click(screen.getByRole('button', { name }));
 const writingSpace = () => screen.findByRole('textbox', { name: 'How the day went' }) as Promise<HTMLTextAreaElement>;
 
-async function start(look: 'Morning' | 'Midday' | 'Night' | 'Current' = 'Morning') {
+async function start(look: 'Morning' | 'Midday' | 'Night' = 'Morning') {
   const view = render(<App devBuild />);
   await screen.findByRole('button', { name: 'Turn protection on' });
-  if (look !== 'Current') await userEvent.selectOptions(switchControl(), look);
+  await userEvent.selectOptions(switchControl(), look);
   const pages = () => Array.from(view.container.querySelectorAll<HTMLElement>('.nb-page-area > .nb-spread > .nb-page'));
   return { ...view, pages };
 }
@@ -111,42 +110,24 @@ describe('Today and Tonight through App, in a notebook look', () => {
     expect((await writingSpace()).value).toBe('Half a thought');
   });
 
-  it('keeps it through Morning, Midday and Night, and through Current and back', async () => {
+  it('keeps it through Morning, Midday and Night, and back round', async () => {
     await start('Morning');
     await tab('Tonight');
     await userEvent.type(await writingSpace(), 'Half a thought');
-    for (const look of ['Midday', 'Night', 'Current', 'Morning']) {
+    for (const look of ['Midday', 'Night', 'Morning']) {
       await userEvent.selectOptions(switchControl(), look);
       expect((await writingSpace()).value, look).toBe('Half a thought');
     }
   });
 });
 
-describe('Current through App', () => {
-  it("shows today's markup for both screens, outside any notebook", async () => {
-    const { container } = await start('Current');
-    await tab('Today');
-    await screen.findByText('video.example');
-    expect(container.querySelector('.nb-spread')).toBeNull();
-    // The same fake core answers both; each screen is rendered once more on its own and found whole in the page.
-    const reachesHtml = await settled(<Reaches />, async (root) => {
-      await within(root).findByText('video.example');
-    });
-    expect(container.innerHTML).toContain(reachesHtml);
-
-    await tab('Tonight');
-    await writingSpace();
-    const tonightHtml = await settled(<CheckIn />, async (root) => {
-      // The writing space is the day loaded; the switch is the quotes setting read, the last thing it waits for.
-      await within(root).findByRole('textbox');
-      await within(root).findByRole('button', { name: 'Show quotes' });
-    });
-    expect(container.innerHTML).toContain(tonightHtml);
-  });
-
-  it('asks the core the same things, with the same arguments, as Current does', async () => {
-    const script = async (look: 'Morning' | 'Current') => {
-      const view = await start(look);
+describe('the core is asked nothing new through App', () => {
+  it('asks the core the same things, with the same arguments, as Current did', async () => {
+    // The clock is held where the log was captured; the zone is the fixture's (Europe/London).
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date(2026, 8, 30, 20, 0));
+    try {
+      const view = await start('Morning');
       await tab('Today');
       await screen.findByText('video.example');
       await userEvent.click(screen.getByRole('button', { name: 'Over time' }));
@@ -156,27 +137,13 @@ describe('Current through App', () => {
       await tab('Today');
       await screen.findByText('Over time');
       const asked = core.calls.map((c) => `${c.cmd} ${JSON.stringify(c.args)}`);
-      core.calls.length = 0;
       view.unmount();
-      return asked;
-    };
-    const current = await script('Current');
-    const morning = await script('Morning');
-    for (const cmd of ['list_todays_reaches', 'summarize_reaches', 'get_day', 'get_quotes_shown']) {
-      expect(current.some((c) => c.startsWith(`${cmd} `)), cmd).toBe(true);
+      for (const cmd of ['list_todays_reaches', 'summarize_reaches', 'get_day', 'get_quotes_shown']) {
+        expect(TONIGHT_CALLS_CURRENT.some((c) => c.startsWith(`${cmd} `)), cmd).toBe(true);
+      }
+      expect([...asked].sort()).toEqual([...TONIGHT_CALLS_CURRENT].sort());
+    } finally {
+      vi.useRealTimers();
     }
-    expect([...morning].sort()).toEqual([...current].sort());
   });
 });
-
-/** A screen rendered on its own, once it shows the loaded state `ready` waits for, as the markup it settles into. */
-async function settled(
-  ui: React.ReactElement,
-  ready: (root: HTMLElement) => Promise<void>,
-): Promise<string> {
-  const view = render(ui);
-  await ready(view.container);
-  const html = view.container.innerHTML;
-  view.unmount();
-  return html;
-}

@@ -1,7 +1,8 @@
 /**
  * Every state the Today screen (`Reaches`, both views) and Tonight (`CheckIn`) can show, as the data that
- * produces it (slice 004 `tonight-page`). The pin renders each outside any shell; the page tests render each
- * on a notebook page and compare the words.
+ * produces it (slice 004 `tonight-page`). Since the
+ * reveal, the words-kept tests render each on a notebook page and compare its words with the markup captured before the
+ * reveal (`beforeTheReveal.ts`).
  *
  * No `Date` is made when this file loads: the tests fix the zone (`Europe/London`) first, and a date made
  * before that would be made in the runner's zone. Reach times are instants in epoch seconds.

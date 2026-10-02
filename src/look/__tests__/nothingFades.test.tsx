@@ -1,6 +1,6 @@
 /// <reference types="vite/client" />
 /**
- * Nothing a look re-points fades (loose-ends T007; looks T024, D3, SC-009): no element on any screen a page
+ * Nothing a look re-points fades (loose-ends T007; looks T024, D3): no element on any screen a page
  * can show carries a transition, animation or settle class, in any look and any state the case files hold,
  * and Protection's "Keep things as they are" is a plain button with the box the shared one had.
  */
@@ -32,7 +32,7 @@ import {
   tonightCore,
 } from '../../screens/__tests__/tonightCases';
 import { NotebookShell } from '../../shell/NotebookShell';
-import type { NotebookLook } from '../look';
+import type { Look } from '../look';
 
 const nodeFs = 'node:' + 'fs';
 const { readFileSync } = (await import(/* @vite-ignore */ nodeFs)) as {
@@ -100,13 +100,10 @@ function motionIn(sheet: string, css: string): Motion[] {
 /**
  * The only motion the sheets may declare. D3 is about a change of look re-lighting colours, so a transition
  * is allowed only where it names no property a look token feeds. The shell tabs' hover filter is the one
- * such (no look sets `filter`), allowed by its exact sheet, selector, property and value; `.settle` is the
- * entrance animation, held off every page element by the class sweep above.
+ * such (no look sets `filter`), allowed by its exact sheet, selector, property and value.
  */
 const ALLOWED_MOTION = [
   { sheet: 'notebook.css', selector: '.nb-tab', property: 'transition', value: 'filter 160ms ease' },
-  { sheet: 'theme.css', selector: '.settle', property: 'animation', value: 'settle 420ms var(--ease-gentle) both' },
-  { sheet: 'theme.css', selector: '@keyframes settle', property: '@keyframes', value: '' },
 ];
 
 /** Whether a declaration sits in exactly the `@media (prefers-reduced-motion: reduce)` block (whitespace-normalised), where motion is switched off. */
@@ -126,7 +123,7 @@ function unallowedMotion(sheets: Record<string, string>): string[] {
   return out;
 }
 
-const LOOKS: NotebookLook[] = ['morning', 'midday', 'night'];
+const LOOKS: Look[] = ['morning', 'midday', 'night'];
 const noop = () => undefined;
 const tabs = [{ id: 'protection' as const, label: 'Protection', current: true }];
 const settle = () => act(async () => new Promise<void>((resolve) => setTimeout(resolve, 20)));
@@ -141,7 +138,7 @@ afterEach(() => {
   core = undefined;
 });
 
-function onPage(ui: React.ReactElement, look: NotebookLook) {
+function onPage(ui: React.ReactElement, look: Look) {
   const view = render(
     <NotebookShell tabs={tabs} onSelect={noop} look={look}>
       {ui}
@@ -150,7 +147,7 @@ function onPage(ui: React.ReactElement, look: NotebookLook) {
   return view.container.querySelector('main') as HTMLElement;
 }
 
-type Scene = (look: NotebookLook) => Promise<HTMLElement>;
+type Scene = (look: Look) => Promise<HTMLElement>;
 const scenes: Record<string, Scene> = {};
 const add = (name: string, scene: Scene) => {
   scenes[name] = scene;

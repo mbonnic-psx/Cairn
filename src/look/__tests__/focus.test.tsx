@@ -14,7 +14,7 @@ const notebook = readFileSync('src/styles/notebook.css', 'utf8');
 
 describe('the look switch focus ring', () => {
   it('is drawn by a rule that matches the element that really takes focus', async () => {
-    render(<LookSwitch look="current" onChange={vi.fn()} />);
+    render(<LookSwitch look="morning" onChange={vi.fn()} />);
     await userEvent.tab();
     const focused = document.activeElement as HTMLElement;
     expect(focused.tagName).toBe('SELECT');

@@ -1,6 +1,6 @@
 /**
  * Through the real `App` (slice `quiet-pages`, T006): in a notebook look the What Cairn covers tab opens a
- * spread under the notebook's heading outline, with protection on or off, and Current is unchanged. The core
+ * spread under the notebook's heading outline, with protection on or off, as before the reveal. The core
  * is a fake written in the test tree at the one seam the interface calls it through.
  */
 import { render, screen, within } from '@testing-library/react';
@@ -9,7 +9,6 @@ import { afterEach, describe, expect, it } from 'vitest';
 
 import App from '../../App';
 import type { ProtectionState } from '../../ipc';
-import { Limits } from '../../screens/Limits';
 import { installFakeCore, type FakeCore } from '../../screens/__tests__/fakeCore';
 import { disclosureCases } from '../../screens/__tests__/quietCases';
 
@@ -46,14 +45,6 @@ const headings = (levels = [1, 2, 3]) =>
     .getAllByRole('heading')
     .filter((h) => levels.includes(Number(h.tagName.slice(1))))
     .map((h) => h.textContent);
-
-/** The markup a screen has outside any shell: what Current must show. */
-function outside(ui: React.ReactElement): string {
-  const view = render(ui);
-  const html = view.container.innerHTML;
-  view.unmount();
-  return html;
-}
 
 /** `ready` waits for the first screen: with protection off App opens on the choosing screen, not a heading. */
 async function openLimits(state: ProtectionState, ready: () => Promise<unknown>) {
@@ -98,15 +89,6 @@ describe('What Cairn covers through App, in a notebook look', () => {
     const { container } = await openLimits(off, choosing);
     expect(container.querySelector('.nb-page-area .nb-spread.nb-limits-leaves')).not.toBeNull();
     expect(headings([1, 2])).toEqual(['Cairn', 'What Cairn covers']);
-  });
-
-  it('shows today\'s markup in Current', async () => {
-    const { container } = await openLimits(inForce, protectionIsOn);
-    await userEvent.selectOptions(switchControl(), 'Current');
-    expect(container.querySelector('.nb-root')).toBeNull();
-    const shown = (container.querySelector('main > div.mx-auto') as HTMLElement).innerHTML;
-    expect(shown).toBe(outside(<Limits disclosures={disclosures} />));
-    expect(container.querySelector('.nb-spread')).toBeNull();
   });
 
   it('asks the core nothing the screens did not ask before', async () => {

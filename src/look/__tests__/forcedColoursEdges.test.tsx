@@ -30,7 +30,7 @@ import {
   tonightCore,
 } from '../../screens/__tests__/tonightCases';
 import { NotebookShell } from '../../shell/NotebookShell';
-import type { NotebookLook } from '../look';
+import type { Look } from '../look';
 
 const nodeFs = 'node:' + 'fs';
 const { readFileSync } = (await import(/* @vite-ignore */ nodeFs)) as {
@@ -137,7 +137,7 @@ function pressedMark(cls: string): { wider: number; fill: boolean } {
   return { wider: widest - unpressed, fill };
 }
 
-const LOOKS: NotebookLook[] = ['morning', 'midday', 'night'];
+const LOOKS: Look[] = ['morning', 'midday', 'night'];
 const tabs = [{ id: 'protection' as const, label: 'Protection', current: true }];
 const noop = () => undefined;
 const settle = () => new Promise((resolve) => setTimeout(resolve, 20));
@@ -149,7 +149,7 @@ afterEach(() => {
   core = undefined;
 });
 
-function onPage(ui: React.ReactElement, look: NotebookLook) {
+function onPage(ui: React.ReactElement, look: Look) {
   const view = render(
     <NotebookShell tabs={tabs} onSelect={noop} look={look}>
       {ui}
@@ -158,7 +158,7 @@ function onPage(ui: React.ReactElement, look: NotebookLook) {
   return view.container.querySelector('main') as HTMLElement;
 }
 
-const scenes: Record<string, (look: NotebookLook) => Promise<HTMLElement>> = {
+const scenes: Record<string, (look: Look) => Promise<HTMLElement>> = {
   'choosing, categories with a note, an address added, a reason': async (look) => {
     core = installFakeCore({
       add_custom_entry: (args) => {
@@ -198,26 +198,26 @@ const scenes: Record<string, (look: NotebookLook) => Promise<HTMLElement>> = {
   ...Object.fromEntries(
     Object.entries(protectionCases).map(([name, c]) => [
       `protection, ${name}`,
-      async (look: NotebookLook) => onPage(<Protection state={c.state} pending={c.pending} />, look),
+      async (look: Look) => onPage(<Protection state={c.state} pending={c.pending} />, look),
     ]),
   ),
   ...Object.fromEntries(
     Object.entries(trailCases).map(([name, c]) => [
       `What is protected, ${name}`,
-      async (look: NotebookLook) => onPage(<Trail {...c} />, look),
+      async (look: Look) => onPage(<Trail {...c} />, look),
     ]),
   ),
   ...Object.fromEntries(
     Object.entries(todayCases).map(([name, today]) => [
       `Reaches, Today, ${name}`,
-      async (look: NotebookLook) =>
+      async (look: Look) =>
         onPage(<Reaches today={today} read={overTimeReader('looking')} now={evening} />, look),
     ]),
   ),
   ...Object.fromEntries(
     Object.entries(overTimeCases).map(([name, answer]) => [
       `Reaches, Over time, ${name}`,
-      async (look: NotebookLook) => {
+      async (look: Look) => {
         const main = onPage(<Reaches today={todayCases.sealed} read={overTimeReader(answer)} now={evening} />, look);
         await userEvent.click(screen.getByRole('button', { name: 'Over time' }));
         await settle();
@@ -228,7 +228,7 @@ const scenes: Record<string, (look: NotebookLook) => Promise<HTMLElement>> = {
   ...Object.fromEntries(
     Object.entries(tonightCases).map(([name, c]) => [
       `CheckIn, ${name}`,
-      async (look: NotebookLook) => {
+      async (look: Look) => {
         core = installFakeCore(tonightCore(c));
         const main = onPage(<CheckIn />, look);
         await settle();
@@ -239,13 +239,13 @@ const scenes: Record<string, (look: NotebookLook) => Promise<HTMLElement>> = {
   ...Object.fromEntries(
     Object.entries(disclosureCases).map(([name, c]) => [
       `Limits, ${name}`,
-      async (look: NotebookLook) => onPage(<Limits disclosures={c} />, look),
+      async (look: Look) => onPage(<Limits disclosures={c} />, look),
     ]),
   ),
   ...Object.fromEntries(
     Object.entries(teardownCases).map(([name, c]) => [
       `Teardown, ${name}`,
-      async (look: NotebookLook) => onPage(<Teardown report={c} />, look),
+      async (look: Look) => onPage(<Teardown report={c} />, look),
     ]),
   ),
 };

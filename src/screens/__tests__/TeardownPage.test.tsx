@@ -1,20 +1,21 @@
 /**
  * This machine is as it was told it is on a notebook page (slice `quiet-pages`, T003 and T004): the same
- * words as outside any shell, laid out as a spread. Rendered inside `NotebookShell`, in each look. The
+ * words as before the notebook, laid out as a spread. Rendered inside `NotebookShell`, in each look. The
  * screen is reached by tests only (D16), so these are its whole proof.
  */
 import { render } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { TeardownReport } from '../../ipc';
-import type { NotebookLook } from '../../look/look';
+import type { Look } from '../../look/look';
 import { NotebookShell } from '../../shell/NotebookShell';
 import { Teardown } from '../Teardown';
+import { baseline, TEARDOWN, TEARDOWN_COMPLETE_WITH_RESIDUE, TEARDOWN_TEXT_SET_ASIDE } from './beforeTheReveal';
 import { teardownCases } from './quietCases';
 
 const tabs = [{ id: 'protection' as const, label: 'Protection', current: true }];
 
-let look: NotebookLook = 'morning';
+let look: Look = 'morning';
 
 function onPage(ui: React.ReactElement) {
   const view = render(
@@ -28,12 +29,8 @@ function onPage(ui: React.ReactElement) {
   return { ...view, main, spread, pages, left: pages[0]!, right: pages[1]! };
 }
 
-function outside(ui: React.ReactElement): string {
-  const view = render(ui);
-  const text = view.container.textContent ?? '';
-  view.unmount();
-  return text;
-}
+/** The words the screen said before the notebook, from the baseline (`beforeTheReveal.ts`), never from a render. */
+const wasText = (html: string) => baseline(html).textContent ?? '';
 
 const COMPLETE = {
   heading: 'This machine is as it was',
@@ -61,7 +58,7 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (lookNa
     look = lookName;
   });
 
-  describe.each(Object.entries(teardownCases))('This machine is as it was on a page, %s', (_name, report) => {
+  describe.each(Object.entries(teardownCases))('This machine is as it was on a page, %s', (caseName, report) => {
     const words = report.complete ? COMPLETE : PARTIAL;
 
     it('sits in one spread of two pages with the slice\'s own class, and runs no entrance', () => {
@@ -104,10 +101,10 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (lookNa
       expect(right.querySelector('button, a, input, ul, p, h2, h3')).toBeNull();
     });
 
-    it('says the same words as outside any shell, what is left set aside (T004 holds that)', () => {
+    it('says the words it said before the notebook, what is left set aside (T004 holds that)', () => {
       const shown = { ...report, residue: [] };
       const { main } = onPage(<Teardown report={shown} />);
-      expect(main.textContent).toBe(outside(<Teardown report={shown} />));
+      expect(main.textContent).toBe(TEARDOWN_TEXT_SET_ASIDE[caseName] ?? wasText(TEARDOWN[caseName]!));
     });
 
     it('reports and never congratulates', () => {
@@ -125,7 +122,7 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (lookNa
       'complete, with residue': completeWithResidue,
     };
 
-    describe.each(Object.entries(shapes))('%s', (_name, report) => {
+    describe.each(Object.entries(shapes))('%s', (shapeName, report) => {
       it('lists it under a "Still here" label, with an amber dot for each line', () => {
         const { left } = onPage(<Teardown report={report} />);
         const label = Array.from(left.querySelectorAll('h3')).find((h) => h.textContent === 'Still here');
@@ -157,9 +154,11 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (lookNa
         expect(outline(left)[outline(left).length - 2]).toBe('h3: Still here');
       });
 
-      it('says the same words as outside any shell', () => {
+      it('says the words it said before the notebook', () => {
         const { main } = onPage(<Teardown report={report} />);
-        expect(main.textContent).toBe(outside(<Teardown report={report} />));
+        expect(main.textContent).toBe(
+          wasText(report === completeWithResidue ? TEARDOWN_COMPLETE_WITH_RESIDUE : TEARDOWN[shapeName]!),
+        );
       });
     });
 
@@ -175,9 +174,15 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (lookNa
   });
 });
 
-describe('outside any shell', () => {
-  it('renders no spread', () => {
-    const { container } = render(<Teardown report={teardownCases['as it was, nothing listed']!} />);
-    expect(container.querySelector('.nb-spread, .nb-page')).toBeNull();
-  });
+describe('rendered alone', () => {
+  it.each([...Object.entries(teardownCases), ['complete, with residue', completeWithResidue] as const])(
+    'it is its spread, %s',
+    (_name, report) => {
+      const { container } = render(<Teardown report={report} />);
+      const spread = container.querySelector('.nb-spread');
+      expect(spread).toHaveClass('nb-teardown-leaves');
+      expect(spread!.querySelectorAll(':scope > .nb-page')).toHaveLength(2);
+      expect(container.querySelector('.settle')).toBeNull();
+    },
+  );
 });

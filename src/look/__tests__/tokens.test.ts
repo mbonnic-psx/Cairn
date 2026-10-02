@@ -15,9 +15,9 @@ const theme = readFileSync('src/styles/theme.css', 'utf8');
 
 const vendored = Object.keys(import.meta.glob('../../assets/fonts/*.woff2'));
 
-// Every screen and component the notebook can wear, read as text (tests excluded).
+// Every screen the notebook can wear, read as text (tests excluded).
 const sources = import.meta.glob(
-  ['../../screens/**/*.tsx', '../../components/**/*.tsx', '!**/__tests__/**'],
+  ['../../screens/**/*.tsx', '!**/__tests__/**'],
   { query: '?raw', import: 'default', eager: true },
 ) as Record<string, string>;
 
@@ -116,7 +116,7 @@ describe('notebook.css behaviour rules', () => {
     }
   });
 
-  it('scopes every selector to the notebook, so Current stays untouched (SC-009)', () => {
+  it('scopes every selector to the notebook, so nothing outside the notebook is styled', () => {
     expect(rules.length).toBeGreaterThan(10);
     for (const r of rules) {
       for (const one of r.selector.split(',')) expect(one.trim()).toMatch(/^(\.nb-|\[data-look)/);
@@ -152,7 +152,7 @@ describe('notebook.css behaviour rules', () => {
   });
 });
 
-describe.each(['morning', 'midday', 'night'] as const)('%s: every colour a screen draws as text, on the paper (FR-021, SC-003)', (look) => {
+describe.each(['morning', 'midday', 'night'] as const)('%s: every colour drawn as text, on the paper (FR-021, SC-003)', (look) => {
   const colourOf = (css: string) => {
     const out = new Map<string, string>();
     for (const m of css.matchAll(/--color-([a-z]+-\d+):\s*(#[0-9a-fA-F]{6})\s*;/g)) out.set(m[1]!, m[2]!);
@@ -160,36 +160,30 @@ describe.each(['morning', 'midday', 'night'] as const)('%s: every colour a scree
   };
   const base = colourOf(theme);
   const lookBlock = notebook.match(new RegExp(`\\[data-look="${look}"\\]\\s*\\{[^}]*\\}`))![0];
-  const onPaper = new Map([...base, ...colourOf(lookBlock)]);
+  const repointed = colourOf(lookBlock);
+  const onPaper = new Map([...base, ...repointed]);
 
-  // A text class is read when it stands alone: variants (disabled:, hover:) mark
-  // states that sit on another fill. text-sand-50 is the button's label on its own fill.
-  const used = new Set<string>();
-  for (const src of Object.values(sources)) {
-    for (const m of src.matchAll(/(?<![\w:-])text-((?:ink|amber|moss|clay|sand)-\d+)(?![\w-])/g)) used.add(m[1]!);
-  }
-  used.delete('sand-50');
-
-  it('finds the text colours the screens use', () => {
+  it('has no screen source that carries a palette text class: the page sheets colour the text', () => {
     expect(Object.keys(sources).length).toBeGreaterThan(5);
-    expect([...used].sort()).toEqual(expect.arrayContaining(['ink-400', 'ink-500', 'ink-700', 'ink-900', 'amber-600', 'moss-600']));
+    const carriers = Object.entries(sources)
+      .filter(([, src]) => /(?<![\w-])text-(?:ink|amber|moss|clay|sand)-\d+(?![\w-])/.test(src))
+      .map(([file]) => file);
+    expect(carriers).toEqual([]);
   });
 
-  it.each([...used].sort())('text-%s meets 4.5:1 on the paper', (name) => {
-    const colour = onPaper.get(name);
-    expect(colour, `no colour for ${name}`).toBeDefined();
-    expect(contrastRatio(colour!, token('--nb-paper', look))).toBeGreaterThanOrEqual(TEXT);
+  it('re-points only --color-moss-600, the one palette value a page sheet draws as text', () => {
+    expect([...repointed.keys()]).toEqual(['moss-600']);
+    expect(theme).toMatch(/--color-moss-600:/);
   });
 
-  it('keeps the status badges readable on their own tints', () => {
-    for (const [fg, bg] of [['moss-600', 'moss-100'], ['amber-600', 'amber-100'], ['ink-500', 'sand-100']] as const) {
-      expect(contrastRatio(onPaper.get(fg)!, onPaper.get(bg)!)).toBeGreaterThanOrEqual(TEXT);
-    }
+  it('reads that value, and the body ink the theme sets, on the paper at 4.5:1', () => {
+    expect(contrastRatio(onPaper.get('moss-600')!, token('--nb-paper', look))).toBeGreaterThanOrEqual(TEXT);
+    expect(contrastRatio(onPaper.get('ink-700')!, token('--nb-paper', look))).toBeGreaterThanOrEqual(TEXT);
   });
 
-  it('leaves the Current look to the theme: the overrides sit under [data-look]', () => {
+  it('leaves the theme without a look: the one re-point sits under [data-look]', () => {
     expect(theme).not.toMatch(/data-look/);
-    expect(lookBlock).toMatch(/--color-ink-400:/);
+    expect(lookBlock).toMatch(/--color-moss-600:/);
   });
 });
 
@@ -362,9 +356,9 @@ describe('the notebook renders the same on every platform', () => {
     expect(ruleFor('.nb-tab').every((r) => !/writing-mode/.test(r.body))).toBe(true);
   });
 
-  it("points the screens' serif at the bundled face, so no platform font stands in", () => {
+  it("points the page sheets' serif at the bundled face, so no platform font stands in", () => {
     const shared = ruleFor('[data-look]').map((r) => r.body).join('\n');
-    expect(shared).toMatch(/--font-serif:\s*var\(--font-notebook-serif\)/);
+    expect(shared).toMatch(/--nb-font-serif:\s*var\(--font-notebook-serif\)/);
   });
 });
 
@@ -387,7 +381,7 @@ describe('tokens: what differs per look, and what every look shares (FR-009, FR-
   });
 
   it('keeps the fonts in one shared block, not in any look', () => {
-    for (const name of ['--font-serif', '--nb-font-serif', '--nb-font-mono']) {
+    for (const name of ['--nb-font-serif', '--nb-font-mono']) {
       expect(shared()).toContain(`${name}:`);
       expect(blockOf('morning')).not.toContain(`${name}:`);
     }
@@ -450,17 +444,11 @@ function completeAndReadable(look: Exclude<LookName, 'morning'>) {
     expect(contrastRatio(t('--nb-ink'), t('--nb-paper'))).toBeGreaterThanOrEqual(TEXT);
   });
 
-  it('the theme palette overrides read on the paper, and the badges on their tints', () => {
+  it('the theme palette overrides read on the paper', () => {
     const overrides = [...blockOf(look).matchAll(/(--color-[a-z]+-\d+):\s*(#[0-9a-fA-F]{6})/g)];
     expect(overrides.length).toBeGreaterThan(0);
     for (const [, name, colour] of overrides) {
       expect(contrastRatio(colour!, t('--nb-paper')), name).toBeGreaterThanOrEqual(TEXT);
-    }
-    const own = new Map(overrides.map((m) => [m[1]!.replace('--color-', ''), m[2]!]));
-    const tints = new Map([...theme.matchAll(/--color-([a-z]+-\d+):\s*(#[0-9a-fA-F]{6})\s*;/g)].map((m) => [m[1]!, m[2]!]));
-    const colour = (n: string) => own.get(n) ?? tints.get(n)!;
-    for (const [fg, bg] of [['moss-600', 'moss-100'], ['amber-600', 'amber-100'], ['ink-500', 'sand-100']] as const) {
-      expect(contrastRatio(colour(fg), colour(bg)), `${fg} on ${bg}`).toBeGreaterThanOrEqual(TEXT);
     }
   });
 
@@ -486,7 +474,6 @@ describe('night look (US2; FR-009, FR-021, FR-016, FR-033, D4)', () => {
 
   it('reads the amber "not confirmed" text on the lamp-lit paper at 4.5:1 (FR-016)', () => {
     expect(contrastRatio(token('--nb-accent-amber', 'night'), token('--nb-paper', 'night'))).toBeGreaterThanOrEqual(TEXT);
-    expect(contrastRatio(token('--color-amber-600', 'night'), token('--nb-paper', 'night'))).toBeGreaterThanOrEqual(TEXT);
   });
 });
 
@@ -555,7 +542,7 @@ describe('text laid over the scene meets its floor against the sun or moon behin
   });
 
   // T020 (research Q4): every line of text over the sky is its own band, from the
-  // stylesheet's own values, for both layouts at every height the window allows,
+  // stylesheet's own values, for the wide and the narrow layout at every height the window allows,
   // and each band's own ink is checked only against what can sit behind it.
   const pct = (look: LookName, name: string) => parseFloat(blockOf(look).match(new RegExp(`${name}:\\s*([\\d.]+)%`))![1]!) / 100;
   /** N of a look token written `calc(N * var(--nb-u))`: the sun's diameter at s = 1 (the token still means the diameter). */
@@ -941,27 +928,6 @@ describe('focus is visible on every sky and on the paper (FR-022, FR-021; resear
   });
 });
 
-describe('what applies outside any [data-look]: the switch on Current (FR-022, FR-011)', () => {
-  // The switch is the one .nb-element that renders with no [data-look] ancestor
-  // (on Current it carries none), so every --nb-* a rule of its own reads is unset there.
-  const bare = ruleFor('.nb-switch select:focus-visible');
-
-  it('gives the focused select the browser\'s own ring on Current, where --nb-focus-sky is unset', () => {
-    const own = ruleFor('.nb-switch:not([data-look]) select:focus-visible');
-    expect(own.some((r) => /outline:\s*auto\b/.test(r.body))).toBe(true);
-    // It sits after the look-coloured rule, and is the only way the unset var is answered.
-    const order = rules.map((r) => r.selector);
-    expect(order.indexOf('.nb-switch:not([data-look]) select:focus-visible')).toBeGreaterThan(
-      order.indexOf(bare[0]!.selector),
-    );
-  });
-
-  it('says plainly what the switch does on Current: its text inherits, it draws the browser\'s ring', () => {
-    expect(notebook).not.toMatch(/On Current it has no look and no rule/);
-    expect(notebook).toMatch(/On Current[\s\S]{0,120}inherit/);
-  });
-});
-
 describe('the switch is readable on every look\'s sky (FR-021, FR-011, FR-012; research L5)', () => {
   it('takes its text colour from the greeting body token', () => {
     expect(ruleFor('.nb-switch').some((r) => /color:\s*var\(--nb-greeting-body\)/.test(r.body))).toBe(true);
@@ -969,5 +935,19 @@ describe('the switch is readable on every look\'s sky (FR-021, FR-011, FR-012; r
 
   it.each(['morning', 'midday', 'night'] as const)('%s: that colour holds 4.5:1 on the top of the sky, where the switch sits', (look) => {
     expect(contrastRatio(token('--nb-greeting-body', look), token('--nb-sky-top', look))).toBeGreaterThanOrEqual(TEXT);
+  });
+});
+
+describe('the released build\'s first paint (D45)', () => {
+  it('paints html and body in the morning sky\'s top colour until React mounts, not sand', () => {
+    const morning = notebook.match(/\[data-look="morning"\]\s*\{[^}]*\}/)![0];
+    const skyTop = morning.match(/--nb-sky-top:\s*(#[0-9a-fA-F]{6})/)![1]!;
+    const paint = (sel: string) =>
+      rulesOf(theme)
+        .filter((r) => r.selector.split(',').map((x) => x.trim()).includes(sel))
+        .map((r) => r.body.match(/background:\s*([^;]+);/)?.[1]?.trim())
+        .find(Boolean);
+    expect(paint('html')?.toLowerCase()).toBe(skyTop.toLowerCase());
+    expect(paint('body')?.toLowerCase()).toBe(skyTop.toLowerCase());
   });
 });

@@ -1,8 +1,8 @@
 /**
- * The look switch at the App level: dev builds only, starts on Current,
+ * The look switch at the App level: dev builds only, starts on Morning,
  * and changing the look loses neither the step nor the check-in's text.
  */
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -60,68 +60,51 @@ afterEach(() => {
 const switchControl = () => screen.getByLabelText('Look (testing)');
 
 describe('the look switch in a dev build', () => {
-  it('shows, starts on Current, and shows the Current shell', async () => {
+  it('shows, starts on Morning, and wears the morning notebook', async () => {
     const { container } = render(<App devBuild />);
     await screen.findByText('What would you like to protect?');
-    expect(switchControl()).toHaveValue('current');
-    expect(container.querySelector('[data-look="morning"]')).toBeNull();
-    expect(screen.getByRole('heading', { name: 'Cairn', level: 1 })).toBeInTheDocument();
+    expect(switchControl()).toHaveValue('morning');
+    expect(container.querySelector('.nb-root')).toHaveAttribute('data-look', 'morning');
+    expect(screen.getByText('Good morning.')).toBeInTheDocument();
   });
 
-  it('starts on Current on every fresh render and reads and writes no storage', async () => {
+  it('starts on Morning on every fresh render and reads and writes no storage', async () => {
     const get = vi.spyOn(Storage.prototype, 'getItem');
     const set = vi.spyOn(Storage.prototype, 'setItem');
     const first = render(<App devBuild />);
     await screen.findByText('What would you like to protect?');
-    await userEvent.selectOptions(switchControl(), 'Morning');
+    await userEvent.selectOptions(switchControl(), 'Night');
     first.unmount();
     const second = render(<App devBuild />);
     await screen.findByText('What would you like to protect?');
-    expect(switchControl()).toHaveValue('current');
-    expect(second.container.querySelector('[data-look="morning"]')).toBeNull();
+    expect(switchControl()).toHaveValue('morning');
+    expect(second.container.querySelector('.nb-root')).toHaveAttribute('data-look', 'morning');
     expect(get).not.toHaveBeenCalled();
     expect(set).not.toHaveBeenCalled();
     get.mockRestore();
     set.mockRestore();
   });
 
-  it('moves between Current and Morning shells', async () => {
-    const { container } = render(<App devBuild />);
-    await screen.findByText('What would you like to protect?');
-    await userEvent.selectOptions(switchControl(), 'Morning');
-    expect(container.querySelector('[data-look="morning"]')).not.toBeNull();
-    expect(screen.getByText('What would you like to protect?')).toBeInTheDocument();
-    await userEvent.selectOptions(switchControl(), 'Current');
-    expect(container.querySelector('[data-look="morning"]')).toBeNull();
-  });
-
   it('shows the matching shell and greeting for every choice in turn', async () => {
     const { container } = render(<App devBuild />);
     await screen.findByText('What would you like to protect?');
-    const expected: [string, string | null, string | null][] = [
+    const expected: [string, string, string][] = [
       ['Midday', 'midday', 'Midday.'],
       ['Night', 'night', 'Good evening.'],
       ['Morning', 'morning', 'Good morning.'],
-      ['Current', null, null],
     ];
     for (const [choice, look, words] of expected) {
       await userEvent.selectOptions(switchControl(), choice);
-      if (look === null) {
-        expect(container.querySelector('.nb-root')).toBeNull();
-      } else {
-        expect(container.querySelector('.nb-root')).toHaveAttribute('data-look', look);
-        expect(screen.getByText(words!)).toBeInTheDocument();
-      }
+      expect(container.querySelector('.nb-root')).toHaveAttribute('data-look', look);
+      expect(screen.getByText(words)).toBeInTheDocument();
       expect(screen.getByText('What would you like to protect?')).toBeInTheDocument();
     }
   });
 
-  // Between the three looks the screen is never rebuilt, so what a screen holds
-  // itself survives too. A move to or from Current may rebuild it (D5).
+  // Between the looks the screen is never rebuilt, so what a screen holds itself survives too.
   it('keeps the screen itself, and what it holds, across every pair of the three looks', async () => {
     render(<App devBuild />);
     await screen.findByText('What would you like to protect?');
-    await userEvent.selectOptions(switchControl(), 'Morning');
     const field = screen.getByLabelText('Address to protect');
     await userEvent.type(field, 'typed.example');
     const looks = ['Morning', 'Midday', 'Night'];
@@ -136,12 +119,12 @@ describe('the look switch in a dev build', () => {
     }
   });
 
-  it('keeps the step and the text typed in Tonight across every pair of looks', async () => {
+  it('keeps the step and the text typed in Tonight across every pair of the three looks', async () => {
     render(<App devBuild />);
     await screen.findByText('What would you like to protect?');
     await userEvent.click(screen.getByRole('button', { name: 'Tonight' }));
     await userEvent.type(await screen.findByLabelText('How the day went'), 'a quiet day');
-    const looks = ['Current', 'Morning', 'Midday', 'Night'];
+    const looks = ['Morning', 'Midday', 'Night'];
     for (const from of looks) {
       for (const to of looks) {
         if (from === to) continue;
@@ -153,26 +136,25 @@ describe('the look switch in a dev build', () => {
     }
   });
 
-  it('keeps the step and the text typed in Tonight across the round trip', async () => {
+  it('keeps the step and the text typed in Tonight across the round trip through Night', async () => {
     render(<App devBuild />);
     await screen.findByText('What would you like to protect?');
     await userEvent.click(screen.getByRole('button', { name: 'Tonight' }));
     const box = await screen.findByLabelText('How the day went');
     await userEvent.type(box, 'a quiet day');
 
-    await userEvent.selectOptions(switchControl(), 'Morning');
+    await userEvent.selectOptions(switchControl(), 'Night');
     expect(await screen.findByLabelText('How the day went')).toHaveValue('a quiet day');
-    await userEvent.selectOptions(switchControl(), 'Current');
+    await userEvent.selectOptions(switchControl(), 'Morning');
     expect(await screen.findByLabelText('How the day went')).toHaveValue('a quiet day');
     expect(screen.queryByText('What would you like to protect?')).toBeNull();
   });
 });
 
 describe('the production build', () => {
-  it('has no switch, cannot focus one, and equals the Current output (devBuild false)', async () => {
+  it('has no switch, cannot focus one, and equals the dev build on Morning minus its switch (devBuild false)', async () => {
     const dev = render(<App devBuild />);
     await screen.findByText('What would you like to protect?');
-    await userEvent.selectOptions(switchControl(), 'Current');
     const devWithoutSwitch = dev.container.cloneNode(true) as HTMLElement;
     devWithoutSwitch.querySelector('.nb-switch')?.remove();
     dev.unmount();
@@ -181,28 +163,73 @@ describe('the production build', () => {
     await screen.findByText('What would you like to protect?');
     expect(screen.queryByLabelText('Look (testing)')).toBeNull();
     expect(screen.queryByText('Look (testing)')).toBeNull();
+    expect(container.querySelector('[data-look="morning"]')).not.toBeNull();
+    expect(screen.getByText('Good morning.')).toBeInTheDocument();
+    expect(screen.queryByText('Midday.')).toBeNull();
+    expect(screen.queryByText('Good evening.')).toBeNull();
     expect(container.innerHTML).toBe(devWithoutSwitch.innerHTML);
   });
 
-  it('ignores a look chosen in state when devBuild is false', async () => {
-    const { container } = render(<App devBuild={false} />);
-    await screen.findByText('What would you like to protect?');
-    expect(container.querySelector('.nb-root')).toBeNull();
-    expect(screen.queryByText('Midday.')).toBeNull();
-    expect(screen.queryByText('Good evening.')).toBeNull();
-  });
-
-  it('under vi.stubEnv("DEV", false) the default is a production build', async () => {
+  it('under vi.stubEnv("DEV", false) the default is the morning notebook with no switch', async () => {
     vi.stubEnv('DEV', false);
     const { container } = render(<App />);
     await screen.findByText('What would you like to protect?');
     expect(screen.queryByLabelText('Look (testing)')).toBeNull();
     expect(screen.queryByText('Look (testing)')).toBeNull();
-    expect(container.querySelector('[data-look="morning"]')).toBeNull();
+    expect(container.querySelector('[data-look="morning"]')).not.toBeNull();
+    expect(screen.getByText('Good morning.')).toBeInTheDocument();
+    expect(screen.queryByText('Midday.')).toBeNull();
+    expect(screen.queryByText('Good evening.')).toBeNull();
     // Tab never lands on a look switch: every focus stop is a header button or page control.
     for (let i = 0; i < 12; i += 1) {
       await userEvent.tab();
       expect(document.activeElement?.closest('.nb-switch')).toBeNull();
+    }
+  });
+
+  // FR-012: not reachable by any key combination. Every Ctrl / Alt / Meta / Shift combination with each letter,
+  // digit and function key, pressed on the page, on the focused control and on the window, leaves the morning.
+  it('no key combination changes the look in a production render', async () => {
+    vi.stubEnv('DEV', false);
+    const { container } = render(<App />);
+    await screen.findByText('What would you like to protect?');
+    const keys = [
+      ...'abcdefghijklmnopqrstuvwxyz'.split(''),
+      ...'0123456789'.split(''),
+      ...Array.from({ length: 12 }, (_, i) => `F${i + 1}`),
+    ];
+    const modifiers = ['ctrlKey', 'altKey', 'metaKey', 'shiftKey'] as const;
+    for (let mask = 1; mask < 1 << modifiers.length; mask += 1) {
+      const held = Object.fromEntries(modifiers.map((m, i) => [m, (mask & (1 << i)) !== 0]));
+      for (const key of keys) {
+        const init = { key, ...held, bubbles: true };
+        for (const target of [document.body, document.activeElement ?? document.body, window] as const) {
+          fireEvent.keyDown(target, init);
+          fireEvent.keyUp(target, init);
+        }
+      }
+    }
+    expect(container.querySelector('[data-look="morning"]')).not.toBeNull();
+    expect(container.querySelector('[data-look="midday"], [data-look="night"]')).toBeNull();
+    expect(screen.getByText('Good morning.')).toBeInTheDocument();
+    expect(screen.queryByText('Good evening.')).toBeNull();
+  });
+
+  // FR-013: whatever the hour, a released build wears the morning. Only Date is faked, so findBy still polls.
+  it.each([
+    ['22:00', new Date(2026, 9, 2, 22, 0, 0)],
+    ['12:30', new Date(2026, 9, 2, 12, 30, 0)],
+  ])('wears the morning at %s', async (_hour, now) => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(now);
+    try {
+      const { container } = render(<App devBuild={false} />);
+      await screen.findByText('What would you like to protect?');
+      expect(container.querySelector('[data-look="morning"]')).not.toBeNull();
+      expect(container.querySelector('[data-look="midday"], [data-look="night"]')).toBeNull();
+      expect(screen.getByText('Good morning.')).toBeInTheDocument();
+    } finally {
+      vi.useRealTimers();
     }
   });
 });

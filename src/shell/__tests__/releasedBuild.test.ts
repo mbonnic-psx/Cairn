@@ -17,6 +17,7 @@ const fs = (await import(/* @vite-ignore */ nodeFs)) as {
     path: string,
     options: { withFileTypes: true },
   ) => { name: string; isDirectory: () => boolean }[];
+  statSync: (path: string) => { isDirectory: () => boolean };
   rmSync: (path: string, options: { recursive: true; force: true }) => void;
 };
 const path = (await import(/* @vite-ignore */ nodePath)) as {
@@ -95,12 +96,16 @@ function found(text: string): string[] {
   );
 }
 
+// Written as constants (R4b): the Card's class string, and the minified rules theme.css used to ship.
+const CARD_CLASSES = 'settle rounded-2xl border border-sand-200';
+const CURRENT_CODE = [CARD_CLASSES, '.reflective{', '.settle{', '@keyframes settle'];
+
 describe('the released interface (SC-002)', () => {
   const TIMEOUT = 180_000;
 
-  it('reads the switch label and all four choices from the switch', () => {
+  it('reads the switch label and all three choices from the switch', () => {
     expect(label).toBe('Look (testing)');
-    expect(words.length).toBeGreaterThanOrEqual(5);
+    expect(words.length).toBe(4);
   });
 
   it(
@@ -112,6 +117,77 @@ describe('the released interface (SC-002)', () => {
         [...words].sort(),
       );
       expect(found(prod), 'the released build must carry none').toEqual([]);
+      expect(prod, 'the released build wears the morning notebook').toContain('Good morning.');
+      expect(prod).toContain('nb-root');
+      expect(prod).toContain('data-look');
+      // The one-column shell's own class strings (research R4), written as constants: it no longer ships.
+      for (const current of ['min-h-screen px-6 py-12', 'mx-auto mb-10 flex max-w-3xl']) {
+        expect(prod, `the released build must not carry ${current}`).not.toContain(current);
+      }
+      // The retired layout's own code (R7, E7.1): the Card's class string and the theme's .reflective / .settle rules.
+      for (const marker of CURRENT_CODE) {
+        expect(prod, `the released build must not carry ${marker}`).not.toContain(marker);
+      }
+    },
+    TIMEOUT,
+  );
+
+  it('looks for the retired layout\'s code by markers the retired pins\' captured markup really carries', async () => {
+    const { PIN, PROTECTION } = await import('../../screens/__tests__/beforeTheReveal');
+    const captured = [...Object.values(PIN), ...Object.values(PROTECTION)].join('\n');
+    expect(captured).toContain(CARD_CLASSES);
+    expect(captured).toMatch(/class="[^"]*\breflective\b/);
+    expect(captured).toMatch(/class="[^"]*\bsettle\b/);
+  });
+  it(
+    'ships no utility only the retired one-column interface used (A1)',
+    async () => {
+      const { PIN, PROTECTION, TRAIL, LIMITS, TEARDOWN, TODAY, OVER_TIME, TONIGHT } = await import(
+        '../../screens/__tests__/beforeTheReveal'
+      );
+      const captured = [
+        ...Object.values(PIN),
+        ...Object.values(PROTECTION),
+        ...Object.values(TRAIL),
+        ...Object.values(LIMITS),
+        ...Object.values(TEARDOWN),
+        ...Object.values(TODAY),
+        ...Object.values(OVER_TIME),
+        ...Object.values(TONIGHT),
+      ].join('\n');
+      const classesIn = (text: string, quoted: boolean): Set<string> => {
+        const out = new Set<string>();
+        const pattern = quoted ? /["'`]([^"'`\n]*)["'`]/g : /class="([^"]*)"/g;
+        for (const m of text.matchAll(pattern)) {
+          for (const t of m[1].split(/\s+/)) if (/^[a-z][a-z0-9:_/.\-[\]]*$/.test(t)) out.add(t);
+        }
+        return out;
+      };
+      const retired = classesIn(captured, false);
+      // Every word of every file that ships and that Tailwind reads (it skips stylesheets): what the build may really use.
+      const shipping = new Set<string>();
+      const walk = (dir: string): void => {
+        for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+          if (entry.name === '__tests__') continue;
+          const full = path.join(dir, entry.name);
+          if (entry.isDirectory()) walk(full);
+          else if (/\.(tsx?|html)$/.test(entry.name) && !/\.test\./.test(entry.name)) {
+            const text = fs.readFileSync(full, 'utf8');
+            for (const t of text.split(/[^A-Za-z0-9:_/.\-[\]]+/)) shipping.add(t);
+          }
+        }
+      };
+      walk('src');
+      const only = [...retired].filter((c) => !shipping.has(c));
+      expect(only.length, 'the sweep must find classes only the retired interface used').toBeGreaterThan(3);
+      const prod = build('prod');
+      const escape = (c: string): string => c.replace(/[^A-Za-z0-9_-]/g, (ch) => '\\' + ch);
+      const shipped = only.filter((c) => prod.includes('.' + escape(c) + '{') || prod.includes('.' + escape(c) + ','));
+      expect(shipped, 'the released CSS must carry none of them').toEqual([]);
+      // The five A1 reproduced, named: the one-column shell's own utilities (not all in the pin records).
+      for (const named of ['min-h-screen', 'max-w-3xl', 'rounded-2xl', 'bg-sand-50', 'text-sand-50']) {
+        expect(prod, `.${named} is only the retired interface's`).not.toContain('.' + named + '{');
+      }
     },
     TIMEOUT,
   );

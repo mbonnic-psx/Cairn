@@ -11,7 +11,8 @@ Every product decision a `/cruise` run took, in order. A person overrides one by
 - **Decided by:** human
 - **Confidence:** high · **Would reverse if:** the owner accepts all three looks in a demo and asks for the reveal
 - **Written to:** `.specify/product-owner.md` (Out of scope), `specs/004-notebook-landscape/story-split.md` (row 7 needs the owner's demo)
-- **Status:** standing
+- **Status:** overridden by human 2026-10-02
+- **Note, 2026-10-02 (D41):** the condition is met. The owner demoed frame, then fold-and-width and board-scale on main, accepted all three looks and said "go reveal".
 
 ## D2 — Does a released build open at 1280×800 before the reveal?
 - **Stage:** after acceptance (adversary triage) · **Slice:** frame · **When:** 2026-10-01T23:58:00Z · **Iteration:** 1
@@ -456,4 +457,81 @@ Every product decision a `/cruise` run took, in order. A person overrides one by
 - **Decided by:** host (standing decision D39)
 - **Confidence:** high · **Would reverse if:** the owner, at the reveal demo, finds the shadow heavy at 2560×1440
 - **Written to:** `specs/004-notebook-landscape/slices/board-scale/tasks.md` (T012)
+- **Status:** standing
+
+## D41 — Does the `reveal` slice run now?
+- **Stage:** split · **Slice:** reveal · **When:** 2026-10-02T23:00:00Z · **Iteration:** 11
+- **Question:** D1 held `reveal` for the owner. The owner, 2026-10-02: "go reveal". They have demoed all three looks themselves (frame, then fold-and-width and board-scale on main) and accept them (SC-008). May the run take `reveal` through the full ladder and merge it?
+- **Options:** run `reveal` now, through plan, tasks, implement, converge, demo, Phase 4 and merge (the owner's answer); keep parking on it
+- **Decision:** Run it now. The notebook becomes Cairn's interface: morning by default in a released build; today's interface and the Current choice removed; a three-way Morning, Midday, Night switch left for development builds until the clock feature replaces it (FR-012, FR-013a, FR-032). The slice also closes the frame adversary finding R1 by removing the dead Current path from the bundle. Then the completion audit, and the run ends.
+- **Why:** The owner asked for this release in their own words, after their own demo of all three looks, which is the acceptance SC-008 and D1 waited for. It is not "releasing what a person has not asked for".
+- **Decided by:** human
+- **Confidence:** high · **Would reverse if:** the owner withdraws the go
+- **Written to:** `specs/004-notebook-landscape/story-split.md` (slice 7), `specs/004-notebook-landscape/decisions.md` (D1)
+- **Status:** standing
+
+## D42 — Do the screens' one-column layouts go with Current?
+- **Stage:** slice gaps · **Slice:** reveal · **When:** 2026-10-02T23:10:00Z · **Iteration:** 11
+- **Question:** Each screen lays itself out as a spread only when the notebook tells it it is on a page (D6), and otherwise renders today's one column, which only Current uses. With Current removed, do those branches stay?
+- **Options:** remove them, the "on a notebook page" signal, `CurrentShell` and whatever only they used (recommended: FR-032 removes today's interface, and R1 asks for the dead path out of the bundle); keep them as dead code
+- **Decision:** Remove them. Every screen renders only as its notebook spread.
+- **Why:** After the reveal nobody can reach today's interface, so its code is weight in what ships and a second layout every later screen change would have to keep working for nobody.
+- **Decided by:** host (stage recommendation)
+- **Confidence:** high · **Would reverse if:** the owner wants today's interface kept reachable somewhere
+- **Written to:** `specs/004-notebook-landscape/spec.md` (Clarifications)
+- **Status:** standing
+
+## D43 — What becomes of the tests that held Current exactly as before?
+- **Stage:** slice gaps · **Slice:** reveal · **When:** 2026-10-02T23:10:00Z · **Iteration:** 11
+- **Question:** The `*CurrentPin` tests and the older interface tests hold today's interface unchanged (SC-009). SC-009 holds "until the reveal". What happens to them?
+- **Options:** retire the Current pins, first moving every word, state and control they hold that no notebook test holds onto the notebook page; older tests that render a screen alone keep their assertions and render the screen as it now is (recommended: FR-018 must lose nothing); delete them outright; keep them against a kept Current
+- **Decision:** The first.
+- **Why:** The person must still find every word, state and control on the page they found before (FR-018). A pin that only proved "unchanged from the old layout" has nothing left to prove; a pin that proved a word was there still does.
+- **Decided by:** host (stage recommendation)
+- **Confidence:** high · **Would reverse if:** a retired pin turns out to hold behaviour no other test holds, found by mutation or the adversary
+- **Written to:** `specs/004-notebook-landscape/spec.md` (Clarifications)
+- **Status:** standing
+
+## D44 — What does a development build start on after the reveal?
+- **Stage:** slice gaps · **Slice:** reveal · **When:** 2026-10-02T23:10:00Z · **Iteration:** 11
+- **Question:** FR-011 starts the switch on Current every time. With Current gone, what does it start on, and what does it offer?
+- **Options:** Morning, every start, not remembered, offering Morning, Midday, Night in that order, label and place unchanged (recommended: a released build opens on morning, FR-032, and a development build should open as a released one does); remember the last look
+- **Decision:** The first.
+- **Why:** A tester sees first what a person sees first. Remembering would be new state this feature never had.
+- **Decided by:** host (stage recommendation)
+- **Confidence:** high · **Would reverse if:** the owner wants a development build to remember the look
+- **Written to:** `specs/004-notebook-landscape/spec.md` (FR-011, User Story 2 scenarios 5 and 6, Clarifications)
+- **Status:** standing
+
+## D45 — What proves the released build after the reveal?
+- **Stage:** slice gaps · **Slice:** reveal · **When:** 2026-10-02T23:10:00Z · **Iteration:** 11
+- **Question:** D29's production-build test proves no switch ships. After the reveal it must also prove the notebook ships and Current does not (R1).
+- **Options:** extend D29's test: what ships carries the morning look and "Good morning." and none of the switch's words or Current's shell (recommended); a new CI check (changes a gate, which no slice may do)
+- **Decision:** Extend D29's test, with its teeth shown against a development build as before.
+- **Why:** R1 was found because nothing searched what ships for the dead path; the same search, widened, keeps it out.
+- **Decided by:** host (stage recommendation)
+- **Confidence:** high · **Would reverse if:** the production build inside the suite proves too slow and the owner prefers a CI step
+- **Written to:** `specs/004-notebook-landscape/spec.md` (Clarifications), `specs/004-notebook-landscape/adversary-log.md` (R1)
+- **Status:** standing
+
+## D46 — How does a later, deliberate change to a page's words meet the reveal's frozen baseline?
+- **Stage:** gaps after converge · **Slice:** reveal · **When:** 2026-10-03T01:00:00Z · **Iteration:** 11
+- **Question:** The `*WordsKept` tests compare each page with the markup captured before the reveal (`beforeTheReveal.ts`), as an exact set of words and controls. A later slice that adds words on purpose (003 `history-by-weekday`, *By day* under Seen by) has no sanctioned way to update it: frozen literals are never re-captured.
+- **Options:** append a dated delta beside the frozen record, naming the slice and decision that changed the words, and compare against record plus delta; the captured markup is never edited or re-captured (recommended: the precedent of `pinned.md`, whose rows are appended, never rewritten, and its 2026-10-02 *Seen by* row); re-capture the record from the new page; loosen the comparison to "at least these words"
+- **Decision:** The first. The fixture's header says so, and `history-by-weekday` rebases onto the spread-only screens and records its *By day* words as such a delta.
+- **Why:** The baseline exists to prove the reveal lost nothing a person had. Re-capturing would make it prove nothing; loosening it would let a word go missing unseen.
+- **Decided by:** host (stage recommendation)
+- **Confidence:** high · **Would reverse if:** deltas pile up until the baseline no longer reads as what a person had before the reveal; then retire it for ordinary page tests
+- **Written to:** `specs/004-notebook-landscape/story-split.md` (Parking lot), `specs/004-notebook-landscape/slices/reveal/tasks.md` (T019)
+- **Status:** standing
+
+## D47 — Do the paper tabs come before the page in the keyboard and reading order?
+- **Stage:** gaps after converge · **Slice:** reveal · **When:** 2026-10-03T01:00:00Z · **Iteration:** 11
+- **Question:** With the reveal, a released build ships the notebook shell for the first time. In it, keyboard users reach the paper tabs only after every control on the page: `NotebookShell` renders the page area (`<main tabIndex={0}>`) before `<nav aria-label="Pages">`. Today's interface put the tabs in a header before the content. On the setup step that means the page area, nine checkboxes, the address box, "Protect it" and "Turn protection on" before the first tab. No decision or contract records the order.
+- **Options:** (a) move the tabs before the page in the DOM so they come first in Tab order and reading order, drawn where they are now, with the Tab sequence pinned by a test (recommended by the gaps pass); (b) keep page-first and record it as accepted, pinned by a test; (c) keep page-first and add a "skip to pages" link first in focus order
+- **Decision:** (a). `<nav aria-label="Pages">` comes before `<main>` inside the notebook. The tabs are drawn exactly where the owner accepted them, in all three looks and at every window size. `src/shell/__tests__/NotebookShell.test.tsx` pins the order: from the start of the shell, Tab reaches every tab in `tabsFor` order (`aria-current` unchanged), then the page area (D19), then the page's own controls; D30's left page stays its own stop after the page area. The order is written into `contracts/ui-shell.md` under Navigation.
+- **Why:** The spec asks that every tab and control be reachable in a sensible order (edge cases, Keyboard only; FR-022, SC-004). A person who only wants Tonight should not tab through nine categories first, and today's interface always offered the tabs first, so the reveal would otherwise be where a keyboard user's Cairn gets worse. (b) leaves that cost on every screen; (c) adds a control the owner never saw on the board. Only the order changes, not the drawing: the tabs are placed absolutely outside the notebook's right edge.
+- **Decided by:** drive-skipper (claude-opus-5-5[1m])
+- **Confidence:** high · **Would reverse if:** moving the tabs in the DOM cannot be done without changing where or how they are drawn in some look or window size; then (c), never a moved tab
+- **Written to:** `src/shell/NotebookShell.tsx`, `src/shell/__tests__/NotebookShell.test.tsx`, `specs/004-notebook-landscape/contracts/ui-shell.md` (Navigation)
 - **Status:** standing

@@ -1,15 +1,16 @@
 /**
- * Protection told it is on a notebook page (slice `protection-page`, T004–T006): the same words as outside
- * any shell, laid out as a spread. Rendered inside `NotebookShell`; the core is a fake written in this tree.
+ * Protection told it is on a notebook page (slice `protection-page`, T004–T006): the same words as before the notebook,
+ * laid out as a spread. Rendered inside `NotebookShell`; the core is a fake written in this tree.
  */
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { protectionWords } from '../../ipc';
 import { NotebookShell } from '../../shell/NotebookShell';
-import type { NotebookLook } from '../../look/look';
+import type { Look } from '../../look/look';
 import { Protection } from '../Protection';
 import { installFakeCore, never, type FakeCore } from './fakeCore';
+import { baseline, wordsOf, PROTECTION } from './beforeTheReveal';
 import { cases, ready, waiting } from './pinCases';
 
 let core: FakeCore | undefined;
@@ -21,7 +22,7 @@ afterEach(() => {
 const tabs = [{ id: 'protection' as const, label: 'Protection', current: true }];
 
 /** The look the cases below run in: every case runs in all three (the quickstart says so). */
-let look: NotebookLook = 'morning';
+let look: Look = 'morning';
 
 function onPage(ui: React.ReactElement) {
   const view = render(
@@ -35,26 +36,9 @@ function onPage(ui: React.ReactElement) {
   return { ...view, spread, left: pages[0], right: pages[1], pages, main };
 }
 
-function outside(ui: React.ReactElement): string {
-  const view = render(ui);
-  const text = view.container.textContent ?? '';
-  view.unmount();
-  return text;
-}
-
-/** The words, one per leaf element, in a fixed order: the waiting note moves page, its words do not change. */
-function words(root: HTMLElement): string[] {
-  return Array.from(root.querySelectorAll('*'))
-    .filter((el) => el.children.length === 0 && el.textContent)
-    .map((el) => el.textContent as string)
-    .sort();
-}
-
-function wordsOutside(ui: React.ReactElement): string[] {
-  const view = render(ui);
-  const found = words(view.container);
-  view.unmount();
-  return found;
+/** The words the screen said before the notebook, from the baseline (`beforeTheReveal.ts`), never from a render. */
+function wasText(name: string): string {
+  return baseline(PROTECTION[name]!).textContent ?? '';
 }
 
 describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (name) => {
@@ -88,9 +72,9 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (name) 
           expect(right!.querySelector('button, a, input')).toBeNull();
         });
 
-        it('says the same words as outside any shell, and runs no entrance', () => {
+        it('says the words it said before the notebook, and runs no entrance', () => {
           const { main } = onPage(<Protection state={state} />);
-          expect(main.textContent).toBe(outside(<Protection state={state} />));
+          expect(main.textContent).toBe(wasText(name));
           expect(main.querySelector('.settle')).toBeNull();
         });
       });
@@ -131,9 +115,9 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (name) 
         expect(right!.innerHTML).not.toMatch(/red/i);
       });
 
-      it(`${name}: says the same words as outside any shell`, () => {
+      it(`${name}: says the words it said before the notebook`, () => {
         const { main } = onPage(<Protection state={state} pending={waiting} />);
-        expect(words(main)).toEqual(wordsOutside(<Protection state={state} pending={waiting} />));
+        expect(wordsOf(main)).toEqual(wordsOf(baseline(PROTECTION[`${name}, a change waiting`]!)));
       });
     }
 
@@ -177,7 +161,7 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (name) 
       expect(within(left!).getByText('Checking this machine…')).toBeInTheDocument();
       expect(right).toHaveClass('nb-page--ruled');
       expect(right!.textContent).toBe('');
-      expect(main.textContent).toBe(outside(<Protection />));
+      expect(main.textContent).toBe(wasText('checking'));
       expect(main.querySelector('button, dl, h2')).toBeNull();
     });
 
@@ -196,5 +180,47 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (name) 
       expect(main.querySelector('button, dl, h2')).toBeNull();
       expect(main.textContent).toBe('Cairn could not read its settings just now.');
     });
+  });
+});
+
+describe('Protection rendered alone, with no shell, is its spread', () => {
+  const alone = (ui: React.ReactElement) => {
+    const view = render(ui);
+    const spread = view.container.querySelector('.nb-spread');
+    return { ...view, spread, pages: spread ? spread.querySelectorAll(':scope > .nb-page') : [] };
+  };
+
+  for (const name of ['off', 'in force', 'not confirmed']) {
+    it(`${name}: one spread of two pages`, () => {
+      const { spread, pages } = alone(<Protection state={cases[name]!.state} />);
+      expect(spread).not.toBeNull();
+      expect(pages).toHaveLength(2);
+    });
+
+    it(`${name}, a change waiting: one spread of two pages, the note on the right`, () => {
+      const { spread, pages } = alone(<Protection state={cases[name]!.state} pending={waiting} />);
+      expect(spread).not.toBeNull();
+      expect(pages).toHaveLength(2);
+      expect(within(pages[1] as HTMLElement).getByRole('button', { name: 'Keep things as they are' })).toBeInTheDocument();
+    });
+  }
+
+  it('checking: one spread of two pages', () => {
+    core = installFakeCore({ get_protection_state: never });
+    const { spread, pages } = alone(<Protection />);
+    expect(spread).not.toBeNull();
+    expect(pages).toHaveLength(2);
+  });
+
+  it('a read that could not be made: one spread of two pages', async () => {
+    core = installFakeCore({
+      get_protection_state: () => {
+        throw 'Cairn could not read its settings just now.';
+      },
+    });
+    const { spread, pages } = alone(<Protection />);
+    await screen.findByText('Cairn could not read its settings just now.');
+    expect(spread).not.toBeNull();
+    expect(pages).toHaveLength(2);
   });
 });

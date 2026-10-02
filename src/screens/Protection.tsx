@@ -7,9 +7,6 @@
  */
 import { useEffect, useState, type ReactNode } from 'react';
 
-import { Card } from '../components/Card';
-import { Button } from '../components/Button';
-import { useNotebookPage } from '../shell/notebookPage';
 import {
   cancelPendingChange,
   getProtectionState,
@@ -17,12 +14,6 @@ import {
   type PendingChange,
   type ProtectionState,
 } from '../ipc';
-
-const toneClasses = {
-  moss: 'bg-moss-100 text-moss-600',
-  amber: 'bg-amber-100 text-amber-600',
-  quiet: 'bg-sand-100 text-ink-500',
-} as const;
 
 /** The same three tones on the paper: the pill's fill and words come from the look's tokens, not the palette. */
 const badgeTone = {
@@ -42,7 +33,6 @@ export function Protection({
 }) {
   const [current, setCurrent] = useState<ProtectionState | undefined>(state);
   const [trouble, setTrouble] = useState<string>();
-  const onPage = useNotebookPage();
 
   useEffect(() => {
     if (state) return;
@@ -50,89 +40,43 @@ export function Protection({
   }, [state]);
 
   if (trouble) {
-    if (onPage) {
-      return (
-        <Spread>
-          <p className="nb-protection-detail">{trouble}</p>
-        </Spread>
-      );
-    }
     return (
-      <Card>
-        <p className="text-ink-500">{trouble}</p>
-      </Card>
+      <Spread>
+        <p className="nb-protection-detail">{trouble}</p>
+      </Spread>
     );
   }
 
   if (!current) {
-    if (onPage) {
-      return (
-        <Spread>
-          <p className="nb-protection-detail">Checking this machine…</p>
-        </Spread>
-      );
-    }
     return (
-      <Card>
-        <p className="text-ink-400">Checking this machine…</p>
-      </Card>
+      <Spread>
+        <p className="nb-protection-detail">Checking this machine…</p>
+      </Spread>
     );
   }
 
   const words = protectionWords[current.status];
 
-  if (onPage) {
-    return (
-      <Spread right={pending && <Waiting pending={pending} onCancelled={onCancelled} />}>
-        <span className={`nb-protection-badge ${badgeTone[words.tone]}`}>{words.title}</span>
-        <h2 className="nb-protection-title">{words.title}</h2>
-        <p className="nb-protection-detail">{words.detail}</p>
-        {current.status !== 'off' && (
-          <dl className="nb-protection-figures">
-            <div className="nb-protection-figure">
-              <dt className="nb-protection-figure__label">Addresses in force</dt>
-              <dd className="nb-protection-figure__value">{current.entry_count_verified}</dd>
-            </div>
-            <div className="nb-protection-figure">
-              <dt className="nb-protection-figure__label">Last checked</dt>
-              <dd className="nb-protection-figure__value">
-                {current.verified_at ? whenWas(current.verified_at) : 'not yet'}
-              </dd>
-            </div>
-          </dl>
-        )}
-      </Spread>
-    );
-  }
-
   return (
-    <Card>
-      <span
-        className={`inline-block rounded-full px-3 py-1 text-xs font-medium tracking-wide uppercase ${toneClasses[words.tone]}`}
-      >
-        {words.title}
-      </span>
-
-      <h2 className="reflective mt-6 text-3xl text-ink-900">{words.title}</h2>
-      <p className="reflective mt-3 max-w-prose text-lg text-ink-700">{words.detail}</p>
-
-      {pending && <Waiting pending={pending} onCancelled={onCancelled} />}
-
+    <Spread right={pending && <Waiting pending={pending} onCancelled={onCancelled} />}>
+      <span className={`nb-protection-badge ${badgeTone[words.tone]}`}>{words.title}</span>
+      <h2 className="nb-protection-title">{words.title}</h2>
+      <p className="nb-protection-detail">{words.detail}</p>
       {current.status !== 'off' && (
-        <dl className="mt-8 grid grid-cols-2 gap-6 text-sm">
-          <div>
-            <dt className="text-ink-400">Addresses in force</dt>
-            <dd className="mt-1 text-2xl text-ink-900">{current.entry_count_verified}</dd>
+        <dl className="nb-protection-figures">
+          <div className="nb-protection-figure">
+            <dt className="nb-protection-figure__label">Addresses in force</dt>
+            <dd className="nb-protection-figure__value">{current.entry_count_verified}</dd>
           </div>
-          <div>
-            <dt className="text-ink-400">Last checked</dt>
-            <dd className="mt-1 text-2xl text-ink-900">
+          <div className="nb-protection-figure">
+            <dt className="nb-protection-figure__label">Last checked</dt>
+            <dd className="nb-protection-figure__value">
               {current.verified_at ? whenWas(current.verified_at) : 'not yet'}
             </dd>
           </div>
         </dl>
       )}
-    </Card>
+    </Spread>
   );
 }
 
@@ -160,7 +104,6 @@ function Waiting({
   pending: PendingChange;
   onCancelled?: () => void;
 }) {
-  const onPage = useNotebookPage();
   const sentence = pending.eligible_now
     ? 'This is ready to take effect.'
     : `This takes effect in ${pending.time_remaining}. Until then, nothing changes.`;
@@ -169,30 +112,14 @@ function Waiting({
     onCancelled?.();
   };
 
-  if (onPage) {
-    return (
-      <div className="nb-protection-note">
-        <p className="nb-protection-note__what">{pending.what}</p>
-        <p className="nb-protection-note__sentence">{sentence}</p>
-        {/* A plain button: nothing a look re-points fades, so none of the shared button's transition is carried here. */}
-        <button type="button" className="nb-protection-note__button" onClick={cancel}>
-          Keep things as they are
-        </button>
-      </div>
-    );
-  }
-
   return (
-    <div className="mt-8 rounded-xl bg-amber-100 p-6">
-      <p className="text-ink-900">{pending.what}</p>
-      <p className="reflective mt-2 text-ink-700">{sentence}</p>
-      <Button
-        tone="quiet"
-        className="mt-4 -ml-2"
-        onClick={cancel}
-      >
+    <div className="nb-protection-note">
+      <p className="nb-protection-note__what">{pending.what}</p>
+      <p className="nb-protection-note__sentence">{sentence}</p>
+      {/* A plain button: nothing a look re-points fades, so none of the shared button's transition is carried here. */}
+      <button type="button" className="nb-protection-note__button" onClick={cancel}>
         Keep things as they are
-      </Button>
+      </button>
     </div>
   );
 }
