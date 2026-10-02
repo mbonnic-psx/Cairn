@@ -80,7 +80,7 @@ track waits for the other. Within a track no task is `[P]`.
 
 ### Track A — the core (`src-tauri`)
 
-- [ ] V6 [US2] [rules 2, 8, 9, 10; scenarios 1, 2, 19, 21, 22; the wire shape] The rows exist, are daily, and cross the
+- [x] V6 [US2] [rules 2, 8, 9, 10; scenarios 1, 2, 19, 21, 22; the wire shape] The rows exist, are daily, and cross the
   boundary.
   RED, from the driving port (`AppState::summarize_reaches`): 28 rows for 2026-09-05 to 2026-10-02, `day`
   ascending, each `days: 1`, `span: "day"`, counts 0 except 2 on 09-07 and 1 on 09-30; with no reaches, still 28 rows
@@ -106,7 +106,7 @@ track waits for the other. Within a track no task is `[P]`.
   `src-tauri/tests/us2_by_site.rs`, `us2_by_hour.rs`, `us2_by_weekday.rs`, `src-tauri/tests/range_allocation.rs`
   (signature only), `src-tauri/src/domain/patterns.rs`, `src-tauri/src/domain/mod.rs`,
   `src-tauri/src/reflection/over_time.rs`, `src-tauri/src/ipc/state.rs`, `src-tauri/src/ipc/commands.rs`.
-- [ ] V7 [US2] [rules 3, 12; scenarios 3–7, 23, 24] A long range is weekly, and every reach is in exactly one row.
+- [x] V7 [US2] [rules 3, 12; scenarios 3–7, 23, 24] A long range is weekly, and every reach is in exactly one row.
   RED: 56 dates is 56 daily rows (holds at birth: it is the boundary the other cases lean on); 57 dates is 9 `week`
   rows, rows 0–7 of `days: 7` from 2026-08-07, row 8 of `days: 1`, `days` summing to 57; reaches at `1786660200` and
   `1786663800` fall in rows 0 and 1; a year across both changes is 53 rows with the 2 July 00:30 BST reach in row 26;
@@ -121,7 +121,7 @@ track waits for the other. Within a track no task is `[P]`.
   capacity, and walks nothing per date. A short last week's `days` is its own. The module doc gains a line.
   *Files:* `src-tauri/tests/patterns_movement.rs`, `src-tauri/tests/us2_movement.rs`,
   `src-tauri/tests/patterns_at_scale.rs`, `src-tauri/tests/range_allocation.rs`, `src-tauri/src/domain/patterns.rs`.
-- [ ] V8 [US2] [rule 4; scenarios 8–12] A reach is in the row of the local date its own instant falls on.
+- [x] V8 [US2] [rule 4; scenarios 8–12] A reach is in the row of the local date its own instant falls on.
   RED: 23:59 and 00:01 BST on 2026-09-13/14 are in those two rows, and 2026-09-13 23:30 UTC is in the 14th's;
   autumn's 00:30 BST and 23:30 GMT on 2026-10-25 are both in that row; spring's 2026-03-29 23:30 UTC is in the 30th's;
   Cairo's skipped midnight is placed, not sealed, with the reach at `range_start + 60` in the 2026-04-24 row under
@@ -133,7 +133,7 @@ track waits for the other. Within a track no task is `[P]`.
   the W-A1 midnight and says nothing that holds `day` and a number.
   *Files:* `src-tauri/tests/patterns_movement.rs`, `src-tauri/tests/us2_movement.rs`,
   `src-tauri/src/domain/patterns.rs`.
-- [ ] V9 [US2] [rules 5, 12; scenarios 13 (first half), 14 (first half), 15, 20, 24 (second half)] A row Cairn did not
+- [x] V9 [US2] [rules 5, 12; scenarios 13 (first half), 14 (first half), 15, 20, 24 (second half)] A row Cairn did not
   count for at all is `none`; one it did is `whole`; every instant is walked once.
   RED: a gap over all 25 hours of 2026-10-25 makes that row `none` with count 0 and its neighbours `whole`; a gap
   over all 23 hours of 2026-03-29 makes the 29th `none` and the 30th `whole`; a gap that ends at a local midnight
@@ -151,7 +151,7 @@ track waits for the other. Within a track no task is `[P]`.
   *Files:* `src-tauri/tests/patterns_movement.rs`, `src-tauri/tests/us2_movement.rs`,
   `src-tauri/tests/patterns_at_scale.rs`, `src-tauri/src/domain/patterns.rs`,
   `src-tauri/src/reflection/over_time.rs`.
-- [ ] V10 [US2] [rule 6; scenarios 13 (second half), 14 (second half), 16] A row Cairn saw only part of is `part`, and
+- [x] V10 [US2] [rule 6; scenarios 13 (second half), 14 (second half), 16] A row Cairn saw only part of is `part`, and
   a row holding a reach is never `none`.
   RED: a 24-hour gap from 2026-10-25 00:00 BST leaves the 25th `part` and the 26th `whole`; a 24-hour gap from
   2026-03-29 00:00 GMT leaves the 29th `none` and the 30th `part`; a gap over the last two hours of 2026-10-01 leaves
@@ -163,7 +163,7 @@ track waits for the other. Within a track no task is `[P]`.
   seeable instants are unseen and the row holds no reach.
   *Files:* `src-tauri/tests/patterns_movement.rs`, `src-tauri/tests/us2_movement.rs`,
   `src-tauri/src/domain/patterns.rs`.
-- [ ] V11 [US2] [rule 7; scenarios 17, 18; scenarios 1 and 2's `so_far` assertions] The row holding today, and any row
+- [x] V11 [US2] [rule 7; scenarios 17, 18; scenarios 1 and 2's `so_far` assertions] The row holding today, and any row
   after it, is `so_far`; the clock is read once.
   RED: scenario 1's last row is `so_far` and no other; one date, today, is `so_far`; a gap an hour long today leaves
   10-02 `so_far` and `part`, because only instants before `NOW` count; with `now` at 2026-10-03 00:30 BST no row is
@@ -178,7 +178,7 @@ track waits for the other. Within a track no task is `[P]`.
 
 ### Track B — the interface (`src`)
 
-- [ ] V12 [US2] [rule 1; scenarios 28, 29; pin row 1] *Day by day* is the fourth option of *Seen by*, over the same
+- [x] V12 [US2] [rule 1; scenarios 28, 29; pin row 1] *Day by day* is the fourth option of *Seen by*, over the same
   range and the one read.
   RED: write `src/screens/__tests__/ReachesMovement.test.tsx` (`TZ=Europe/London`, a fake `read`, a fixed `now`, no
   `vi.mock`): *Seen by* holds *By site* (pressed), *By hour*, *By day*, *Day by day*, in that order; choosing *Day by
@@ -199,7 +199,7 @@ track waits for the other. Within a track no task is `[P]`.
   `ReachesByHourPage.test.tsx`, `ReachesByDayPage.test.tsx`, `ReachesByHour.test.tsx`, `ReachesByDay.test.tsx`,
   `ReachesRowGuard.test.tsx`, `tonightCases.ts`, `fakeCore.ts`, `ReachesOverTime.test.tsx`, `ReachesEdges.test.tsx`,
   `ReachesToday.test.tsx`, `Reaches.test.tsx` (fixtures only).
-- [ ] V13 [US2] [rules 2, 9, 10, 11; scenarios 31, 35, 37, 38, 40] The days are drawn, quiet and sealed read as the other
+- [x] V13 [US2] [rules 2, 9, 10, 11; scenarios 31, 35, 37, 38, 40] The days are drawn, quiet and sealed read as the other
   views read them, and nothing is a verdict.
   RED: scenario 1's answer draws 28 lines, oldest first, each named by `shortDateInWords`, the count as text, a bar
   against the largest row in the one warm colour, a 0 with `0` and an empty bar; the coverage note stands above the
@@ -215,13 +215,13 @@ track waits for the other. Within a track no task is `[P]`.
   shared.
   *Files:* `src/screens/Reaches.tsx`, `src/screens/__tests__/ReachesMovement.test.tsx`,
   `src/screens/__tests__/ReachesRowGuard.test.tsx`.
-- [ ] V14 [US2] [rule 8; scenarios 30, 36] The estimates sentence on *Day by day*.
+- [x] V14 [US2] [rule 8; scenarios 30, 36] The estimates sentence on *Day by day*.
   RED: `estimates_excluded` 2 reads *Your own estimates for 2 days are not counted here, because Cairn counts only
   what it saw.*, 1 the singular, 0 no sentence; *By site* and *By hour* keep *an estimate has no site* and *an
   estimate has no hour*, and *By day* keeps its own. Fails because the view gives another view's reason or none.
   GREEN: `estimatesSentence` gives W6's reason for `'movement'` as for `'weekday'`.
   *Files:* `src/screens/Reaches.tsx`, `src/screens/__tests__/ReachesMovement.test.tsx`.
-- [ ] V15 [US2] [rule 3; scenario 32 (first and third parts)] A long range reads one row per week, each named by the date
+- [x] V15 [US2] [rule 3; scenario 32 (first and third parts)] A long range reads one row per week, each named by the date
   it begins.
   RED: scenario 4's answer draws nine lines named by `weekOfInWords`; a full week has no *across* clause; a short last
   week says *across 1 day*, *across 3 days* and so on, singular for 1; across a year every name carries its year.
@@ -229,26 +229,26 @@ track waits for the other. Within a track no task is `[P]`.
   GREEN: `rowsOf` names a `span: "week"` row with `weekOfInWords` and gives a week of `days < 7` the clause `across N
   days`, built as the *Guards* paragraph requires. The interface never re-derives 56: it reads `span`.
   *Files:* `src/screens/Reaches.tsx`, `src/screens/__tests__/ReachesMovement.test.tsx`.
-- [ ] V16 [US2] [rule 5; scenario 33 (first half)] A row Cairn did not count for is *not seen*, never a zero.
+- [x] V16 [US2] [rule 5; scenario 33 (first half)] A row Cairn did not count for is *not seen*, never a zero.
   RED: a `seen: "none"` row with count 0 shows its name and *not seen*, with no count and no bar, on the card and in
   the quiet list; the largest bar is taken from the rows that are drawn. Fails because the row draws `0` and an empty
   bar.
   GREEN: `rowsOf` makes a row `absent` (name and clause only) when `seen` is `"none"` and `count` is 0.
   *Files:* `src/screens/Reaches.tsx`, `src/screens/__tests__/ReachesMovement.test.tsx`.
-- [ ] V17 [US2] [rule 6; scenarios 33 (second half), 39] A row Cairn saw part of keeps its count, and a count is never
+- [x] V17 [US2] [rule 6; scenarios 33 (second half), 39] A row Cairn saw part of keeps its count, and a count is never
   hidden.
   RED: a `seen: "part"` row shows its name, *partly seen*, the bar and the count; a row the core sent as `"none"` with
   count 2 (built by hand) shows the count and the bar with *partly seen*. Fails because the first draws no clause and
   the second is hidden as *not seen*.
   GREEN: the clause gains *partly seen*, and a `"none"` row with a count draws as `"part"`.
   *Files:* `src/screens/Reaches.tsx`, `src/screens/__tests__/ReachesMovement.test.tsx`.
-- [ ] V18 [US2] [rule 7; scenarios 34, 32 (second part)] The row holding today says *so far*.
+- [x] V18 [US2] [rule 7; scenarios 34, 32 (second part)] The row holding today says *so far*.
   RED: the last row `so_far` ends its clause with *so far*, alone, after *partly seen* (*partly seen, so far*), or
   after *not seen* (*not seen, so far*), and a short week reads *across 1 day, so far* and *across 3 days, partly seen,
   so far*, in that order; a row not `so_far` never says it. Fails because the clause has no *so far*.
   GREEN: clauses are joined by `, `, in the order across, seen, so far.
   *Files:* `src/screens/Reaches.tsx`, `src/screens/__tests__/ReachesMovement.test.tsx`.
-- [ ] V19 [US2] [rules 2, 3; scenario 41; styling] The screen on the notebook page, and its look. The styles come from
+- [x] V19 [US2] [rules 2, 3; scenario 41; styling] The screen on the notebook page, and its look. The styles come from
   the notebook's `src/styles/tonight-page.css` (004 `tonight-page`), and *Day by day* takes the rows' face as *By day*
   and *Today* do: `nb-reaches-time` for the clause, the one warm bar fill, no colour that means good or bad, no
   monospace body text.

@@ -1,3 +1,4 @@
+declare const process: { env: Record<string, string | undefined> };
 process.env.TZ = 'Pacific/Kiritimati';
 
 import { describe, expect, it } from 'vitest';
