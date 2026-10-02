@@ -12,19 +12,48 @@
 import { useEffect, useState } from 'react';
 
 import { Card } from '../components/Card';
-import { listTodaysReaches, type TodaysReaches } from '../ipc/reaches';
+import {
+  listTodaysReaches,
+  summarizeReaches,
+  type Patterns,
+  type TodaysReaches,
+} from '../ipc/reaches';
 
-export function Reaches({ today }: { today?: TodaysReaches }) {
+/** What the screen reads from. A test passes its own; the screen defaults to the real wrappers. */
+export interface ReachesReader {
+  listTodaysReaches: (dayStart: number, dayEnd: number) => Promise<TodaysReaches>;
+  summarizeReaches: (
+    firstDay: string,
+    lastDay: string,
+    rangeStart: number,
+    rangeEnd: number,
+  ) => Promise<Patterns>;
+}
+
+const realReader: ReachesReader = { listTodaysReaches, summarizeReaches };
+const realNow = () => new Date();
+
+export function Reaches({
+  today,
+  read = realReader,
+  now = realNow,
+}: {
+  today?: TodaysReaches;
+  read?: ReachesReader;
+  now?: () => Date;
+}) {
   const [day, setDay] = useState<TodaysReaches | undefined>(today);
 
   useEffect(() => {
     if (today) return;
-    const start = new Date();
+    const start = new Date(now());
     start.setHours(0, 0, 0, 0);
     const dayStart = Math.round(start.getTime() / 1000);
-    listTodaysReaches(dayStart, dayStart + 86_400)
+    read.listTodaysReaches(dayStart, dayStart + 86_400)
       .then(setDay)
       .catch(() => undefined);
+    // The reader and the clock are fixed for the life of the screen.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [today]);
 
   if (!day) {
