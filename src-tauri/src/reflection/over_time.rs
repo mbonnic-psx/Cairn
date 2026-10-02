@@ -1,7 +1,7 @@
 //! A range of days, assembled from the history (slice `history-by-site`).
 
 use crate::domain::dates::LocalDate;
-use crate::domain::patterns::{by_site, Reach};
+use crate::domain::patterns::{by_site, OffsetChange, Reach};
 use crate::reflection::checkin::{could_begin, offset_from_midnight};
 use crate::services::Trouble;
 use crate::store::gaps::{clipped, Gap};
@@ -47,10 +47,7 @@ pub fn check_range(
         || range_start > now
         || range_end > now.saturating_add(DAY + LARGEST_CLOCK_CHANGE)
     {
-        return Err(Trouble::new(
-            "Cairn could not tell which days those are just now, so it has shown \
-             nothing. Protection is unaffected.",
-        ));
+        return Err(unplaceable());
     }
     Ok(())
 }
@@ -109,4 +106,110 @@ pub fn assemble(
         gaps: clipped(&gaps, range_start, range_end),
         estimates_excluded: u32::try_from(estimates.len()).unwrap_or(u32::MAX),
     })
+}
+
+/// The lowest and highest offsets any zone uses, in seconds east of UTC.
+const LOWEST_OFFSET: i64 = -12 * 3600;
+const HIGHEST_OFFSET: i64 = 14 * 3600;
+
+/// Whether `offsets`, each `(from, offset)` in epoch seconds and seconds east
+/// of UTC, could be the offsets in force across `[range_start, range_end)`
+/// somewhere on earth (`contracts/ui-ipc.md`, amended in slice
+/// `history-by-hour`). The core cannot know the zone, so each entry is held to
+/// what is true in every zone:
+///
+/// - the list is not empty and has no more entries than the range has days,
+///   plus one;
+/// - the first begins at `range_start`, with the offset `range_start` implies
+///   for `first_day`;
+/// - the instants strictly increase and all come before `range_end`;
+/// - every offset lies between -12 h and +14 h;
+/// - neighbouring offsets differ, by no more than a clock change can;
+/// - the last is within a clock change of the offset `range_end` implies.
+///
+/// Every subtraction is checked: an instant of `i64::MIN` is refused, not
+/// wrapped. Run after [`check_range`]. Returns the first offset and the
+/// changes after it, in the form [`by_hour`] takes. Refused with the one
+/// sentence `check_range` gives, for every range Cairn cannot place.
+pub fn check_offsets(
+    first_day: LocalDate,
+    last_day: LocalDate,
+    range_start: i64,
+    range_end: i64,
+    offsets: &[(i64, i64)],
+) -> Result<(i32, Vec<OffsetChange>), Trouble> {
+    offsets_in_force(first_day, last_day, range_start, range_end, offsets)
+        .ok_or_else(unplaceable)
+}
+
+fn unplaceable() -> Trouble {
+    Trouble::new(
+        "Cairn could not tell which days those are just now, so it has shown \
+         nothing. Protection is unaffected.",
+    )
+}
+
+/// The offset an end implies: how far east of UTC a clock is when it reads
+/// midnight at `instant`, the UTC midnight of `day` being the reference.
+fn implied_offset(day: LocalDate, instant: i64) -> Option<i64> {
+    offset_from_midnight(day, instant)?.checked_neg()
+}
+
+fn within_a_clock_change(one: i64, other: i64) -> bool {
+    one.checked_sub(other).is_some_and(|difference| {
+        difference.unsigned_abs() <= LARGEST_CLOCK_CHANGE as u64
+    })
+}
+
+fn offsets_in_force(
+    first_day: LocalDate,
+    last_day: LocalDate,
+    range_start: i64,
+    range_end: i64,
+    offsets: &[(i64, i64)],
+) -> Option<(i32, Vec<OffsetChange>)> {
+    let days = last_day
+        .days_since_epoch()
+        .checked_sub(first_day.days_since_epoch())?
+        .checked_add(1)?;
+    let most = usize::try_from(days.checked_add(1)?).ok()?;
+    let (first, rest) = offsets.split_first()?;
+    if offsets.len() > most
+        || first.0 != range_start
+        || Some(first.1) != implied_offset(first_day, range_start)
+    {
+        return None;
+    }
+    let day_after_last =
+        LocalDate::from_days_since_epoch(last_day.days_since_epoch().checked_add(1)?);
+    let mut previous = *first;
+    for entry in rest {
+        if entry.0 <= previous.0
+            || entry.0 >= range_end
+            || entry.1 == previous.1
+            || !within_a_clock_change(entry.1, previous.1)
+        {
+            return None;
+        }
+        previous = *entry;
+    }
+    if first.0 >= range_end
+        || !offsets
+            .iter()
+            .all(|(_, offset)| (LOWEST_OFFSET..=HIGHEST_OFFSET).contains(offset))
+        || !within_a_clock_change(previous.1, implied_offset(day_after_last, range_end)?)
+    {
+        return None;
+    }
+    let first_offset = i32::try_from(first.1).ok()?;
+    let changes = rest
+        .iter()
+        .map(|(from, offset)| {
+            Some(OffsetChange {
+                from: *from,
+                offset_seconds: i32::try_from(*offset).ok()?,
+            })
+        })
+        .collect::<Option<Vec<_>>>()?;
+    Some((first_offset, changes))
 }
