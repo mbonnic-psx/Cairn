@@ -133,3 +133,47 @@ Every product decision a `/cruise` run took, in order. A person overrides one by
 - **Confidence:** medium · **Would reverse if:** the owner, at the reveal demo, reads the caption as part of the list's text
 - **Written to:** `specs/004-notebook-landscape/slices/protection-page/tasks.md` (T021)
 - **Status:** standing
+
+## D13 — How does the choosing step sit on one spread?
+- **Stage:** slice gaps · **Slice:** setup-pages · **When:** 2026-10-02T07:12:00Z · **Iteration:** 4
+- **Question:** Choosing what to protect shows two screens, What would you like to protect? and Anywhere else?, and the "Turn protection on" button, one under the other. How do they sit on two pages?
+- **Options:** categories on the left page, Anywhere else? and "Turn protection on" on the right page (recommended); everything on the left page, the right blank; the categories across both pages, Anywhere else? below
+- **Decision:** What would you like to protect?, its sentence, the categories and the note a change leaves on the left page. Anywhere else?, the address box and what comes back on the right page, with "Turn protection on" at its foot. The step's composition moves into one component of the setup screens that the app renders, so Current renders exactly what it renders today.
+- **Why:** Each heading opens its own page, the person reads in the order they do today, and the step ends with its way forward where the eye ends. Nothing is invented and nothing moves between steps (FR-018, FR-031).
+- **Decided by:** host (stage recommendation)
+- **Confidence:** high · **Would reverse if:** the owner, at the reveal demo, wants the address box beside the categories on the left page
+- **Written to:** `specs/004-notebook-landscape/spec.md` (Clarifications), `specs/004-notebook-landscape/contracts/ui-shell.md` (A step of more than one screen)
+- **Status:** standing
+
+## D14 — Where do Before Cairn changes anything's parts and its two buttons go?
+- **Stage:** slice gaps · **Slice:** setup-pages · **When:** 2026-10-02T07:12:00Z · **Iteration:** 4
+- **Question:** The screen is a heading, a paragraph, what Cairn will change, the background component's paragraph, What this does not cover, the note on administrators, and "Yes, set this up" and "Not yet". Its details may still be loading or could not be read. How do they sit on two pages?
+- **Options:** what changes on the left page; the limits, the administrator note and the buttons on the right page, the buttons in the same place in every state (recommended); everything on the left with the buttons, the right blank
+- **Decision:** Left page: the heading, the opening paragraph, what Cairn will change and the background component's paragraph. Right page: What this does not cover, the note on administrators, then "Yes, set this up" and "Not yet" at its foot. Without the details, the left page holds the heading and the paragraph and the right page holds only the two buttons, in the same place.
+- **Why:** Cairn discloses before it asks (Principle III, FR-016 of 002): the person reaches the yes only after reading what Cairn does not cover. The buttons never move as the details arrive.
+- **Decided by:** host (stage recommendation)
+- **Confidence:** high · **Would reverse if:** the owner, at the reveal demo, wants the buttons under what Cairn will change
+- **Written to:** `specs/004-notebook-landscape/spec.md` (Clarifications)
+- **Status:** standing
+
+## D15 — Do the setup controls' edges stay visible on the paper?
+- **Stage:** slice gaps · **Slice:** setup-pages · **When:** 2026-10-02T07:12:00Z · **Iteration:** 4
+- **Question:** The address box's edge and the checkboxes were drawn for a white card. On the notebook's paper, in night's lamp-lit look most of all, nothing holds them visible. FR-022 covers focus only.
+- **Options:** every control's edge on the paper at least 3:1 against the paper in every look, the floor D4 used for graphics (recommended); leave it to the owner's eye at the demo
+- **Decision:** The edge of every control the setup screens draw on the paper — the address box and each checkbox — meets at least 3:1 against the paper in every look, held by a test.
+- **Why:** A person who cannot find the address box cannot add the site that brought them here. 3:1 is the WCAG floor for what identifies a control, and the floor this feature already holds the mark to.
+- **Decided by:** host (stage recommendation)
+- **Confidence:** medium · **Would reverse if:** the owner, at the reveal demo, wants the address box drawn as a bare line on the page
+- **Written to:** `specs/004-notebook-landscape/spec.md` (Clarifications)
+- **Status:** standing
+
+## D16 — How is This machine is as it was seen in each look before it is reachable?
+- **Stage:** slice gaps · **Slice:** quiet-pages · **When:** 2026-10-02T07:12:00Z · **Iteration:** 4
+- **Question:** Teardown is restyled now but not reachable from the app (Assumptions), so no demo can open it.
+- **Options:** tests render it inside the notebook in each look and both outcomes, and the demo names it under Not working yet (recommended: protection-page did this for the waiting change); a development-only way to open it; leave it unseen
+- **Decision:** Tests render This machine is as it was inside the notebook in morning, midday and night, both as it was and almost everything undone. The demo lists it under Not working yet: not reachable from the app until teardown is wired in.
+- **Why:** The spread is proved in every look without adding a way into the app that Cairn does not have, which would change what Cairn does (FR-018).
+- **Decided by:** host (stage recommendation)
+- **Confidence:** high · **Would reverse if:** teardown is wired into the app before this slice merges
+- **Written to:** `specs/004-notebook-landscape/spec.md` (Clarifications)
+- **Status:** standing
