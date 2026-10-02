@@ -39,3 +39,26 @@ export const readBack = (status: ProtectionStatus): ProtectionState => ({
   verified_at: null,
   entry_count_verified: 0,
 });
+
+/** All nine categories, as the choosing step draws them when the core lists every one (T018's sweep). */
+export const nineCategories: CategoryPreset[] = [
+  { id: 'adult', label: 'Adult', enabled: true, entry_count: 200, edited: false },
+  { id: 'ai', label: 'AI', enabled: false, entry_count: 12, edited: false },
+  { id: 'gambling', label: 'Gambling', enabled: true, entry_count: 120, edited: true },
+  { id: 'gaming', label: 'Gaming', enabled: true, entry_count: 55, edited: false },
+  { id: 'messenger', label: 'Messaging', enabled: false, entry_count: 9, edited: false },
+  { id: 'news', label: 'News', enabled: true, entry_count: 18, edited: true },
+  { id: 'shopping', label: 'Shopping', enabled: true, entry_count: 30, edited: false },
+  { id: 'social', label: 'Social', enabled: true, entry_count: 42, edited: false },
+  { id: 'streaming', label: 'Streaming', enabled: false, entry_count: 40, edited: false },
+];
+
+/** The sentence a core's pending change reads as on the screen, for the pending change below. */
+export const pendingChange = {
+  id: 'abc',
+  what: 'Switch the list off',
+  time_remaining: '24 hours',
+  eligible_now: false,
+};
+export const pendingSentence =
+  'Switch the list off: this takes effect in 24 hours, and until then nothing changes.';

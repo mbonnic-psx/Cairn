@@ -5,29 +5,40 @@
  */
 import { cleanup, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import App from '../../App';
 import type { CategoryPreset } from '../../ipc';
 import { Disclosure } from '../../screens/Disclosure';
 import { Choosing } from '../../screens/Setup/Choosing';
 import { installFakeCore, type FakeCore } from '../../screens/__tests__/fakeCore';
-import { categories as cases, disclosures, readBack } from '../../screens/__tests__/setupCases';
+import {
+  categories as cases,
+  disclosures,
+  nineCategories,
+  pendingChange,
+  pendingSentence,
+  readBack,
+} from '../../screens/__tests__/setupCases';
 
 let core: FakeCore;
 let list: CategoryPreset[];
+/** How the core answers a toggle; each test sets it, and `beforeEach` puts it back to "at once". */
+let toggleAnswer: (args: Record<string, unknown>) => unknown;
+const applyAtOnce = (args: Record<string, unknown>) => {
+  const category = list.find((c) => c.id === args.id)!;
+  category.enabled = Boolean(args.on);
+  return null;
+};
 
 beforeEach(() => {
   list = cases.map((c) => ({ ...c }));
+  toggleAnswer = applyAtOnce;
   core = installFakeCore({
     get_protection_state: () => readBack('off'),
     list_categories: () => list.map((c) => ({ ...c })),
     get_disclosures: () => disclosures,
-    set_category_enabled: (args) => {
-      const category = list.find((c) => c.id === args.id)!;
-      category.enabled = Boolean(args.on);
-      return null;
-    },
+    set_category_enabled: (args) => toggleAnswer(args),
     add_custom_entry: () => ['example.com', 'www.example.com'],
     turn_protection_on: () => ({ ...readBack('in_force'), since: 1_700_000_000 }),
     get_trail: () => ({ entries: [], enabled_categories: [] }),
@@ -124,6 +135,76 @@ describe('the setup steps through App, in a notebook look', () => {
     }
   });
 });
+
+describe.each(['Morning', 'Midday', 'Night'] as const)(
+  'the choosing step shows the state it holds, on a page, in %s (T018)',
+  (look) => {
+    const steps = async () => {
+      list = nineCategories.map((c) => ({ ...c }));
+      const view = await choosing(look);
+      const boxes = () => within(view.pagesOf()[0]!).getAllByRole('checkbox') as HTMLInputElement[];
+      expect(boxes()).toHaveLength(9);
+      return { ...view, boxes, left: () => view.pagesOf()[0]! };
+    };
+
+    it('keeps every ticked box ticked, and says why, when the untick has to wait', async () => {
+      toggleAnswer = () => pendingChange;
+      const { boxes, left } = await steps();
+      for (const box of boxes().filter((b) => b.checked)) {
+        await userEvent.click(box);
+        await screen.findByText(pendingSentence);
+        expect(box, box.id || 'a box').toBeChecked();
+        expect(within(left()).getByText(pendingSentence)).toBeInTheDocument();
+      }
+      expect(boxes().filter((b) => b.checked)).toHaveLength(nineCategories.filter((c) => c.enabled).length);
+    });
+
+    it("keeps every box as it was, and shows the core's sentence, when the core refuses", async () => {
+      toggleAnswer = () => {
+        throw 'Cairn could not change that just now. Nothing has changed.';
+      };
+      const { boxes, left } = await steps();
+      const before = boxes().map((b) => b.checked);
+      for (const box of boxes()) {
+        await userEvent.click(box);
+        await within(left()).findByText('Cairn could not change that just now. Nothing has changed.');
+        expect(boxes().map((b) => b.checked)).toEqual(before);
+      }
+    });
+
+    it('unticks every box that comes off at once, and shows no note', async () => {
+      const { boxes, left } = await steps();
+      for (const box of boxes().filter((b) => b.checked)) {
+        await userEvent.click(box);
+        await vi.waitFor(() => expect(box).not.toBeChecked());
+      }
+      expect(boxes().filter((b) => b.checked)).toHaveLength(0);
+      expect(left().querySelector('.nb-categories-note')).toBeNull();
+    });
+
+    it('ticks a box at once and keeps it ticked', async () => {
+      const { boxes } = await steps();
+      for (const box of boxes().filter((b) => !b.checked)) {
+        await userEvent.click(box);
+        await vi.waitFor(() => expect(box).toBeChecked());
+      }
+      expect(boxes().every((b) => b.checked)).toBe(true);
+    });
+
+    it('empties the address box after an address is taken and disables "Protect it"', async () => {
+      const { pagesOf } = await steps();
+      const right = () => pagesOf()[1]!;
+      const box = () => within(right()).getByLabelText('Address to protect') as HTMLInputElement;
+      const button = () => within(right()).getByRole('button', { name: 'Protect it' });
+
+      await userEvent.type(box(), 'example.com');
+      await userEvent.click(button());
+      await within(right()).findByText(/example\.com, www\.example\.com/);
+      expect(box().value).toBe('');
+      expect(button()).toBeDisabled();
+    });
+  },
+);
 
 describe('Current is unchanged', () => {
   it("shows today's markup for both steps", async () => {

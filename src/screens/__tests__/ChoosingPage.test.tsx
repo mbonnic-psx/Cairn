@@ -339,3 +339,91 @@ describe.each(['morning', 'midday', 'night'] as const)('the choosing step on a n
     expect(here).toBe(outside(step(noop, waitingNote)));
   });
 });
+
+describe.each(['morning', 'midday', 'night'] as const)(
+  'the address box shows the state it holds, on a page, in the %s look (T018)',
+  (look) => {
+    type Check = NonNullable<Parameters<typeof CustomEntry>[0]['check']>;
+    const typed = 'Example.com/path';
+
+    async function submit(add: () => Promise<string[]>, check?: Check) {
+      const { main } = onPage(<CustomEntry add={add} check={check} />, look);
+      const box = within(main).getByLabelText('Address to protect') as HTMLInputElement;
+      const button = within(main).getByRole('button', { name: 'Protect it' });
+      await userEvent.type(box, typed);
+      expect(box.value).toBe(typed);
+      expect(button).toBeEnabled();
+      await userEvent.click(button);
+      return { main, box, button };
+    }
+
+    const taken = async () => ['example.com', 'www.example.com'];
+    const reads: Array<[string, Check]> = [
+      ['in force', async () => readBack('in_force')],
+      ['off', async () => readBack('off')],
+      ['not confirmed', async () => readBack('not_verified')],
+      [
+        'one that could not be made',
+        async () => {
+          throw 'no read-back';
+        },
+      ],
+    ];
+
+    it.each(reads)('after an address is taken under a read-back %s, the box is empty and "Protect it" is disabled', async (_name, check) => {
+      const { main, box, button } = await submit(taken, check);
+      await within(main).findByText(/example\.com, www\.example\.com/);
+      expect(box.value).toBe('');
+      expect(button).toBeDisabled();
+    });
+
+    const refusals: Array<[string, unknown]> = [
+      ['a localhost reason', { reason: localhostReason, kind: 'keeps_the_machine_working' }],
+      ['a sentence', 'Cairn could not reach its settings just now.'],
+      ['a core that rejects with nothing readable', 42],
+    ];
+
+    it.each(refusals)('after %s, the box still holds what was typed and "Protect it" stays enabled', async (_name, problem) => {
+      const { main, box, button } = await submit(async () => {
+        throw problem;
+      });
+      await within(main).findByRole('status');
+      expect(box.value).toBe(typed);
+      expect(button).toBeEnabled();
+    });
+
+    it('keeps what was typed after a reason, then empties it once a later try is taken', async () => {
+      let answer: () => Promise<string[]> = async () => {
+        throw 'Cairn could not reach its settings just now.';
+      };
+      const { main } = onPage(<CustomEntry add={() => answer()} check={async () => readBack('off')} />, look);
+      const box = within(main).getByLabelText('Address to protect') as HTMLInputElement;
+      await userEvent.type(box, typed);
+      await userEvent.click(within(main).getByRole('button', { name: 'Protect it' }));
+      await within(main).findByRole('status');
+      expect(box.value).toBe(typed);
+
+      answer = taken;
+      await userEvent.click(within(main).getByRole('button', { name: 'Protect it' }));
+      await within(main).findByText(/example\.com, www\.example\.com/);
+      expect(box.value).toBe('');
+      expect(within(main).getByRole('button', { name: 'Protect it' })).toBeDisabled();
+    });
+  },
+);
+
+describe.each(['morning', 'midday', 'night'] as const)(
+  'the categories show the state they hold, on a page, in the %s look (T018)',
+  (look) => {
+    it('keeps a box exactly as the prop says, whatever the person clicked', async () => {
+      const onToggle = vi.fn();
+      const { main } = onPage(<Categories categories={categories} onToggle={onToggle} note={waitingNote} />, look);
+      for (const category of categories) {
+        const box = within(main).getByRole('checkbox', { name: new RegExp(category.label) });
+        await userEvent.click(box);
+        expect(onToggle).toHaveBeenLastCalledWith(category.id, !category.enabled);
+        expect(box, category.label).toHaveProperty('checked', category.enabled);
+      }
+    });
+  },
+);
