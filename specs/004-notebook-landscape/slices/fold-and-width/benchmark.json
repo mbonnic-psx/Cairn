@@ -1,0 +1,97 @@
+{
+  "_comment": "What each stage of /drive cost this slice and how well it did, one entry per stage run, appended by scripts/agents/benchmark.py at the stage's start and end. Tokens come from the harness's own transcript or are null with the reason; signals are what the stage reported. `make benchmark` reads every record. docs/agent-harnesses.md says what the numbers can and cannot be compared with.",
+  "feature": "004-notebook-landscape",
+  "slice": "fold-and-width",
+  "from": "edbbd2691c2ac4c352c3ad441b2479311baf4c26",
+  "stages": [
+    {
+      "stage": "implement",
+      "started": "2026-10-02T14:42:51Z",
+      "planned": "implement: fast → sonnet — Claude Code: the Agent tool's `model` parameter, set per call",
+      "tasks": {
+        "start": {
+          "open": 4,
+          "done": 0
+        },
+        "end": {
+          "open": 0,
+          "done": 4
+        }
+      },
+      "ended": "2026-10-02T14:46:37Z",
+      "seconds": 226,
+      "span": {
+        "from": {
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/71633336-496b-4252-a9a5-d1d3a2247a72.jsonl": 1099313,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/71633336-496b-4252-a9a5-d1d3a2247a72/subagents/agent-af66e7d9df42fc9de.jsonl": 234423
+        },
+        "to": {
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/71633336-496b-4252-a9a5-d1d3a2247a72.jsonl": 1221933,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/71633336-496b-4252-a9a5-d1d3a2247a72/subagents/agent-a0ce3d896fdef3c91.jsonl": 331825,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/71633336-496b-4252-a9a5-d1d3a2247a72/subagents/agent-af66e7d9df42fc9de.jsonl": 234423
+        }
+      },
+      "usage": {
+        "source": "claude",
+        "session": "71633336-496b-4252-a9a5-d1d3a2247a72",
+        "read": "message.usage on each assistant line, once per requestId",
+        "host": {
+          "claude-opus-5-5": {
+            "input": 28,
+            "output": 5930,
+            "cache_read": 2678911,
+            "cache_creation": 14745
+          }
+        },
+        "subagents": {
+          "claude-sonnet-5-5": {
+            "input": 28,
+            "output": 2653,
+            "cache_read": 666823,
+            "cache_creation": 63283
+          }
+        },
+        "agents": [
+          "drive-implement"
+        ]
+      },
+      "ran": [
+        "claude-opus-5-5",
+        "claude-sonnet-5-5"
+      ],
+      "agents": [
+        "drive-implement"
+      ],
+      "delegated": true,
+      "signals": {
+        "verify_failures": 0,
+        "delegate": "story",
+        "cycle": "rule",
+        "split": 0,
+        "driver": "cruise"
+      }
+    },
+    {
+      "stage": "converge",
+      "started": "2026-10-02T14:46:43Z",
+      "planned": "converge: strong → host model — `strong` maps to the host model",
+      "tasks": {
+        "start": {
+          "open": 0,
+          "done": 4
+        }
+      },
+      "cursor": {
+        "source": "claude",
+        "session": "71633336-496b-4252-a9a5-d1d3a2247a72",
+        "files": {
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/71633336-496b-4252-a9a5-d1d3a2247a72.jsonl": 1235771
+        },
+        "subagents": {
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/71633336-496b-4252-a9a5-d1d3a2247a72/subagents/agent-a0ce3d896fdef3c91.jsonl": 331825,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/71633336-496b-4252-a9a5-d1d3a2247a72/subagents/agent-af66e7d9df42fc9de.jsonl": 234423
+        }
+      }
+    }
+  ]
+}

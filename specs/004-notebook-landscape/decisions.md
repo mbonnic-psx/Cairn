@@ -394,6 +394,7 @@ Every product decision a `/cruise` run took, in order. A person overrides one by
 - **Confidence:** high · **Would reverse if:** in the slice's demo on a large screen, the owner says the 1200 notebook looks small in the scene or the lines read long. The cap then moves; the rule stays the same.
 - **Written to:** `specs/004-notebook-landscape/spec.md` (Clarifications, FR-035)
 - **Status:** overridden in part by D36 (the width rule below the cap; the 1200×982 cap and the centring stand)
+- **Note, 2026-10-02 (converge T009):** the cap's height is 1200 × 680/830 = 983, not 982; FR-035 and the tests say 983.
 
 ## D36 — Does keeping the proportion ever make the notebook narrower than today?
 - **Stage:** slice gaps · **Slice:** fold-and-width · **When:** 2026-10-02T16:24:00Z · **Iteration:** 8
@@ -405,3 +406,4 @@ Every product decision a `/cruise` run took, in order. A person overrides one by
 - **Confidence:** medium · **Would reverse if:** in the demo, the owner wants a short wide window (such as 1920×800) to widen the notebook too. That is option (a).
 - **Written to:** `specs/004-notebook-landscape/spec.md` (Clarifications, FR-035)
 - **Status:** standing
+- **Note, 2026-10-02 (converge T009):** the cap's height is 1200 × 680/830 = 983, not 982; FR-035 and the tests say 983.
