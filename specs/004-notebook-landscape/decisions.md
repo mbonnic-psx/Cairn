@@ -177,3 +177,47 @@ Every product decision a `/cruise` run took, in order. A person overrides one by
 - **Confidence:** high · **Would reverse if:** teardown is wired into the app before this slice merges
 - **Written to:** `specs/004-notebook-landscape/spec.md` (Clarifications)
 - **Status:** standing
+
+## D17 — Are "not confirmed" and waiting sentences on the setup pages amber?
+- **Stage:** convergence · **Slice:** setup-pages · **When:** 2026-10-02T08:11:00Z · **Iteration:** 4
+- **Question:** After an address is added and the read-back is not confirmed, "Added to your list, though Cairn has not confirmed it is in force just now: …" is moss, the colour of "Protected: …". The note beside the categories, which carries a waiting untick, is quiet ink. FR-016 says "not confirmed" and "waiting" keep their warm amber meaning (T021, T023).
+- **Options:** keep today's colours on the page; on the page only, amber for not confirmed, off and waiting, moss for in force, Current unchanged (recommended by converge); change Current as well
+- **Decision:** On the notebook page only: the added sentence is amber when the read-back is not confirmed or protection is off, moss when it is in force; the note beside the categories is amber. Current keeps today's colours until `reveal`.
+- **Why:** A person who added a site must not read "not confirmed" in the colour of "Protected". FR-016 asks for amber in the notebook, and Current must stay as it is (SC-009).
+- **Decided by:** host (stage recommendation)
+- **Confidence:** high · **Would reverse if:** the owner, at the reveal demo, wants "off" kept apart from "not confirmed" in colour
+- **Written to:** `specs/004-notebook-landscape/spec.md` (Clarifications), `specs/004-notebook-landscape/slices/setup-pages/tasks.md` (T027)
+- **Status:** standing
+
+## D18 — What does "the same place" mean for Before Cairn changes anything's buttons?
+- **Stage:** convergence · **Slice:** setup-pages · **When:** 2026-10-02T08:11:00Z · **Iteration:** 4
+- **Question:** D14 says the buttons never move as the details arrive. At 1280×800 they hold still; at 800×600 the details push them further down the right page (T022).
+- **Options:** the buttons sit at the foot of the right page in every state, below whatever it holds (recommended); reserve the details' height while they load
+- **Decision:** The buttons sit at the foot of the right page in every state, after What this does not cover and the note on administrators. In a small window they move down as the details arrive.
+- **Why:** What D14 protects is that the yes comes after the limits. Reserving empty space for text that may never arrive would leave a blank gap on a screen that should read plainly.
+- **Decided by:** host (stage recommendation)
+- **Confidence:** high · **Would reverse if:** the owner, at the reveal demo, finds the buttons moving under their pointer
+- **Written to:** `specs/004-notebook-landscape/spec.md` (Clarifications)
+- **Status:** standing
+
+## D19 — Who makes a spread with no control scrollable from the keyboard?
+- **Stage:** after-converge gaps · **Slice:** quiet-pages · **When:** 2026-10-02T08:11:00Z · **Iteration:** 4
+- **Question:** A keyboard-only person may be unable to scroll a spread with no control on it (What Cairn covers) in the macOS and Linux webview, because the scrolling page area is the shell's and is not in the tab order there. Chromium puts it in the order; WebKit is untested. It touches every spread, protection-page's too.
+- **Options:** one small shell task before `reveal`, owned by the host and landed on main between slices (recommended by the slice); each page slice adds its own focus target; leave it
+- **Decision:** A shell task before `reveal`: the notebook's page area can be reached and scrolled from the keyboard in every webview, held by a test. It is recorded in the split's parking lot and lands on main as host work before `reveal` starts.
+- **Why:** FR-022 and FR-025 promise every part of every page is reachable by keyboard; one fix in the shell covers every spread at once, and a page slice may not edit the shell.
+- **Decided by:** host (stage recommendation)
+- **Confidence:** medium · **Would reverse if:** a run in WebKit shows the page area already scrolls from the keyboard
+- **Written to:** `specs/004-notebook-landscape/story-split.md` (Parking lot)
+- **Status:** standing
+
+## D20 — May a person confirm Before Cairn changes anything without seeing What this does not cover?
+- **Stage:** after-converge gaps · **Slice:** setup-pages · **When:** 2026-10-02T08:16:00Z · **Iteration:** 4
+- **Question:** setup-pages T026. While the disclosure's details have not arrived, or could not be read, the screen still shows its heading, the paragraph saying Cairn affects everyone who uses this machine, and "Yes, set this up". A person can confirm without ever seeing What this does not cover or the note on administrators. This is how `src/screens/Disclosure.tsx` behaves today, in both layouts. 004 does not change it, and the disclosure belongs to 002.
+- **Options:** (a) leave it as today; (b) a task in 002, like D11: the disclosure offers "Yes, set this up" only once its details are shown, and says plainly when they could not be read, with a way to try again; fixed in 002, so Current and the notebook both get it; (c) fix it inside 004's setup-pages. No stage recommendation beyond "the owner's call for 002".
+- **Decision:** (b). A new unchecked task in `specs/002-machine-wide-protection/tasks.md`: until the details are shown, the screen does not offer "Yes, set this up"; if they could not be read, it says so plainly and offers "Try again" beside "Not yet", in both layouts. setup-pages ships the screen as it is today (FR-018), and D14 stands for 004 until the 002 task lands.
+- **Why:** For someone in recovery, saying yes to a wall without being told where its gaps are is what Principle III exists to prevent: an operation affecting other accounts is disclosed in plain language before the first write, with an explicit confirmation, and 002's FR-016–FR-018 say the disclosure carries what is not covered and that an administrator can defeat Cairn. A yes before those are on screen is not that confirmation, so (a) is out. (c) would change what Cairn does inside 004 and make Current differ from today (FR-018, SC-009), as D11 found. "Not yet" stays in every state, and nothing asks the person to type or solve anything (Principle V).
+- **Decided by:** drive-skipper (claude-opus-5-5)
+- **Confidence:** high · **Would reverse if:** every path to the first system change already shows What this does not cover and the note on administrators before the yes, somewhere other than this screen
+- **Written to:** `specs/002-machine-wide-protection/tasks.md` (task appended on the trunk after this slice merges), `specs/004-notebook-landscape/slices/setup-pages/tasks.md` (T026), `specs/004-notebook-landscape/story-split.md` (Parking lot)
+- **Status:** standing

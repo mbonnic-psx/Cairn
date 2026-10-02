@@ -1,10 +1,10 @@
 # Benchmark — 004-notebook-landscape
 
-Drawn 2026-10-02T06:45:55Z at `20d2640` from 4 record(s) under `specs/004-notebook-landscape/` by `scripts/agents/benchmark.py overview`; `/benchmark` redraws it, and so does closing a slice. Regenerated whole, never edited: the records beside each slice are the source.
+Drawn 2026-10-02T08:37:53Z at `2eae673` from 6 record(s) under `specs/004-notebook-landscape/` by `scripts/agents/benchmark.py overview`; `/benchmark` redraws it, and so does closing a slice. Regenerated whole, never edited: the records beside each slice are the source.
 
 ## Slices
 
-3 slice(s) recorded, 2h39m+ in all.
+5 slice(s) recorded, 3h51m+ in all.
 
 | slice | delegate/cycle | wall | in | out | models | sessions | converge | +tasks | gaps | mutation | adversary | demo | verify✗ | rework | tasks | files | ±lines |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
@@ -12,6 +12,8 @@ Drawn 2026-10-02T06:45:55Z at `20d2640` from 4 record(s) under `specs/004-notebo
 | frame | rule/rule, story/rule, task/example | 1h01m | 28.3M (+1 unread) | 57.9k | claude-opus-5-5, claude-sonnet-5-5 | 2 | 1 | 9 | 0/0 | 90.39 | 5 | implementation | 0 | 0 | — | — | — |
 | looks | story/rule, task/rule | 33m07s+ | 19.9M (+3 unread) | 46.3k | claude-opus-5-5, claude-sonnet-5-5 | 1 | 2 | 6 | 2/0 | 95.07 | 0 | accepted | 0 | 0 | 24 | 48 | +2043/-92 |
 | protection-page | story/rule, task/rule | 1h00m+ | 36.7M (+2 unread) | 64.2k | claude-opus-5-5, claude-sonnet-5-5 | 1 | 2 | 8 | 4/0 | 81.70 | 0 | accepted | 0 | 0 | 26 | 64 | +3338/-16 |
+| quiet-pages | — | 50s | 671.7k | 5.1k | claude-opus-5-5 | 1 | 0 | 0 | 1/0 | — | 0 | — | 0 | 0 | — | — | — |
+| setup-pages | story/rule, task/rule | 1h11m | 58.7M | 86.3k | claude-opus-5-5, claude-sonnet-5-5 | 1 | 2 | 3 | 3/4 | 93.80 | 0 | accepted | 0 | 0 | 23 | 69 | +4353/-11 |
 
 delegate/cycle = how implementation was delegated and driven; in = input + cache read + cache creation tokens; gaps = before/after converge; +tasks = tasks converge appended; sessions = harness sessions read; a stage's tokens are a floor (the turn that ends it is partly uncounted); a trailing + makes wall a floor because an unbracketed stage is missing; tokens are not prices.
 
@@ -74,11 +76,37 @@ delegate/cycle = how implementation was delegated and driven; in = input + cache
 | mutation | 2026-10-02 06:39 | 2m19s | 406.1k | 3.9k | claude-opus-5-5, claude-sonnet-5-5 | drive-mutation | yes | mutation_score=81.70, driver=cruise |
 | implement | 2026-10-02 06:42 | 1m49s | 665.6k | 3k | claude-opus-5-5, claude-sonnet-5-5 | drive-implement | yes | verify_failures=0, delegate=task, cycle=rule, split=0, driver=cruise |
 
+### quiet-pages — 50s
+
+| stage | started (UTC) | wall | in | out | model | agent | delegated | reported |
+|---|---|---|---|---|---|---|---|---|
+| gaps | 2026-10-02 07:10 | 50s | 671.7k | 5.1k | claude-opus-5-5 | — | no | gaps=1, driver=cruise |
+
+### setup-pages — 1h11m
+
+| stage | started (UTC) | wall | in | out | model | agent | delegated | reported |
+|---|---|---|---|---|---|---|---|---|
+| gaps | 2026-10-02 07:10 | 50s | 106.5k | 2.9k | claude-opus-5-5 | — | no | gaps=3, driver=cruise |
+| plan | 2026-10-02 07:13 | 5m26s | 5M | 5.3k | claude-opus-5-5, claude-sonnet-5-5 | drive-slice, drive-tasks | yes | driver=cruise |
+| tasks | 2026-10-02 07:19 | 3m25s | 4M | 10k | claude-opus-5-5, claude-sonnet-5-5 | drive-implement, drive-slice, drive-tasks | yes | driver=cruise |
+| pin | 2026-10-02 07:23 | 1m00s | 1.8M | 783 | claude-opus-5-5, claude-sonnet-5-5 | drive-implement, drive-slice | yes | driver=cruise |
+| implement | 2026-10-02 07:24 | 16m45s | 22.8M | 21.8k | claude-opus-5-5, claude-sonnet-5-5 | drive-converge, drive-implement, drive-slice | yes | verify_failures=0, delegate=story, cycle=rule, split=0, driver=cruise |
+| converge | 2026-10-02 07:41 | 8m16s | 5.6M | 2.5k | claude-opus-5-5 | drive-converge, drive-gaps, drive-slice | yes | driver=cruise |
+| implement | 2026-10-02 07:49 | 3m10s | 3M | 7.4k | claude-opus-5-5, claude-sonnet-5-5 | drive-hand, drive-implement, drive-slice | yes | verify_failures=0, delegate=story, cycle=rule, split=0, driver=cruise |
+| converge | 2026-10-02 07:52 | 4m54s | 4.3M | 3.2k | claude-opus-5-5 | drive-converge, drive-hand, drive-slice | yes | driver=cruise |
+| gaps | 2026-10-02 07:57 | 3m34s | 2.8M | 8.4k | claude-opus-5-5 | drive-gaps, drive-hand, drive-slice | yes | gaps=4, driver=cruise |
+| implement | 2026-10-02 08:11 | 1m47s | 1.4M | 6.8k | claude-opus-5-5, claude-sonnet-5-5 | drive-implement, drive-skipper | yes | delegate=task, cycle=rule, split=0, red=observed, driver=cruise |
+| demo | 2026-10-02 08:13 | 11m44s | 5.4M | 5.8k | claude-opus-5-5 | drive-hand | yes | outcome=accepted, driver=cruise |
+| adversary | 2026-10-02 08:25 | 1s | 180.7k | 1.6k | claude-opus-5-5 | — | no | findings=0, seams=0, driver=cruise |
+| mutation | 2026-10-02 08:25 | 2m45s | 1.1M | 6k | claude-opus-5-5, claude-sonnet-5-5 | drive-mutation | yes | mutation_score=93.80, driver=cruise |
+| implement | 2026-10-02 08:28 | 8m13s | 1.2M | 3.8k | claude-opus-5-5, claude-sonnet-5-5 | drive-implement | yes | delegate=task, cycle=rule, split=0, red=observed, driver=cruise |
+
 ## Notes
 
 - frame: implemented as rule/rule and story/rule and task/example — its wall compares with neither
 - looks: implemented as story/rule and task/rule — its wall compares with neither
 - protection-page: implemented as story/rule and task/rule — its wall compares with neither
+- setup-pages: implemented as story/rule and task/rule — its wall compares with neither
 - looks plan: not bracketed around its work — start and end were called in the same moment, so this stage's wall and tokens are missing, not zero.
 - looks gaps: cut off — a new `demo` entry started while it was open; its wall is real, its signals were never reported
 - looks gaps: not bracketed around its work — start and end were called in the same moment, so this stage's wall and tokens are missing, not zero.
