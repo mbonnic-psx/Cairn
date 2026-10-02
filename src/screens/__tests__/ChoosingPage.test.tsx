@@ -12,7 +12,7 @@ import type { NotebookLook } from '../../look/look';
 import { Categories } from '../Setup/Categories';
 import { Choosing } from '../Setup/Choosing';
 import { CustomEntry } from '../Setup/CustomEntry';
-import { categories, waitingNote } from './setupCases';
+import { categories, readBack, waitingNote } from './setupCases';
 
 const noop = () => undefined;
 
@@ -138,5 +138,55 @@ describe('Categories on a notebook page (T004)', () => {
     expect(main.querySelectorAll('label')).toHaveLength(0);
     expect(main.querySelector('ul li')).toBeNull();
     expect(within(main).getByRole('heading', { level: 2 })).toBeInTheDocument();
+  });
+});
+
+describe('CustomEntry on a notebook page (T005)', () => {
+  const box = (main: HTMLElement) => within(main).getByLabelText('Address to protect') as HTMLInputElement;
+
+  it('puts "Anywhere else?" and its sentence on the page, with no card', () => {
+    const { main } = onPage(<CustomEntry add={async () => []} />);
+    expect(within(main).getByRole('heading', { level: 2, name: 'Anywhere else?' })).toBeInTheDocument();
+    expect(
+      within(main).getByText('Type an address and Cairn will protect it, along with its www. form.'),
+    ).toBeInTheDocument();
+    expect(main.querySelector('.settle')).toBeNull();
+    expect(main.querySelector('section.rounded-2xl')).toBeNull();
+    expect(main.querySelector('section.nb-custom')).not.toBeNull();
+  });
+
+  it('names the box with the hidden label, keeps its id and its placeholder', () => {
+    const { main } = onPage(<CustomEntry add={async () => []} />);
+    expect(box(main).id).toBe('address');
+    expect(box(main).placeholder).toBe('example.com');
+    expect(main.querySelector('label[for="address"]')).toHaveClass('sr-only');
+  });
+
+  it('keeps "Protect it" disabled while the box is empty and enables it once something is typed', async () => {
+    const { main } = onPage(<CustomEntry add={async () => []} />);
+    const button = within(main).getByRole('button', { name: 'Protect it' });
+    expect(button).toBeDisabled();
+    await userEvent.type(box(main), 'example.com');
+    expect(button).toBeEnabled();
+  });
+
+  it('draws "Protect it" as a plain button and the box without the clay focus', () => {
+    const { main } = onPage(<CustomEntry add={async () => []} />);
+    const button = within(main).getByRole('button', { name: 'Protect it' });
+    expect(button.className).not.toMatch(/transition-colors|duration-200|bg-clay/);
+    expect(box(main).className).not.toMatch(/focus:border-clay-500|focus:outline-none/);
+  });
+
+  it('submits the typed text to the add seam', async () => {
+    const add = vi.fn(async () => ['example.com']);
+    const { main } = onPage(<CustomEntry add={add} check={async () => readBack('off')} />);
+    await userEvent.type(box(main), 'Example.com/path');
+    await userEvent.click(within(main).getByRole('button', { name: 'Protect it' }));
+    expect(add).toHaveBeenCalledWith('Example.com/path');
+  });
+
+  it('says the same words as outside any shell', () => {
+    const ui = <CustomEntry add={async () => []} />;
+    expect(onPage(ui).main.textContent).toBe(outside(ui));
   });
 });
