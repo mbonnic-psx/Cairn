@@ -210,3 +210,14 @@ Every product decision a `/cruise` run took, in order. A person overrides one by
 - **Confidence:** medium · **Would reverse if:** a run in WebKit shows the page area already scrolls from the keyboard
 - **Written to:** `specs/004-notebook-landscape/story-split.md` (Parking lot)
 - **Status:** standing
+
+## D20 — May a person confirm Before Cairn changes anything without seeing What this does not cover?
+- **Stage:** after-converge gaps · **Slice:** setup-pages · **When:** 2026-10-02T08:16:00Z · **Iteration:** 4
+- **Question:** setup-pages T026. While the disclosure's details have not arrived, or could not be read, the screen still shows its heading, the paragraph saying Cairn affects everyone who uses this machine, and "Yes, set this up". A person can confirm without ever seeing What this does not cover or the note on administrators. This is how `src/screens/Disclosure.tsx` behaves today, in both layouts. 004 does not change it, and the disclosure belongs to 002.
+- **Options:** (a) leave it as today; (b) a task in 002, like D11: the disclosure offers "Yes, set this up" only once its details are shown, and says plainly when they could not be read, with a way to try again; fixed in 002, so Current and the notebook both get it; (c) fix it inside 004's setup-pages. No stage recommendation beyond "the owner's call for 002".
+- **Decision:** (b). A new unchecked task in `specs/002-machine-wide-protection/tasks.md`: until the details are shown, the screen does not offer "Yes, set this up"; if they could not be read, it says so plainly and offers "Try again" beside "Not yet", in both layouts. setup-pages ships the screen as it is today (FR-018), and D14 stands for 004 until the 002 task lands.
+- **Why:** For someone in recovery, saying yes to a wall without being told where its gaps are is what Principle III exists to prevent: an operation affecting other accounts is disclosed in plain language before the first write, with an explicit confirmation, and 002's FR-016–FR-018 say the disclosure carries what is not covered and that an administrator can defeat Cairn. A yes before those are on screen is not that confirmation, so (a) is out. (c) would change what Cairn does inside 004 and make Current differ from today (FR-018, SC-009), as D11 found. "Not yet" stays in every state, and nothing asks the person to type or solve anything (Principle V).
+- **Decided by:** drive-skipper (claude-opus-5-5)
+- **Confidence:** high · **Would reverse if:** every path to the first system change already shows What this does not cover and the note on administrators before the yes, somewhere other than this screen
+- **Written to:** `specs/002-machine-wide-protection/tasks.md` (task appended on the trunk after this slice merges), `specs/004-notebook-landscape/slices/setup-pages/tasks.md` (T026), `specs/004-notebook-landscape/story-split.md` (Parking lot)
+- **Status:** standing

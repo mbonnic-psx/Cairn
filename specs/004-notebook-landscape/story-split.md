@@ -56,3 +56,6 @@ the frame's page-spread layout and the look tokens, both settled by `frame` and 
   change, not a break of SC-009.
 - A spread with no control may not scroll from the keyboard in the macOS and Linux webview: the page area is the
   shell's. One shell task makes it reachable and scrollable by keyboard, as host work on main before `reveal` (D19).
+- Before Cairn changes anything can be confirmed before its details (what is not covered) are shown, while they load
+  or when they cannot be read. That is 002's to fix, as a task in `specs/002-machine-wide-protection/tasks.md` (D20).
+  When it lands, Current's disclosure changes too; that is 002's change, not a break of SC-009.
