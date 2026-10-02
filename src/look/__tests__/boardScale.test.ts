@@ -165,3 +165,46 @@ describe('the writing space\'s minimum is the notebook\'s unit, not the root fon
     expect(sheetText('tonight-page.css')).toMatch(/\.nb-checkin-write\s*\{[^}]*min-height:\s*calc\(226 \* var\(--nb-u\)\)\s*;/);
   });
 });
+
+// T010 (converge pass 1): the measure stops the writing, not the paper. A leaf child that paints the paper to keep a
+// rule of the page from striking through its words must cover that rule the whole leaf wide, or it leaves a stub of
+// the rule past the measure. Every page-sheet rule that paints the paper is either uncapped by a rule that beats the
+// shell's measure, or named here as a box that was narrower than its leaf before this slice, with the reason.
+describe('a box that paints the paper is never cut short by the measure (D39, T010)', () => {
+  const NARROWER_BEFORE: Record<string, string> = {
+    '.nb-checkin-keep:disabled': 'a button, sized by its own words',
+    '.nb-checkin-switch': 'a label, align-self: flex-start, sized by its own words',
+    '.nb-checkin-write': 'a bordered box drawing its own ruling, not a band hiding the page\'s',
+  };
+  const MEASURE = '.nb-page-area .nb-spread > .nb-page > *';
+  const specificity = (selector: string) => {
+    const classes = (selector.match(/[.:][\w-]+/g) ?? []).length;
+    return classes;
+  };
+  const painters = ['protection-page.css', 'quiet-pages.css', 'setup-pages.css', 'tonight-page.css'].flatMap((name) =>
+    [...sheetText(name).matchAll(/([^{};]+)\{([^{}]*)\}/g)]
+      .filter((m) => /(?:^|[;\s])background(?:-color)?:\s*var\(--nb-paper\)/.test(m[2]!))
+      .flatMap((m) => splitTop(m[1]!.trim(), ',').map((selector) => ({ name, selector }))),
+  );
+  const uncapping = (target: string) =>
+    ['protection-page.css', 'quiet-pages.css', 'setup-pages.css', 'tonight-page.css'].some((name) =>
+      [...sheetText(name).matchAll(/([^{};]+)\{([^{}]*)\}/g)].some(
+        (m) =>
+          /max-inline-size:\s*none/.test(m[2]!) &&
+          splitTop(m[1]!.trim(), ',').some((s) => s.trim().endsWith(target) && specificity(s) >= specificity(MEASURE)),
+      ),
+    );
+
+  it('finds the boxes that paint the paper, so the sweep is never vacuous', () => {
+    expect(painters.map((p) => p.selector)).toContain('.nb-checkin-status');
+  });
+
+  it.each(painters.map((p) => [p.selector, p.name] as const))('%s (%s) is uncapped, or was narrower than its leaf before', (selector) => {
+    if (selector in NARROWER_BEFORE) return;
+    expect(uncapping(selector), `${selector} paints the paper and the measure cuts it short`).toBe(true);
+  });
+
+  it('the measure is still the shell\'s selector the uncapping rules are weighed against', () => {
+    expect(sheetText('notebook.css')).toContain(`${MEASURE} {`);
+  });
+});

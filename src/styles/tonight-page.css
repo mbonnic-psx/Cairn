@@ -324,6 +324,11 @@
   background-color: var(--nb-paper);
   color: var(--nb-ink-body);
 }
+/* Its paper hides a rule of the page the whole leaf wide, so the shell's measure does not cut it short: a band
+   stopped at the measure would leave a stub of that rule beside it (T010). Same weight as the measure, read later. */
+.nb-checkin-leaves > .nb-page > .nb-checkin-status {
+  max-inline-size: none;
+}
 
 /* The quotes switch: a quiet typewriter label at the foot of the right page. */
 .nb-checkin-switch {

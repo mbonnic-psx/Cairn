@@ -82,7 +82,9 @@ so a page's writing, controls and spacing keep their proportions at any size.
 - **The measure.** The shell holds a page's text column to a measure of 383 × s (`calc(383 * var(--nb-u))`), set as
   `max-inline-size` on the leaf's children (`.nb-page-area .nb-spread > .nb-page > *`) in windows 1100px wide and up.
   The leaf keeps its full width, so its ruling runs to the edge and the fold stays on the gap. A page slice never sets
-  its own measure on the leaf or the spread, and the narrow layout takes none.
+  its own measure on the leaf or the spread, and the narrow layout takes none. A leaf child that paints the paper to
+  hide a rule of the page is not capped: its page sheet lifts the measure for it (`max-inline-size: none`, at the
+  measure's weight or more), so no stub of that rule shows past it.
 - **What the shell owns.** The notebook's place and size, `--nb-u` and `--nb-g` are the shell's. A page sheet reads
   `--nb-u` and never redefines it.
 
