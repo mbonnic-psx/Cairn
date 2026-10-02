@@ -8,7 +8,7 @@
  *
  * A later slice that changes a page's words on purpose (D46) does not touch the records below. It writes a `Delta`
  * beside them: the date, the slice and the decision that changed the words, and the words (or controls) it added
- * and removed. `wordsOf` and `controlsOf` take the deltas for that page as a second argument and return the record
+ * and removed. `wordsOf`, `controlsOf` and `structureOf` take the deltas for that page as a second argument and return the record
  * plus what was added, minus what was removed. The captured markup is never edited and never re-captured; a page
  * with no delta is compared with its record exactly.
  */
@@ -22,6 +22,8 @@ export interface Delta {
   words?: { added?: string[]; removed?: string[] };
   /** In the form `controlsOf` returns: `kind | name | disabled=… | pressed=…`. */
   controls?: { added?: string[]; removed?: string[] };
+  /** In the form `structureOf` returns: `role | name | live=…`. */
+  structure?: { added?: string[]; removed?: string[] };
 }
 
 /** record ∪ added − removed, in the fixed order. A removal takes out one occurrence; removing what is not there is an error. */
@@ -100,8 +102,8 @@ export function controlsOf(root: HTMLElement, deltas: Delta[] = []): string[] {
  * What a reader of the page is told besides its words and controls: every group, region, live region and status, by
  * role and accessible name with its `aria-live`, empty ones included. Sorted. Native controls are `controlsOf`'s.
  */
-export function structureOf(root: HTMLElement): string[] {
-  return Array.from(root.querySelectorAll('[role="group"], [role="region"], [role="status"], [role="alert"], [role="log"], [aria-live]'))
+export function structureOf(root: HTMLElement, deltas: Delta[] = []): string[] {
+  const record = Array.from(root.querySelectorAll('[role="group"], [role="region"], [role="status"], [role="alert"], [role="log"], [aria-live]'))
     .map((el) => {
       const labelledBy = el.getAttribute('aria-labelledby');
       const name =
@@ -116,6 +118,7 @@ export function structureOf(root: HTMLElement): string[] {
       return `${el.getAttribute('role')} | ${name} | live=${el.getAttribute('aria-live')}`;
     })
     .sort();
+  return applied(record, deltas.map((d) => d.structure ?? {}));
 }
 
 import { reachesOfTheDay } from './tonightCases';

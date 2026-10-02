@@ -10,7 +10,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { NotebookShell } from '../../shell/NotebookShell';
 import { Protection } from '../Protection';
 import { Trail } from '../Trail';
-import { baseline, controlsOf, structureOf, wordsOf, PROTECTION, TRAIL } from './beforeTheReveal';
+import { baseline, controlsOf, structureOf, wordsOf, PROTECTION, TRAIL, type Delta } from './beforeTheReveal';
 import { installFakeCore, never, type FakeCore } from './fakeCore';
 import { cases, trailCases } from './pinCases';
 
@@ -81,10 +81,21 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (look) 
     const was = baseline(TRAIL[name]!);
     expect(wordsOf(main)).toEqual(wordsOf(was));
     expect(controlsOf(main)).toEqual(controlsOf(was));
-    // structureOf is not yet compared here: the spread's left page is a named role="region" (labelled by its heading)
-    // that the one-column What is protected did not have. Reported (T023); the difference awaits a decision.
+    expect(structureOf(main)).toEqual(structureOf(was, leftPageRegion(was)));
   });
 });
+
+/**
+ * The one deliberate difference from the one-column What is protected: on the page its left page is a named region,
+ * labelled by its heading, so a keyboard can reach it and scroll it (loose-ends, D30). Recorded as a delta (D46).
+ */
+function leftPageRegion(was: HTMLElement): Delta[] {
+  const heading = ['What you are protecting', 'What you have chosen'].find((h) => wordsOf(was).includes(h));
+  if (!heading) throw new Error('the record names neither left-page heading');
+  return [
+    { slice: 'loose-ends', decision: 'D30', date: '2026-10-02', structure: { added: [`region | ${heading} | live=null`] } },
+  ];
+}
 
 describe('the baseline itself', () => {
   it('holds the one control the screens ever offered, where a change is waiting', () => {
