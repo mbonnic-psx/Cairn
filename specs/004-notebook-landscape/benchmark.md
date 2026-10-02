@@ -1,10 +1,10 @@
 # Benchmark — 004-notebook-landscape
 
-Drawn 2026-10-02T08:50:08Z at `313e036` from 6 record(s) under `specs/004-notebook-landscape/` by `scripts/agents/benchmark.py overview`; `/benchmark` redraws it, and so does closing a slice. Regenerated whole, never edited: the records beside each slice are the source.
+Drawn 2026-10-02T11:41:27Z at `e5e34a5` from 7 record(s) under `specs/004-notebook-landscape/` by `scripts/agents/benchmark.py overview`; `/benchmark` redraws it, and so does closing a slice. Regenerated whole, never edited: the records beside each slice are the source.
 
 ## Slices
 
-5 slice(s) recorded, 4h31m+ in all.
+6 slice(s) recorded, 6h10m+ in all.
 
 | slice | delegate/cycle | wall | in | out | models | sessions | converge | +tasks | gaps | mutation | adversary | demo | verify✗ | rework | tasks | files | ±lines |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
@@ -14,6 +14,7 @@ Drawn 2026-10-02T08:50:08Z at `313e036` from 6 record(s) under `specs/004-notebo
 | protection-page | story/rule, task/rule | 1h00m+ | 36.7M (+2 unread) | 64.2k | claude-opus-5-5, claude-sonnet-5-5 | 1 | 2 | 8 | 4/0 | 81.70 | 0 | accepted | 0 | 0 | 26 | 64 | +3338/-16 |
 | quiet-pages | story/rule | 40m58s+ | 46.1M (+1 unread) | 86.3k | claude-opus-5-5, claude-sonnet-5-5 | 1 | 1 | 1 | 1/5 | 100.00 | 0 | accepted | 0 | 0 | 13 | 114 | +6995/-20 |
 | setup-pages | story/rule, task/rule | 1h11m | 58.7M | 86.3k | claude-opus-5-5, claude-sonnet-5-5 | 1 | 2 | 3 | 3/4 | 93.80 | 0 | accepted | 0 | 0 | 23 | 69 | +4353/-11 |
+| tonight-page | story/rule, task/rule | 1h39m+ | 50.3M (+2 unread) | 69.2k | claude-opus-5-5, claude-sonnet-5-5 | 1 | 1 | 3 | 4/3 | 96.43 | 0 | accepted | 1 | 0 | 27 | 138 | +10499/-103 |
 
 delegate/cycle = how implementation was delegated and driven; in = input + cache read + cache creation tokens; gaps = before/after converge; +tasks = tasks converge appended; sessions = harness sessions read; a stage's tokens are a floor (the turn that ends it is partly uncounted); a trailing + makes wall a floor because an unbracketed stage is missing; tokens are not prices.
 
@@ -110,12 +111,31 @@ delegate/cycle = how implementation was delegated and driven; in = input + cache
 | mutation | 2026-10-02 08:25 | 2m45s | 1.1M | 6k | claude-opus-5-5, claude-sonnet-5-5 | drive-mutation | yes | mutation_score=93.80, driver=cruise |
 | implement | 2026-10-02 08:28 | 8m13s | 1.2M | 3.8k | claude-opus-5-5, claude-sonnet-5-5 | drive-implement | yes | delegate=task, cycle=rule, split=0, red=observed, driver=cruise |
 
+### tonight-page — 1h39m+
+
+| stage | started (UTC) | wall | in | out | model | agent | delegated | reported |
+|---|---|---|---|---|---|---|---|---|
+| gaps | 2026-10-02 09:18 | unbracketed | unknown | unknown | claude-opus-5-5 | — | no | — |
+| skipper | 2026-10-02 09:18 | 1m38s | 1.8M | 7.5k | claude-opus-5-5 | drive-skipper | yes | driver=cruise |
+| gaps | 2026-10-02 09:19 | 25s | 132.5k | 3.4k | claude-opus-5-5 | — | no | gaps=4, driver=cruise |
+| tasks | 2026-10-02 09:48 | 3m33s | 1.3M | 2.2k | claude-opus-5-5, claude-sonnet-5-5 | drive-slice, drive-tasks | yes | driver=cruise |
+| pin | 2026-10-02 09:52 | 4m40s | 2.5M | 3.4k | claude-opus-5-5 | drive-implement, drive-slice | yes | driver=cruise |
+| implement | 2026-10-02 09:57 | 35m07s | 20.3M | 22.3k | claude-opus-5-5, claude-sonnet-5-5 | drive-implement, drive-slice | yes | verify_failures=1, delegate=story, cycle=rule, split=0, driver=cruise |
+| converge | 2026-10-02 10:32 | 14m12s | 7.1M | 8.5k | claude-opus-5-5, claude-sonnet-5-5 | drive-converge, drive-implement, drive-slice | yes | driver=cruise |
+| gaps | 2026-10-02 10:46 | 6m26s | 5.7M | 2.1k | claude-opus-5-5 | drive-gaps, drive-slice | yes | gaps=3, driver=cruise |
+| demo | 2026-10-02 10:53 | 12m14s | 7.3M | 8k | claude-opus-5-5 | drive-hand | yes | outcome=accepted, driver=cruise |
+| adversary | 2026-10-02 11:08 | unbracketed | unknown | unknown | claude-opus-5-5 | — | no | findings=0, seams=0, driver=cruise |
+| implement | 2026-10-02 11:08 | 8m39s | 1.7M | 4.7k | claude-opus-5-5, claude-sonnet-5-5 | drive-implement | yes | verify_failures=0, delegate=task, cycle=rule, split=0, driver=cruise |
+| mutation | 2026-10-02 11:16 | 5m10s | 992k | 3.2k | claude-opus-5-5, claude-sonnet-5-5 | drive-mutation | yes | mutation_score=96.43, driver=cruise |
+| implement | 2026-10-02 11:22 | 6m59s | 1.5M | 4k | claude-opus-5-5, claude-sonnet-5-5 | drive-implement | yes | verify_failures=0, delegate=task, cycle=rule, split=0, driver=cruise |
+
 ## Notes
 
 - frame: implemented as rule/rule and story/rule and task/example — its wall compares with neither
 - looks: implemented as story/rule and task/rule — its wall compares with neither
 - protection-page: implemented as story/rule and task/rule — its wall compares with neither
 - setup-pages: implemented as story/rule and task/rule — its wall compares with neither
+- tonight-page: implemented as story/rule and task/rule — its wall compares with neither
 - looks plan: not bracketed around its work — start and end were called in the same moment, so this stage's wall and tokens are missing, not zero.
 - looks gaps: cut off — a new `demo` entry started while it was open; its wall is real, its signals were never reported
 - looks gaps: not bracketed around its work — start and end were called in the same moment, so this stage's wall and tokens are missing, not zero.
@@ -124,6 +144,9 @@ delegate/cycle = how implementation was delegated and driven; in = input + cache
 - protection-page gaps: not bracketed around its work — start and end were called in the same moment, so this stage's wall and tokens are missing, not zero.
 - protection-page adversary: not bracketed around its work — start and end were called in the same moment, so this stage's wall and tokens are missing, not zero.
 - quiet-pages adversary: not bracketed around its work — start and end were called in the same moment, so this stage's wall and tokens are missing, not zero.
+- tonight-page gaps: cut off — a new `skipper` entry started while it was open; its wall is real, its signals were never reported
+- tonight-page gaps: not bracketed around its work — start and end were called in the same moment, so this stage's wall and tokens are missing, not zero.
+- tonight-page adversary: not bracketed around its work — start and end were called in the same moment, so this stage's wall and tokens are missing, not zero.
 
 ## Reading these numbers
 
