@@ -1,16 +1,17 @@
 # Benchmark — 004-notebook-landscape
 
-Drawn 2026-10-02T11:41:27Z at `e5e34a5` from 7 record(s) under `specs/004-notebook-landscape/` by `scripts/agents/benchmark.py overview`; `/benchmark` redraws it, and so does closing a slice. Regenerated whole, never edited: the records beside each slice are the source.
+Drawn 2026-10-02T13:31:23Z at `d3b89b7` from 8 record(s) under `specs/004-notebook-landscape/` by `scripts/agents/benchmark.py overview`; `/benchmark` redraws it, and so does closing a slice. Regenerated whole, never edited: the records beside each slice are the source.
 
 ## Slices
 
-6 slice(s) recorded, 6h10m+ in all.
+7 slice(s) recorded, 7h09m+ in all.
 
 | slice | delegate/cycle | wall | in | out | models | sessions | converge | +tasks | gaps | mutation | adversary | demo | verify✗ | rework | tasks | files | ±lines |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | (feature) | — | 3m31s | 1.1M | 4.6k | claude-opus-5-5 | 1 | 0 | 0 | 5/0 | — | 0 | — | 0 | 0 | — | — | — |
 | frame | rule/rule, story/rule, task/example | 1h01m | 28.3M (+1 unread) | 57.9k | claude-opus-5-5, claude-sonnet-5-5 | 2 | 1 | 9 | 0/0 | 90.39 | 5 | implementation | 0 | 0 | — | — | — |
 | looks | story/rule, task/rule | 33m07s+ | 19.9M (+3 unread) | 46.3k | claude-opus-5-5, claude-sonnet-5-5 | 1 | 2 | 6 | 2/0 | 95.07 | 0 | accepted | 0 | 0 | 24 | 48 | +2043/-92 |
+| loose-ends | task/rule | 59m02s+ | 32.7M (+1 unread) | 59.4k | claude-opus-5-5, claude-sonnet-5-5 | 1 | 2 | 8 | 3/6 | 100.00 | 0 | accepted | 0 | 0 | 19 | 78 | +5251/-10 |
 | protection-page | story/rule, task/rule | 1h00m+ | 36.7M (+2 unread) | 64.2k | claude-opus-5-5, claude-sonnet-5-5 | 1 | 2 | 8 | 4/0 | 81.70 | 0 | accepted | 0 | 0 | 26 | 64 | +3338/-16 |
 | quiet-pages | story/rule | 40m58s+ | 46.1M (+1 unread) | 86.3k | claude-opus-5-5, claude-sonnet-5-5 | 1 | 1 | 1 | 1/5 | 100.00 | 0 | accepted | 0 | 0 | 13 | 114 | +6995/-20 |
 | setup-pages | story/rule, task/rule | 1h11m | 58.7M | 86.3k | claude-opus-5-5, claude-sonnet-5-5 | 1 | 2 | 3 | 3/4 | 93.80 | 0 | accepted | 0 | 0 | 23 | 69 | +4353/-11 |
@@ -56,6 +57,23 @@ delegate/cycle = how implementation was delegated and driven; in = input + cache
 | demo | 2026-10-02 05:02 | 4m46s | 6.6M | 12k | claude-opus-5-5 | drive-gaps, drive-hand | yes | outcome=accepted, driver=cruise |
 | adversary | 2026-10-02 05:07 | unbracketed | unknown | unknown | — | — | no | findings=0, seams=0, driver=cruise |
 | mutation | 2026-10-02 05:07 | 2m24s | 726.3k | 2.9k | claude-opus-5-5, claude-sonnet-5-5 | drive-mutation | yes | mutation_score=95.07, driver=cruise |
+
+### loose-ends — 59m02s+
+
+| stage | started (UTC) | wall | in | out | model | agent | delegated | reported |
+|---|---|---|---|---|---|---|---|---|
+| gaps | 2026-10-02 12:21 | 26s | 102.5k | 181 | claude-opus-5-5 | — | no | gaps=3, driver=cruise |
+| plan | 2026-10-02 12:26 | 3m36s | 1.2M | 1.5k | claude-opus-5-5 | drive-slice | yes | — |
+| tasks | 2026-10-02 12:30 | 2m08s | 1.2M | 3.5k | claude-opus-5-5, claude-sonnet-5-5 | drive-slice, drive-tasks | yes | — |
+| implement | 2026-10-02 12:35 | 5m29s | 5.7M | 10.5k | claude-opus-5-5, claude-sonnet-5-5 | drive-implement, drive-slice | yes | verify_failures=0, delegate=task, cycle=rule, split=3 |
+| converge | 2026-10-02 12:41 | 6m49s | 3.4M | 2.9k | claude-opus-5-5 | drive-converge, drive-slice | yes | — |
+| implement | 2026-10-02 12:48 | 4m50s | 4.6M | 8.2k | claude-opus-5-5, claude-sonnet-5-5 | drive-implement, drive-slice | yes | verify_failures=0, delegate=task, cycle=rule, split=3 |
+| converge | 2026-10-02 12:53 | 5m22s | 2.1M | 5k | claude-opus-5-5 | drive-converge, drive-slice | yes | — |
+| gaps | 2026-10-02 12:58 | 6m10s | 4.3M | 4.2k | claude-opus-5-5 | drive-gaps, drive-slice | yes | gaps=6 |
+| demo | 2026-10-02 13:06 | 8m39s | 2.7M | 6.1k | claude-opus-5-5 | drive-hand | yes | outcome=accepted, driver=cruise |
+| adversary | 2026-10-02 13:15 | unbracketed | unknown | unknown | claude-opus-5-5 | — | no | findings=0, seams=0, driver=cruise |
+| implement | 2026-10-02 13:15 | 13m25s | 7M | 15.1k | claude-opus-5-5, claude-sonnet-5-5 | drive-implement | yes | delegate=task, cycle=rule, split=3, verify_failures=0, driver=cruise |
+| mutation | 2026-10-02 13:29 | 2m08s | 438.1k | 2.1k | claude-opus-5-5, claude-sonnet-5-5 | drive-mutation | yes | mutation_score=100.00, driver=cruise |
 
 ### protection-page — 1h00m+
 
@@ -140,6 +158,7 @@ delegate/cycle = how implementation was delegated and driven; in = input + cache
 - looks gaps: cut off — a new `demo` entry started while it was open; its wall is real, its signals were never reported
 - looks gaps: not bracketed around its work — start and end were called in the same moment, so this stage's wall and tokens are missing, not zero.
 - looks adversary: not bracketed around its work — start and end were called in the same moment, so this stage's wall and tokens are missing, not zero.
+- loose-ends adversary: not bracketed around its work — start and end were called in the same moment, so this stage's wall and tokens are missing, not zero.
 - protection-page gaps: cut off — a new `skipper` entry started while it was open; its wall is real, its signals were never reported
 - protection-page gaps: not bracketed around its work — start and end were called in the same moment, so this stage's wall and tokens are missing, not zero.
 - protection-page adversary: not bracketed around its work — start and end were called in the same moment, so this stage's wall and tokens are missing, not zero.
