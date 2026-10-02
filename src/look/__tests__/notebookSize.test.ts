@@ -181,7 +181,7 @@ describe('the tab column fits the notebook at every window the model covers (FR-
     // min-height: 80px replaces min-height: min-content in the large rules.
     const floor = labels.map((l) => (mode.floorMin > 0 ? mode.floorMin : longest(l) * mode.adv + 2 * mode.pad));
     let size = base.map((b) => Math.max(b, 0));
-    let frozen = size.map(() => false);
+    const frozen = size.map(() => false);
     for (let pass = 0; pass < 6; pass++) {
       const free = available - mode.gap * (labels.length - 1) - size.reduce((a, b) => a + b, 0);
       if (free >= 0) break;
