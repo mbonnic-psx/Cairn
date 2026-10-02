@@ -157,8 +157,6 @@ an absent field as not yet known.
 Classified `Effect::Reads`. The frontend wrapper is `summarizeReaches` in `src/ipc/reaches.ts`,
 and the reaches screen is its only caller (spec, gaps review H1).
 
-### `get_quote() -> string | null`
-
 ### `get_quote(day) -> string | null`
 
 A quote from the bundled set, or nothing. Never fetched. Null is a valid, complete answer —
