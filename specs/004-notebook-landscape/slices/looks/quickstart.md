@@ -25,3 +25,8 @@ npx vitest run src/look src/shell
 npm test && npm run lint && npm run check
 npm run build && grep -c "Look (testing)" dist/assets/*.js   # 0: a released build has no switch
 ```
+
+## Not working yet
+
+- Switching to or from **Current** rebuilds the screen: the custom address box empties and the screen's entrance
+  replays. The step and the Tonight text are kept. Accepted until `reveal` removes Current (D5).

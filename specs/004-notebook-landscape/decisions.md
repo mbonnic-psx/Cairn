@@ -45,3 +45,14 @@ Every product decision a `/cruise` run took, in order. A person overrides one by
 - **Confidence:** high · **Would reverse if:** the owner, seeing the night look, wants the mark softer than 3:1
 - **Written to:** `specs/004-notebook-landscape/spec.md` (FR-033, Clarifications), `specs/004-notebook-landscape/story-split.md` (row 2)
 - **Status:** standing
+
+## D5 — Does a move to or from Current have to keep everything typed on the screen?
+- **Stage:** convergence · **Slice:** looks · **When:** 2026-10-02T04:57:48Z · **Iteration:** 2
+- **Question:** Moving between notebook looks keeps the screen and everything typed. Moving to or from Current swaps the whole shell, so the screen is rebuilt: the step and the Tonight text survive, but a field the screen holds itself (the custom address box) empties and the entrance replays. No way was found to keep the screen mounted that leaves Current byte-identical to today (SC-009) without restructuring the accepted notebook layout (T015, graded HIGH).
+- **Options:** flatten the notebook into one shell tree shared with Current, rewriting five of `frame`'s structural tests (the implementer's recommendation); lift each screen's own field state into App; FR-010 applies between the three looks, and a move to or from Current keeps the step and the Tonight text until `reveal` (the host's recommendation)
+- **Decision:** FR-010 applies between morning, midday and night: that change stays instant (D3) and keeps the screen and everything on it. A move to or from Current keeps the step and the Tonight text, and may empty a screen's own field and replay its entrance, until `reveal` removes Current (FR-032).
+- **Why:** The spec's Key Entities define a look as morning, midday or night, with Current "beside" them. Only a tester makes this move, in a development build, and loses at most an address they can type again; the Tonight writing is kept. Reworking the layout the owner accepted, to fix what only testers see, is the wrong trade.
+- **Decided by:** drive-skipper (claude-opus-5-5)
+- **Confidence:** medium · **Would reverse if:** a page slice gives a screen long-form text of its own while Current still exists, or the owner says a move to or from Current must keep everything
+- **Written to:** `specs/004-notebook-landscape/spec.md` (Clarifications), `specs/004-notebook-landscape/slices/looks/tasks.md` (T015), `specs/004-notebook-landscape/slices/looks/quickstart.md` (Not working yet), `src/shell/__tests__/AppLook.test.tsx`
+- **Status:** standing

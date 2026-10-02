@@ -116,6 +116,26 @@ describe('the look switch in a dev build', () => {
     }
   });
 
+  // Between the three looks the screen is never rebuilt, so what a screen holds
+  // itself survives too. A move to or from Current may rebuild it (D5).
+  it('keeps the screen itself, and what it holds, across every pair of the three looks', async () => {
+    render(<App devBuild />);
+    await screen.findByText('What would you like to protect?');
+    await userEvent.selectOptions(switchControl(), 'Morning');
+    const field = screen.getByLabelText('Address to protect');
+    await userEvent.type(field, 'typed.example');
+    const looks = ['Morning', 'Midday', 'Night'];
+    for (const from of looks) {
+      for (const to of looks) {
+        if (from === to) continue;
+        await userEvent.selectOptions(switchControl(), from);
+        await userEvent.selectOptions(switchControl(), to);
+        expect(screen.getByLabelText('Address to protect')).toBe(field);
+        expect(field).toHaveValue('typed.example');
+      }
+    }
+  });
+
   it('keeps the step and the text typed in Tonight across every pair of looks', async () => {
     render(<App devBuild />);
     await screen.findByText('What would you like to protect?');
