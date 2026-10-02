@@ -66,16 +66,16 @@
         case 'list_categories':
           return categories.map((c) => ({ ...c }));
         case 'get_disclosures':
-          return noDetails
-            ? { in_force: [], not_covered: [], helper: '', encryption: '', administrator: '' }
-            : disclosures;
+          // No details: the core does not answer, so the screen shows what it shows when it could not read them.
+          if (noDetails) throw 'fake core: no details';
+          return disclosures;
         case 'set_category_enabled': {
           const category = categories.find((c) => c.id === args.id);
           if (!category) throw 'fake core: no such category';
           if (!args.on && wait) {
             return {
               id: 'pending-1',
-              what: `Stop protecting ${category.label.toLowerCase()}.`,
+              what: `Stop protecting ${category.label.toLowerCase()}`,
               time_remaining: '23 hours',
               eligible_now: false,
             };

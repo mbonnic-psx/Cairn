@@ -166,6 +166,12 @@ describe('the setup-pages stylesheet', () => {
     }
   });
 
+  it('balances the lines of every heading, so none ends on a lone word', () => {
+    for (const heading of ['.nb-categories-title', '.nb-custom-title', '.nb-disclosure-title', '.nb-disclosure-subtitle']) {
+      expect(own(heading), heading).toMatch(/text-wrap:\s*balance/);
+    }
+  });
+
   it('names no palette shade in a hover rule: only the look tokens', () => {
     for (const { selector, body } of rules.filter((r) => /:hover/.test(r.selector))) {
       for (const m of body.matchAll(/var\((--[a-z0-9-]+)/g)) expect(m[1], selector).toMatch(/^--nb-/);

@@ -162,6 +162,13 @@ describe('CustomEntry on a notebook page (T005)', () => {
     expect(main.querySelector('label[for="address"]')).toHaveClass('sr-only');
   });
 
+  it('asks the browser not to complete or spell-check an address, and names the field', () => {
+    const { main } = onPage(<CustomEntry add={async () => []} />);
+    expect(box(main).name).toBe('address');
+    expect(box(main).getAttribute('autocomplete')).toBe('off');
+    expect(box(main).getAttribute('spellcheck')).toBe('false');
+  });
+
   it('keeps "Protect it" disabled while the box is empty and enables it once something is typed', async () => {
     const { main } = onPage(<CustomEntry add={async () => []} />);
     const button = within(main).getByRole('button', { name: 'Protect it' });

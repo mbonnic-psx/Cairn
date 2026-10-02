@@ -78,6 +78,9 @@ export function CustomEntry({
             value={input}
             onChange={(event) => setInput(event.target.value)}
             placeholder="example.com"
+            name="address"
+            autoComplete="off"
+            spellCheck={false}
             className="nb-custom-input"
           />
           <button type="submit" className="nb-custom-button" disabled={!input.trim()}>
