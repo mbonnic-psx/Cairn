@@ -171,7 +171,7 @@ renders today's choice, which is the recommendation.
   labels in the typewriter face; D12 made the 14px "added with its root address" one. Options: (a) keep the serif — it
   reads as the prompt that opens the journal page, not a small label, at the size of a subheading, and Principle VI keeps
   the serif for reflective writing (recommended by the gaps review and the host); (b) set it in the typewriter face like
-  From and To. If (b), the GREEN is one rule in `tonight-page.css` and the mono list in `tonightPage.test.ts`.
+  From and To. If (b), the GREEN is one rule in `tonight-page.css` and the mono list in `tonightPage.test.ts`. **Answered: (a), the serif (D25).**
 
 Every other product question about this slice was answered at slice gaps (D21–D24) or by standing decisions (D5, D6,
 D8, D15, D17). Two readings this plan takes, each keeping every MUST, are recorded in research rather than asked:
