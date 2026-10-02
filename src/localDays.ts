@@ -174,26 +174,41 @@ interface LocaleWeek {
 /**
  * The day a locale begins its week on, in the core's numbering (0 = Monday ... 6 = Sunday): the
  * platform's `firstDay` runs 1 (Monday) to 7 (Sunday). `getWeekInfo()` is preferred, then
- * `weekInfo`, and a webview with neither, or a `firstDay` that is not an integer from 1 to 7, begins
- * on Monday (W2). Pure: it is given the object, so a test can give it any.
+ * `weekInfo`, and a webview with neither, a `getWeekInfo()` that throws, or a `firstDay` that is not an
+ * integer from 1 to 7, begins on Monday (W2): an invalid one is not passed over for the other form. Pure: it is given the object, so a test can give it any.
  */
 export function firstWeekdayOf(locale: LocaleWeek): number {
-  const info = typeof locale.getWeekInfo === 'function' ? locale.getWeekInfo() : locale.weekInfo;
-  const first = info?.firstDay;
-  return typeof first === 'number' && Number.isInteger(first) && first >= 1 && first <= 7
-    ? first - 1
-    : 0;
+  try {
+    const info =
+      typeof locale.getWeekInfo === 'function' ? locale.getWeekInfo() : locale.weekInfo;
+    const first = info?.firstDay;
+    return typeof first === 'number' &&
+      Number.isInteger(first) &&
+      first >= 1 &&
+      first <= 7
+      ? first - 1
+      : 0;
+  } catch {
+    return 0;
+  }
 }
 
 /**
  * The first day of the computer's week, from its region (W9). With no `locale`, the one the days are
  * named in (`Intl.DateTimeFormat().resolvedOptions().locale`), so the order and the names come from
- * one place. Holds no reach data.
+ * one place. Holds no reach data. It never throws: it runs when the reaches screen mounts, *Today*
+ * included, so a webview with no `Intl.Locale`, or a locale it refuses, begins on Monday (W2).
  */
 export function firstWeekday(locale?: string): number {
-  return firstWeekdayOf(
-    new Intl.Locale(locale ?? new Intl.DateTimeFormat().resolvedOptions().locale) as LocaleWeek,
-  );
+  try {
+    return firstWeekdayOf(
+      new Intl.Locale(
+        locale ?? new Intl.DateTimeFormat().resolvedOptions().locale,
+      ) as LocaleWeek,
+    );
+  } catch {
+    return 0;
+  }
 }
 
 /**

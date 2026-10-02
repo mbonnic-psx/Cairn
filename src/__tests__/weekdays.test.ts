@@ -10,7 +10,7 @@
 declare const process: { env: Record<string, string | undefined> };
 process.env.TZ = 'Pacific/Kiritimati';
 
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 
 import {
   acrossInWords,
@@ -86,9 +86,67 @@ describe('firstWeekdayOf: the parser, given plain objects', () => {
 
   it('refuses a firstDay that is not an integer from 1 to 7, and takes Monday', () => {
     for (const bad of [0, 8, 1.5, '7', null, undefined, NaN, -1]) {
-      expect(firstWeekdayOf({ getWeekInfo: () => ({ firstDay: bad }) }), String(bad)).toBe(0);
+      expect(
+        firstWeekdayOf({ getWeekInfo: () => ({ firstDay: bad }) }),
+        String(bad),
+      ).toBe(0);
       expect(firstWeekdayOf({ weekInfo: { firstDay: bad } }), String(bad)).toBe(0);
     }
+  });
+});
+
+describe('the week’s first day never throws, and is Monday when it cannot be told (Y24; W2, W9)', () => {
+  it('takes Monday for an invalid getWeekInfo() firstDay, though weekInfo holds a valid one', () => {
+    expect(
+      firstWeekdayOf({
+        getWeekInfo: () => ({ firstDay: 9 }),
+        weekInfo: { firstDay: 7 },
+      }),
+    ).toBe(0);
+  });
+
+  it('takes Monday when getWeekInfo() gives nothing', () => {
+    expect(
+      firstWeekdayOf({
+        getWeekInfo: () => undefined as unknown as { firstDay?: unknown },
+        weekInfo: { firstDay: 7 },
+      }),
+    ).toBe(0);
+  });
+
+  it('takes Monday when getWeekInfo() throws', () => {
+    const throwing = {
+      getWeekInfo: () => {
+        throw new RangeError('no week info');
+      },
+      weekInfo: { firstDay: 7 },
+    };
+    expect(firstWeekdayOf(throwing)).toBe(0);
+  });
+
+  describe('firstWeekday', () => {
+    const real = Intl.Locale;
+    afterEach(() => {
+      Object.defineProperty(Intl, 'Locale', {
+        value: real,
+        configurable: true,
+        writable: true,
+      });
+    });
+
+    it('takes Monday on a webview with no Intl.Locale', () => {
+      Object.defineProperty(Intl, 'Locale', {
+        value: undefined,
+        configurable: true,
+        writable: true,
+      });
+      expect(firstWeekday('en-US')).toBe(0);
+      expect(firstWeekday()).toBe(0);
+    });
+
+    it('takes Monday for a locale the platform refuses', () => {
+      expect(firstWeekday('not a locale!')).toBe(0);
+    });
   });
 });
 

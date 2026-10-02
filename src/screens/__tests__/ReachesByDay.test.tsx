@@ -13,7 +13,7 @@ process.env.TZ = 'Europe/London';
 
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 
 import type { OffsetChange, Patterns, TodaysReaches } from '../../ipc/reaches';
 import { acrossInWords, weekdayInWords } from '../../localDays';
@@ -284,7 +284,11 @@ describe('how a day reads (W3, W4, B3)', () => {
     await waitFor(() => expect(lines()).toHaveLength(7));
 
     const tuesday = lines()[1];
-    expect(leaves(tuesday)).toEqual([weekdayInWords(1), 'across 4 ' + weekdayInWords(1) + 's', '0']);
+    expect(leaves(tuesday)).toEqual([
+      weekdayInWords(1),
+      'across 4 ' + weekdayInWords(1) + 's',
+      '0',
+    ]);
     expect(barOf(tuesday)?.style.width).toBe('0%');
   });
 
@@ -316,7 +320,11 @@ describe('how a day reads (W3, W4, B3)', () => {
     await openByDay(read);
     await waitFor(() => expect(lines()).toHaveLength(7));
 
-    expect(leaves(lines()[1])).toEqual([weekdayInWords(1), `across 1 ${weekdayInWords(1)}`, '3']);
+    expect(leaves(lines()[1])).toEqual([
+      weekdayInWords(1),
+      `across 1 ${weekdayInWords(1)}`,
+      '3',
+    ]);
   });
 
   it('uses no ranking, averaging or comparing word', async () => {
@@ -331,7 +339,8 @@ describe('how a day reads (W3, W4, B3)', () => {
 });
 
 describe('stated above the days (H4, H5, W6)', () => {
-  const NOTE = 'Cairn was not running for 3 days in this range, so this may not be everything.';
+  const NOTE =
+    'Cairn was not running for 3 days in this range, so this may not be everything.';
   const SAW = 'because Cairn counts only what it saw.';
 
   it('puts the coverage note, then the estimates sentence, above the days', async () => {
@@ -416,7 +425,9 @@ describe('a quiet range, sealed, and unreadable', () => {
       sentence.compareDocumentPosition(lines()[0]) & Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy();
     expect(leaves(lines()[0])).toEqual([weekdayInWords(0), acrossInWords(0, 4), '0']);
-    expect(text()).not.toMatch(/\b(well done|great|good|nice|keep it up|congratulat\w*)\b/i);
+    expect(text()).not.toMatch(
+      /\b(well done|great|good|nice|keep it up|congratulat\w*)\b/i,
+    );
   });
 
   it('shows the sentence and no days when sealed, as By site does', async () => {
@@ -446,9 +457,23 @@ describe('a quiet range, sealed, and unreadable', () => {
 describe('voice and the wall (US2 scenario 5, SC-010, Principle I)', () => {
   it.each([
     ['a list', () => patterns()],
-    ['a note and estimates', () => patterns({ coverage_note: 'Cairn was not running for 1 day in this range, so this may not be everything.', estimates_excluded: 3 })],
-    ['a short range', () => patterns({ by_weekday: week({ 4: 1 }, [0, 0, 0, 0, 1, 1, 1]) })],
-    ['a quiet range', () => patterns({ by_site: [], by_hour: hours(), by_weekday: week() })],
+    [
+      'a note and estimates',
+      () =>
+        patterns({
+          coverage_note:
+            'Cairn was not running for 1 day in this range, so this may not be everything.',
+          estimates_excluded: 3,
+        }),
+    ],
+    [
+      'a short range',
+      () => patterns({ by_weekday: week({ 4: 1 }, [0, 0, 0, 0, 1, 1, 1]) }),
+    ],
+    [
+      'a quiet range',
+      () => patterns({ by_site: [], by_hour: hours(), by_weekday: week() }),
+    ],
   ])('has no streak, day count, chain or banned word: %s', async (_name, answer) => {
     const { read } = fakeRead(async () => answer());
     await openByDay(read);
@@ -508,6 +533,32 @@ describe('a count the core sent is never hidden (Y23; W3, W7)', () => {
 
     expect(within(lines()[2]).getByText('3')).toBeInTheDocument();
     expect(within(lines()[5]).getByText('1')).toBeInTheDocument();
+    expect(lines()[0]).toHaveTextContent(weekdayInWords(0));
+  });
+});
+
+describe('a platform with no Intl.Locale does not take the screen down (Y24)', () => {
+  const real = Intl.Locale;
+  afterEach(() => {
+    Object.defineProperty(Intl, 'Locale', {
+      value: real,
+      configurable: true,
+      writable: true,
+    });
+  });
+
+  it('mounts, with no first day given, and opens By day from Monday', async () => {
+    Object.defineProperty(Intl, 'Locale', {
+      value: undefined,
+      configurable: true,
+      writable: true,
+    });
+    const { read } = fakeRead();
+    const user = userEvent.setup();
+    render(<Reaches read={read} now={() => NOW} />);
+    await user.click(await screen.findByRole('button', { name: 'Over time' }));
+    await user.click(await screen.findByRole('button', { name: 'By day' }));
+    await waitFor(() => expect(lines()).toHaveLength(7));
     expect(lines()[0]).toHaveTextContent(weekdayInWords(0));
   });
 });
