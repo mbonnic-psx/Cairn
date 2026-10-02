@@ -475,14 +475,9 @@ fn an_accepted_offset_list_can_place_a_reach_on_a_weekday_the_range_does_not_hol
     let day = date(2026, 9, 15);
     let range_start = utc(day, 0) - HOUR;
     let range_end = utc(date(2026, 9, 16), 0) - HOUR;
-    let (first, changes) = check_offsets(
-        day,
-        day,
-        range_start,
-        range_end,
-        &[(range_start, 4 * HOUR)],
-    )
-    .expect("accepted: 3 hours above the implied offset");
+    let (first, changes) =
+        check_offsets(day, day, range_start, range_end, &[(range_start, 4 * HOUR)])
+            .expect("accepted: 3 hours above the implied offset");
 
     let counts = by_weekday(
         &reaches(&[range_end - 1_800]),
