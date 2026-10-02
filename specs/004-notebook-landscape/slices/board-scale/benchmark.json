@@ -674,6 +674,72 @@
         "split": 0,
         "driver": "cruise"
       }
+    },
+    {
+      "stage": "mutation",
+      "started": "2026-10-02T17:08:32Z",
+      "planned": "mutation: fast → sonnet — Claude Code: the Agent tool's `model` parameter, set per call",
+      "tasks": {
+        "start": {
+          "open": 0,
+          "done": 15
+        },
+        "end": {
+          "open": 0,
+          "done": 15
+        }
+      },
+      "ended": "2026-10-02T17:08:32Z",
+      "seconds": 0,
+      "span": {
+        "from": {
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac.jsonl": 1958809,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-a5baf4fb0f3a81550.jsonl": 4062308,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-a5cce553484ff589f.jsonl": 1688822,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-a6558235ca1e1fcf1.jsonl": 497398,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-a730d7855ed1cf1d5.jsonl": 2669609,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-a84a53044efe98916.jsonl": 209720,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-aa0cd4b7671d6dbef.jsonl": 230742,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-aa4ab015eba35f15a.jsonl": 1082071,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-aadf850603c224813.jsonl": 2874468,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-ae61d89faae4f3347.jsonl": 329978
+        },
+        "to": {
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac.jsonl": 1958809,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-a5baf4fb0f3a81550.jsonl": 4062308,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-a5cce553484ff589f.jsonl": 1688822,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-a6558235ca1e1fcf1.jsonl": 497398,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-a730d7855ed1cf1d5.jsonl": 2669609,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-a84a53044efe98916.jsonl": 209720,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-aa0cd4b7671d6dbef.jsonl": 230742,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-aa4ab015eba35f15a.jsonl": 1082071,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-aadf850603c224813.jsonl": 2874468,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/1003b780-000d-494a-b94e-b40b3f8a8eac/subagents/agent-ae61d89faae4f3347.jsonl": 329978
+        }
+      },
+      "usage": {
+        "source": "claude",
+        "session": "1003b780-000d-494a-b94e-b40b3f8a8eac",
+        "read": "message.usage on each assistant line, once per requestId",
+        "host": {},
+        "subagents": {},
+        "agents": []
+      },
+      "ran": null,
+      "agents": null,
+      "delegated": false,
+      "signals": {
+        "mutation_score": "n/a (no mutable production code changed)",
+        "driver": "cruise"
+      }
     }
-  ]
+  ],
+  "shape": {
+    "tasks": 15,
+    "files": 94,
+    "added": 2723,
+    "removed": 404,
+    "from": "ca5edaedbe77af4494c6f4cf303e006ff9fb200b",
+    "to": "d90af2fb8d38c002d5eb66ed09ab4f9c06ea0823"
+  }
 }
