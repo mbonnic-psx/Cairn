@@ -122,3 +122,14 @@ Every product decision a `/cruise` run took, in order. A person overrides one by
 - **Confidence:** high · **Would reverse if:** a caller elsewhere in the running app already fetches the waiting change and shows it where protection state is shown
 - **Written to:** `specs/002-machine-wide-protection/tasks.md` (task appended on the trunk after this slice merges), `specs/004-notebook-landscape/story-split.md` (Parking lot), `specs/004-notebook-landscape/slices/protection-page/plan.md` (Open questions)
 - **Status:** standing
+
+## D12 — Is "added with its root address" a small label, in the typewriter face?
+- **Stage:** after-converge gaps · **Slice:** protection-page · **When:** 2026-10-02T07:25:00Z · **Iteration:** 3
+- **Question:** The list's caption beside an address is 14px and set in the serif, while the plan put it in the typewriter face.
+- **Options:** a small label, so typewriter (recommended: FR-014 names small labels); reading text, so serif
+- **Decision:** A small label: typewriter face, as the plan said.
+- **Why:** It is a short note beside an entry, not text read at length; FR-014 and Principle VI put such labels in the typewriter face, and it tells the caption apart from the addresses (T019).
+- **Decided by:** host (stage recommendation)
+- **Confidence:** medium · **Would reverse if:** the owner, at the reveal demo, reads the caption as part of the list's text
+- **Written to:** `specs/004-notebook-landscape/slices/protection-page/tasks.md` (T021)
+- **Status:** standing
