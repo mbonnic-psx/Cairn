@@ -17,7 +17,7 @@ fact, not convenience, decides every trade-off.
 | Document | What it is |
 | --- | --- |
 | `VISION.md` | Intent and voice. The source. Do not edit without being asked. |
-| `.specify/memory/constitution.md` | **Binding rules.** Currently v1.4.0. |
+| `.specify/memory/constitution.md` | **Binding rules.** Currently v1.5.0. |
 | `specs/001-cairn-v1/spec.md` | The v1 PRD — 90 functional requirements, 18 success criteria. |
 | `specs/001-cairn-v1/checklists/requirements.md` | Quality gate + validation history. |
 
@@ -155,9 +155,10 @@ Write instead: *protected*, *you reached for this*, *a slip*, *back on the trail
 - A reach is information, not failure. Never congratulate, never shame.
 - Streaks are opt-in and reversible. With streaks off: no counter, no "day N", no
   chain imagery anywhere. Turning them off never produces a loss moment.
-- Visuals: warm palette, generous whitespace, soft motion. Serif for reflective
-  moments, sans for UI. No locks, no shields, no alarm-red, no broken chains, no
-  neumorphism.
+- Visuals: warm palette, generous whitespace, soft motion. Serif for headings,
+  lists and reflective writing; a typewriter-style mono or a sans for small UI
+  labels, tabs and buttons — never mono for body text. No locks, no shields, no
+  alarm-red, no broken chains, no neumorphism.
 
 ## Tech direction (planned, not yet built)
 

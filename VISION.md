@@ -169,7 +169,7 @@ Nine categories, carried forward and kept: Adult, AI, Gambling, Gaming, Messenge
 - **Voice**: a good sponsor, not a firewall log. Warm, plain, honest.
 - **Never say**: failed, denied, violation, relapsed, forbidden, "you lost."
 - **Instead say**: protected, you reached for this, a slip, back on the trail.
-- **Visuals**: warm palette, generous whitespace, soft motion. Serif for reflective moments, sans for UI. No locks, no shields, no red, no broken chains, no neumorphism.
+- **Visuals**: warm palette, generous whitespace, soft motion. Serif for headings, lists and reflective writing; a typewriter-style mono or a sans for small labels, tabs and buttons, never for body text. No locks, no shields, no red, no broken chains, no neumorphism.
 
 ## The commitment
 
