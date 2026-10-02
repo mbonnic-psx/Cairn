@@ -5,17 +5,23 @@
  * nothing on the spreads fades. The core is a fake written in the test tree at the one seam the screens call it
  * through, and the Today reader is a plain object.
  */
-import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { CheckIn } from '../../screens/CheckIn';
 import { Reaches } from '../../screens/Reaches';
 import { installFakeCore, type FakeCore } from '../../screens/__tests__/fakeCore';
 import {
+  lateEvening,
+  loadRefusal,
   overTimeCases,
   overTimeReader,
+  quoteLine,
+  saveRefusal,
+  sealedSentence,
   silentReader,
+  switchRefusal,
   todayCases,
   tonightCases,
   tonightCore,
@@ -39,6 +45,7 @@ const noop = () => undefined;
 
 let core: FakeCore | undefined;
 afterEach(() => {
+  vi.useRealTimers();
   cleanup();
   core?.remove();
   core = undefined;
@@ -54,7 +61,63 @@ const CONTROLS: Record<string, string> = {
 };
 
 const FOCUSABLE = 'input, button, select, textarea, a[href], [tabindex]';
-const settle = () => act(() => new Promise<void>((resolve) => setTimeout(resolve, 30)));
+
+/** What a scene must show before anything is asserted over it: a text, a typed value, or the bars of a list. */
+type Marker = string | { value: string } | { bars: true };
+
+/**
+ * Waits for the marker of the state a scene names, and fails by the scene's name when it never comes: a scene
+ * that rendered some other state fails here, not as a pass over the wrong markup.
+ */
+async function showing(scene: string, main: HTMLElement, marker: Marker): Promise<void> {
+  const seen =
+    typeof marker === 'string'
+      ? within(main).findAllByText(marker)
+      : 'value' in marker
+        ? within(main).findAllByDisplayValue(marker.value)
+        : within(main).findAllByTestId('bar');
+  await seen.catch(() => {
+    throw new Error(`scene "${scene}" never showed ${JSON.stringify(marker)}`);
+  });
+}
+
+const todayMarkers: Record<string, Marker> = {
+  looking: 'Looking…',
+  'a log, the fallback note': 'news.example',
+  'a log, a coverage note': 'news.example',
+  'nothing yet, the fallback note': 'Nothing here for today.',
+  'nothing yet, a coverage note': 'Nothing here for today.',
+  sealed: sealedSentence,
+};
+const overTimeMarkers: Record<string, Marker> = {
+  looking: 'Looking…',
+  'could not read': 'Cairn could not read your history just now. Protection is unaffected.',
+  sealed: sealedSentence,
+  'a list': { bars: true },
+  'a list, a coverage note': { bars: true },
+  'a list, one estimate': { bars: true },
+  'a list, a coverage note and several estimates': { bars: true },
+  'nothing here': 'Nothing here for these days.',
+  'nothing here, a coverage note and several estimates': 'Nothing here for these days.',
+};
+const tonightMarkers: Record<string, Marker> = {
+  looking: 'Looking…',
+  'a load that could not be made': loadRefusal,
+  'reaches, no coverage note, quotes hidden': 'news.example',
+  'no reaches, no coverage note, quotes hidden': 'Nothing here for today.',
+  'reaches, a coverage note, quotes hidden': 'news.example',
+  'no reaches, a coverage note, quotes hidden': 'Nothing here for today.',
+  'reaches, with a quote': quoteLine,
+  'reaches, quotes shown and none to be had': 'Hide quotes',
+  'reaches, the quotes setting unknown': 'news.example',
+  'an entry written before': { value: 'A slow morning, a better afternoon.' },
+  'an entry kept': 'Kept for today.',
+  'a refused save': saveRefusal,
+  'a refused switch': switchRefusal,
+  'sealed, quotes hidden': sealedSentence,
+  'sealed, with a quote': sealedSentence,
+  'a day that ended while open': 'Wednesday 30 September',
+};
 
 function onPage(ui: React.ReactElement, look: NotebookLook) {
   const view = render(
@@ -67,19 +130,45 @@ function onPage(ui: React.ReactElement, look: NotebookLook) {
 
 async function tonight(name: string, look: NotebookLook): Promise<HTMLElement> {
   const c = tonightCases[name]!;
+  const scene = `Tonight: ${name}`;
+  const marker = tonightMarkers[name];
+  if (!marker) throw new Error(`scene "${scene}" names no marker`);
+  if (c.endsWhileOpen) {
+    // Opened ten minutes before the day ends, then the clock moves past it, as CheckInPage.test.tsx does.
+    vi.useFakeTimers({ toFake: ['Date', 'setTimeout', 'clearTimeout'] });
+    vi.setSystemTime(lateEvening());
+  }
   core = installFakeCore(tonightCore(c));
   const { main } = onPage(<CheckIn />, look);
-  await settle();
+  if (c.endsWhileOpen) {
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(0);
+    });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(11 * 60 * 1000);
+    });
+    // The rest of the scene runs on the real clock; the day stays ended on it.
+    vi.useRealTimers();
+    if (!within(main).queryByRole('heading', { name: marker as string })) {
+      throw new Error(`scene "${scene}" never showed ${JSON.stringify(marker)}`);
+    }
+  } else if (!c.keep && !c.switchRefused) {
+    await showing(scene, main, marker);
+  } else {
+    // What the person does needs the loaded check-in under it: the heading, or the writing space.
+    await within(main).findByRole('textbox').catch(() => {
+      throw new Error(`scene "${scene}" never showed the writing space`);
+    });
+  }
   const write = main.querySelector('textarea');
   if (write) fireEvent.change(write, { target: { value: c.keep?.typed ?? 'A few words.' } });
   if (c.keep) {
     fireEvent.click(screen.getByRole('button', { name: 'Keep this' }));
-    await settle();
-    if (write) fireEvent.change(write, { target: { value: 'More words.' } });
+    await showing(scene, main, marker);
   }
   if (c.switchRefused) {
     fireEvent.click(screen.getByRole('button', { name: 'Hide quotes' }));
-    await settle();
+    await showing(scene, main, marker);
   }
   return main;
 }
@@ -89,7 +178,7 @@ const scenes: Record<string, (look: NotebookLook) => Promise<HTMLElement>> = {};
 for (const name of Object.keys(todayCases)) {
   scenes[`Today, Today view: ${name}`] = async (look) => {
     const { main } = onPage(<Reaches today={todayCases[name]} read={silentReader} />, look);
-    await settle();
+    await showing(`Today, Today view: ${name}`, main, todayMarkers[name]!);
     return main;
   };
 }
@@ -97,7 +186,7 @@ for (const name of Object.keys(overTimeCases)) {
   scenes[`Today, Over time: ${name}`] = async (look) => {
     const { main } = onPage(<Reaches today={todayCases['a log, the fallback note']} read={overTimeReader(overTimeCases[name]!)} />, look);
     await userEvent.click(screen.getByRole('button', { name: 'Over time' }));
-    await settle();
+    await showing(`Today, Over time: ${name}`, main, overTimeMarkers[name]!);
     return main;
   };
 }
@@ -182,23 +271,26 @@ describe('nothing the Today and Tonight spreads draw fades (T017)', () => {
   });
 
   it('leaves every element the same node, with no fading class added, when the look changes', async () => {
-    const pairs: [string, () => React.ReactElement, () => Promise<void>][] = [
-      ['Today', () => <Reaches today={todayCases['a log, the fallback note']} read={silentReader} />, async () => undefined],
+    const pairs: [string, () => React.ReactElement, (main: HTMLElement) => Promise<void>][] = [
+      [
+        'Today',
+        () => <Reaches today={todayCases['a log, the fallback note']} read={silentReader} />,
+        (main) => showing('Today', main, 'news.example'),
+      ],
       [
         'Over time',
         () => <Reaches today={todayCases['a log, the fallback note']} read={overTimeReader(overTimeCases['a list']!)} />,
-        async () => {
+        async (main) => {
           await userEvent.click(screen.getByRole('button', { name: 'Over time' }));
-          await settle();
+          await showing('Over time', main, { bars: true });
         },
       ],
-      ['Tonight', () => <CheckIn />, async () => undefined],
+      ['Tonight', () => <CheckIn />, (main) => showing('Tonight', main, quoteLine)],
     ];
     for (const [name, make, enter] of pairs) {
       core = installFakeCore(tonightCore(tonightCases['reaches, with a quote']!));
       const { main, rerender } = onPage(make(), 'morning');
-      await settle();
-      await enter();
+      await enter(main);
       const write = main.querySelector('textarea');
       if (write) fireEvent.change(write, { target: { value: 'Typed before the look changed.' } });
       const before = Array.from(main.querySelectorAll('*'));
