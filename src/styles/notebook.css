@@ -330,11 +330,11 @@
 .nb-greeting {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: calc(10 * var(--nb-g));
 }
 .nb-greeting__time {
   font-family: var(--nb-font-mono);
-  font-size: 12px;
+  font-size: calc(12 * var(--nb-g));
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--nb-greeting-quiet);
@@ -342,7 +342,7 @@
 .nb-greeting__words {
   margin: 0;
   font-weight: 400;
-  font-size: 40px;
+  font-size: calc(40 * var(--nb-g));
   line-height: 1.1;
   color: var(--nb-greeting-ink);
 }

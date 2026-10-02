@@ -502,22 +502,34 @@ describe('text laid over the scene meets its floor against the sun or moon behin
   // and each band's own ink is checked only against what can sit behind it.
   const pct = (look: LookName, name: string) => parseFloat(blockOf(look).match(new RegExp(`${name}:\\s*([\\d.]+)%`))![1]!) / 100;
   const px = (look: LookName, name: string) => parseFloat(blockOf(look).match(new RegExp(`${name}:\\s*([\\d.]+)px`))![1]!);
-  /** Every number a declaration carries across the rules for one selector (a media override comes second). */
-  const decl = (selector: string, prop: string) => {
+  /** The raw value a selector's rules give a property: the base rule's for the wide layout, the last rule's (the narrow
+   * override, else the base) for the narrow one. The guard below holds the rules to those two, in that order. */
+  const raw = (selector: string, prop: string, wide: boolean) => {
     const hits = ruleFor(selector).flatMap((r) => {
-      const m = r.body.match(new RegExp(`(?:^|[;\\s])${prop}:\\s*([\\d.]+)(?:px)?\\s*(?:;|$)`));
-      return m ? [Number(m[1])] : [];
+      const m = r.body.match(new RegExp(`(?:^|[;\\s])${prop}:\\s*([^;]+?)\\s*(?:;|$)`));
+      return m ? [m[1]!] : [];
     });
     if (hits.length === 0) throw new Error(`${selector} sets no ${prop}`);
-    return hits;
+    return wide ? hits[0]! : hits[hits.length - 1]!;
   };
-  const rootPadTop = (wide: boolean) => {
-    const pads = ruleFor('.nb-root').flatMap((r) => {
-      const m = r.body.match(/padding:\s*(\d+)px/);
-      return m ? [Number(m[1])] : [];
-    });
-    return pads[wide ? 0 : 1]!;
+  /** The greeting's factor, from the shared block's own declaration: max(Npx, 100vw / D). */
+  const growth = (() => {
+    const m = noComments(notebook).match(/--nb-g:\s*max\(([\d.]+)px, 100vw \/ ([\d.]+)\)/)!;
+    return (width: number) => Math.max(Number(m[1]), width / Number(m[2]));
+  })();
+  /** A length as the window gives it: `Npx`, `0`, `Nvh` of the height, or `calc(N * var(--nb-g))`. */
+  const lengthAt = (value: string, width: number, height: number) => {
+    const g = value.match(/^calc\(([\d.]+) \* var\(--nb-g\)\)$/);
+    if (g) return Number(g[1]) * growth(width);
+    const vh = value.match(/^([\d.]+)vh$/);
+    if (vh) return (Number(vh[1]) * height) / 100;
+    const vw = value.match(/^([\d.]+)vw$/);
+    if (vw) return (Number(vw[1]) * width) / 100;
+    const n = value.match(/^([\d.]+)(?:px)?$/);
+    if (n) return Number(n[1]);
+    throw new Error(`cannot read the length ${value}`);
   };
+  const rootPadTop = (wide: boolean, width: number, height: number) => lengthAt(raw('.nb-root', 'padding', wide).split(/\s+/)[0]!, width, height);
   /** preflight's html line-height, which nothing in notebook.css overrides on the 12px lines. */
   const preflight = readFileSync('node_modules/tailwindcss/preflight.css', 'utf8');
   const lineHeight = parseFloat(preflight.match(/html,\s*:host\s*\{[^}]*?line-height:\s*([\d.]+)/)![1]!);
@@ -539,20 +551,33 @@ describe('text laid over the scene meets its floor against the sun or moon behin
     return Number(m[1]) + Number(m[2]);
   })();
 
-  const bandsOf = (wide: boolean) => {
-    const i = wide ? 0 : 1;
-    const titleTop = decl('.nb-titlebar', 'top')[0]!;
-    const asidePad = decl('.nb-aside', 'padding-top')[i]!;
-    const gap = decl('.nb-greeting', 'gap')[i]!;
-    const wordsSize = decl('.nb-greeting__words', 'font-size')[i]!;
-    const timeTop = rootPadTop(wide) + asidePad;
-    const wordsTop = timeTop + line12 + gap;
-    const wordsHeight = 2 * wordsSize * decl('.nb-greeting__words', 'line-height')[0]!;
-    return [
-      { text: 'title bar name', ink: '--nb-greeting-body', floor: TEXT, top: titleTop, bottom: titleTop + line12 },
-      { text: 'weekday and time', ink: '--nb-greeting-quiet', floor: TEXT, top: timeTop, bottom: timeTop + line12 },
-      { text: 'greeting words', ink: '--nb-greeting-ink', floor: LARGE, top: wordsTop, bottom: wordsTop + wordsHeight },
+  const bandCache = new Map<string, Array<{ text: string; ink: string; floor: number; top: number; bottom: number; from: number; to: number }>>();
+  const greetings = [...readFileSync('src/look/look.ts', 'utf8').matchAll(/(?:morning|midday|night):\s*'([^']+)'/g)].map((m) => m[1]!);
+  const bandsOf = (wide: boolean, width: number, height: number) => {
+    const key = `${wide}/${width}/${height}`;
+    const known = bandCache.get(key);
+    if (known) return known;
+    const at = (selector: string, prop: string) => lengthAt(raw(selector, prop, wide), width, height);
+    const titleTop = at('.nb-titlebar', 'top');
+    const timeSize = at('.nb-greeting__time', 'font-size');
+    const timeTop = rootPadTop(wide, width, height) + at('.nb-aside', 'padding-top');
+    const timeBottom = timeTop + timeSize * lineHeight;
+    const wordsSize = at('.nb-greeting__words', 'font-size');
+    const wordsTop = timeBottom + at('.nb-greeting', 'gap');
+    const wordsHeight = 2 * wordsSize * Number(raw('.nb-greeting__words', 'line-height', wide));
+    // The greeting's text runs from the root's left padding to the widest word. Research R3 measured "morning." at
+    // 170px in 40px type (0.53em a letter, the widest of the three greetings' words), so the extent is that, read
+    // at the size the words have in this window. The title bar and the time line are not bounded: the whole width.
+    const left = lengthAt(raw('.nb-root', 'padding', wide).split(/\s+/).pop()!, width, height);
+    const widest = Math.max(...greetings.flatMap((g) => g.split(' ').map((word) => word.length)));
+    const wordsRight = left + widest * (170 / 8 / 40) * wordsSize;
+    const bands = [
+      { text: 'title bar name', ink: '--nb-greeting-body', floor: TEXT, top: titleTop, bottom: titleTop + line12, from: 0, to: width },
+      { text: 'weekday and time', ink: '--nb-greeting-quiet', floor: TEXT, top: timeTop, bottom: timeBottom, from: 0, to: width },
+      { text: 'greeting words', ink: '--nb-greeting-ink', floor: LARGE, top: wordsTop, bottom: wordsTop + wordsHeight, from: left, to: wordsRight },
     ];
+    bandCache.set(key, bands);
+    return bands;
   };
 
   it('keeps the band model honest: a 12px line is 18px, and a greeting is at most two words that fit the column', () => {
@@ -577,6 +602,7 @@ describe('text laid over the scene meets its floor against the sun or moon behin
     ['.nb-aside', ['', NARROW]],
     ['.nb-greeting', ['', NARROW]],
     ['.nb-greeting__words', ['', NARROW]],
+    ['.nb-greeting__time', ['']],
     ['.nb-titlebar', ['']],
     ['.nb-sun', ['']],
   ];
@@ -635,37 +661,74 @@ describe('text laid over the scene meets its floor against the sun or moon behin
     expect(found.map((r) => `${r.sheet}: ${r.item}`)).toEqual([`zz.css: ${plant}`]);
   });
 
-  const HEIGHTS = Array.from({ length: Math.floor((2160 - 600) / 20) + 1 }, (_, i) => 600 + i * 20);
+  // The window grid: wide windows 1100-3840 by 600-2160 in 20px steps, and the narrow layout at its two ends.
+  const range = (from: number, to: number, step: number) => Array.from({ length: Math.floor((to - from) / step) + 1 }, (_, i) => from + i * step);
+  const WINDOWS = [
+    ...range(1100, 3840, 20).flatMap((w) => range(600, 2160, 20).map((h) => ({ w, h, wide: true }))),
+    ...[800, 1099].flatMap((w) => range(600, 2160, 20).map((h) => ({ w, h, wide: false }))),
+  ];
 
-  it.each(looks.flatMap((look) => [true, false].map((wide) => [look, wide] as const)))(
-    '%s, wide layout %s, every height from 600 to 2160: each line of text holds its floor on the disc and glow that reach it',
-    (look, wide) => {
+  it.each(looks)(
+    '%s, every window of the grid: each line of text holds its floor on the disc and glow that reach it',
+    (look) => {
       const size = px(look, '--nb-sun-size');
       const sun = token('--nb-sun', look);
       const glow = glowToken(look);
       const glows = [over(glow, token('--nb-sky-top', look)), over(glow, token('--nb-sky-mid', look))];
-      const bands = bandsOf(wide);
       let reached = 0;
-      for (const height of HEIGHTS) {
-        const top = pct(look, '--nb-sun-top') * height;
-        for (const band of bands) {
+      for (const { w, h, wide } of WINDOWS) {
+        const top = pct(look, '--nb-sun-top') * h;
+        for (const band of bandsOf(wide, w, h)) {
           const ink = token(band.ink, look);
-          const at = `${band.text} at height ${height}`;
-          if (top < band.bottom && top + size > band.top) {
+          const at = `${band.text} at ${w}x${h}`;
+          const discLeft = pct(look, '--nb-sun-left') * w;
+          const beside = (reach: number) => discLeft - reach < band.to && discLeft + size + reach > band.from;
+          if (top < band.bottom && top + size > band.top && beside(0)) {
             reached += 1;
             expect(contrastRatio(ink, sun), `${at} on the disc`).toBeGreaterThanOrEqual(band.floor);
           }
-          if (top - glowReach < band.bottom && top + size + glowReach > band.top) {
+          if (top - glowReach < band.bottom && top + size + glowReach > band.top && beside(glowReach)) {
             reached += 1;
             for (const g of glows) expect(contrastRatio(ink, g), `${at} on the glow`).toBeGreaterThanOrEqual(band.floor);
           }
         }
       }
-      // In the wide layout every look's disc or glow reaches some line at 600 tall, so the sweep is never vacuous
-      // (night's narrow layout is reached by nothing at 600: the moon is below the greeting there).
-      if (wide) expect(reached, 'the sweep reaches some band').toBeGreaterThan(0);
+      // Every look's disc or glow reaches some line somewhere on the grid, so the sweep is never vacuous.
+      expect(reached, 'the sweep reaches some band').toBeGreaterThan(0);
     },
+    30_000,
   );
+
+  it('a change of the greeting\'s size or place changes the band a line is measured on', () => {
+    const wordsAt = (w: number, h: number) => bandsOf(true, w, h).find((b) => b.text === 'greeting words')!;
+    expect(wordsAt(1920, 1080).bottom - wordsAt(1920, 1080).top).toBeGreaterThan(wordsAt(1280, 800).bottom - wordsAt(1280, 800).top);
+    expect(wordsAt(1280, 1600).top).toBeGreaterThan(wordsAt(1280, 800).top);
+  });
+
+  describe('the greeting grows with the window and never below today\'s size (FR-036, research R3)', () => {
+    const wordsRule = (wide: boolean) => raw('.nb-greeting__words', 'font-size', wide);
+    it('declares its size, time and gap by the greeting factor, and the narrow layout keeps 30px and 4px', () => {
+      expect(raw('.nb-greeting__words', 'font-size', true)).toBe('calc(40 * var(--nb-g))');
+      expect(raw('.nb-greeting__time', 'font-size', true)).toBe('calc(12 * var(--nb-g))');
+      expect(raw('.nb-greeting', 'gap', true)).toBe('calc(10 * var(--nb-g))');
+      expect(wordsRule(false)).toBe('30px');
+      expect(raw('.nb-greeting', 'gap', false)).toBe('4px');
+    });
+    it.each([
+      [1100, 700, 40],
+      [1280, 800, 40],
+      [1920, 1080, 60],
+      [2560, 1080, 80],
+      [3840, 2160, 120],
+    ])('at %ix%i the words are %fpx', (w, h, words) => {
+      expect(lengthAt(wordsRule(true), w, h)).toBeCloseTo(words, 6);
+    });
+    it('at 2560x1080 the whole greeting ends above the far hill\'s top', () => {
+      const hillTop = (Number(ruleFor('.nb-hill--far')[0]!.body.match(/top:\s*([\d.]+)%/)![1]) / 100) * 1080;
+      const lines = bandsOf(true, 2560, 1080);
+      expect(Math.max(...lines.map((b) => b.bottom))).toBeLessThan(hillTop);
+    });
+  });
 });
 
 describe('the mark on every look\'s own sky (FR-033, D4)', () => {
