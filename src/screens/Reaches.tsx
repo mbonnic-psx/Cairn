@@ -186,7 +186,7 @@ function TodayView({
   if (!day) {
     return (
       <Frame onPage={onPage}>
-        <p className="text-ink-400">{LOOKING}</p>
+        <p className={onPage ? 'nb-reaches-sentence' : 'text-ink-400'}>{LOOKING}</p>
       </Frame>
     );
   }
@@ -194,8 +194,16 @@ function TodayView({
   if (day.sealed) {
     return (
       <Frame onPage={onPage}>
-        <h2 className="reflective text-3xl text-ink-900">{TODAY}</h2>
-        <p className="reflective mt-4 max-w-prose text-lg text-ink-700">{day.sealed}</p>
+        <h2 className={onPage ? 'nb-reaches-title' : 'reflective text-3xl text-ink-900'}>
+          {TODAY}
+        </h2>
+        <p
+          className={
+            onPage ? 'nb-reaches-sentence' : 'reflective mt-4 max-w-prose text-lg text-ink-700'
+          }
+        >
+          {day.sealed}
+        </p>
       </Frame>
     );
   }

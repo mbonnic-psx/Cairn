@@ -142,6 +142,23 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (name) 
     });
 
     it.each(['looking', 'sealed'])(
+      'carries no Tailwind utility class in the spread, in Today (%s) or in Over time',
+      async (state) => {
+        const user = userEvent.setup();
+        const { spread } = onPage(
+          <Reaches today={todayCases[state]} read={silentReader} now={now} />,
+        );
+        const notOurs = () =>
+          Array.from(spread!.querySelectorAll('*')).flatMap((el) =>
+            Array.from(el.classList).filter((c) => !c.startsWith('nb-')),
+          );
+        expect(notOurs()).toEqual([]);
+        await user.click(screen.getByRole('button', { name: 'Over time' }));
+        expect(notOurs()).toEqual([]);
+      },
+    );
+
+    it.each(['looking', 'sealed'])(
       'says the same words as outside any shell: %s',
       (state) => {
         const today = todayCases[state];
