@@ -7,6 +7,8 @@ import type { Look } from './look';
 const CHOICES: { value: Look; name: string }[] = [
   { value: 'current', name: 'Current' },
   { value: 'morning', name: 'Morning' },
+  { value: 'midday', name: 'Midday' },
+  { value: 'night', name: 'Night' },
 ];
 
 export function LookSwitch({

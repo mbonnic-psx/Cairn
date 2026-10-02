@@ -5,12 +5,12 @@ import { describe, expect, it, vi } from 'vitest';
 import { LookSwitch } from '../../look/LookSwitch';
 
 describe('LookSwitch', () => {
-  it('is labelled "Look (testing)" and offers Current and Morning', () => {
+  it('is labelled "Look (testing)" and offers Current, Morning, Midday and Night, in that order', () => {
     render(<LookSwitch look="current" onChange={vi.fn()} />);
     const control = screen.getByLabelText('Look (testing)');
     expect(control).toHaveValue('current');
     const names = screen.getAllByRole('option').map((o) => o.textContent);
-    expect(names).toEqual(['Current', 'Morning']);
+    expect(names).toEqual(['Current', 'Morning', 'Midday', 'Night']);
   });
 
   it('shows the look it is given', () => {
@@ -23,6 +23,14 @@ describe('LookSwitch', () => {
     render(<LookSwitch look="current" onChange={onChange} />);
     await userEvent.selectOptions(screen.getByLabelText('Look (testing)'), 'Morning');
     expect(onChange).toHaveBeenCalledWith('morning');
+  });
+
+  it('reports Midday and then Night', async () => {
+    const onChange = vi.fn();
+    render(<LookSwitch look="current" onChange={onChange} />);
+    await userEvent.selectOptions(screen.getByLabelText('Look (testing)'), 'Midday');
+    await userEvent.selectOptions(screen.getByLabelText('Look (testing)'), 'Night');
+    expect(onChange.mock.calls).toEqual([['midday'], ['night']]);
   });
 
   it('is reachable and operable by keyboard', async () => {
