@@ -103,3 +103,14 @@ Skipped: nothing widened, and the slice does not close the split (`reveal` remai
 | concurrency, idempotency, ordering, retention, or time | not present | nothing reads time, retries or orders anything |
 
 Skipped: nothing widened, and the slice does not close the split (`reveal` remains). Covered by row `frame` · release gate on the notebook.
+
+## board-scale · dd94694 · 2026-10-02
+
+| Trigger | Status | Evidence |
+|---|---|---|
+| driving adapter (HTTP route, CLI command, queue consumer) | not present | no IPC command, route or CLI added (`src-tauri/`, `src/App.tsx`, `package.json` untouched; `ipc_surface.rs` unchanged; T009's guard diff empty) |
+| driven adapter or the provider types behind one | not present | no store, file or system call touched; the production diff is stylesheets only (`src/styles/notebook.css` and the four page sheets: sizes and places as `calc(N * var(--nb-u))`); the rest is tests and the shell contract |
+| authorisation decision (who can reach one that already exists) | already covered | row `frame` (release gate on the notebook): a released build still forces `current` (`releasedBuild.test.ts`, D29); nothing new is reachable |
+| concurrency, idempotency, ordering, retention, or time | not present | nothing reads time, retries or orders anything |
+
+Skipped: nothing widened, and the slice does not close the split (`reveal` remains). Covered by row `frame` · release gate on the notebook.
