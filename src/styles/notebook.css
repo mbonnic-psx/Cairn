@@ -5,10 +5,16 @@
  * of tokens for other looks and touching nothing else. Serif carries the
  * reading; mono is for tab names, small labels and buttons only. */
 
-[data-look="morning"] {
+/* What is the same in every look. */
+[data-look] {
   /* The screens' own serif is the bundled face here, so no platform font
    * (Palatino on Windows, DejaVu on Linux) stands in for it. */
   --font-serif: var(--font-notebook-serif);
+  --nb-font-serif: var(--font-notebook-serif);
+  --nb-font-mono: var(--font-notebook-mono);
+}
+
+[data-look="morning"] {
   --nb-paper: #f8f1e3;
   --nb-ink: #2a2119;
   --nb-ink-body: #33291f;
@@ -22,9 +28,13 @@
   --nb-sky-top: #f7e7cc;
   --nb-sky-mid: #f4d9b2;
   --nb-sky-bottom: #efcd9f;
+  --nb-focus-sky: #2a2119;
   --nb-greeting-ink: #2a2119;
   --nb-greeting-body: #4a3d2f;
   --nb-greeting-quiet: #6b5440;
+  --nb-sun-size: 96px;
+  --nb-sun-left: 15%;
+  --nb-sun-top: 37%;
   --nb-sun: #eda95e;
   --nb-sun-glow: #eda95e59;
   --nb-hill-far: #cdcfa8;
@@ -44,9 +54,6 @@
   --nb-tab-limits: #cfc5b3;
   --nb-tab-ink: #2a2119;
 
-  --nb-font-serif: var(--font-notebook-serif);
-  --nb-font-mono: var(--font-notebook-mono);
-
   /* Today's screens colour their text with the theme's palette. On the paper
    * the lighter shades fall under 4.5:1, so inside the notebook alone they
    * are re-pointed to darker warm values of the same families. */
@@ -54,6 +61,122 @@
   --color-ink-400: #6b5f52;
   --color-amber-600: #7d5a22;
   --color-amber-500: #8a6325;
+  --color-moss-600: #4a5e41;
+}
+
+/* Midday: high, flat light. Values from the canvas board G-Midday; any move
+ * to meet a contrast floor is recorded in slices/looks/research.md (L1). */
+[data-look="midday"] {
+  --nb-paper: #f8f1e3;
+  --nb-ink: #2a2119;
+  --nb-ink-body: #33291f;
+  --nb-ink-quiet: #6b5a47;
+  --nb-rule: #e3d6bf;
+  --nb-margin: #c99a83;
+  --nb-accent-amber: #7d5a22;
+  --nb-button: #33291f;
+  --nb-button-ink: #f8f1e3;
+
+  --nb-sky-top: #f6e6c4;
+  --nb-sky-mid: #f1d8a4;
+  --nb-sky-bottom: #ecca8a;
+  --nb-focus-sky: #2a2119;
+  --nb-greeting-ink: #2a2119;
+  --nb-greeting-body: #4a3d2f;
+  --nb-greeting-quiet: #66503d;
+  --nb-sun-size: 84px;
+  --nb-sun-left: 11.7%;
+  --nb-sun-top: 7.5%;
+  --nb-sun: #f5c374;
+  --nb-sun-glow: #f5c37473;
+  --nb-hill-far: #dccb98;
+  --nb-hill-mid: #c2ad72;
+  --nb-hill-near: #93874f;
+  --nb-stone-base: #4a3a22;
+  --nb-stone-moss: #5f6234;
+  --nb-stone-amber: #a8762f;
+  --nb-stone-pale: #fbf3df;
+  --nb-shadow-edge: #c9b998;
+  --nb-shadow-soft: #33291f80;
+
+  --nb-tab-protection: #e7dcc8;
+  --nb-tab-trail: #b9c4a7;
+  --nb-tab-reaches: #dcbf8c;
+  --nb-tab-checkin: #d7b4a2;
+  --nb-tab-limits: #cfc5b3;
+  --nb-tab-ink: #2a2119;
+
+  --color-ink-500: #5c5245;
+  --color-ink-400: #6b5f52;
+  --color-amber-600: #7d5a22;
+  --color-amber-500: #8a6325;
+  --color-moss-600: #4a5e41;
+}
+
+/* Night: a lamp-lit page under a plum sky. Values from the canvas board
+ * G-Night; moves made to meet a contrast floor are recorded in
+ * slices/looks/research.md (L1). The moon takes the sun's tokens, since one
+ * body hangs in the sky at a time. */
+[data-look="night"] {
+  --nb-paper: #f1e6d0;
+  --nb-ink: #2a2119;
+  --nb-ink-body: #33291f;
+  --nb-ink-quiet: #6b5a47;
+  --nb-rule: #dccdb1;
+  --nb-margin: #c99a83;
+  --nb-accent-amber: #7d5a22;
+  --nb-button: #33291f;
+  --nb-button-ink: #f1e6d0;
+
+  --nb-sky-top: #221c22;
+  --nb-sky-mid: #3a2b2a;
+  --nb-sky-bottom: #7a4a38;
+  --nb-focus-sky: #f6ecdc;
+  --nb-greeting-ink: #f6ecdc;
+  --nb-greeting-body: #d9cbb4;
+  --nb-greeting-quiet: #d7c9b5;
+  --nb-sun-size: 56px;
+  --nb-sun-left: 18%;
+  --nb-sun-top: 41%;
+  --nb-sun: #f3e6cf;
+  --nb-sun-glow: #f3e6cf2e;
+  --nb-star: #f3e6cf;
+  --nb-star-size: 3px;
+  --nb-star-1-left: 7%;
+  --nb-star-1-top: 10%;
+  --nb-star-2-left: 19%;
+  --nb-star-2-top: 15%;
+  --nb-star-3-left: 23%;
+  --nb-star-3-top: 8%;
+  --nb-star-4-left: 3%;
+  --nb-star-4-top: 21%;
+  --nb-star-5-left: 95%;
+  --nb-star-5-top: 7.5%;
+  --nb-star-6-left: 98%;
+  --nb-star-6-top: 17.5%;
+  --nb-stone-glow: #f3e6cf59;
+  --nb-lamp-glow: #f3c88c40;
+  --nb-hill-far: #4c3a33;
+  --nb-hill-mid: #352c27;
+  --nb-hill-near: #221d1a;
+  --nb-stone-base: #e6d5b6;
+  --nb-stone-moss: #c9b48e;
+  --nb-stone-amber: #efe0c4;
+  --nb-stone-pale: #d6c19b;
+  --nb-shadow-edge: #8a7860;
+  --nb-shadow-soft: #00000099;
+
+  --nb-tab-protection: #8f8574;
+  --nb-tab-trail: #8a9478;
+  --nb-tab-reaches: #a69070;
+  --nb-tab-checkin: #a68a7c;
+  --nb-tab-limits: #9a9283;
+  --nb-tab-ink: #1d1915;
+
+  --color-ink-500: #5c5245;
+  --color-ink-400: #6b5f52;
+  --color-amber-600: #7d5a22;
+  --color-amber-500: #876124;
   --color-moss-600: #4a5e41;
 }
 
@@ -92,16 +215,30 @@
   inset: 0;
   background: linear-gradient(to bottom, var(--nb-sky-top) 0%, var(--nb-sky-mid) 60%, var(--nb-sky-bottom) 100%);
 }
-.nb-sun {
+.nb-sun,
+.nb-moon {
   position: absolute;
-  width: 96px;
-  height: 96px;
-  left: 15%;
-  top: 37%;
+  width: var(--nb-sun-size);
+  height: var(--nb-sun-size);
+  left: var(--nb-sun-left);
+  top: var(--nb-sun-top);
   border-radius: 50%;
   background: var(--nb-sun);
   box-shadow: 0 0 80px 30px var(--nb-sun-glow);
 }
+.nb-star {
+  position: absolute;
+  width: var(--nb-star-size);
+  height: var(--nb-star-size);
+  border-radius: 50%;
+  background: var(--nb-star);
+}
+.nb-star--1 { left: var(--nb-star-1-left); top: var(--nb-star-1-top); }
+.nb-star--2 { left: var(--nb-star-2-left); top: var(--nb-star-2-top); }
+.nb-star--3 { left: var(--nb-star-3-left); top: var(--nb-star-3-top); }
+.nb-star--4 { left: var(--nb-star-4-left); top: var(--nb-star-4-top); }
+.nb-star--5 { left: var(--nb-star-5-left); top: var(--nb-star-5-top); }
+.nb-star--6 { left: var(--nb-star-6-left); top: var(--nb-star-6-top); }
 .nb-hill {
   position: absolute;
   border-radius: 50%;
@@ -136,8 +273,10 @@
   align-items: center;
   gap: 4px;
 }
+/* The glow is night's alone: only that look sets --nb-stone-glow. */
 .nb-stone {
   border-radius: 999px;
+  box-shadow: 0 0 14px 2px var(--nb-stone-glow, transparent);
 }
 .nb-stone--base { background: var(--nb-stone-base); }
 .nb-stone--moss { background: var(--nb-stone-moss); }
@@ -148,6 +287,13 @@
 .nb-stone--3 { width: 44px; height: 17px; }
 .nb-stone--4 { width: 58px; height: 19px; }
 .nb-stone--5 { width: 74px; height: 21px; }
+
+/* The testing switch sits over the sky, outside the shell, and wears the look
+ * it shows (LookSwitch sets data-look). On Current it has no look, so its tokens
+ * are unset: the text inherits, and the focused select draws the browser's own ring. */
+.nb-switch {
+  color: var(--nb-greeting-body);
+}
 
 /* Brand row. */
 .nb-titlebar {
@@ -197,7 +343,7 @@
   min-height: 480px;
   background: var(--nb-paper);
   border-radius: 6px;
-  box-shadow: 0 1px 0 var(--nb-shadow-edge), 0 24px 50px -20px var(--nb-shadow-soft);
+  box-shadow: 0 1px 0 var(--nb-shadow-edge), 0 24px 50px -20px var(--nb-shadow-soft), 0 0 90px 10px var(--nb-lamp-glow, transparent);
 }
 .nb-spread {
   display: grid;
@@ -225,7 +371,9 @@
     var(--nb-rule) 31px,
     var(--nb-rule) 32px
   );
-  background-position: 0 150px;
+  /* One tile is one pitch, so the ruling has no seam; it starts 22px in, where the first line of writing sits. */
+  background-size: 100% 32px;
+  background-position: 0 22px;
 }
 .nb-margin {
   position: absolute;
@@ -328,8 +476,17 @@
 }
 .nb-tab:focus-visible,
 .nb-switch select:focus-visible {
-  outline: 2px solid var(--nb-ink);
+  outline: 2px solid var(--nb-focus-sky);
   outline-offset: 2px;
+}
+/* A tab's left edge lies on the paper and its other sides on the sky: two contiguous bands, the ink one
+ * filling the 2px between the tab and the outline, so one of them holds 3:1 on whatever is under it. */
+.nb-tab:focus-visible {
+  box-shadow: 0 0 0 2px var(--nb-ink);
+}
+/* On Current --nb-focus-sky is unset, which would leave the focused select with no outline at all. */
+.nb-switch:not([data-look]) select:focus-visible {
+  outline: auto;
 }
 
 /* Narrow windows: the greeting moves above the notebook. */
@@ -377,6 +534,10 @@
   }
   .nb-landscape {
     forced-color-adjust: none;
+  }
+  /* The outline alone takes the system colour. */
+  .nb-tab:focus-visible {
+    box-shadow: none;
   }
   /* The scene keeps its own colours, so text laid over it sits on the
    * system's own ground and takes the system's own ink. */

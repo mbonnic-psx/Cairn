@@ -23,3 +23,201 @@ Every product decision a `/cruise` run took, in order. A person overrides one by
 - **Confidence:** high · **Would reverse if:** the owner asks for released builds to keep today's window until the reveal
 - **Written to:** `specs/004-notebook-landscape/adversary-log.md` (R2)
 - **Status:** standing
+
+## D3 — Does a change of look fade, or happen at once?
+- **Stage:** slice gaps · **Slice:** looks · **When:** 2026-10-02T04:33:00Z · **Iteration:** 2
+- **Question:** Choosing a look on the switch could cross-fade the scene or change it at once.
+- **Options:** at once, no transition (recommended: the scenario says "at once"); a soft cross-fade, none under reduced motion
+- **Decision:** At once, with no transition, in every case.
+- **Why:** US2 scenario 1 says the look changes "at once". The switch is a testing aid, and an instant change makes each look easy to compare.
+- **Decided by:** host (stage recommendation)
+- **Confidence:** high · **Would reverse if:** the owner asks for a soft change between looks when the clock feature arrives
+- **Written to:** `specs/004-notebook-landscape/spec.md` (Clarifications, US2 scenario 1)
+- **Status:** standing
+
+## D4 — Must the Cairn mark stay visible on the night sky?
+- **Stage:** slice gaps · **Slice:** looks · **When:** 2026-10-02T04:33:00Z · **Iteration:** 2
+- **Question:** The mark is drawn in ink-coloured stones. FR-021 covers text only, so nothing stops the mark vanishing on the dark night sky.
+- **Options:** the base and top stones at least 3:1 against the sky, the WCAG floor for graphics, applied to the stones that carry the shape (recommended); every stone at 3:1, which the accepted morning mark's pale stone does not meet; leave it to the owner's eye at the demo
+- **Decision:** The mark's base and top stones each meet at least 3:1 against the sky behind them, in every look. The middle stones may stay soft (FR-033).
+- **Why:** The mark is how the person knows the window is Cairn. Lost on the night sky, it would read as a broken screen.
+- **Decided by:** host (stage recommendation)
+- **Confidence:** high · **Would reverse if:** the owner, seeing the night look, wants the mark softer than 3:1
+- **Written to:** `specs/004-notebook-landscape/spec.md` (FR-033, Clarifications), `specs/004-notebook-landscape/story-split.md` (row 2)
+- **Status:** standing
+
+## D5 — Does a move to or from Current have to keep everything typed on the screen?
+- **Stage:** convergence · **Slice:** looks · **When:** 2026-10-02T04:57:48Z · **Iteration:** 2
+- **Question:** Moving between notebook looks keeps the screen and everything typed. Moving to or from Current swaps the whole shell, so the screen is rebuilt: the step and the Tonight text survive, but a field the screen holds itself (the custom address box) empties and the entrance replays. No way was found to keep the screen mounted that leaves Current byte-identical to today (SC-009) without restructuring the accepted notebook layout (T015, graded HIGH).
+- **Options:** flatten the notebook into one shell tree shared with Current, rewriting five of `frame`'s structural tests (the implementer's recommendation); lift each screen's own field state into App; FR-010 applies between the three looks, and a move to or from Current keeps the step and the Tonight text until `reveal` (the host's recommendation)
+- **Decision:** FR-010 applies between morning, midday and night: that change stays instant (D3) and keeps the screen and everything on it. A move to or from Current keeps the step and the Tonight text, and may empty a screen's own field and replay its entrance, until `reveal` removes Current (FR-032).
+- **Why:** The spec's Key Entities define a look as morning, midday or night, with Current "beside" them. Only a tester makes this move, in a development build, and loses at most an address they can type again; the Tonight writing is kept. Reworking the layout the owner accepted, to fix what only testers see, is the wrong trade.
+- **Decided by:** drive-skipper (claude-opus-5-5)
+- **Confidence:** medium · **Would reverse if:** a page slice gives a screen long-form text of its own while Current still exists, or the owner says a move to or from Current must keep everything
+- **Written to:** `specs/004-notebook-landscape/spec.md` (Clarifications), `specs/004-notebook-landscape/slices/looks/tasks.md` (T015), `specs/004-notebook-landscape/slices/looks/quickstart.md` (Not working yet), `src/shell/__tests__/AppLook.test.tsx`
+- **Status:** standing
+
+## D6 — How does a screen know it is on a notebook page?
+- **Stage:** slice gaps · **Slice:** protection-page · **When:** 2026-10-02T06:15:00Z · **Iteration:** 3
+- **Question:** A screen gets no new props from the shell, and Current must stay exactly as today, yet each page slice lays its screen out as two pages. How does the screen tell which it is in?
+- **Options:** the notebook tells the screens it wraps through React context, Current tells them nothing (recommended); a second notebook copy of each screen; CSS alone over today's markup
+- **Decision:** The notebook tells the screens through React context, read with one hook from `src/shell/`. Told, a screen lays itself out as a spread; not told, it renders exactly as today. One component, one set of state.
+- **Why:** It is the one reading that keeps both rules the specification states: no new props, and Current unchanged (SC-009). A copy of each screen could drift in words or behaviour (FR-018); CSS alone cannot move today's single card onto two pages.
+- **Decided by:** host (stage recommendation)
+- **Confidence:** high · **Would reverse if:** a page slice finds a screen whose today's markup cannot be kept element for element beside its spread
+- **Written to:** `specs/004-notebook-landscape/contracts/ui-shell.md` (Knowing it is on a page), `specs/004-notebook-landscape/spec.md` (Clarifications)
+- **Status:** standing
+
+## D7 — Does the Protection spread gain content the screen does not show today?
+- **Stage:** slice gaps · **Slice:** protection-page · **When:** 2026-10-02T06:15:00Z · **Iteration:** 3
+- **Question:** US3 describes the Protection spread with what you are protecting, a way to add an address and margin notes. Today's Protection screen shows none of them.
+- **Options:** today's content only: state, words and figures on the left, a waiting change on the right, else a blank ruled page (recommended); bring the list, the address box and the limits onto it, as the canvas shows
+- **Decision:** Today's content only. Left page: the state, its words and the two figures. Right page: a waiting change with "Keep things as they are", when there is one; otherwise blank and ruled.
+- **Why:** FR-018 keeps every screen word for word and FR-031 says nothing is invented to fill a page; the canvas content is illustration (Assumptions). Moving controls between screens is a change of what Cairn does, which this feature rules out.
+- **Decided by:** host (stage recommendation)
+- **Confidence:** high · **Would reverse if:** the owner, at the reveal demo, wants the Protection spread to carry the canvas's content
+- **Written to:** `specs/004-notebook-landscape/spec.md` (Clarifications)
+- **Status:** standing
+
+## D8 — Where does the What is protected list go on its spread?
+- **Stage:** slice gaps · **Slice:** protection-page · **When:** 2026-10-02T06:15:00Z · **Iteration:** 3
+- **Question:** The screen is a heading, a count sentence, notes and a list. How do they sit on two pages?
+- **Options:** the heading, sentence and notes on the left, the list on the right ruled like an inventory (recommended); everything on the left, the right blank
+- **Decision:** Heading, count sentence, not-confirmed note and the note on taking things out on the left page; the list on the right, ruled, one address a line. A long list scrolls inside the notebook.
+- **Why:** US3 asks for "the full list, ruled like an inventory"; a person reads what the list is before reading down it.
+- **Decided by:** host (stage recommendation)
+- **Confidence:** medium · **Would reverse if:** the owner, at the reveal demo, wants the list on the left page
+- **Written to:** `specs/004-notebook-landscape/spec.md` (Clarifications)
+- **Status:** standing
+
+## D9 — Who settles the notebook's heading outline, and how?
+- **Stage:** slice gaps · **Slice:** protection-page · **When:** 2026-10-02T06:15:00Z · **Iteration:** 3
+- **Question:** Frame T025: the notebook has no `h1` and the greeting is the first heading. Nobody owns it.
+- **Options:** protection-page, the first page slice to land: one visually hidden `h1` "Cairn", greeting not a heading (recommended by T025); each page slice in turn
+- **Decision:** `protection-page` settles it as T025 recommends, and writes the rule into the contract.
+- **Why:** A screen reader's list of headings should open on Cairn and then the page, not on "Good morning.". One owner, once, before the other page slices build.
+- **Decided by:** host (stage recommendation)
+- **Confidence:** high · **Would reverse if:** the owner wants the greeting announced as a heading
+- **Written to:** `specs/004-notebook-landscape/contracts/ui-shell.md` (Headings), `specs/004-notebook-landscape/spec.md` (Clarifications)
+- **Status:** standing
+
+## D10 — Which page slices run now, and who carries the open tasks?
+- **Stage:** ready-set selection · **Slice:** protection-page, setup-pages, quiet-pages, tonight-page · **When:** 2026-10-02T06:15:00Z · **Iteration:** 3
+- **Question:** Three page slices are ready and unclaimed. The notebook context (D6) is shared code none of them has yet. Seven carried tasks wait for owners.
+- **Options:** `protection-page` alone first, since it lands the context, then the other two together against it (recommended); all three at once, each adding the context
+- **Decision:** `protection-page` runs alone this iteration and lands the context and the heading outline. `setup-pages` and `quiet-pages` run together after it merges. `tonight-page` waits for 003's `history-by-site` (parking lot). Carried tasks: frame T025 to `protection-page`; looks T021 (focus on the paper) and T024 (no fades) to `setup-pages` for the setup screens and to `tonight-page` for the check-in; looks T020, T022, T023 (sun band, hilltop stones, tab focus ring) to `quiet-pages`; frame T024 (a real-browser layout check) stays open, since adding a browser runner changes `package.json`, which no slice may write.
+- **Why:** A slice whose shared surface is still being decided is worked first, never alongside others (drive, *The contract is settled*). Three slices each writing the same new hook would collide at every merge.
+- **Decided by:** host (stage recommendation)
+- **Confidence:** high · **Would reverse if:** the owner adopts a browser test runner, which frees frame T024 to ride with a page slice
+- **Written to:** `specs/004-notebook-landscape/story-split.md` (Parking lot)
+- **Status:** standing
+
+## D11 — Where is the missing waiting change on Protection fixed?
+- **Stage:** convergence · **Slice:** protection-page · **When:** 2026-10-02T07:12:00Z · **Iteration:** 3
+- **Question:** No screen in the running app shows a waiting change. `App` never asks the core for one (`getPendingChange` has no caller) and never passes `pending` to Protection. Yet What is protected tells the person they can cancel a change "at any time in that day".
+- **Options:** (a) leave it, since 004 changes nothing Cairn does (D7); (b) a separate piece of work outside 004, owned by the feature that owns the waiting period, in which `App` asks for the waiting change and passes it to Protection (recommended by the slice delegate); (c) fix it inside 004's `protection-page`
+- **Decision:** (b). It is a gap in 002-machine-wide-protection and is fixed there, as an unchecked task appended to `specs/002-machine-wide-protection/tasks.md`: ask the core for the waiting change when protection state is shown, and after any change that protects less or a cancel, and pass it to Protection, in `src/App.tsx` (FR-047c, FR-047e). Its test shows a waiting change and its cancel in the running app's shell. `protection-page` is unaffected: its spread already puts a waiting change on the right page (D7, FR-020).
+- **Why:** A person who asked to take something out is told they can call it off, and today cannot find the change or see how long is left. 002 promised both, and Principle III says the screen reports real state, so (a) is out. (c) would change what Cairn does inside 004 and make Current differ from today (SC-009).
+- **Decided by:** drive-skipper (claude-opus-5-5)
+- **Confidence:** high · **Would reverse if:** a caller elsewhere in the running app already fetches the waiting change and shows it where protection state is shown
+- **Written to:** `specs/002-machine-wide-protection/tasks.md` (task appended on the trunk after this slice merges), `specs/004-notebook-landscape/story-split.md` (Parking lot), `specs/004-notebook-landscape/slices/protection-page/plan.md` (Open questions)
+- **Status:** standing
+
+## D12 — Is "added with its root address" a small label, in the typewriter face?
+- **Stage:** after-converge gaps · **Slice:** protection-page · **When:** 2026-10-02T07:25:00Z · **Iteration:** 3
+- **Question:** The list's caption beside an address is 14px and set in the serif, while the plan put it in the typewriter face.
+- **Options:** a small label, so typewriter (recommended: FR-014 names small labels); reading text, so serif
+- **Decision:** A small label: typewriter face, as the plan said.
+- **Why:** It is a short note beside an entry, not text read at length; FR-014 and Principle VI put such labels in the typewriter face, and it tells the caption apart from the addresses (T019).
+- **Decided by:** host (stage recommendation)
+- **Confidence:** medium · **Would reverse if:** the owner, at the reveal demo, reads the caption as part of the list's text
+- **Written to:** `specs/004-notebook-landscape/slices/protection-page/tasks.md` (T021)
+- **Status:** standing
+
+## D13 — How does the choosing step sit on one spread?
+- **Stage:** slice gaps · **Slice:** setup-pages · **When:** 2026-10-02T07:12:00Z · **Iteration:** 4
+- **Question:** Choosing what to protect shows two screens, What would you like to protect? and Anywhere else?, and the "Turn protection on" button, one under the other. How do they sit on two pages?
+- **Options:** categories on the left page, Anywhere else? and "Turn protection on" on the right page (recommended); everything on the left page, the right blank; the categories across both pages, Anywhere else? below
+- **Decision:** What would you like to protect?, its sentence, the categories and the note a change leaves on the left page. Anywhere else?, the address box and what comes back on the right page, with "Turn protection on" at its foot. The step's composition moves into one component of the setup screens that the app renders, so Current renders exactly what it renders today.
+- **Why:** Each heading opens its own page, the person reads in the order they do today, and the step ends with its way forward where the eye ends. Nothing is invented and nothing moves between steps (FR-018, FR-031).
+- **Decided by:** host (stage recommendation)
+- **Confidence:** high · **Would reverse if:** the owner, at the reveal demo, wants the address box beside the categories on the left page
+- **Written to:** `specs/004-notebook-landscape/spec.md` (Clarifications), `specs/004-notebook-landscape/contracts/ui-shell.md` (A step of more than one screen)
+- **Status:** standing
+
+## D14 — Where do Before Cairn changes anything's parts and its two buttons go?
+- **Stage:** slice gaps · **Slice:** setup-pages · **When:** 2026-10-02T07:12:00Z · **Iteration:** 4
+- **Question:** The screen is a heading, a paragraph, what Cairn will change, the background component's paragraph, What this does not cover, the note on administrators, and "Yes, set this up" and "Not yet". Its details may still be loading or could not be read. How do they sit on two pages?
+- **Options:** what changes on the left page; the limits, the administrator note and the buttons on the right page, the buttons in the same place in every state (recommended); everything on the left with the buttons, the right blank
+- **Decision:** Left page: the heading, the opening paragraph, what Cairn will change and the background component's paragraph. Right page: What this does not cover, the note on administrators, then "Yes, set this up" and "Not yet" at its foot. Without the details, the left page holds the heading and the paragraph and the right page holds only the two buttons, in the same place.
+- **Why:** Cairn discloses before it asks (Principle III, FR-016 of 002): the person reaches the yes only after reading what Cairn does not cover. The buttons never move as the details arrive.
+- **Decided by:** host (stage recommendation)
+- **Confidence:** high · **Would reverse if:** the owner, at the reveal demo, wants the buttons under what Cairn will change
+- **Written to:** `specs/004-notebook-landscape/spec.md` (Clarifications)
+- **Status:** standing
+
+## D15 — Do the setup controls' edges stay visible on the paper?
+- **Stage:** slice gaps · **Slice:** setup-pages · **When:** 2026-10-02T07:12:00Z · **Iteration:** 4
+- **Question:** The address box's edge and the checkboxes were drawn for a white card. On the notebook's paper, in night's lamp-lit look most of all, nothing holds them visible. FR-022 covers focus only.
+- **Options:** every control's edge on the paper at least 3:1 against the paper in every look, the floor D4 used for graphics (recommended); leave it to the owner's eye at the demo
+- **Decision:** The edge of every control the setup screens draw on the paper — the address box and each checkbox — meets at least 3:1 against the paper in every look, held by a test.
+- **Why:** A person who cannot find the address box cannot add the site that brought them here. 3:1 is the WCAG floor for what identifies a control, and the floor this feature already holds the mark to.
+- **Decided by:** host (stage recommendation)
+- **Confidence:** medium · **Would reverse if:** the owner, at the reveal demo, wants the address box drawn as a bare line on the page
+- **Written to:** `specs/004-notebook-landscape/spec.md` (Clarifications)
+- **Status:** standing
+
+## D16 — How is This machine is as it was seen in each look before it is reachable?
+- **Stage:** slice gaps · **Slice:** quiet-pages · **When:** 2026-10-02T07:12:00Z · **Iteration:** 4
+- **Question:** Teardown is restyled now but not reachable from the app (Assumptions), so no demo can open it.
+- **Options:** tests render it inside the notebook in each look and both outcomes, and the demo names it under Not working yet (recommended: protection-page did this for the waiting change); a development-only way to open it; leave it unseen
+- **Decision:** Tests render This machine is as it was inside the notebook in morning, midday and night, both as it was and almost everything undone. The demo lists it under Not working yet: not reachable from the app until teardown is wired in.
+- **Why:** The spread is proved in every look without adding a way into the app that Cairn does not have, which would change what Cairn does (FR-018).
+- **Decided by:** host (stage recommendation)
+- **Confidence:** high · **Would reverse if:** teardown is wired into the app before this slice merges
+- **Written to:** `specs/004-notebook-landscape/spec.md` (Clarifications)
+- **Status:** standing
+
+## D17 — Are "not confirmed" and waiting sentences on the setup pages amber?
+- **Stage:** convergence · **Slice:** setup-pages · **When:** 2026-10-02T08:11:00Z · **Iteration:** 4
+- **Question:** After an address is added and the read-back is not confirmed, "Added to your list, though Cairn has not confirmed it is in force just now: …" is moss, the colour of "Protected: …". The note beside the categories, which carries a waiting untick, is quiet ink. FR-016 says "not confirmed" and "waiting" keep their warm amber meaning (T021, T023).
+- **Options:** keep today's colours on the page; on the page only, amber for not confirmed, off and waiting, moss for in force, Current unchanged (recommended by converge); change Current as well
+- **Decision:** On the notebook page only: the added sentence is amber when the read-back is not confirmed or protection is off, moss when it is in force; the note beside the categories is amber. Current keeps today's colours until `reveal`.
+- **Why:** A person who added a site must not read "not confirmed" in the colour of "Protected". FR-016 asks for amber in the notebook, and Current must stay as it is (SC-009).
+- **Decided by:** host (stage recommendation)
+- **Confidence:** high · **Would reverse if:** the owner, at the reveal demo, wants "off" kept apart from "not confirmed" in colour
+- **Written to:** `specs/004-notebook-landscape/spec.md` (Clarifications), `specs/004-notebook-landscape/slices/setup-pages/tasks.md` (T027)
+- **Status:** standing
+
+## D18 — What does "the same place" mean for Before Cairn changes anything's buttons?
+- **Stage:** convergence · **Slice:** setup-pages · **When:** 2026-10-02T08:11:00Z · **Iteration:** 4
+- **Question:** D14 says the buttons never move as the details arrive. At 1280×800 they hold still; at 800×600 the details push them further down the right page (T022).
+- **Options:** the buttons sit at the foot of the right page in every state, below whatever it holds (recommended); reserve the details' height while they load
+- **Decision:** The buttons sit at the foot of the right page in every state, after What this does not cover and the note on administrators. In a small window they move down as the details arrive.
+- **Why:** What D14 protects is that the yes comes after the limits. Reserving empty space for text that may never arrive would leave a blank gap on a screen that should read plainly.
+- **Decided by:** host (stage recommendation)
+- **Confidence:** high · **Would reverse if:** the owner, at the reveal demo, finds the buttons moving under their pointer
+- **Written to:** `specs/004-notebook-landscape/spec.md` (Clarifications)
+- **Status:** standing
+
+## D19 — Who makes a spread with no control scrollable from the keyboard?
+- **Stage:** after-converge gaps · **Slice:** quiet-pages · **When:** 2026-10-02T08:11:00Z · **Iteration:** 4
+- **Question:** A keyboard-only person may be unable to scroll a spread with no control on it (What Cairn covers) in the macOS and Linux webview, because the scrolling page area is the shell's and is not in the tab order there. Chromium puts it in the order; WebKit is untested. It touches every spread, protection-page's too.
+- **Options:** one small shell task before `reveal`, owned by the host and landed on main between slices (recommended by the slice); each page slice adds its own focus target; leave it
+- **Decision:** A shell task before `reveal`: the notebook's page area can be reached and scrolled from the keyboard in every webview, held by a test. It is recorded in the split's parking lot and lands on main as host work before `reveal` starts.
+- **Why:** FR-022 and FR-025 promise every part of every page is reachable by keyboard; one fix in the shell covers every spread at once, and a page slice may not edit the shell.
+- **Decided by:** host (stage recommendation)
+- **Confidence:** medium · **Would reverse if:** a run in WebKit shows the page area already scrolls from the keyboard
+- **Written to:** `specs/004-notebook-landscape/story-split.md` (Parking lot)
+- **Status:** standing
+
+## D20 — May a person confirm Before Cairn changes anything without seeing What this does not cover?
+- **Stage:** after-converge gaps · **Slice:** setup-pages · **When:** 2026-10-02T08:16:00Z · **Iteration:** 4
+- **Question:** setup-pages T026. While the disclosure's details have not arrived, or could not be read, the screen still shows its heading, the paragraph saying Cairn affects everyone who uses this machine, and "Yes, set this up". A person can confirm without ever seeing What this does not cover or the note on administrators. This is how `src/screens/Disclosure.tsx` behaves today, in both layouts. 004 does not change it, and the disclosure belongs to 002.
+- **Options:** (a) leave it as today; (b) a task in 002, like D11: the disclosure offers "Yes, set this up" only once its details are shown, and says plainly when they could not be read, with a way to try again; fixed in 002, so Current and the notebook both get it; (c) fix it inside 004's setup-pages. No stage recommendation beyond "the owner's call for 002".
+- **Decision:** (b). A new unchecked task in `specs/002-machine-wide-protection/tasks.md`: until the details are shown, the screen does not offer "Yes, set this up"; if they could not be read, it says so plainly and offers "Try again" beside "Not yet", in both layouts. setup-pages ships the screen as it is today (FR-018), and D14 stands for 004 until the 002 task lands.
+- **Why:** For someone in recovery, saying yes to a wall without being told where its gaps are is what Principle III exists to prevent: an operation affecting other accounts is disclosed in plain language before the first write, with an explicit confirmation, and 002's FR-016–FR-018 say the disclosure carries what is not covered and that an administrator can defeat Cairn. A yes before those are on screen is not that confirmation, so (a) is out. (c) would change what Cairn does inside 004 and make Current differ from today (FR-018, SC-009), as D11 found. "Not yet" stays in every state, and nothing asks the person to type or solve anything (Principle V).
+- **Decided by:** drive-skipper (claude-opus-5-5)
+- **Confidence:** high · **Would reverse if:** every path to the first system change already shows What this does not cover and the note on administrators before the yes, somewhere other than this screen
+- **Written to:** `specs/002-machine-wide-protection/tasks.md` (task appended on the trunk after this slice merges), `specs/004-notebook-landscape/slices/setup-pages/tasks.md` (T026), `specs/004-notebook-landscape/story-split.md` (Parking lot)
+- **Status:** standing

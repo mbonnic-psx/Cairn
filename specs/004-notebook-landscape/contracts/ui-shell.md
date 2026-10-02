@@ -1,7 +1,8 @@
 # Contract — the notebook shell
 
 What the page slices (`protection-page`, `tonight-page`, `setup-pages`, `quiet-pages`) build against. Settled by
-slice `frame`, extended by slice `looks` (more `Look` values and tokens) and by nothing else.
+slice `frame`, extended by slice `looks` (more `Look` values and tokens) and by `protection-page` (knowing it is on a
+page, headings), and by nothing else.
 
 ## Navigation
 
@@ -26,9 +27,43 @@ slice `frame`, extended by slice `looks` (more `Look` values and tokens) and by 
   scroll with the page. A page slice never adds a `.nb-margin` of its own.
   A screen whose content fits one page leaves the right page as `.nb-page--ruled` and empty (FR-031).
 
+## Knowing it is on a page
+
+Added by `protection-page` (D6), before the other page slices build against it.
+
+- `NotebookShell` tells the screens it wraps that they are on a notebook page, through React context; it is not a
+  prop, so the rule above holds. `CurrentShell` provides nothing, and a screen rendered outside any shell (as the
+  existing screen tests render it) reads the same as Current.
+- A screen asks with one hook exported from `src/shell/`. When it is told it is on a page, it may lay its content
+  out with the spread classes above. Otherwise it renders exactly what it renders today, element for element, so
+  Current and every existing screen test are unchanged (SC-009).
+- Both layouts come from the one component and the one set of state and handlers. A page slice never copies a
+  screen into a second component.
+- A page slice's own styles live in a stylesheet of its own under `src/styles/`, imported once from `src/main.tsx`.
+  Every selector in it starts with one prefix per screen, `.nb-<screen>-` (`protection-page` uses `.nb-protection-`
+  and `.nb-trail-`), so two page slices never edit or override each other's rules. The spread classes above stay
+  the shell's; a page slice uses them and never restyles them.
+
+## A step of more than one screen
+
+Added before `setup-pages` and `quiet-pages` (D13). The choosing step shows two screens and a button. Its composition
+moves out of `App` into one component beside the setup screens, which `App` renders in its place: on a page it lays
+the step out as one spread, otherwise it renders exactly today's elements in today's order. The two screens inside
+it keep their own components and state.
+
+Prefixes, one per screen: `setup-pages` uses `.nb-choosing-`, `.nb-categories-`, `.nb-custom-` and `.nb-disclosure-`;
+`quiet-pages` uses `.nb-limits-` and `.nb-teardown-`.
+
+## Headings
+
+Added by `protection-page` (D9, frame T025). The notebook supplies one `h1`, "Cairn", visually hidden and read by
+assistive technology. The greeting is not a heading. A screen's own heading is the next heading in the outline.
+
 ## Look tokens
 
-Every page reads colour and type only from CSS custom properties set on the shell's root, `[data-look]`:
+Every page reads colour and type only from CSS custom properties set on the shell's root, `[data-look]`. What is the same in every look (the fonts) lives in one shared `[data-look]` block. Each look
+(`morning`, `midday`, `night`) defines every other token below under the same name, so a page that reads a token is lit
+by every look with no change of its own:
 
 | Token | Meaning |
 |---|---|
@@ -40,8 +75,12 @@ Every page reads colour and type only from CSS custom properties set on the shel
 | `--nb-margin` | the margin line |
 | `--nb-accent-amber` | waiting and not confirmed (text) |
 | `--nb-button` | the primary button's fill, with `--nb-button-ink` |
-| `--nb-font-serif` | headings, lists, reflective text |
-| `--nb-font-mono` | tab names, small labels, buttons only |
+| `--nb-font-serif` | headings, lists, reflective text; the same in every look, set once in the shared `[data-look]` block |
+| `--nb-font-mono` | tab names, small labels, buttons only; shared, as above |
+| `--nb-sun-size`, `--nb-sun-left`, `--nb-sun-top` | the sun's diameter and place, per look |
+| `--nb-stone-glow` | the glow around the cairn's stones; set by night alone (`looks`) |
+| `--nb-lamp-glow` | the lamp's glow on the notebook; set by night alone (`looks`) |
+| `--nb-focus-sky` | the focus outline of anything drawn over the sky (tabs, the switch); added by `looks` |
 
 Screens that still colour their text with the theme's palette (`text-ink-*`, `text-amber-*`, `text-moss-*`) are
 covered too: inside `[data-look]` the shell re-points those palette properties to darker warm values, and the
@@ -54,4 +93,6 @@ and the contrast test (research R6) covers every page by covering the tokens.
 
 - The shell holds no reach data, imports nothing from `ipc/reaches`, and shows no count, badge or streak
   (the `check-no-ambient-counts` rule 3, FR-008).
+- `NotebookShell` takes the look (`'morning' | 'midday' | 'night'`) and sets it as `data-look` on its root; the
+  screens it wraps still receive no new props.
 - With `look === 'current'` the shell is `CurrentShell`, whose output is today's interface byte for byte (SC-009).

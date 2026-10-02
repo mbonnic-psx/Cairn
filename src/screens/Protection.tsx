@@ -5,10 +5,11 @@
  * write that returned success — and `not_verified` is its own state with its
  * own words, never rendered as protected (FR-011, FR-012).
  */
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
+import { useNotebookPage } from '../shell/notebookPage';
 import {
   cancelPendingChange,
   getProtectionState,
@@ -23,6 +24,13 @@ const toneClasses = {
   quiet: 'bg-sand-100 text-ink-500',
 } as const;
 
+/** The same three tones on the paper: the pill's fill and words come from the look's tokens, not the palette. */
+const badgeTone = {
+  moss: 'nb-protection-badge--moss',
+  amber: 'nb-protection-badge--amber',
+  quiet: 'nb-protection-badge--quiet',
+} as const;
+
 export function Protection({
   state,
   pending,
@@ -34,6 +42,7 @@ export function Protection({
 }) {
   const [current, setCurrent] = useState<ProtectionState | undefined>(state);
   const [trouble, setTrouble] = useState<string>();
+  const onPage = useNotebookPage();
 
   useEffect(() => {
     if (state) return;
@@ -41,6 +50,13 @@ export function Protection({
   }, [state]);
 
   if (trouble) {
+    if (onPage) {
+      return (
+        <Spread>
+          <p className="nb-protection-detail">{trouble}</p>
+        </Spread>
+      );
+    }
     return (
       <Card>
         <p className="text-ink-500">{trouble}</p>
@@ -49,6 +65,13 @@ export function Protection({
   }
 
   if (!current) {
+    if (onPage) {
+      return (
+        <Spread>
+          <p className="nb-protection-detail">Checking this machine…</p>
+        </Spread>
+      );
+    }
     return (
       <Card>
         <p className="text-ink-400">Checking this machine…</p>
@@ -57,6 +80,30 @@ export function Protection({
   }
 
   const words = protectionWords[current.status];
+
+  if (onPage) {
+    return (
+      <Spread right={pending && <Waiting pending={pending} onCancelled={onCancelled} />}>
+        <span className={`nb-protection-badge ${badgeTone[words.tone]}`}>{words.title}</span>
+        <h2 className="nb-protection-title">{words.title}</h2>
+        <p className="nb-protection-detail">{words.detail}</p>
+        {current.status !== 'off' && (
+          <dl className="nb-protection-figures">
+            <div className="nb-protection-figure">
+              <dt className="nb-protection-figure__label">Addresses in force</dt>
+              <dd className="nb-protection-figure__value">{current.entry_count_verified}</dd>
+            </div>
+            <div className="nb-protection-figure">
+              <dt className="nb-protection-figure__label">Last checked</dt>
+              <dd className="nb-protection-figure__value">
+                {current.verified_at ? whenWas(current.verified_at) : 'not yet'}
+              </dd>
+            </div>
+          </dl>
+        )}
+      </Spread>
+    );
+  }
 
   return (
     <Card>
@@ -89,6 +136,16 @@ export function Protection({
   );
 }
 
+/** The notebook's two pages: what is said on the left, a blank ruled page (or a note) on the right. */
+function Spread({ children, right }: { children: ReactNode; right?: ReactNode }) {
+  return (
+    <div className="nb-spread nb-protection-leaves">
+      <div className="nb-page">{children}</div>
+      <div className="nb-page nb-page--ruled">{right}</div>
+    </div>
+  );
+}
+
 /**
  * A change that is waiting.
  *
@@ -103,21 +160,35 @@ function Waiting({
   pending: PendingChange;
   onCancelled?: () => void;
 }) {
+  const onPage = useNotebookPage();
+  const sentence = pending.eligible_now
+    ? 'This is ready to take effect.'
+    : `This takes effect in ${pending.time_remaining}. Until then, nothing changes.`;
+  const cancel = async () => {
+    await cancelPendingChange(pending.id);
+    onCancelled?.();
+  };
+
+  if (onPage) {
+    return (
+      <div className="nb-protection-note">
+        <p className="nb-protection-note__what">{pending.what}</p>
+        <p className="nb-protection-note__sentence">{sentence}</p>
+        <Button tone="quiet" className="nb-protection-note__button" onClick={cancel}>
+          Keep things as they are
+        </Button>
+      </div>
+    );
+  }
+
   return (
     <div className="mt-8 rounded-xl bg-amber-100 p-6">
       <p className="text-ink-900">{pending.what}</p>
-      <p className="reflective mt-2 text-ink-700">
-        {pending.eligible_now
-          ? 'This is ready to take effect.'
-          : `This takes effect in ${pending.time_remaining}. Until then, nothing changes.`}
-      </p>
+      <p className="reflective mt-2 text-ink-700">{sentence}</p>
       <Button
         tone="quiet"
         className="mt-4 -ml-2"
-        onClick={async () => {
-          await cancelPendingChange(pending.id);
-          onCancelled?.();
-        }}
+        onClick={cancel}
       >
         Keep things as they are
       </Button>

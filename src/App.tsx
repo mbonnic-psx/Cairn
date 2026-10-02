@@ -6,15 +6,13 @@
  */
 import { useEffect, useState } from 'react';
 
-import { Button } from './components/Button';
 import { tabsFor, type Step, type TabId } from './navigation';
 import { CheckIn, useCheckInSession } from './screens/CheckIn';
 import { Disclosure } from './screens/Disclosure';
 import { Limits } from './screens/Limits';
 import { Protection } from './screens/Protection';
 import { Reaches } from './screens/Reaches';
-import { Categories } from './screens/Setup/Categories';
-import { CustomEntry } from './screens/Setup/CustomEntry';
+import { Choosing } from './screens/Setup/Choosing';
 import { Trail } from './screens/Trail';
 import { LookSwitch } from './look/LookSwitch';
 import type { Look } from './look/look';
@@ -116,42 +114,53 @@ export default function App({ devBuild = import.meta.env.DEV }: { devBuild?: boo
     }
   }
 
-  const Shell = look === 'morning' ? NotebookShell : CurrentShell;
   const tabs = tabsFor(step, protectionOn, state?.status);
+  const onSelect = (id: TabId) => void select(id);
+
+  const screen = (
+    <>
+      {step === 'choosing' && (
+        <Choosing
+          categories={categories}
+          onToggle={toggle}
+          note={note}
+          onTurnOn={() => setStep('disclosure')}
+        />
+      )}
+
+      {step === 'disclosure' && (
+        <Disclosure
+          disclosures={disclosures}
+          onConfirm={confirm}
+          onBack={() => setStep('choosing')}
+        />
+      )}
+
+      {step === 'protected' && <Protection state={state} />}
+
+      {step === 'trail' && trail && <Trail trail={trail} status={state?.status} />}
+
+      {step === 'reaches' && <Reaches />}
+
+      {step === 'checkin' && <CheckIn session={checkIn} />}
+
+      {step === 'limits' && disclosures && <Limits disclosures={disclosures} />}
+    </>
+  );
 
   return (
     <>
       {/* `import.meta.env.DEV` is a build-time constant, so the bundler drops the switch from a production build. */}
       {import.meta.env.DEV && devBuild && <LookSwitch look={look} onChange={setLook} />}
-      <Shell tabs={tabs} onSelect={(id) => void select(id)}>
-        {step === 'choosing' && (
-          <>
-            <Categories categories={categories} onToggle={toggle} note={note} />
-            <CustomEntry />
-            <div className="flex justify-end">
-              <Button onClick={() => setStep('disclosure')}>Turn protection on</Button>
-            </div>
-          </>
-        )}
-
-        {step === 'disclosure' && (
-          <Disclosure
-            disclosures={disclosures}
-            onConfirm={confirm}
-            onBack={() => setStep('choosing')}
-          />
-        )}
-
-        {step === 'protected' && <Protection state={state} />}
-
-        {step === 'trail' && trail && <Trail trail={trail} status={state?.status} />}
-
-        {step === 'reaches' && <Reaches />}
-
-        {step === 'checkin' && <CheckIn session={checkIn} />}
-
-        {step === 'limits' && disclosures && <Limits disclosures={disclosures} />}
-      </Shell>
+      {look === 'current' ? (
+        <CurrentShell tabs={tabs} onSelect={onSelect}>
+          {screen}
+        </CurrentShell>
+      ) : (
+        <NotebookShell tabs={tabs} onSelect={onSelect} look={look}>
+          {screen}
+        </NotebookShell>
+      )}
     </>
   );
 }

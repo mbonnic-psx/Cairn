@@ -17,7 +17,7 @@ page that follows is built and checked in all three. Then one group of screens a
 | # | Slice | What the person sees afterwards | Specification | Depends on |
 |---|---|---|---|---|
 | 1 | `frame` | Behind the switch (Current or Morning): the landscape in its morning look, the notebook, the paper tabs, the greeting and the Cairn mark. Every existing screen already sits inside the notebook, unchanged in content. Fonts ship in the app. Works from the smallest window to the largest | US1; FR-001–FR-008, FR-014, FR-015, FR-017, FR-022, FR-024–FR-027 | — |
-| 2 | `looks` | Midday and night, and the testing switch that moves between the three looks, present only in development builds | US2; FR-009–FR-013b, FR-016, FR-021, FR-023 | `frame` |
+| 2 | `looks` | Midday and night, and the testing switch that moves between the three looks, present only in development builds | US2; FR-009–FR-013b, FR-016, FR-021, FR-023, FR-033 | `frame` |
 | 3 | `protection-page` | Protection (including "not confirmed" and a waiting change) and What is protected, laid out as notebook spreads | US3 (Protection, What is protected); FR-018, FR-020 | `looks` |
 | 4 | `tonight-page` | Tonight and Today, laid out as notebook spreads: the typed log and the lined journal page | US3 (Tonight, Today); FR-018, FR-019 | `looks` |
 | 5 | `setup-pages` | What would you like to protect?, Anywhere else? and Before Cairn changes anything, as notebook spreads | US3 (setup, disclosure); FR-018 | `looks` |
@@ -49,3 +49,15 @@ the frame's page-spread layout and the look tokens, both settled by `frame` and 
 - The clock choosing the look is a later feature. It removes the testing switch before the first release (FR-013a).
 - Screens not built yet (Settings, Over time, One day, a partner, streaks) adopt this style when their own slices
   build them.
+- `protection-page` lands the notebook context and heading outline (D6, D9) before `setup-pages` and `quiet-pages`
+  start; they build against it. Carried tasks are owned as D10 says.
+- A waiting change is never shown in the running app (`App` never fetches it). That is 002's to fix, as a task in
+  `specs/002-machine-wide-protection/tasks.md` (D11). When it lands, Current's Protection shows it too; that is 002's
+  change, not a break of SC-009.
+- A spread with no control may not scroll from the keyboard in the macOS and Linux webview: the page area is the
+  shell's. One shell task makes it reachable and scrollable by keyboard, as host work on main before `reveal` (D19).
+  The same task scrolls the page area back to its top when the screen changes: at 800×600 the disclosure opened
+  part-way down, its heading cut off (setup-pages demo, design note 1).
+- Before Cairn changes anything can be confirmed before its details (what is not covered) are shown, while they load
+  or when they cannot be read. That is 002's to fix, as a task in `specs/002-machine-wide-protection/tasks.md` (D20).
+  When it lands, Current's disclosure changes too; that is 002's change, not a break of SC-009.

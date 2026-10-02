@@ -17,13 +17,36 @@ afterEach(() => {
 
 describe('Greeting', () => {
   it('shows the words and the true weekday and time', () => {
-    render(<Greeting />);
+    render(<Greeting look="morning" />);
     expect(screen.getByText('Good morning.')).toBeInTheDocument();
     expect(screen.getByText(formatWeekdayTime(START))).toBeInTheDocument();
   });
 
+  it.each([
+    ['morning', 'Good morning.'],
+    ['midday', 'Midday.'],
+    ['night', 'Good evening.'],
+  ] as const)('shows the words of the %s look, with the same weekday and time', (look, words) => {
+    render(<Greeting look={look} />);
+    expect(screen.getByText(words)).toBeInTheDocument();
+    expect(screen.getByText(formatWeekdayTime(START))).toBeInTheDocument();
+  });
+
+  it('changes the words on a new look without resetting the clock tick', () => {
+    const { rerender } = render(<Greeting look="morning" />);
+    const timers = vi.getTimerCount();
+    rerender(<Greeting look="night" />);
+    expect(screen.getByText('Good evening.')).toBeInTheDocument();
+    expect(vi.getTimerCount()).toBe(timers);
+    act(() => {
+      vi.advanceTimersByTime(60_000);
+    });
+    expect(screen.getByText(formatWeekdayTime(new Date(2026, 9, 1, 7, 49, 20)))).toBeInTheDocument();
+    expect(vi.getTimerCount()).toBe(timers);
+  });
+
   it('first updates at the next minute boundary', () => {
-    render(<Greeting />);
+    render(<Greeting look="morning" />);
     const before = formatWeekdayTime(START);
     act(() => {
       vi.advanceTimersByTime(39_000);
@@ -36,7 +59,7 @@ describe('Greeting', () => {
   });
 
   it('keeps up, minute by minute', () => {
-    render(<Greeting />);
+    render(<Greeting look="morning" />);
     act(() => {
       vi.advanceTimersByTime(40_000 + 60_000);
     });
@@ -44,7 +67,7 @@ describe('Greeting', () => {
   });
 
   it('clears its timer on unmount', () => {
-    const { unmount } = render(<Greeting />);
+    const { unmount } = render(<Greeting look="morning" />);
     expect(vi.getTimerCount()).toBeGreaterThan(0);
     unmount();
     expect(vi.getTimerCount()).toBe(0);
@@ -62,7 +85,7 @@ describe('Greeting', () => {
     }
 
     it('shows the true weekday and time at once when the window becomes visible', () => {
-      render(<Greeting />);
+      render(<Greeting look="morning" />);
       jump();
       act(() => {
         document.dispatchEvent(new Event('visibilitychange'));
@@ -71,7 +94,7 @@ describe('Greeting', () => {
     });
 
     it('shows the true weekday and time at once when the window regains focus', () => {
-      render(<Greeting />);
+      render(<Greeting look="morning" />);
       jump();
       act(() => {
         window.dispatchEvent(new Event('focus'));
@@ -80,7 +103,7 @@ describe('Greeting', () => {
     });
 
     it('ignores visibilitychange while hidden', () => {
-      render(<Greeting />);
+      render(<Greeting look="morning" />);
       jump();
       const spy = vi.spyOn(document, 'visibilityState', 'get').mockReturnValue('hidden');
       act(() => {
@@ -91,7 +114,7 @@ describe('Greeting', () => {
     });
 
     it('lands the next update on the next :00, not 60 s after the jump', () => {
-      render(<Greeting />);
+      render(<Greeting look="morning" />);
       jump();
       act(() => {
         window.dispatchEvent(new Event('focus'));
@@ -103,7 +126,7 @@ describe('Greeting', () => {
     });
 
     it('re-reads the clock each tick, so a jump with no event still recovers on the next :00', () => {
-      render(<Greeting />);
+      render(<Greeting look="morning" />);
       act(() => {
         vi.advanceTimersByTime(40_000); // 07:49:00 tick
       });
@@ -121,7 +144,7 @@ describe('Greeting', () => {
     it('removes its listeners and timer on unmount', () => {
       const docSpy = vi.spyOn(document, 'removeEventListener');
       const winSpy = vi.spyOn(window, 'removeEventListener');
-      const { unmount } = render(<Greeting />);
+      const { unmount } = render(<Greeting look="morning" />);
       unmount();
       expect(docSpy).toHaveBeenCalledWith('visibilitychange', expect.any(Function));
       expect(winSpy).toHaveBeenCalledWith('focus', expect.any(Function));
@@ -132,7 +155,7 @@ describe('Greeting', () => {
   });
 
   it('leaves exactly one pending timer after a refresh', () => {
-    render(<Greeting />);
+    render(<Greeting look="morning" />);
     expect(vi.getTimerCount()).toBe(1);
     act(() => {
       window.dispatchEvent(new Event('focus'));
@@ -142,7 +165,7 @@ describe('Greeting', () => {
 
   it('wakes exactly when the minute turns, from a clock with milliseconds', () => {
     vi.setSystemTime(new Date(2026, 9, 1, 7, 48, 30, 500));
-    render(<Greeting />);
+    render(<Greeting look="morning" />);
     const before = formatWeekdayTime(new Date(2026, 9, 1, 7, 48));
     const after = formatWeekdayTime(new Date(2026, 9, 1, 7, 49));
     act(() => {
@@ -156,7 +179,7 @@ describe('Greeting', () => {
   });
 
   it('shows no count, badge or streak', () => {
-    const { container } = render(<Greeting />);
+    const { container } = render(<Greeting look="morning" />);
     expect(container.textContent).not.toMatch(/streak|badge|\bday \d|\bchain\b|reach/i);
   });
 });

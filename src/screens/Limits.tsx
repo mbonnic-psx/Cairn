@@ -7,8 +7,50 @@
  */
 import { Card } from '../components/Card';
 import type { Disclosures } from '../ipc';
+import { useNotebookPage } from '../shell/notebookPage';
+
+/** The two section labels, read by both layouts so their words cannot drift apart. */
+const NOT_COVERED_LABEL = 'What it does not cover in this release';
+const KEPT_LABEL = 'What is kept, and how';
 
 export function Limits({ disclosures }: { disclosures: Disclosures }) {
+  const onPage = useNotebookPage();
+
+  if (onPage) {
+    return (
+      <div className="nb-spread nb-limits-leaves">
+        <div className="nb-page">
+          <h2 className="nb-limits-title">What Cairn covers</h2>
+
+          <ul className="nb-limits-list">
+            {disclosures.in_force.map((line) => (
+              <li key={line} className="nb-limits-line">
+                <span aria-hidden className="nb-limits-mark nb-limits-mark--dot" />
+                <span>{line}</span>
+              </li>
+            ))}
+          </ul>
+
+          <h3 className="nb-label nb-limits-label">{NOT_COVERED_LABEL}</h3>
+          <ul className="nb-limits-list">
+            {disclosures.not_covered.map((line) => (
+              <li key={line} className="nb-limits-line">
+                <span aria-hidden className="nb-limits-mark nb-limits-mark--ring" />
+                <span>{line}</span>
+              </li>
+            ))}
+          </ul>
+
+          <h3 className="nb-label nb-limits-label">{KEPT_LABEL}</h3>
+          <p className="nb-limits-kept">{disclosures.encryption}</p>
+
+          <p className="nb-limits-note">{disclosures.administrator}</p>
+        </div>
+        <div className="nb-page nb-page--ruled" />
+      </div>
+    );
+  }
+
   return (
     <Card className="max-w-2xl">
       <h2 className="reflective text-3xl text-ink-900">What Cairn covers</h2>
@@ -23,7 +65,7 @@ export function Limits({ disclosures }: { disclosures: Disclosures }) {
       </ul>
 
       <h3 className="mt-10 text-sm font-medium tracking-wide text-ink-400 uppercase">
-        What it does not cover in this release
+        {NOT_COVERED_LABEL}
       </h3>
       <ul className="mt-3 space-y-3 text-ink-700">
         {disclosures.not_covered.map((line) => (
@@ -35,7 +77,7 @@ export function Limits({ disclosures }: { disclosures: Disclosures }) {
       </ul>
 
       <h3 className="mt-10 text-sm font-medium tracking-wide text-ink-400 uppercase">
-        What is kept, and how
+        {KEPT_LABEL}
       </h3>
       <p className="reflective mt-3 text-ink-700">{disclosures.encryption}</p>
 
