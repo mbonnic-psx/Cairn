@@ -347,6 +347,30 @@ this, 4. … just match the time of the computer"):
 Already stated, and held by this slice as written: day-level estimates are excluded from the hour breakdown and
 the exclusion is stated (FR-023); the time Cairn did not see is stated above the hours, as for by site (H4, H5).
 
+### Gaps reviewed — slice `history-by-weekday` (2026-10-02)
+
+Checked against US2 scenario 1 (by day of week), FR-019, FR-023, the `by_weekday` field of `contracts/ui-ipc.md`,
+and history-by-hour's B1–B5. Decided by the owner ("1. yes, 2. Follow Computer Settings, 3. yes, 4. do the
+recommendation"):
+
+- **W1 — where it lives.** A third option in *Over time*'s choice: *By site*, *By hour*, *By day*, sharing the
+  same range. Not a screen of its own, nothing in the header (H1).
+- **W2 — which day comes first.** The week starts on the day the computer's own settings say it starts (its
+  locale), and on Monday when the computer does not say. Days are named in words, as the computer names them.
+- **W3 — every day, quiet ones too.** All seven days are shown, a day with no reaches as plainly as any other
+  (as B2 for hours).
+- **W4 — an uneven range is stated, not hidden.** A range rarely holds each weekday the same number of times
+  (ten days hold two Mondays and one Tuesday). Beside each day, the screen says how many of that day the range
+  holds ("across 2 Mondays"), so a count is never read as worse only because its day came round more often. No
+  averages are computed and no day is ranked.
+- **W5 — the day is the computer's.** A reach belongs to the local day its own instant falls in, with the offset
+  in force then, exactly as by hour (B4, B4 clarified): exact across clock changes, read in the zone set now.
+
+Already stated, and held by this slice as written: estimates are day-level and *do* have a day, but FR-023
+excludes them only from site and hour breakdowns, so whether an estimate counts toward its weekday is a question
+for the plan to raise rather than assume; the time Cairn did not see is stated above the days (H4, H5); no
+ranking word, no colour that means good or bad (B3).
+
 ## Requirements *(mandatory)*
 
 ### Functional Requirements
