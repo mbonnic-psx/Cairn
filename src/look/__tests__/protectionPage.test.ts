@@ -206,6 +206,11 @@ describe('the protection-page stylesheet', () => {
       expect(sticky).not.toMatch(/min-height|(^|[^-])height:/);
     });
 
+    it('never lets the sticky leaf grow taller than the page area: max-height 100% and its own scrolling (T023)', () => {
+      expect(sticky).toMatch(/max-height:\s*100%/);
+      expect(sticky).toMatch(/overflow-y:\s*auto/);
+    });
+
     it('leaves the ruled leaf to stretch to the foot of the spread', () => {
       const ruled = rules.filter((r) => r.selector.includes('.nb-page--ruled')).map((r) => r.body).join('');
       expect(ruled).not.toMatch(/align-self:\s*start|(^|[^-])height:/);

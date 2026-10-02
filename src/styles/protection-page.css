@@ -25,6 +25,9 @@
   position: sticky;
   top: 0;
   align-self: start;
+  /* However much it says, it never outgrows the page area: it scrolls inside itself instead of clipping. */
+  max-height: 100%;
+  overflow-y: auto;
 }
 
 /* The state of protection, on the left leaf. */

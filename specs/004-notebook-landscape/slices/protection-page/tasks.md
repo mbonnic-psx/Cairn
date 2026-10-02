@@ -47,6 +47,8 @@ Reviewed: drive-slice (opus) and drive-implement (sonnet), 2026-10-02, in a brow
 
 T018/T019 (drive-implement, 2026-10-02): inventory lines start-aligned; the aside's `margin-left: auto`. In the demo (`?core=in_force&list=long`, 120 lines; `?core=not_verified`, 4 lines), morning, midday and night at 1280×800 and 800×600: lines whose height is not a multiple of 32 = 0 in all twelve runs (was 17 of 120 at 1280×800); lines whose aside starts at the address column = 0 in all twelve; the figures' row (31px values) was already whole-pitch-independent, as it is not on the ruled pitch.
 
+T023 (drive-implement, 2026-10-02): the sticky leaf is `max-height: 100%` with `overflow-y: auto`. In the demo at 800×600 with a five-digit count (a copy of the fake core with 12,350 addresses, in /tmp), `?core=not_verified` and `?core=in_force`, morning, midday and night: the page area is 480px and the leaf 365px (not confirmed) or 302px (in force), `scrollHeight` = `clientHeight`, so nothing clips and nothing scrolls inside the leaf. Limit seen: a percentage max-height resolves against the spread's grid area, which is the page area only while the list is shorter than it; with a long list the bound is the spread's height, so the leaf's own height (which does not grow with the list) is what keeps it in view.
+
 ## Final verification
 
 - [x] T010 [US3] Guard: every existing test under `src/screens/__tests__/` passes unchanged, `git diff --stat main -- src/screens/__tests__` shows only added files (`ProtectionCurrentPin`, `ProtectionPage`, `TrailPage`), and `src/shell/__tests__/AppLook.test.tsx` (production-equals-Current) is unedited and green (SC-009). Quickstart "Check it", step 1: `npx vitest run src/shell src/screens src/look`. Depends on T003, T008, T009.
