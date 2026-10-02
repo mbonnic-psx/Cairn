@@ -7,12 +7,12 @@ its phase touches.
 
 ## Phase 0 — Pin: before code that was here changes
 
-- [ ] S1 [US2] [pin] Write `src/screens/__tests__/ReachesToday.test.tsx`. It renders `Reaches` with a fake
+- [X] S1 [US2] [pin] Write `src/screens/__tests__/ReachesToday.test.tsx`. It renders `Reaches` with a fake
   `read` (a plain object of two functions, written in the test file, recording its calls) and a fixed `now`
   (an ordinary day, 30 September 2026, 20:00 local). It asserts the screen opens on *Today*, and asks
   `listTodaysReaches` for this local midnight to that instant plus 86 400. It fails only because `Reaches`
   takes no `read` or `now` yet. No `vi.mock`.
-- [ ] S2 [US2] [pin] `src/screens/Reaches.tsx`: add the optional `read` and `now` props, defaulting to the real
+- [X] S2 [US2] [pin] `src/screens/Reaches.tsx`: add the optional `read` and `now` props, defaulting to the real
   wrappers and `() => new Date()`, with no other change. S1 and `Reaches.test.tsx` green, and
   `Reaches.test.tsx` is not edited. Hand the host the two rows in `plan.md`, *Pin*, for
   `delivery/survey/pinned.md`.
@@ -41,18 +41,18 @@ its phase touches.
   1 000 ms. The header says what this does not measure, as `at_scale.rs`'s does.
 - [X] S7 [P] [US2] [T044] Grow `CLASSIFIED` in `src-tauri/tests/ipc_surface.rs` from 17 to 18 with
   `summarize_reaches` as `Effect::Reads`, so `every_classified_command_is_exposed` fails until it is exposed.
-- [ ] S8 [P] [US2] [W13] Write `src/__tests__/localDays.test.ts` for `src/localDays.ts`: today's date as
+- [X] S8 [P] [US2] [W13] Write `src/__tests__/localDays.test.ts` for `src/localDays.ts`: today's date as
   `YYYY-MM-DD`; a day's bounds as its two local midnights, 23 hours apart on a spring-forward day and 25 on a
   fall-back day (with `process.env.TZ = 'Europe/London'` set at the top of the file, before any date is made); a range's bounds; adding
   days across a month end, a year end and 29 February.
-- [ ] S9 [P] [US2] [T042, T045, T047; scenarios 13–19] Write `src/screens/__tests__/ReachesOverTime.test.tsx`
+- [X] S9 [P] [US2] [T042, T045, T047; scenarios 13–19] Write `src/screens/__tests__/ReachesOverTime.test.tsx`
   with a fake `read` and a fixed `now`, and no `vi.mock`. It covers the *Today* | *Over time* choice; the
   first call for 2026-09-03 to 2026-09-30 with local-midnight bounds; changing *From* calling again; the range
   forgotten on going back to *Today* and returning; *To* bounded by today and *From* by *To*; the order kept,
   with a count and a bar for each site; no ranking word and no comparison; a quiet range; the coverage note and
   the estimates sentence above the list, the latter only when non-zero; sealed; a read that throws, shown as
   one plain sentence; no streak, *day N*, chain or banned word; and no control that changes protection.
-- [ ] S10 [US2] [W13; scenario 20] Add the clock-change case to `src/screens/__tests__/ReachesToday.test.tsx`:
+- [X] S10 [US2] [W13; scenario 20] Add the clock-change case to `src/screens/__tests__/ReachesToday.test.tsx`:
   on a 25-hour day (`TZ=Europe/London`, 25 October 2026), *Today* asks for this local midnight to the next one.
   It fails against `start + 86 400`. (Not `[P]` with S1, which writes the same file.)
 
@@ -75,19 +75,19 @@ its phase touches.
   sentence. Without the `history` feature, the answer is `NO_HISTORY`. `ipc/commands.rs`: the
   `#[tauri::command]`, whose doc comment names the reaches screen as its only caller. `main.rs`: registered.
   Depends on S13.
-- [ ] S15 [P] [US2] [W13; S8] `src/localDays.ts`: `localToday(now)`, `dayBounds(day)`,
+- [X] S15 [P] [US2] [W13; S8] `src/localDays.ts`: `localToday(now)`, `dayBounds(day)`,
   `rangeBounds(firstDay, lastDay)` and `addDays(day, n)`, built from the calendar (`new Date(y, m, d)`), never
   by adding seconds. It holds no reach data, so the guard has nothing to say about it.
 - [X] S16 [P] [US2] [T034, W14] `src/ipc/reaches.ts`: `SiteCount`, `Patterns` (the five fields), and
   `summarizeReaches(firstDay, lastDay, rangeStart, rangeEnd)`. The wrapper returns what the command returns.
   The screen turns a thrown error into its own sentence (S17).
-- [ ] S17 [US2] [T045, T047; S9, S10, S1] `src/screens/Reaches.tsx`: the *Today* | *Over time* choice; *Today*
+- [X] S17 [US2] [T045, T047; S9, S10, S1] `src/screens/Reaches.tsx`: the *Today* | *Over time* choice; *Today*
   on `dayBounds`; the over-time view with *From* and *To* (opening on `addDays(today, -27)` to today, and held
   only in component state); the coverage note, then the estimates sentence, above the list; each site with its
   count and a soft bar in one warm theme colour, decorative and `aria-hidden`, with the count as text; *Nothing
   here for these days.* for a quiet range; the standing sentence under the list; sealed; and one plain sentence
   for a failed read. Serif for the headings, as now. Depends on S2, S15 and S16.
-- [ ] S18 [US2] [W13, refactor] `src/screens/CheckIn.tsx`: replace its own `today()` with `localDays`, with
+- [X] S18 [US2] [W13, refactor] `src/screens/CheckIn.tsx`: replace its own `today()` with `localDays`, with
   every `CheckIn*.test.tsx` green before and after. `quote` also edits this file, so whichever lands second
   rebases. Depends on S15.
 - [X] S19 [P] [US2] [H1, guard] `scripts/check-no-ambient-counts.mjs`: remove `History.tsx` from *(Done on `main` by the host in #21, 2026-10-01: a slice may not edit `scripts/` or `eslint.config.js`. Planted `History.tsx` refused by both.)*
