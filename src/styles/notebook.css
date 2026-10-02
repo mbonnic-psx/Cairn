@@ -12,6 +12,14 @@
   --font-serif: var(--font-notebook-serif);
   --nb-font-serif: var(--font-notebook-serif);
   --nb-font-mono: var(--font-notebook-mono);
+
+  /* The board's two lengths (D39). --nb-u is the notebook's scale s as a length:
+   * everything inside the notebook, the sun and the stones are N x this. It is
+   * written in viewport units, not container units, because a page's own
+   * container would resolve them against itself. --nb-g is the greeting's own
+   * growth with the window's width, and is not for page sheets. */
+  --nb-u: clamp(1px, min(100vw / 1280, 100vh / 800), 2px);
+  --nb-g: max(1px, 100vw / 1280);
 }
 
 [data-look="morning"] {
@@ -188,14 +196,14 @@
   position: relative;
   box-sizing: border-box;
   display: grid;
-  grid-template-columns: 250px minmax(0, min(1200px, max(830px, calc((100vh - 120px) * 830 / 680))));
-  column-gap: 44px;
-  justify-content: center;
+  grid-template-columns: 19.53125vw minmax(0, min(64.84375vw, 127.5vh));
+  column-gap: 3.4375vw;
+  justify-content: start;
   align-items: start;
   width: 100%;
   height: 100vh;
   min-height: 600px;
-  padding: 70px 100px 50px 56px;
+  padding: 8.75vh 0 0 4.375vw;
   overflow: hidden;
   font-family: var(--nb-font-serif);
   color: var(--nb-ink-body);
@@ -317,7 +325,7 @@
 /* The greeting. */
 .nb-aside {
   position: relative;
-  padding-top: 18px;
+  padding-top: 2.25vh;
 }
 .nb-greeting {
   display: flex;
@@ -345,7 +353,7 @@
   width: 100%;
   aspect-ratio: 830 / 680;
   container-type: size;
-  max-height: calc(100vh - 120px);
+  max-height: 85vh;
   min-height: 480px;
   background: var(--nb-paper);
   border-radius: 6px;
@@ -548,7 +556,7 @@
  * not kept there; the height is, so the pages still scroll. */
 @supports not (aspect-ratio: 1 / 1) {
   .nb-notebook {
-    height: calc(100vh - 120px);
+    height: 85vh;
   }
 }
 @supports not (aspect-ratio: 1 / 1) {

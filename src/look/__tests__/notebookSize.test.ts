@@ -22,29 +22,95 @@ const narrowBlock = css.match(/@media \(max-width: 1099px\)\s*\{([\s\S]*?\n\})\s
 const forcedBlock = css.match(/@media \(forced-colors: active\)\s*\{([\s\S]*?\n\})\s*$/m)?.[1] ?? '';
 const base = css.replace(narrowBlock, '').replace(forcedBlock, '');
 
+// The narrow block as it stood on main when slice board-scale began (T001): it must not change (D37).
+const NARROW_AT_T001 =
+  '\n  .nb-root {\n    grid-template-columns: minmax(0, 1fr);\n    grid-template-rows: auto minmax(0, 1fr);\n    row-gap: 12px;\n    padding: 44px 64px 24px 16px;\n  }\n  .nb-aside {\n    padding-top: 0;\n  }\n  .nb-greeting {\n    gap: 4px;\n  }\n  .nb-greeting__words {\n    font-size: 30px;\n  }\n  .nb-notebook {\n    max-height: 100%;\n    min-height: 0;\n  }\n  .nb-page-area {\n    padding: 28px 32px 28px 52px;\n  }\n  .nb-fold {\n    left: calc(50% + 10px);\n  }\n}';
+
+const look = ruleIn(base, '[data-look]');
 const root = ruleIn(base, '.nb-root');
 const nb = ruleIn(base, '.nb-notebook');
+const aside = ruleIn(base, '.nb-aside');
 const nbNarrow = ruleIn(narrowBlock, '.nb-notebook');
 const rootNarrow = ruleIn(narrowBlock, '.nb-root');
 
-const TRACK = /^(\d+)px minmax\(0, min\((\d+)px, max\((\d+)px, calc\(\(100vh - (\d+)px\) \* (\d+) \/ (\d+)\)\)\)\)$/;
+const num = (v: string | undefined) => Number(v);
+const px = (v: string | undefined) => Number(v?.match(/^(-?[\d.]+)px$/)?.[1]);
+const vh = (v: string | undefined) => Number(v?.match(/^([\d.]+)vh$/)?.[1]);
+
+// The two shared lengths, read from the sheet.
+const U = declOf(look, '--nb-u')?.match(/^clamp\(([\d.]+)px, min\(100vw \/ ([\d.]+), 100vh \/ ([\d.]+)\), ([\d.]+)px\)$/);
+const G = declOf(look, '--nb-g')?.match(/^max\(([\d.]+)px, 100vw \/ ([\d.]+)\)$/);
+/** D39's s: the length `--nb-u` resolves to, in px, at a window. */
+const sOf = (w: number, h: number) => Math.min(Math.max(num(U?.[1]), Math.min(w / num(U?.[2]), h / num(U?.[3]))), num(U?.[4]));
+/** The greeting's factor `--nb-g`, in px. */
+const gOf = (w: number) => Math.max(num(G?.[1]), w / num(G?.[2]));
+
 const columns = declOf(root, 'grid-template-columns') ?? '';
-const track = columns.match(TRACK);
-const px = (v: string | undefined) => Number(v?.match(/^(\d+)px$/)?.[1]);
-const pad = (v: string | undefined) => {
-  const m = v?.match(/^(\d+)px (\d+)px (\d+)px (\d+)px$/);
-  return { right: Number(m?.[2]), left: Number(m?.[4]) };
+const track = columns.match(/^([\d.]+)vw minmax\(0, min\(([\d.]+)vw, ([\d.]+)vh\)\)$/);
+const gapVw = Number(declOf(root, 'column-gap')?.match(/^([\d.]+)vw$/)?.[1]);
+const wideDecl = declOf(root, 'padding')?.match(/^([\d.]+)vh 0 0 ([\d.]+)vw$/);
+const narrowPadM = declOf(rootNarrow, 'padding')?.match(/^(\d+)px (\d+)px (\d+)px (\d+)px$/);
+const narrowPad = { right: Number(narrowPadM?.[2]), left: Number(narrowPadM?.[4]) };
+const [aspectW, aspectH] = (declOf(nb, 'aspect-ratio') ?? '').split('/').map((x) => Number(x.trim()));
+const breakpoint = Number(css.match(/@media \(max-width: (\d+)px\)/)?.[1]) + 1;
+
+interface Placed {
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+  greetingLeft: number;
+  greetingTop: number;
+}
+/** The notebook and the greeting, placed from the parsed numbers (the grid, its gap and padding). */
+function place(w: number, h: number): Placed {
+  if (w >= breakpoint) {
+    const padLeft = (num(wideDecl?.[2]) * w) / 100;
+    const asideW = (num(track?.[1]) * w) / 100;
+    const gap = (gapVw * w) / 100;
+    const width = Math.min((num(track?.[2]) * w) / 100, (num(track?.[3]) * h) / 100);
+    const height = Math.max(px(declOf(nb, 'min-height')), Math.min((vh(declOf(nb, 'max-height')) * h) / 100, (width * aspectH!) / aspectW!));
+    const top = (num(wideDecl?.[1]) * h) / 100;
+    return {
+      left: padLeft + asideW + gap,
+      top,
+      width,
+      height,
+      greetingLeft: padLeft,
+      greetingTop: top + (vh(declOf(aside, 'padding-top')) * h) / 100,
+    };
+  }
+  const room = w - narrowPad.left - narrowPad.right;
+  return { left: narrowPad.left, top: 0, width: room, height: room / (aspectW! / aspectH!), greetingLeft: narrowPad.left, greetingTop: 0 };
+}
+const size = (w: number, h: number) => place(w, h);
+/** D39's s as the notebook's own size gives it. */
+const sFromNotebook = (w: number, h: number) => {
+  const p = place(w, h);
+  return Math.min(Math.max(1, Math.min(p.width / aspectW!, p.height / aspectH!)), 2);
 };
 
-describe('the notebook sheet declares the sizing (FR-035)', () => {
-  it('the side-by-side track is exactly the capped, height-widened width', () => {
-    expect(columns).toBe('250px minmax(0, min(1200px, max(830px, calc((100vh - 120px) * 830 / 680))))');
-    expect(track).not.toBeNull();
+describe('the notebook sheet declares the board and its two lengths (FR-036, D37-D39)', () => {
+  it('the shared block defines --nb-u and --nb-g once, in the forms the model reads', () => {
+    expect(declOf(look, '--nb-u')).toBe('clamp(1px, min(100vw / 1280, 100vh / 800), 2px)');
+    expect(declOf(look, '--nb-g')).toBe('max(1px, 100vw / 1280)');
+    expect(U).not.toBeNull();
+    expect(G).not.toBeNull();
+    expect(css.match(/--nb-u:/g)).toHaveLength(1);
+    expect(css.match(/--nb-g:/g)).toHaveLength(1);
   });
-  it('the notebook is a landscape box, sized by its width', () => {
+  it('the root places the greeting and the notebook by the board\'s fractions', () => {
+    expect(columns).toBe('19.53125vw minmax(0, min(64.84375vw, 127.5vh))');
+    expect(declOf(root, 'column-gap')).toBe('3.4375vw');
+    expect(declOf(root, 'padding')).toBe('8.75vh 0 0 4.375vw');
+    expect(declOf(root, 'justify-content')).toBe('start');
+    expect(declOf(aside, 'padding-top')).toBe('2.25vh');
+  });
+  it('the notebook is a landscape box, sized by its width and held to 85% of the height', () => {
     expect(declOf(nb, 'width')).toBe('100%');
     expect(declOf(nb, 'aspect-ratio')).toBe('830 / 680');
-    expect(declOf(nb, 'max-height')).toBe('calc(100vh - 120px)');
+    expect(declOf(nb, 'container-type')).toBe('size');
+    expect(declOf(nb, 'max-height')).toBe('85vh');
     expect(declOf(nb, 'min-height')).toBe('480px');
     expect(declOf(nb, 'height')).toBeUndefined();
   });
@@ -52,6 +118,9 @@ describe('the notebook sheet declares the sizing (FR-035)', () => {
     expect(declOf(nbNarrow, 'max-height')).toBe('100%');
     expect(declOf(nbNarrow, 'min-height')).toBe('0');
     expect(declOf(nbNarrow, 'height')).toBeUndefined();
+  });
+  it('the narrow block is textually what it was when the slice began', () => {
+    expect(narrowBlock).toBe(NARROW_AT_T001);
   });
 });
 
@@ -80,9 +149,9 @@ describe('where aspect-ratio is not read, the notebook still has a definite heig
     .map((b) => ruleIn(b, '.nb-notebook'))
     .find(Boolean);
 
-  it('gives the side-by-side notebook the height the ratio gave it before', () => {
+  it('gives the side-by-side notebook the height the ratio gives it, at its most', () => {
     expect(noRatio.length).toBeGreaterThan(0);
-    expect(declOf(baseFallback, 'height')).toBe('calc(100vh - 120px)');
+    expect(declOf(baseFallback, 'height')).toBe('85vh');
   });
   it('gives the narrow notebook the room left, so the page area scrolls', () => {
     expect(declOf(narrowFallback, 'height')).toBe('100%');
@@ -97,86 +166,92 @@ describe('where aspect-ratio is not read, the notebook still has a definite heig
   });
 });
 
-// A model built from the parsed numbers.
-const [, aside, cap, floor, off, rw, rh] = (track ?? []).map((x, i) => (i === 0 ? 0 : Number(x)));
-const gap = px(declOf(root, 'column-gap'));
-const wide = pad(declOf(root, 'padding'));
-const narrowPad = pad(declOf(rootNarrow, 'padding'));
-const ratio = (rw ?? 1) / (rh ?? 1); // width over height
-const maxOff = px(declOf(nb, 'max-height')?.match(/(\d+px)\)$/)?.[1]);
-const minH = px(declOf(nb, 'min-height'));
-const breakpoint = Number(narrowBlock ? css.match(/@media \(max-width: (\d+)px\)/)?.[1] : NaN) + 1;
-
-function size(w: number, h: number): { width: number; height: number; room: number } {
-  if (w >= breakpoint) {
-    const room = w - wide.left - wide.right - aside! - gap;
-    const width = Math.min(room, Math.min(cap!, Math.max(floor!, (h - off!) * ratio)));
-    const height = Math.max(minH, Math.min(h - maxOff, width / ratio));
-    return { width, height, room };
-  }
-  const room = w - narrowPad.left - narrowPad.right;
-  return { width: room, height: room / ratio, room };
-}
-
-describe('the notebook never narrows, never stands upright, and widens with the window (FR-035, D36)', () => {
-  const cases: Array<[number, number, number, number]> = [
-    [1280, 800, 830, 680],
-    [1100, 600, 650, 480],
-    [1920, 800, 830, 680],
-    [1920, 1080, 1171.8, 960],
-    [2560, 1440, 1200, 983] /* 1200 x 680 / 830 = 983.1; the specification says 983 */,
-    [1280, 1400, 830, 680],
-    [3840, 2160, 1200, 983],
+describe('the board scaled to the window: places and sizes (FR-036, D37, D38)', () => {
+  const near = (a: number, b: number, tol = 1) => Math.abs(a - b) <= tol;
+  const cases: Array<[number, number, number, number, number, number, number]> = [
+    // W, H, width, height, left, top, s
+    [1280, 800, 830, 680, 350, 70, 1],
+    [1920, 1080, 1245, 918, 525, 94.5, 1.35],
+    [2560, 1440, 1660, 1224, 700, 126, 1.8],
+    [2560, 1080, 1377, 918, 700, 94.5, 1.35],
+    [1920, 800, 1020, 680, 525, 70, 1],
+    [1100, 700, 713, 584, 300.6, 61.25, 1],
+    [1280, 1024, 830, 680, 350, 89.6, 1],
+    [3840, 2160, 2490, 1836, 1050, 189, 2],
   ];
-  it.each(cases)('at %ix%i it is %f by %f', (w, h, ew, eh) => {
-    const s = size(w, h);
-    expect(Math.abs(s.width - ew)).toBeLessThanOrEqual(1);
-    expect(Math.abs(s.height - eh)).toBeLessThanOrEqual(1);
+  it.each(cases)('at %ix%i the notebook is %f by %f at (%f, %f), s %f', (w, h, ew, eh, el, et, es) => {
+    const p = place(w, h);
+    expect(near(p.width, ew), `width ${p.width}`).toBe(true);
+    expect(near(p.height, eh), `height ${p.height}`).toBe(true);
+    expect(near(p.left, el), `left ${p.left}`).toBe(true);
+    expect(near(p.top, et), `top ${p.top}`).toBe(true);
+    expect(near(sOf(w, h), es, 0.001), `s ${sOf(w, h)}`).toBe(true);
   });
 
-  it('is at least as wide as it is tall, and as wide as before, in every wide window', () => {
-    for (let w = 1100; w <= 3840; w += 20) {
-      for (let h = 600; h <= 2160; h += 20) {
-        const s = size(w, h);
-        expect(s.width, `${w}x${h}`).toBeGreaterThanOrEqual(s.height);
-        expect(s.width, `${w}x${h}`).toBeGreaterThanOrEqual(Math.min(s.room, 830));
-      }
+  it('puts the greeting at 56/1280 of the width and 88/800 of the height', () => {
+    for (const [w, h] of [
+      [1280, 800],
+      [1920, 1080],
+      [2560, 1440],
+    ] as const) {
+      const p = place(w, h);
+      expect(near(p.greetingLeft, (56 * w) / 1280, 0.01)).toBe(true);
+      expect(near(p.greetingTop, (88 * h) / 800, 0.01)).toBe(true);
     }
   });
 
-  it.each([
-    [800, 600],
-    [1099, 1400],
-  ])('in the narrow layout at %ix%i it fills the room and is landscape', (w, h) => {
-    const s = size(w, h);
-    expect(s.width).toBe(w - 80);
-    expect(s.height).toBeLessThanOrEqual((s.width * 680) / 830 + 0.001);
-  });
-});
-
-// T013. Above the cap the greeting, notebook and tabs are one group, centred on the window.
-describe('above the cap the group is centred on the window, and narrow it is never upright (FR-035, D35)', () => {
-  const tabsRight = -px(declOf(ruleIn(base, '.nb-tabs'), 'right')?.replace(/^-/, ''));
-  it('reads the tabs\' offset and the root\'s justification from the sheet', () => {
-    expect(tabsRight).toBe(-44);
-    expect(declOf(root, 'justify-content')).toBe('center');
-    expect(Number.isFinite(wide.left) && Number.isFinite(wide.right) && Number.isFinite(gap)).toBe(true);
-  });
-
-  it('puts the centre of aside-to-tabs on the centre of the window, +-1px, at every width from 1660 to 3840', () => {
+  it('keeps the notebook inside the window, as wide as it is tall, in every wide window', () => {
     const bad: string[] = [];
-    for (let w = 1660; w <= 3840; w += 20) {
-      for (const h of [900, 1440, 2160]) {
-        const content = w - wide.left - wide.right;
-        const trackW = size(w, h).width; // the notebook's width is the track's
-        const groupW = aside! + gap + trackW;
-        const left = wide.left + (content - groupW) / 2; // justify-content: center
-        const right = left + groupW - tabsRight; // the tabs stand 44px past the notebook
-        const centre = (left + right) / 2;
-        if (Math.abs(centre - w / 2) > 1) bad.push(`${w}x${h}: centre ${centre} of ${w / 2}`);
+    for (let w = 1100; w <= 3840; w += 20) {
+      for (let h = 600; h <= 2160; h += 20) {
+        const p = place(w, h);
+        if (p.width < p.height) bad.push(`${w}x${h} upright`);
+        if (p.left < 0 || p.top < 0 || p.left + p.width > w || p.top + p.height > h) bad.push(`${w}x${h} outside`);
+        if (p.width > 1.5 * p.height + 1e-6 && p.height < 0.85 * h - 1e-6) bad.push(`${w}x${h} wider than the limit`);
       }
     }
     expect(bad.slice(0, 8)).toEqual([]);
+  });
+
+  it('gives s exactly clamp(1, min(W/1280, H/800), 2) from the notebook\'s own size (research R1)', () => {
+    const bad: string[] = [];
+    for (let w = 1100; w <= 3840; w += 20) {
+      for (let h = 600; h <= 2160; h += 20) {
+        if (!near(sOf(w, h), sFromNotebook(w, h), 1e-9)) bad.push(`${w}x${h}: ${sOf(w, h)} vs ${sFromNotebook(w, h)}`);
+        if ((w < 1280 || h < 800) && sOf(w, h) !== 1) bad.push(`${w}x${h}: s is not 1`);
+      }
+    }
+    expect(bad.slice(0, 8)).toEqual([]);
+  });
+
+  it('keeps the greeting factor at 1px below 1280 wide and equal to W/1280 above', () => {
+    expect(gOf(1100)).toBe(1);
+    expect(gOf(1280)).toBe(1);
+    expect(near(gOf(1920), 1.5, 1e-9)).toBe(true);
+  });
+
+  it('keeps the tab column inside the window (research R5)', () => {
+    const offset = -px(declOf(ruleIn(base, '.nb-tabs'), 'right')); // how far past the notebook's right edge
+    expect(offset).toBe(44);
+    const bad: string[] = [];
+    for (let w = 1100; w <= 3840; w += 20) {
+      for (let h = 600; h <= 2160; h += 20) {
+        const p = place(w, h);
+        if (p.left + p.width + offset > w) bad.push(`${w}x${h}`);
+      }
+    }
+    expect(bad.slice(0, 8)).toEqual([]);
+  });
+
+  it('in the narrow layout fills the room and is landscape', () => {
+    for (const [w, h] of [
+      [800, 600],
+      [1099, 1400],
+    ] as const) {
+      const p = place(w, h);
+      expect(p.width).toBe(w - 80);
+      expect(p.height).toBeLessThanOrEqual((p.width * 680) / 830 + 0.001);
+    }
   });
 
   it('never stands the narrow notebook upright, in any window 800-1099 wide and 600-2160 tall', () => {
