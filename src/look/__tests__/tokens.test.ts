@@ -6,9 +6,8 @@ import { contrastRatio } from '../contrast';
 // Vitest blanks CSS imports, and this project carries no Node typings, so the
 // stylesheets are read from disk through a module name TypeScript cannot see.
 const nodeFs = 'node:' + 'fs';
-const { readFileSync, readdirSync } = (await import(/* @vite-ignore */ nodeFs)) as {
+const { readFileSync } = (await import(/* @vite-ignore */ nodeFs)) as {
   readFileSync: (path: string, encoding: 'utf8') => string;
-  readdirSync: (path: string) => string[];
 };
 const notebook = readFileSync('src/styles/notebook.css', 'utf8');
 const theme = readFileSync('src/styles/theme.css', 'utf8');
@@ -503,7 +502,9 @@ describe('text laid over the scene meets its floor against the sun or moon behin
     ['.nb-sun', ['']],
   ];
   // T011: every sheet is global once its screen is imported, so every sheet under src/styles/ is read.
-  const sheetNames = readdirSync('src/styles').filter((f) => f.endsWith('.css')).sort();
+  const sheetNames = Object.keys(import.meta.glob('../../styles/*.css'))
+    .map((path) => path.slice(path.lastIndexOf('/') + 1))
+    .sort();
   const loaded = [...readFileSync('src/main.tsx', 'utf8').matchAll(/import\s+'\.\/styles\/([\w-]+\.css)'/g)].map((m) => m[1]!);
   const applying = (selector: string) => {
     const found: Array<{ item: string; scope: string; sheet: string }> = [];
