@@ -41,7 +41,7 @@
   --nb-greeting-ink: #2a2119;
   --nb-greeting-body: #4a3d2f;
   --nb-greeting-quiet: #6b5440;
-  --nb-sun-size: 96px;
+  --nb-sun-size: calc(96 * var(--nb-u));
   --nb-sun-left: 15%;
   --nb-sun-top: 37%;
   --nb-sun: #eda95e;
@@ -94,7 +94,7 @@
   --nb-greeting-ink: #2a2119;
   --nb-greeting-body: #4a3d2f;
   --nb-greeting-quiet: #66503d;
-  --nb-sun-size: 84px;
+  --nb-sun-size: calc(84 * var(--nb-u));
   --nb-sun-left: 11.7%;
   --nb-sun-top: 7.5%;
   --nb-sun: #f5c374;
@@ -146,7 +146,7 @@
   --nb-greeting-ink: #f6ecdc;
   --nb-greeting-body: #d9cbb4;
   --nb-greeting-quiet: #d7c9b5;
-  --nb-sun-size: 56px;
+  --nb-sun-size: calc(56 * var(--nb-u));
   --nb-sun-left: 18%;
   --nb-sun-top: 41%;
   --nb-sun: #f3e6cf;
@@ -235,7 +235,7 @@
   top: var(--nb-sun-top);
   border-radius: 50%;
   background: var(--nb-sun);
-  box-shadow: 0 0 80px 30px var(--nb-sun-glow);
+  box-shadow: 0 0 calc(80 * var(--nb-u)) calc(30 * var(--nb-u)) var(--nb-sun-glow);
 }
 .nb-star {
   position: absolute;
@@ -282,7 +282,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: calc(4 * var(--nb-u));
 }
 /* The glow is night's alone: only that look sets --nb-stone-glow. */
 .nb-stone {
@@ -293,11 +293,11 @@
 .nb-stone--moss { background: var(--nb-stone-moss); }
 .nb-stone--amber { background: var(--nb-stone-amber); }
 .nb-stone--pale { background: var(--nb-stone-pale); }
-.nb-stone--1 { width: 18px; height: 12px; }
-.nb-stone--2 { width: 30px; height: 15px; }
-.nb-stone--3 { width: 44px; height: 17px; }
-.nb-stone--4 { width: 58px; height: 19px; }
-.nb-stone--5 { width: 74px; height: 21px; }
+.nb-stone--1 { width: calc(18 * var(--nb-u)); height: calc(12 * var(--nb-u)); }
+.nb-stone--2 { width: calc(30 * var(--nb-u)); height: calc(15 * var(--nb-u)); }
+.nb-stone--3 { width: calc(44 * var(--nb-u)); height: calc(17 * var(--nb-u)); }
+.nb-stone--4 { width: calc(58 * var(--nb-u)); height: calc(19 * var(--nb-u)); }
+.nb-stone--5 { width: calc(74 * var(--nb-u)); height: calc(21 * var(--nb-u)); }
 
 /* The testing switch sits over the sky, outside the shell, and wears the look
  * it shows (LookSwitch sets data-look). On Current it has no look, so its tokens

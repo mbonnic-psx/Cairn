@@ -501,7 +501,12 @@ describe('text laid over the scene meets its floor against the sun or moon behin
   // stylesheet's own values, for both layouts at every height the window allows,
   // and each band's own ink is checked only against what can sit behind it.
   const pct = (look: LookName, name: string) => parseFloat(blockOf(look).match(new RegExp(`${name}:\\s*([\\d.]+)%`))![1]!) / 100;
-  const px = (look: LookName, name: string) => parseFloat(blockOf(look).match(new RegExp(`${name}:\\s*([\\d.]+)px`))![1]!);
+  /** N of a look token written `calc(N * var(--nb-u))`: the sun's diameter at s = 1 (the token still means the diameter). */
+  const sunN = (look: LookName) => {
+    const m = blockOf(look).match(/--nb-sun-size:\s*calc\(([\d.]+) \* var\(--nb-u\)\)\s*;/);
+    if (!m) throw new Error(`--nb-sun-size in the ${look} block is not calc(N * var(--nb-u))`);
+    return Number(m[1]);
+  };
   /** The raw value a selector's rules give a property: the base rule's for the wide layout, the last rule's (the narrow
    * override, else the base) for the narrow one. The guard below holds the rules to those two, in that order. */
   const raw = (selector: string, prop: string, wide: boolean) => {
@@ -516,6 +521,11 @@ describe('text laid over the scene meets its floor against the sun or moon behin
   const growth = (() => {
     const m = noComments(notebook).match(/--nb-g:\s*max\(([\d.]+)px, 100vw \/ ([\d.]+)\)/)!;
     return (width: number) => Math.max(Number(m[1]), width / Number(m[2]));
+  })();
+  /** s, the length `--nb-u` resolves to in px at a window: clamp(Lpx, min(100vw / A, 100vh / B), Upx). */
+  const scale = (() => {
+    const m = noComments(notebook).match(/--nb-u:\s*clamp\(([\d.]+)px, min\(100vw \/ ([\d.]+), 100vh \/ ([\d.]+)\), ([\d.]+)px\)/)!;
+    return (width: number, height: number) => Math.min(Math.max(Number(m[1]), Math.min(width / Number(m[2]), height / Number(m[3]))), Number(m[4]));
   })();
   /** A length as the window gives it: `Npx`, `0`, `Nvh` of the height, or `calc(N * var(--nb-g))`. */
   const lengthAt = (value: string, width: number, height: number) => {
@@ -546,9 +556,10 @@ describe('text laid over the scene meets its floor against the sun or moon behin
     if (!m) throw new Error(`--nb-sun-glow is not an 8-digit hex colour in the ${look} block`);
     return m[1]!;
   };
-  const glowReach = (() => {
-    const m = ruleFor('.nb-sun')[0]!.body.match(/box-shadow:\s*0\s+0\s+(\d+)px\s+(\d+)px/)!;
-    return Number(m[1]) + Number(m[2]);
+  /** The glow's blur plus spread at s = 1, from `0 0 calc(B * var(--nb-u)) calc(S * var(--nb-u))`. */
+  const glowN = (() => {
+    const m = ruleFor('.nb-sun')[0]!.body.match(/box-shadow:\s*0\s+0\s+calc\(([\d.]+) \* var\(--nb-u\)\)\s+calc\(([\d.]+) \* var\(--nb-u\)\)/);
+    return m ? Number(m[1]) + Number(m[2]) : NaN; // NaN until the glow is written so: the tests below name it
   })();
 
   const bandCache = new Map<string, Array<{ text: string; ink: string; floor: number; top: number; bottom: number; from: number; to: number }>>();
@@ -671,13 +682,15 @@ describe('text laid over the scene meets its floor against the sun or moon behin
   it.each(looks)(
     '%s, every window of the grid: each line of text holds its floor on the disc and glow that reach it',
     (look) => {
-      const size = px(look, '--nb-sun-size');
+      const sunBase = sunN(look);
       const sun = token('--nb-sun', look);
       const glow = glowToken(look);
       const glows = [over(glow, token('--nb-sky-top', look)), over(glow, token('--nb-sky-mid', look))];
       let reached = 0;
       for (const { w, h, wide } of WINDOWS) {
         const top = pct(look, '--nb-sun-top') * h;
+        const size = sunBase * scale(w, h);
+        const glowReach = glowN * scale(w, h);
         for (const band of bandsOf(wide, w, h)) {
           const ink = token(band.ink, look);
           const at = `${band.text} at ${w}x${h}`;
@@ -703,6 +716,53 @@ describe('text laid over the scene meets its floor against the sun or moon behin
     const wordsAt = (w: number, h: number) => bandsOf(true, w, h).find((b) => b.text === 'greeting words')!;
     expect(wordsAt(1920, 1080).bottom - wordsAt(1920, 1080).top).toBeGreaterThan(wordsAt(1280, 800).bottom - wordsAt(1280, 800).top);
     expect(wordsAt(1280, 1600).top).toBeGreaterThan(wordsAt(1280, 800).top);
+  });
+
+  describe('the scenery keeps its places and grows by the same factor (FR-036, research R3)', () => {
+    const looksN: Array<[LookName, number]> = [['morning', 96], ['midday', 84], ['night', 56]];
+    it.each(looksN)('%s: the sun is calc(%i * var(--nb-u)), and the glow too', (look, n) => {
+      expect(blockOf(look)).toContain(`--nb-sun-size: calc(${n} * var(--nb-u));`);
+      expect(ruleFor('.nb-sun')[0]!.body).toContain('box-shadow: 0 0 calc(80 * var(--nb-u)) calc(30 * var(--nb-u)) var(--nb-sun-glow);');
+    });
+    it.each(looksN)('%s: at s = 1 the sun is today\'s %ipx, and at 3840x2160 twice that', (look, n) => {
+      expect(sunN(look) * scale(1280, 800)).toBe(n);
+      expect(sunN(look) * scale(800, 600)).toBe(n);
+      expect(sunN(look) * scale(3840, 2160)).toBe(2 * n);
+    });
+    it('sizes the stones and the cairn\'s gap by calc(N * var(--nb-u)), with today\'s N', () => {
+      const today: Record<string, string> = {
+        '.nb-cairn': 'gap: calc(4 * var(--nb-u));',
+        '.nb-stone--1': 'width: calc(18 * var(--nb-u)); height: calc(12 * var(--nb-u));',
+        '.nb-stone--2': 'width: calc(30 * var(--nb-u)); height: calc(15 * var(--nb-u));',
+        '.nb-stone--3': 'width: calc(44 * var(--nb-u)); height: calc(17 * var(--nb-u));',
+        '.nb-stone--4': 'width: calc(58 * var(--nb-u)); height: calc(19 * var(--nb-u));',
+        '.nb-stone--5': 'width: calc(74 * var(--nb-u)); height: calc(21 * var(--nb-u));',
+      };
+      for (const [selector, text] of Object.entries(today)) {
+        const body = ruleFor(selector)[0]!.body.replace(/\s+/g, ' ');
+        for (const decl of text.split('; ').map((d) => d.replace(/;$/, ''))) expect(body, selector).toContain(decl);
+      }
+    });
+    it('writes every length the scenery has as calc(N * var(--nb-u)), apart from a short list of fixed ones', () => {
+      // Stars are 3px points, and a stone's own roundness and soft glow are not lengths of the picture.
+      const FIXED = new Set(['--nb-star-size: 3px', '.nb-stone border-radius: 999px', '.nb-stone box-shadow: 0 0 14px 2px']);
+      const scenery = /^\.nb-(sun|moon|star|hill|cairn|stone)/;
+      const found: string[] = [];
+      for (const r of rules.filter((x) => scenery.test(x.selector.split(',')[0]!.trim()))) {
+        for (const d of r.body.split(';').map((x) => x.trim()).filter(Boolean)) {
+          const rest = d.replace(/calc\([\d.]+ \* var\(--nb-u\)\)/g, '');
+          const px = rest.match(/[\d.]+px/);
+          if (px) found.push(`${r.selector.split(',')[0]!.trim()} ${d}`);
+        }
+      }
+      for (const look of ['morning', 'midday', 'night'] as const) {
+        for (const d of blockOf(look).split(';').map((x) => x.trim()).filter(Boolean)) {
+          if (/^--nb-[a-z0-9-]*(size|glow)[a-z0-9-]*:/.test(d) && /[\d.]+px/.test(d.replace(/calc\([\d.]+ \* var\(--nb-u\)\)/g, ''))) found.push(d);
+        }
+      }
+      const unscaled = found.filter((d) => ![...FIXED].some((f) => d.startsWith(f)));
+      expect(unscaled, 'scenery lengths still in plain px').toEqual([]);
+    });
   });
 
   describe('the greeting grows with the window and never below today\'s size (FR-036, research R3)', () => {
