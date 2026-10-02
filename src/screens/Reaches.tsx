@@ -337,10 +337,10 @@ function OverTimeView({
           ) : (
             <>
               {list.coverage_note && (
-                <p className="nb-reaches-sentence">{list.coverage_note}</p>
+                <p className="nb-reaches-aside">{list.coverage_note}</p>
               )}
               {list.estimates_excluded > 0 && (
-                <p className="nb-reaches-sentence">
+                <p className="nb-reaches-aside">
                   {list.estimates_excluded === 1
                     ? ESTIMATE_ONE
                     : estimatesMany(list.estimates_excluded)}

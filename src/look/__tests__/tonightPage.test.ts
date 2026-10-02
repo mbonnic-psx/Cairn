@@ -347,6 +347,32 @@ describe('what follows the writing space is legible however tall it is dragged (
   );
 });
 
+describe('one note style on the page, in both Today views (T027, FR-018)', () => {
+  const reaches = read('src/screens/Reaches.tsx');
+  // The coverage note, the estimates line and "Cairn counts only while it is running" on the left pages.
+  const NOTES = ['.nb-reaches-note', '.nb-reaches-aside'];
+
+  it('sets every note class to the same size and colour', () => {
+    const look = (selector: string) => ({
+      size: last(bodyOf(selector, base), 'font-size'),
+      colour: tokenOf(last(bodyOf(selector, base), 'color')),
+    });
+    const first = look(NOTES[0]!);
+    expect(first.size).toBeDefined();
+    expect(first.colour).toBeDefined();
+    for (const selector of NOTES) expect(look(selector), selector).toEqual(first);
+  });
+
+  it('gives the Over time coverage note and estimates line a note class, not the state sentence', () => {
+    const over = reaches.slice(reaches.indexOf('{list.coverage_note && ('));
+    const coverage = over.match(/<p className="([^"]+)">\{list\.coverage_note\}/)?.[1];
+    const estimates = over.match(/\{list\.estimates_excluded > 0 && \(\s*<p className="([^"]+)"/)?.[1];
+    for (const used of [coverage, estimates]) {
+      expect(NOTES.map((n) => n.slice(1)), String(used)).toContain(used);
+    }
+  });
+});
+
 describe('focus on the paper (the sweep is T016)', () => {
   const CONTROLS = [
     '.nb-reaches-which__button',
