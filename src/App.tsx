@@ -116,14 +116,15 @@ export default function App({ devBuild = import.meta.env.DEV }: { devBuild?: boo
     }
   }
 
-  const Shell = look === 'morning' ? NotebookShell : CurrentShell;
+  const Shell = look === 'current' ? CurrentShell : NotebookShell;
   const tabs = tabsFor(step, protectionOn, state?.status);
 
   return (
     <>
       {/* `import.meta.env.DEV` is a build-time constant, so the bundler drops the switch from a production build. */}
       {import.meta.env.DEV && devBuild && <LookSwitch look={look} onChange={setLook} />}
-      <Shell tabs={tabs} onSelect={(id) => void select(id)}>
+      {/* CurrentShell ignores `look`; the spread keeps one stable Shell so a change of look never remounts the screen. */}
+      <Shell tabs={tabs} onSelect={(id) => void select(id)} {...{ look }}>
         {step === 'choosing' && (
           <>
             <Categories categories={categories} onToggle={toggle} note={note} />

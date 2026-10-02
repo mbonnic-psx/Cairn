@@ -8,7 +8,7 @@ import type { Look } from '../look/look';
 const STARS = [1, 2, 3, 4, 5, 6] as const;
 const STONES = ['base', 'moss', 'amber', 'pale', 'base'] as const;
 
-export function Landscape({ look = 'morning' }: { look?: Look }) {
+export function Landscape({ look }: { look: Look }) {
   const night = look === 'night';
   return (
     <div className="nb-landscape" data-testid="landscape" aria-hidden="true">

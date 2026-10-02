@@ -6,14 +6,14 @@ import { Landscape } from '../Landscape';
 
 describe('Landscape', () => {
   it('is hidden from assistive technology and silent', () => {
-    render(<Landscape />);
+    render(<Landscape look="morning" />);
     const scene = screen.getByTestId('landscape');
     expect(scene).toHaveAttribute('aria-hidden', 'true');
     expect(scene.querySelectorAll('button, a, input, [tabindex]')).toHaveLength(0);
   });
 
   it('holds a sky, three hills, a sun and a cairn of five stones', () => {
-    render(<Landscape />);
+    render(<Landscape look="morning" />);
     const scene = screen.getByTestId('landscape');
     expect(scene.querySelectorAll('[data-testid="sky"]')).toHaveLength(1);
     expect(scene.querySelectorAll('[data-testid="hill"]')).toHaveLength(3);
@@ -22,7 +22,7 @@ describe('Landscape', () => {
   });
 
   it('draws no lock, shield or chain', () => {
-    const { container } = render(<Landscape />);
+    const { container } = render(<Landscape look="morning" />);
     expect(container.innerHTML).not.toMatch(/lock|shield|chain/i);
   });
 });
