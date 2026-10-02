@@ -245,6 +245,80 @@ describe('the edge of every control on the paper meets 3:1 in every look (D15, T
   });
 });
 
+/** The last value a rule set for a property, or undefined where it does not set it. */
+function last(body: string, property: string): string | undefined {
+  const found = [...body.matchAll(new RegExp(`(?:^|[;\\s])${property}:\\s*([^;]+)`, 'g'))];
+  return found.at(-1)?.[1]!.trim();
+}
+const tokenOf = (value: string | undefined): string | undefined => value?.match(/^var\((--[a-z0-9-]+)\)$/)?.[1];
+/** `.a:hover` and `.a::placeholder` sit on the element `.a`, whose own rules they refine. */
+const baseOf = (selector: string) => selector.replace(/::?[a-z-]+(?:\([^)]*\))?$/, '');
+
+/** WCAG 1.4.3 exempts the text of an inactive control; this is the one place the sheet uses it. */
+const INACTIVE = ['.nb-custom-button:disabled'];
+
+interface Text {
+  selector: string;
+  colour: string;
+  ground: string;
+  large: boolean;
+}
+/** Every selector in the sheet whose rule sets the colour of text, or the ground one sits on. */
+const texts: Text[] = [];
+for (const selector of new Set(rules.flatMap((r) => r.selector.split(',').map((x) => x.trim())))) {
+  const body = own(selector);
+  const base = own(baseOf(selector));
+  if (last(body, 'color') === undefined && last(body, 'background-color') === undefined) continue;
+  const colour = tokenOf(last(body, 'color') ?? last(base, 'color'));
+  if (!colour) continue; // no text on this selector: a dot, a box, a tick
+  const ground = tokenOf(last(body, 'background-color')) ?? tokenOf(last(base, 'background-color')) ?? '--nb-paper';
+  const size = last(body, 'font-size') ?? last(base, 'font-size');
+  texts.push({ selector, colour, ground, large: size !== undefined && parseFloat(size) >= 24 });
+}
+
+describe('every text colour the sheet declares meets its floor against what is behind it (FR-021, SC-003, T019)', () => {
+  it('finds the sheet\'s text rules, each of the kinds the screens draw', () => {
+    const found = texts.map((t) => t.selector);
+    for (const expected of [
+      '.nb-categories-title',
+      '.nb-categories-lead',
+      '.nb-categories-name',
+      '.nb-categories-count',
+      '.nb-categories-note',
+      '.nb-custom-input',
+      '.nb-custom-input::placeholder',
+      '.nb-custom-added',
+      '.nb-custom-reason',
+      '.nb-custom-button',
+      '.nb-custom-button:hover',
+      '.nb-choosing-turn-on',
+      '.nb-choosing-turn-on:hover',
+      '.nb-disclosure-confirm',
+      '.nb-disclosure-confirm:hover',
+      '.nb-disclosure-back',
+      '.nb-disclosure-back:hover',
+      '.nb-disclosure-line',
+      '.nb-disclosure-helper',
+      '.nb-disclosure-subtitle',
+      '.nb-disclosure-administrator',
+    ]) {
+      expect(found, expected).toContain(expected);
+    }
+  });
+
+  it('exempts only the inactive "Protect it"', () => {
+    const exempt = texts.filter((t) => INACTIVE.includes(t.selector));
+    expect(exempt.map((t) => t.selector)).toEqual(INACTIVE);
+  });
+
+  it.each(LOOKS)('%s: each is held at 4.5:1 (3:1 at 24px and up) against its ground', (look) => {
+    for (const { selector, colour, ground, large } of texts.filter((t) => !INACTIVE.includes(t.selector))) {
+      const ratio = contrastRatio(token(colour, look), token(ground, look));
+      expect(ratio, `${selector}: ${colour} on ${ground}`).toBeGreaterThanOrEqual(large ? 3 : 4.5);
+    }
+  });
+});
+
 describe('the stylesheet import', () => {
   it('is in main.tsx exactly once, after notebook.css and protection-page.css', () => {
     const lines = main.split('\n').map((l) => l.trim());
