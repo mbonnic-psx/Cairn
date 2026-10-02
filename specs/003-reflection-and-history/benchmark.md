@@ -1,13 +1,14 @@
 # Benchmark — 003-reflection-and-history
 
-Drawn 2026-10-02T15:12:14Z at `55303a7` from 3 record(s) under `specs/003-reflection-and-history/` by `scripts/agents/benchmark.py overview`; `/benchmark` redraws it, and so does closing a slice. Regenerated whole, never edited: the records beside each slice are the source.
+Drawn 2026-10-02T17:37:06Z at `0408593` from 4 record(s) under `specs/003-reflection-and-history/` by `scripts/agents/benchmark.py overview`; `/benchmark` redraws it, and so does closing a slice. Regenerated whole, never edited: the records beside each slice are the source.
 
 ## Slices
 
-3 slice(s) recorded, 6h25m in all.
+4 slice(s) recorded, 7h58m in all.
 
 | slice | delegate/cycle | wall | in | out | models | sessions | converge | +tasks | gaps | mutation | adversary | demo | verify✗ | rework | tasks | files | ±lines |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| history-by-hour | rule/rule, story/rule | 1h32m | 43.4M | 25.5k | claude-opus-5-5, claude-sonnet-5-5 | 1 | 2 | 3 | 0/0 | interface 94.68% before closing (one gap killed, two equivalent); core 53/54 viable, 1 Tauri wrapper app-only | 3 | — | 0 | 0 | 25 | 39 | +4300/-155 |
 | history-by-site | rule/rule, story/rule | 2h03m | 44.7M | 32.9k | claude-opus-5-5, claude-sonnet-5-5 | 1 | 1 | 4 | 0/0 | interface 97.07% (Stryker, scoped, TZ=Europe/London); core 107/108 viable caught, 1 Tauri wrapper app-only | 5 | — | 0 | 0 | 26 | 48 | +4450/-101 |
 | quote | none/rule, rule/rule | 2h56m | 53.6M | 43.8k | claude-opus-5-5, claude-sonnet-5-5 | 1 | 2 | 7 | 0/0 | interface 95.86% (Stryker, scoped); core 29/32 live (7 wrappers app-only), dead quote() removed | 6 | — | 1 | 0 | 19 | 94 | +11149/-674 |
 | write-tonight | rule/rule | 1h26m | 42.6M | 45.5k | claude-opus-5-5, claude-sonnet-5-5 | 1 | 0 | 0 | 0/0 | interface 96.96% (Stryker, scoped); core 22/24 viable | 10 | — | 0 | 0 | 16 | 49 | +5816/-604 |
@@ -15,6 +16,18 @@ Drawn 2026-10-02T15:12:14Z at `55303a7` from 3 record(s) under `specs/003-reflec
 delegate/cycle = how implementation was delegated and driven; in = input + cache read + cache creation tokens; gaps = before/after converge; +tasks = tasks converge appended; sessions = harness sessions read; a stage's tokens are a floor (the turn that ends it is partly uncounted); a trailing + makes wall a floor because an unbracketed stage is missing; tokens are not prices.
 
 ## Stages
+
+### history-by-hour — 1h32m
+
+| stage | started (UTC) | wall | in | out | model | agent | delegated | reported |
+|---|---|---|---|---|---|---|---|---|
+| implement | 2026-10-02 15:15 | 17m37s | 15.3M | 4.3k | claude-opus-5-5, claude-sonnet-5-5 | drive-implement | yes | verify_failures=0, delegate=story, cycle=rule, split=0 |
+| converge | 2026-10-02 15:33 | 3m45s | 3M | 1.7k | claude-opus-5-5 | drive-converge | yes | — |
+| implement | 2026-10-02 15:37 | 4m20s | 2.3M | 2.4k | claude-opus-5-5, claude-sonnet-5-5 | drive-implement | yes | verify_failures=0, delegate=rule, cycle=rule, split=0 |
+| converge | 2026-10-02 15:41 | 8m46s | 7.4M | 4.7k | claude-opus-5-5 | drive-converge | yes | — |
+| adversary | 2026-10-02 15:58 | 10m03s | 5.3M | 3.9k | claude-opus-5-5, claude-sonnet-5-5 | drive-adversary, drive-implement | yes | findings=3, seams=1 |
+| implement | 2026-10-02 16:09 | 7m52s | 4.2M | 3.7k | claude-opus-5-5, claude-sonnet-5-5 | drive-implement | yes | verify_failures=0, delegate=rule, cycle=rule, split=0 |
+| mutation | 2026-10-02 16:16 | 40m02s | 6M | 4.7k | claude-opus-5-5, claude-sonnet-5-5 | drive-implement, drive-mutation | yes | mutation_score=interface 94.68% before closing (one gap killed, two equivalent); core 53/54 viable, 1 Tauri wrapper app-only |
 
 ### history-by-site — 2h03m
 
@@ -54,6 +67,7 @@ delegate/cycle = how implementation was delegated and driven; in = input + cache
 
 ## Notes
 
+- history-by-hour: implemented as rule/rule and story/rule — its wall compares with neither
 - history-by-site: implemented as rule/rule and story/rule — its wall compares with neither
 - quote: implemented as none/rule and rule/rule — its wall compares with neither
 

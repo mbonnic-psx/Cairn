@@ -165,10 +165,10 @@ ways, change the range. Everything works with no entries in existence.
 
 ### Implementation for User Story 2
 
-- [ ] T043 [US2] Implement the summary orchestration over the range read in `src-tauri/src/reflection/mod.rs`, delegating all arithmetic to `domain/patterns.rs` (FR-019, FR-020)
+- [ ] T043 [US2] Implement the summary orchestration over the range read in `src-tauri/src/reflection/mod.rs`, delegating all arithmetic to `domain/patterns.rs` (FR-019, FR-020) *(by site in `history-by-site` (#29), by hour in `history-by-hour` (#48); by weekday and movement still to come)*
 - [ ] T044 [US2] Expose `summarize_reaches` in `src-tauri/src/ipc/commands.rs`, returning `estimates_excluded` as a count so the exclusion can be stated rather than implied, and add it to `CLASSIFIED` in `src-tauri/tests/ipc_surface.rs`. **⚠ Contract defect found at T014, resolve here.** `contracts/ui-ipc.md` types this command as `summarize_reaches(from, to, offset_seconds)` and expects `dst_approximate` in the result, but one offset cannot reveal a change in offset and the pure layer may not consult a timezone database (R4). **The signature needs a second offset** — `(from, to, offset_at_from, offset_at_to)` — with this command calling `domain::patterns::crosses_offset_change` on the pair and passing whichever offset the product deems authoritative into `summarize` for the bucketing itself. Amend `contracts/ui-ipc.md` as part of this task rather than leaving the contract describing something unbuildable
-- [ ] T045 [US2] Build the history view in `src/screens/History.tsx` — by site, by hour, by day of week, movement across the range, and the range control (FR-019, FR-020)
-- [ ] T046 [P] [US2] Render the DST approximation notice in `src/screens/History.tsx` when the range crosses a change, rather than presenting the buckets as exact (research R4, Principle III)
+- [ ] T045 [US2] Build the history view in `src/screens/History.tsx` — by site, by hour, by day of week, movement across the range, and the range control (FR-019, FR-020) *(built on the reaches screen as Over time, not a `History.tsx` (H1): by site #29, by hour #48)*
+- [-] ~~T046 [P] [US2] Render the DST approximation notice in `src/screens/History.tsx` when the range crosses a change, rather than presenting the buckets as exact (research R4, Principle III)~~ — **WITHDRAWN 2026-10-02**: superseded by B4 (hours bucketed by the offset in force at each instant, so nothing is approximate; slice `history-by-hour`, #48).
 - [ ] T047 [P] [US2] Write the copy for a quiet range in `src/screens/History.tsx` so it reads as neither an achievement nor a warning (FR-024, FR-032)
 
 **Checkpoint**: Patterns are readable independently of anything written in the check-in.
