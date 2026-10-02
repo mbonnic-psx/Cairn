@@ -43,6 +43,13 @@ export function Protection({
   }, [state]);
 
   if (trouble) {
+    if (onPage) {
+      return (
+        <Spread>
+          <p className="nb-state-detail">{trouble}</p>
+        </Spread>
+      );
+    }
     return (
       <Card>
         <p className="text-ink-500">{trouble}</p>
@@ -51,6 +58,13 @@ export function Protection({
   }
 
   if (!current) {
+    if (onPage) {
+      return (
+        <Spread>
+          <p className="nb-state-detail">Checking this machine…</p>
+        </Spread>
+      );
+    }
     return (
       <Card>
         <p className="text-ink-400">Checking this machine…</p>

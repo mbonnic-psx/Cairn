@@ -2,13 +2,13 @@
  * Protection told it is on a notebook page (slice `protection-page`, T004–T006): the same words as outside
  * any shell, laid out as a spread. Rendered inside `NotebookShell`; the core is a fake written in this tree.
  */
-import { fireEvent, render, waitFor, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { protectionWords } from '../../ipc';
 import { NotebookShell } from '../../shell/NotebookShell';
 import { Protection } from '../Protection';
-import { installFakeCore, type FakeCore } from './fakeCore';
+import { installFakeCore, never, type FakeCore } from './fakeCore';
 import { cases, ready, waiting } from './pinCases';
 
 let core: FakeCore | undefined;
@@ -157,5 +157,34 @@ describe('Protection on a notebook page, with a change waiting', () => {
     button.focus();
     expect(button).toHaveFocus();
     expect(button.tabIndex).toBeGreaterThanOrEqual(0);
+  });
+});
+
+describe('Protection on a notebook page, before it has a state', () => {
+  it('checking: the left page says so and the right is blank and ruled', () => {
+    core = installFakeCore({ get_protection_state: never });
+    const { spread, left, right, main } = onPage(<Protection />);
+    expect(spread).not.toBeNull();
+    expect(within(left!).getByText('Checking this machine…')).toBeInTheDocument();
+    expect(right).toHaveClass('nb-page--ruled');
+    expect(right!.textContent).toBe('');
+    expect(main.textContent).toBe(outside(<Protection />));
+    expect(main.querySelector('button, dl, h2')).toBeNull();
+  });
+
+  it('a read that could not be made: the core’s sentence, the right page blank and ruled', async () => {
+    core = installFakeCore({
+      get_protection_state: () => {
+        throw 'Cairn could not read its settings just now.';
+      },
+    });
+    const { spread, left, right, main } = onPage(<Protection />);
+    expect(spread).not.toBeNull();
+    await screen.findByText('Cairn could not read its settings just now.');
+    expect(within(left!).getByText('Cairn could not read its settings just now.')).toBeInTheDocument();
+    expect(right).toHaveClass('nb-page--ruled');
+    expect(right!.textContent).toBe('');
+    expect(main.querySelector('button, dl, h2')).toBeNull();
+    expect(main.textContent).toBe('Cairn could not read its settings just now.');
   });
 });
