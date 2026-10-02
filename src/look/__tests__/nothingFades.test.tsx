@@ -109,8 +109,8 @@ const ALLOWED_MOTION = [
   { sheet: 'theme.css', selector: '@keyframes settle', property: '@keyframes', value: '' },
 ];
 
-/** Whether a declaration sits in the `prefers-reduced-motion: reduce` block, where motion is switched off. */
-const inReducedMotion = (m: Motion) => m.context.some((c) => /prefers-reduced-motion:\s*reduce/.test(c));
+/** Whether a declaration sits in exactly the `@media (prefers-reduced-motion: reduce)` block (whitespace-normalised), where motion is switched off. */
+const inReducedMotion = (m: Motion) => m.context.some((c) => c.replace(/\s+/g, ' ').replace(/\(\s+/g, '(').replace(/\s+\)/g, ')') === '@media (prefers-reduced-motion: reduce)');
 
 function unallowedMotion(sheets: Record<string, string>): string[] {
   const out: string[] = [];
@@ -239,6 +239,25 @@ describe('no sheet the app loads declares a fade', () => {
   it('names a transition or animation inside a media block that is not the reduced-motion one', () => {
     const planted = { ...sheets, 'quiet-pages.css': `${sheets['quiet-pages.css']}\n@media (min-width: 900px) { .a, .b { animation-name: x; } }` };
     expect(unallowedMotion(planted)).toEqual(['quiet-pages.css: .a, .b { animation-name: x }']);
+  });
+
+  // T017: only exactly `@media (prefers-reduced-motion: reduce)` is exempt. Synthetic sheets; none is written under src/styles/.
+  it('names a fade inside the negated reduced-motion block, which is for the people who did not ask for less motion', () => {
+    const planted = {
+      ...sheets,
+      'protection-page.css': `${sheets['protection-page.css']}\n@media not (prefers-reduced-motion: reduce) { .nb-protection-note__button { transition: color 200ms ease; } }`,
+    };
+    expect(unallowedMotion(planted)).toEqual([
+      'protection-page.css: .nb-protection-note__button { transition: color 200ms ease }',
+    ]);
+  });
+
+  it('names a fade in a media query that only mentions the reduced-motion one, and exempts the exact one whatever its spacing', () => {
+    const fade = '.a { transition: color 200ms ease; }';
+    expect(unallowedMotion({ 'x.css': `@media (prefers-reduced-motion: no-preference) { ${fade} }` })).toHaveLength(1);
+    expect(unallowedMotion({ 'x.css': `@media screen and (prefers-reduced-motion: reduce) { ${fade} }` })).toHaveLength(1);
+    expect(unallowedMotion({ 'x.css': `@media (prefers-reduced-motion: reduce) { ${fade} }` })).toEqual([]);
+    expect(unallowedMotion({ 'x.css': `@media   (prefers-reduced-motion:   reduce) { ${fade} }` })).toEqual([]);
   });
 
   it('holds no inline transition or animation on a rendered element', async () => {
