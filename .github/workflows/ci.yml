@@ -38,6 +38,8 @@ jobs:
         run: npm run check:no-notifications
       - name: Domain code stays pure (platform abstraction)
         run: npm run check:domain-purity
+      - name: Unix-only test code is gated to Unix, so Windows CI can build the tests
+        run: npm run check:unix-gated-tests
 
   frontend:
     name: Frontend

@@ -55,7 +55,7 @@ full workspace on all three platforms.
 
 ### The guards
 
-Seven checks run in CI, and each one has been verified to fail on a planted
+Eight checks run in CI, and each one has been verified to fail on a planted
 violation. Do not weaken one to make a change pass:
 
 | Script | Enforces |
@@ -67,6 +67,7 @@ violation. Do not weaken one to make a change pass:
 | `check-no-network-deps.sh` | nothing network-capable in the build graph (Principle II) |
 | `check-no-notifications.sh` | no notification capability (FR-023) |
 | `check-domain-purity.sh` | no platform conditionals or I/O in `domain/` |
+| `check-unix-gated-tests.mjs` | no Unix-only API in a Rust test outside `#[cfg(unix)]` (Windows CI must build every test) |
 
 Two tests are guards in disguise and matter as much:
 `src-tauri/tests/ipc_surface.rs` refuses to pass until every exposed command is
