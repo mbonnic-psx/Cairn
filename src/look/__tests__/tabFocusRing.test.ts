@@ -72,3 +72,53 @@ describe('a tab\'s focus ring is two contiguous bands (FR-022, FR-021; looks T02
     expect(bodiesFor(forced, '.nb-tab:focus-visible')).toMatch(/box-shadow:\s*none/);
   });
 });
+
+// T005 (loose-ends; quiet-pages T013, research R6): the ring is read from the bare rules for the tab's
+// selector, so a look-scoped or media-scoped rule for it would change what is drawn with no change here.
+// Every rule that can apply to the tab's focus ring, outside forced colours, is either one the model reads
+// above or fails the guard by name.
+interface Found {
+  item: string;
+  scope: string;
+}
+/** Every selector in the sheet whose last compound (attribute selectors dropped) is `selector`, with the at-rules around it. */
+function rulesApplyingTo(source: string, selector: string): Found[] {
+  const found: Found[] = [];
+  const scope: string[] = [];
+  const re = /([^{}]*)\{|\}/g;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(source))) {
+    if (m[0] === '}') {
+      scope.pop();
+      continue;
+    }
+    const header = m[1]!.trim();
+    if (header.startsWith('@')) {
+      scope.push(header);
+      continue;
+    }
+    for (const item of header.split(',').map((x) => x.trim())) {
+      const last = item.split(/[\s>+~]+/).pop()!.replace(/\[[^\]]*\]/g, '');
+      if (last === selector) found.push({ item, scope: scope.join(' > ') });
+    }
+    re.lastIndex = source.indexOf('}', re.lastIndex) + 1;
+  }
+  return found;
+}
+
+describe('every rule that can apply to a tab\'s focus ring is one the guard models (FR-022, FR-021; quiet-pages T013)', () => {
+  const SELECTOR = '.nb-tab:focus-visible';
+  const outsideForced = rulesApplyingTo(css, SELECTOR).filter((r) => !r.scope.includes('forced-colors'));
+
+  it('finds the bare rules the ring is read from, so the check is live', () => {
+    expect(outsideForced.length).toBeGreaterThanOrEqual(1);
+    expect(ring).not.toBe('');
+  });
+
+  it('finds no look-scoped rule and no rule inside an at-rule that it does not model', () => {
+    const unmodelled = outsideForced
+      .filter((r) => r.item !== SELECTOR || r.scope !== '')
+      .map((r) => `${r.scope ? r.scope + ' { ' : ''}${r.item}${r.scope ? ' }' : ''}`);
+    expect(unmodelled, `${SELECTOR} has a rule this guard does not model`).toEqual([]);
+  });
+});

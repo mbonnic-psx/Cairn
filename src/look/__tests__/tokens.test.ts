@@ -488,6 +488,49 @@ describe('text laid over the scene meets its floor against the sun or moon behin
     }
   });
 
+  // T005 (loose-ends; quiet-pages T013, research R6): `decl` and `rootPadTop` index the rules for a selector by
+  // position (the base rule, then the narrow layout), so a third rule shifts the index with no error. Every rule
+  // that can apply to a selector read above, bare, look-scoped or inside any at-rule but forced colours, is one
+  // of those two, in that order, or the guard fails naming it.
+  const NARROW = '@media (max-width: 1099px)';
+  const READ: Array<[string, string[]]> = [
+    ['.nb-root', ['', NARROW]],
+    ['.nb-aside', ['', NARROW]],
+    ['.nb-greeting', ['', NARROW]],
+    ['.nb-greeting__words', ['', NARROW]],
+    ['.nb-titlebar', ['']],
+    ['.nb-sun', ['']],
+  ];
+  const applying = (selector: string) => {
+    const found: Array<{ item: string; scope: string }> = [];
+    const scope: string[] = [];
+    const re = /([^{}]*)\{|\}/g;
+    const source = noComments(notebook);
+    let m: RegExpExecArray | null;
+    while ((m = re.exec(source))) {
+      if (m[0] === '}') {
+        scope.pop();
+        continue;
+      }
+      const header = m[1]!.trim();
+      if (header.startsWith('@')) {
+        scope.push(header);
+        continue;
+      }
+      for (const item of header.split(',').map((x) => x.trim())) {
+        const last = item.split(/[\s>+~]+/).pop()!.replace(/\[[^\]]*\]/g, '');
+        if (last === selector) found.push({ item, scope: scope.join(' > ') });
+      }
+      re.lastIndex = source.indexOf('}', re.lastIndex) + 1;
+    }
+    return found.filter((r) => !r.scope.includes('forced-colors'));
+  };
+
+  it.each(READ)('%s: the rules that can apply to it are exactly the ones the band model reads', (selector, scopes) => {
+    const found = applying(selector).map((r) => (r.item === selector ? r.scope : `${r.scope} { ${r.item} }`));
+    expect(found, `${selector} has a rule the band model does not read`).toEqual(scopes);
+  });
+
   const HEIGHTS = Array.from({ length: Math.floor((2160 - 600) / 20) + 1 }, (_, i) => 600 + i * 20);
 
   it.each(looks.flatMap((look) => [true, false].map((wide) => [look, wide] as const)))(

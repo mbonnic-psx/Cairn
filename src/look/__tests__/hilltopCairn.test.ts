@@ -131,3 +131,42 @@ describe('the hilltop cairn\'s outline stones hold 3:1 on what lies behind them 
     expect([...surfaces].some((s) => s !== 'sky'), `surfaces found under the bottom stone: ${[...surfaces].join(', ')}`).toBe(true);
   });
 });
+
+// T005 (loose-ends; quiet-pages T013, research R6): `bodyOf` returns the first rule for a selector, so a
+// second rule for any selector the model reads, scoped to a look or inside a media query, would change the
+// scene with no change here. Each selector the model reads has exactly one rule, bare, or the guard fails by name.
+describe('every rule that can apply to what the cairn guard models is the one it reads (FR-021, SC-003; quiet-pages T013)', () => {
+  const MODELLED = [
+    ...(['far', 'mid', 'near'] as const).map((n) => `.nb-hill--${n}`),
+    '.nb-cairn',
+    ...[1, 2, 3, 4, 5].map((n) => `.nb-stone--${n}`),
+  ];
+  const rulesFor = (selector: string) => {
+    const found: Array<{ item: string; scope: string }> = [];
+    const scope: string[] = [];
+    const re = /([^{}]*)\{|\}/g;
+    let m: RegExpExecArray | null;
+    while ((m = re.exec(css))) {
+      if (m[0] === '}') {
+        scope.pop();
+        continue;
+      }
+      const header = m[1]!.trim();
+      if (header.startsWith('@')) {
+        scope.push(header);
+        continue;
+      }
+      for (const item of header.split(',').map((x) => x.trim())) {
+        const last = item.split(/[\s>+~]+/).pop()!.replace(/\[[^\]]*\]/g, '');
+        if (last === selector) found.push({ item, scope: scope.join(' > ') });
+      }
+      re.lastIndex = css.indexOf('}', re.lastIndex) + 1;
+    }
+    return found;
+  };
+
+  it.each(MODELLED)('%s has one bare rule, the one the model reads, and no other', (selector) => {
+    const found = rulesFor(selector).map((r) => (r.scope ? `${r.scope} { ${r.item} }` : r.item));
+    expect(found, `${selector} has a rule this guard does not model`).toEqual([selector]);
+  });
+});
