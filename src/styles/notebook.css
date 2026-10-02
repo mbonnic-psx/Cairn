@@ -482,6 +482,14 @@
     letter-spacing: 0.08em;
   }
 }
+/* A page's text column stops at a measure: today's leaf at 1280x800 is 337px, and 337 x 75/66 = 383 (D39). Only the
+ * writing stops; the leaf keeps its full width, so its ruling runs to the edge and the fold stays on the gap. The
+ * narrow layout, where the greeting sits above the notebook, takes no measure. */
+@media (min-width: 1100px) {
+  .nb-page-area .nb-spread > .nb-page > * {
+    max-inline-size: calc(383 * var(--nb-u));
+  }
+}
 /* WebKitGTK (Tauri on Linux) ignores writing-mode on a <button>; the label
  * span turns sideways in every engine. */
 .nb-tab-label {

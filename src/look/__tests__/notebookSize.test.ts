@@ -387,3 +387,93 @@ describe('the tab column fits the notebook at every window the model covers (FR-
     expect(declOf(nb, 'container-type')).toBe('size');
   });
 });
+
+// T007 (FR-036, D39, research R7). A page's text column stops at a measure, so a large window shows larger
+// writing and not longer lines. The leaf keeps its full width: its ruling runs to the edge, the fold stays on the gap.
+describe('a page\'s line keeps a comfortable measure (D39, research R7)', () => {
+  const MEASURE_SELECTOR = '.nb-page-area .nb-spread > .nb-page > *';
+  const wideBlocks = blocksOf(css, /@media \(min-width: 1100px\)\s*\{/);
+  const measureRules = wideBlocks.flatMap((b) => rulesOf(b)).filter((r) => r.selector === MEASURE_SELECTOR);
+  const measure = declOf(measureRules[0], 'max-inline-size');
+
+  /** N of a length written `Npx` or `calc(N * var(--nb-u))`: the sheet's own number, today's px at s = 1. */
+  const nOf = (v: string | undefined) => Number(v?.match(/^(?:calc\(([\d.]+) \* var\(--nb-u\)\)|([\d.]+)px)$/)?.slice(1).find(Boolean));
+  const pagePad = declOf(ruleIn(base, '.nb-page-area'), 'padding')?.match(/calc\([^)]*\)\)|\S+/g) ?? [];
+  const padLeft = nOf(pagePad[3]);
+  const padRight = nOf(pagePad[1]);
+  // The columns' gap, from every sheet's spread rule: they all say the same.
+  const spreadGaps = ['protection-page.css', 'quiet-pages.css', 'setup-pages.css', 'tonight-page.css'].flatMap((f) =>
+    rulesOf(readFileSync(`src/styles/${f}`, 'utf8').replace(/\/\*[\s\S]*?\*\//g, ''))
+      .filter((r) => r.selector.split(',').some((x) => /-(leaves|spread)$/.test(x.trim()) && !x.includes(' ')))
+      .map((r) => nOf(declOf(r, 'column-gap')))
+      .filter((n) => !Number.isNaN(n)),
+  );
+  const gapN = spreadGaps[0] ?? NaN;
+  const capN = nOf(measure);
+
+  /** The leaf's width and the measure's cap at a window, every length N x s. */
+  const leaf = (w: number, h: number) => (place(w, h).width - (padLeft + padRight + gapN) * sOf(w, h)) / 2;
+  const cap = (w: number, h: number) => capN * sOf(w, h);
+
+  it('has the rule once, in the min-width block, setting max-inline-size to calc(383 * var(--nb-u))', () => {
+    expect(wideBlocks.length).toBeGreaterThan(0);
+    expect(measureRules).toHaveLength(1);
+    expect(measure).toBe('calc(383 * var(--nb-u))');
+    expect(css.split(MEASURE_SELECTOR)).toHaveLength(2);
+  });
+
+  it('leaves the narrow block without a measure', () => {
+    expect(narrowBlock).not.toMatch(/max-inline-size|max-width/);
+    expect(narrowBlock).toBe(NARROW_AT_T001);
+  });
+
+  it('puts no width of its own on the leaf or the spread: the leaf keeps its full width', () => {
+    const subjects = /(^|[\s>+~])(\.nb-page|\.nb-spread|\.nb-[a-z-]+-(leaves|spread))(?![\w-])[^\s>+~]*$/;
+    const offenders: string[] = [];
+    for (const f of ['notebook.css', 'protection-page.css', 'quiet-pages.css', 'setup-pages.css', 'tonight-page.css']) {
+      for (const r of rulesOf(readFileSync(`src/styles/${f}`, 'utf8').replace(/\/\*[\s\S]*?\*\//g, ''))) {
+        if (r.selector === MEASURE_SELECTOR) continue;
+        if (!r.selector.split(',').some((x) => subjects.test(x.trim()))) continue;
+        for (const prop of ['max-inline-size', 'max-width', 'width', 'inline-size']) {
+          if (declOf(r, prop) !== undefined) offenders.push(`${f}: ${r.selector} { ${prop} }`);
+        }
+      }
+    }
+    expect(offenders).toEqual([]);
+  });
+
+  it('reads the leaf\'s model from the sheets: padding 60 and 48, a 48 gap, and a cap of 383', () => {
+    expect([padLeft, padRight, gapN, capN]).toEqual([60, 48, 48, 383]);
+    expect(new Set(spreadGaps).size, 'every sheet\'s spread gap is the same').toBe(1);
+  });
+
+  const cases: Array<[number, number, number, number]> = [
+    [1280, 800, 337, 383],
+    [1920, 1080, 517.2, 517.0],
+    [2560, 1080, 583, 517],
+    [1920, 800, 432, 383],
+    [3840, 2160, 1089, 766],
+  ];
+  it.each(cases)('at %ix%i the leaf is %f and the cap %f', (w, h, l, c) => {
+    expect(Math.abs(leaf(w, h) - l), `leaf ${leaf(w, h)}`).toBeLessThanOrEqual(1);
+    expect(Math.abs(cap(w, h) - c), `cap ${cap(w, h)}`).toBeLessThanOrEqual(1);
+  });
+
+  it('is today\'s line at 1280x800: the cap is 337 x 75/66 and does not bite', () => {
+    expect(Math.abs(cap(1280, 800) - (leaf(1280, 800) * 75) / 66)).toBeLessThanOrEqual(0.5);
+    expect(Math.min(leaf(1280, 800), cap(1280, 800))).toBe(leaf(1280, 800));
+  });
+
+  it('holds the line to the cap wherever the leaf is wider, and never shortens it elsewhere, in every wide window', () => {
+    const bad: string[] = [];
+    for (let w = 1100; w <= 3840; w += 20) {
+      for (let h = 600; h <= 2160; h += 20) {
+        const line = Math.min(leaf(w, h), cap(w, h));
+        if (line > cap(w, h) + 1e-9 || line > leaf(w, h) + 1e-9) bad.push(`${w}x${h}: ${line}`);
+        if (leaf(w, h) <= cap(w, h) && line !== leaf(w, h)) bad.push(`${w}x${h}: shortened`);
+        if (line / sOf(w, h) > capN + 1e-9) bad.push(`${w}x${h}: more than ${capN} units`);
+      }
+    }
+    expect(bad.slice(0, 8)).toEqual([]);
+  });
+});
