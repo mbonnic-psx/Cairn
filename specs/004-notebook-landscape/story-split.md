@@ -57,7 +57,10 @@ the frame's page-spread layout and the look tokens, both settled by `frame` and 
 - A spread with no control may not scroll from the keyboard in the macOS and Linux webview: the page area is the
   shell's. One shell task makes it reachable and scrollable by keyboard, as host work on main before `reveal` (D19).
   The same task scrolls the page area back to its top when the screen changes: at 800×600 the disclosure opened
-  part-way down, its heading cut off (setup-pages demo, design note 1).
+  part-way down, its heading cut off (setup-pages demo, design note 1). Landed as host work in iteration 6: the
+  page area is a tab stop of its own with a focus ring in `--nb-ink`, and it returns to its top when the step
+  changes, choosing to disclosure included (`NotebookShell.test.tsx`, `AppSetupPages.test.tsx`). Held in jsdom
+  only; no WebKit run was possible here, so the owner's macOS/Linux demo is where it is seen.
 - Before Cairn changes anything can be confirmed before its details (what is not covered) are shown, while they load
   or when they cannot be read. That is 002's to fix, as a task in `specs/002-machine-wide-protection/tasks.md` (D20).
   When it lands, Current's disclosure changes too; that is 002's change, not a break of SC-009.

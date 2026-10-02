@@ -9,6 +9,13 @@ import { tabsFor } from '../../navigation';
 import { NotebookShell } from '../NotebookShell';
 import source from '../NotebookShell.tsx?raw';
 
+// Vitest blanks CSS imports and this project carries no Node typings; read the file from disk.
+const nodeFs = 'node:' + 'fs';
+const { readFileSync } = (await import(/* @vite-ignore */ nodeFs)) as {
+  readFileSync: (path: string, encoding: 'utf8') => string;
+};
+const notebook = readFileSync('src/styles/notebook.css', 'utf8');
+
 const fakeTabs: Tab[] = [
   { id: 'protection', label: 'Protection', current: false },
   { id: 'reaches', label: 'Today', current: true },
@@ -47,6 +54,7 @@ describe('NotebookShell tabs', () => {
   it('reports the chosen destination from the keyboard', async () => {
     const { onSelect } = shell();
     await userEvent.tab();
+    await userEvent.tab();
     expect(screen.getByRole('button', { name: 'Protection' })).toHaveFocus();
     await userEvent.keyboard('{Enter}');
     expect(onSelect).toHaveBeenCalledWith('protection');
@@ -58,6 +66,51 @@ describe('NotebookShell tabs', () => {
     expect(area).not.toBeNull();
     expect(area).toContainElement(screen.getByText('the screen'));
     expect(container.querySelectorAll('.nb-page-area')).toHaveLength(1);
+  });
+
+  it('lets the keyboard reach the page area on a spread with no control, so it can scroll it (D19)', async () => {
+    const { container } = shell();
+    await userEvent.tab();
+    expect(container.querySelector('.nb-page-area')).toHaveFocus();
+  });
+
+  it('draws a focus ring on the page area, in the ink every outline on the paper is drawn in (D19)', () => {
+    expect(notebook).toMatch(/\.nb-page-area:focus-visible\s*\{[^}]*outline:\s*2px solid var\(--nb-ink\)/);
+  });
+
+  it('scrolls the page area back to its top when the screen changes, and not otherwise (D19)', () => {
+    const { container, rerender } = shell();
+    const area = container.querySelector('.nb-page-area') as HTMLElement;
+    area.scrollTop = 240;
+    rerender(
+      <NotebookShell tabs={fakeTabs} onSelect={vi.fn()} look="night">
+        <p>the screen</p>
+      </NotebookShell>,
+    );
+    expect(area.scrollTop).toBe(240);
+    const moved = fakeTabs.map((t) => ({ ...t, current: t.id === 'checkin' }));
+    rerender(
+      <NotebookShell tabs={moved} onSelect={vi.fn()} look="night">
+        <p>the screen</p>
+      </NotebookShell>,
+    );
+    expect(area.scrollTop).toBe(0);
+  });
+
+  it('scrolls back to the top when the page changes under the same tab (D19)', () => {
+    const { container, rerender } = render(
+      <NotebookShell tabs={fakeTabs} onSelect={vi.fn()} look="morning" page="choosing">
+        <p>the screen</p>
+      </NotebookShell>,
+    );
+    const area = container.querySelector('.nb-page-area') as HTMLElement;
+    area.scrollTop = 240;
+    rerender(
+      <NotebookShell tabs={fakeTabs} onSelect={vi.fn()} look="morning" page="disclosure">
+        <p>the screen</p>
+      </NotebookShell>,
+    );
+    expect(area.scrollTop).toBe(0);
   });
 
   it('renders no tab for an id tabsFor does not return', () => {

@@ -106,6 +106,15 @@ describe('the setup steps through App, in a notebook look', () => {
     expect(pagesOf()[1]!.contains(sentence)).toBe(true);
   });
 
+  it('opens Before Cairn changes anything at the top of the page, wherever the choosing step was scrolled to (D19)', async () => {
+    const { container } = await choosing();
+    const area = container.querySelector('.nb-page-area') as HTMLElement;
+    area.scrollTop = 300;
+    await userEvent.click(screen.getByRole('button', { name: 'Turn protection on' }));
+    await screen.findByRole('heading', { name: 'Before Cairn changes anything' });
+    expect(area.scrollTop).toBe(0);
+  });
+
   it('turns to Before Cairn changes anything: limits on the right, the two buttons last, and Not yet comes back', async () => {
     const { pagesOf } = await choosing();
     await userEvent.click(screen.getByRole('checkbox', { name: /News/ }));

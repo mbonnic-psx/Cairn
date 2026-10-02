@@ -157,7 +157,7 @@ export default function App({ devBuild = import.meta.env.DEV }: { devBuild?: boo
           {screen}
         </CurrentShell>
       ) : (
-        <NotebookShell tabs={tabs} onSelect={onSelect} look={look}>
+        <NotebookShell tabs={tabs} onSelect={onSelect} look={look} page={step}>
           {screen}
         </NotebookShell>
       )}
