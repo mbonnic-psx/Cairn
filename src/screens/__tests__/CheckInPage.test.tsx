@@ -1,6 +1,6 @@
 /**
- * Tonight (`CheckIn`) told it is on a notebook page (slice `tonight-page`): the same words as outside any
- * shell, laid out as a spread. The core is the IPC fake and the clock is Vitest's fake timers, as the pin does.
+ * Tonight (`CheckIn`) told it is on a notebook page (slice `tonight-page`): the same words as before the
+ * notebook, laid out as a spread. The core is the IPC fake and the clock is Vitest's fake timers, as the pin does.
  */
 declare const process: { env: Record<string, string | undefined> };
 process.env.TZ = 'Europe/London';
@@ -26,6 +26,15 @@ import {
   tonightCore,
   type TonightCase,
 } from './tonightCases';
+import {
+  baseline,
+  wordsOf,
+  SAVE_CALLS_OUTSIDE,
+  SWITCH_CALLS_OUTSIDE,
+  TONIGHT,
+  TONIGHT_EXTRA_WORDS,
+  TONIGHT_SEEN_OUTSIDE,
+} from './beforeTheReveal';
 
 const tabs = [{ id: 'reaches' as const, label: 'Tonight', current: true }];
 
@@ -92,17 +101,8 @@ function words(root: HTMLElement): string[] {
     .sort();
 }
 
-async function wordsOutside(
-  c: TonightCase,
-  perform = false,
-  typed?: string,
-): Promise<string[]> {
-  const view = await show(c, false, perform, typed);
-  const found = words(view.container);
-  view.unmount();
-  core?.remove();
-  return found;
-}
+/** The words the screen said before the notebook, for a case the pin held: parsed from the baseline, never rendered. */
+const wasWords = (key: string) => wordsOf(baseline(TONIGHT[key]!));
 
 /** The time as Current writes it: the same call. */
 const timeOf = (seconds: number) =>
@@ -173,18 +173,11 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (name) 
     });
 
     it.each(['looking', 'a load that could not be made'])(
-      '%s: the words equal the same state outside any shell, which is the Pin’s card',
+      '%s: the words equal those it said before the notebook',
       async (key) => {
-        const c = tonightCases[key]!;
-        const onPage = await show(c, true);
+        const onPage = await show(tonightCases[key]!, true);
         expect(onPage.spread).not.toBeNull();
-        const found = words(onPage.spread!);
-        onPage.unmount();
-        core?.remove();
-        expect(found).toEqual(await wordsOutside(c));
-        const outside = await show(c, false);
-        expect(outside.container.querySelector('section.settle')).not.toBeNull();
-        expect(outside.container.querySelector('[class*="nb-"]')).toBeNull();
+        expect(words(onPage.spread!)).toEqual(wasWords(key));
       },
     );
   });
@@ -228,20 +221,11 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (name) 
       }
     });
 
-    it.each(OPEN_DAYS)('%s: the left page\u2019s words equal the same part outside any shell', async (key) => {
+    it.each(OPEN_DAYS)('%s: the left page\u2019s words equal that part of what it said before the notebook', async (key) => {
       const c = tonightCases[key]!;
       const onPage = await show(c, true);
       expect(onPage.left).toBeDefined();
-      const found = words(onPage.left!);
-      onPage.unmount();
-      core?.remove();
-      expect(found).toEqual(withoutRight(await wordsOutside(c)));
-    });
-
-    it('outside any shell the open day is the Pin\u2019s card', async () => {
-      const outside = await show(tonightCases[OPEN_DAYS[0]!]!, false);
-      expect(outside.container.querySelector('section.settle')).not.toBeNull();
-      expect(outside.container.querySelector('[class*="nb-"]')).toBeNull();
+      expect(words(onPage.left!)).toEqual(withoutRight(wasWords(key)));
     });
   });
 
@@ -330,34 +314,26 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (name) 
       expect(keep).toBeDisabled();
     });
 
-    it('pressing it asks save_journal_entry with the same arguments as outside any shell', async () => {
+    it('pressing it asks save_journal_entry with the arguments it asked before the notebook', async () => {
       const c = tonightCases['an entry kept']!;
-      const saves = async (shell: boolean) => {
-        const view = await show(c, shell);
-        fireEvent.change(screen.getByLabelText('How the day went'), {
-          target: { value: c.keep!.typed },
-        });
-        fireEvent.click(screen.getByRole('button', { name: 'Keep this' }));
-        await settle();
-        const asked = core!.calls.filter((call) => call.cmd === 'save_journal_entry');
-        view.unmount();
-        core?.remove();
-        return asked;
-      };
-      const onPage = await saves(true);
-      expect(onPage).toHaveLength(1);
-      expect(onPage).toEqual(await saves(false));
+      await show(c, true);
+      fireEvent.change(screen.getByLabelText('How the day went'), {
+        target: { value: c.keep!.typed },
+      });
+      fireEvent.click(screen.getByRole('button', { name: 'Keep this' }));
+      await settle();
+      const asked = core!.calls.filter((call) => call.cmd === 'save_journal_entry');
+      expect(asked).toHaveLength(1);
+      expect(asked).toEqual(SAVE_CALLS_OUTSIDE);
     });
 
-    it.each(WRITING_DAYS)('%s: the right page\u2019s words equal the same part outside any shell', async (key) => {
+    it.each(WRITING_DAYS)('%s: the right page\u2019s words equal that part of what it said before the notebook', async (key) => {
       const c = tonightCases[key]!;
       const onPage = await show(c, true);
       expect(onPage.right).toBeDefined();
       const left = words(onPage.left!);
       const right = words(onPage.right!);
-      onPage.unmount();
-      core?.remove();
-      expect(right).toEqual(without(await wordsOutside(c), left));
+      expect(right).toEqual(without(wasWords(key), left));
     });
   });
 
@@ -449,35 +425,27 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (name) 
       expect(toggle.className).not.toMatch(/transition|duration-|animate-|rounded|px-/);
     });
 
-    it('pressing it asks set_quotes_shown with the same arguments as outside any shell', async () => {
+    it('pressing it asks set_quotes_shown with the arguments it asked before the notebook', async () => {
       const c = tonightCases['reaches, with a quote']!;
-      const presses = async (shell: boolean) => {
-        const view = await show(c, shell);
-        fireEvent.click(screen.getByRole('button', { name: 'Hide quotes' }));
-        await settle();
-        const asked = core!.calls.filter((call) => call.cmd === 'set_quotes_shown');
-        view.unmount();
-        core?.remove();
-        return asked;
-      };
-      const onPage = await presses(true);
-      expect(onPage).toEqual([{ cmd: 'set_quotes_shown', args: { shown: false } }]);
-      expect(onPage).toEqual(await presses(false));
+      await show(c, true);
+      fireEvent.click(screen.getByRole('button', { name: 'Hide quotes' }));
+      await settle();
+      const asked = core!.calls.filter((call) => call.cmd === 'set_quotes_shown');
+      expect(asked).toEqual([{ cmd: 'set_quotes_shown', args: { shown: false } }]);
+      expect(asked).toEqual(SWITCH_CALLS_OUTSIDE);
     });
 
     it.each([
       'reaches, with a quote',
       'reaches, quotes shown and none to be had',
       'reaches, the quotes setting unknown',
-    ])('%s: the right page\u2019s words equal the same part outside any shell', async (key) => {
+    ])('%s: the right page\u2019s words equal that part of what it said before the notebook', async (key) => {
       const c = tonightCases[key]!;
       const onPage = await show(c, true);
       expect(onPage.right).toBeDefined();
       const left = words(onPage.left!);
       const right = words(onPage.right!);
-      onPage.unmount();
-      core?.remove();
-      expect(right).toEqual(without(await wordsOutside(c), left));
+      expect(right).toEqual(without(wasWords(key), left));
     });
   });
 
@@ -535,14 +503,13 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (name) 
       ['a refused save', tonightCases['a refused save']!],
       ['a refused switch', tonightCases['a refused switch']!],
       ['both refused', bothRefused],
-    ])('%s: the right page\u2019s words equal the same part outside any shell', async (_name, c) => {
+    ])('%s: the right page\u2019s words equal that part of what it said before the notebook', async (name, c) => {
       const onPage = await show(c, true, true);
       expect(onPage.right).toBeDefined();
       const left = words(onPage.left!);
       const right = words(onPage.right!);
-      onPage.unmount();
-      core?.remove();
-      expect(right).toEqual(without(await wordsOutside(c, true), left));
+      const was = name === 'both refused' ? TONIGHT_EXTRA_WORDS[name]! : wasWords(name);
+      expect(right).toEqual(without(was, left));
     });
   });
 
@@ -584,16 +551,13 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (name) 
     });
 
     it.each([
-      ['an empty log', emptyDay, false, undefined],
-      ['a kept entry', keptDay, true, undefined],
-      ['text typed', typedDay, false, TYPED],
-    ])('%s: the words equal the same state outside any shell', async (_name, c, perform, typed) => {
+      ['an empty log', emptyDay, false, undefined, wasWords('a day that ended while open')],
+      ['a kept entry', keptDay, true, undefined, TONIGHT_EXTRA_WORDS['a kept entry, the day ended']!],
+      ['text typed', typedDay, false, TYPED, TONIGHT_EXTRA_WORDS['text typed, the day ended']!],
+    ])('%s: the words equal those it said before the notebook', async (_name, c, perform, typed, was) => {
       const onPage = await show(c, true, perform, typed);
       expect(onPage.spread).not.toBeNull();
-      const found = words(onPage.spread!);
-      onPage.unmount();
-      core?.remove();
-      expect(found).toEqual(await wordsOutside(c, perform, typed));
+      expect(words(onPage.spread!)).toEqual(was);
     });
   });
 
@@ -648,24 +612,16 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (name) 
     });
 
     it.each([
-      ['quotes hidden', sealedHidden, false],
-      ['a quote', sealedQuote, false],
-      ['the setting unknown', sealedUnknown, false],
-      ['a refused switch', sealedRefused, true],
-      ['ended', sealedEnded, false],
-    ])('%s: the words of both pages equal the same state outside any shell', async (_name, c, perform) => {
+      ['quotes hidden', sealedHidden, false, wasWords('sealed, quotes hidden')],
+      ['a quote', sealedQuote, false, wasWords('sealed, with a quote')],
+      ['the setting unknown', sealedUnknown, false, TONIGHT_EXTRA_WORDS['sealed, the setting unknown']!],
+      ['a refused switch', sealedRefused, true, TONIGHT_EXTRA_WORDS['sealed, a refused switch']!],
+      ['ended', sealedEnded, false, TONIGHT_EXTRA_WORDS['sealed, ended']!],
+    ])('%s: the words of both pages equal those it said before the notebook', async (_name, c, perform, was) => {
       const onPage = await show(c, true, perform);
       expect(onPage.right).toBeDefined();
       const found = [...words(onPage.left!), ...words(onPage.right!)].sort();
-      onPage.unmount();
-      core?.remove();
-      expect(found).toEqual(await wordsOutside(c, perform));
-    });
-
-    it('outside any shell the sealed day is the Pin\u2019s card', async () => {
-      const outside = await show(sealedQuote, false);
-      expect(outside.container.querySelector('section.settle')).not.toBeNull();
-      expect(outside.container.querySelector('[class*="nb-"]')).toBeNull();
+      expect(found).toEqual(was);
     });
   });
 
@@ -698,8 +654,8 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (name) 
       keeping: { draft: 'Held draft.', note: undefined, kept: false, keeping: true },
     };
 
-    /** The words of the whole screen and the text of its status region, on a page or outside any shell. */
-    async function seen(c: TonightCase, h: Held, shell: boolean) {
+    /** The words of the whole screen and the text of its status region, on the notebook page. */
+    async function seen(c: TonightCase, h: Held) {
       const session: CheckInSession = {
         opened: { day: '2026-09-30', start: 1_790_722_800, end: 1_790_809_200 },
         open: () => undefined,
@@ -712,13 +668,9 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (name) 
       vi.setSystemTime(c.endsWhileOpen ? lateEvening() : evening());
       core = installFakeCore(tonightCore(c));
       const view = render(
-        shell ? (
-          <NotebookShell tabs={tabs} onSelect={vi.fn()} look={look}>
-            <CheckIn session={session} />
-          </NotebookShell>
-        ) : (
+        <NotebookShell tabs={tabs} onSelect={vi.fn()} look={look}>
           <CheckIn session={session} />
-        ),
+        </NotebookShell>,
       );
       await settle();
       if (c.endsWhileOpen) {
@@ -740,11 +692,11 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (name) 
 
     for (const [viewName, c] of Object.entries(views)) {
       for (const [heldName, h] of Object.entries(held)) {
-        it(`${viewName} x ${heldName}: the page says what Current says, status region and all`, async () => {
-          const onPage = await seen(c, h, true);
-          const outside = await seen(c, h, false);
-          expect(onPage.status).toEqual(outside.status);
-          expect(onPage.words).toEqual(outside.words);
+        it(`${viewName} x ${heldName}: the page says what it said before the notebook, status region and all`, async () => {
+          const onPage = await seen(c, h);
+          const was = TONIGHT_SEEN_OUTSIDE[`${viewName} x ${heldName}`]!;
+          expect(onPage.status).toEqual(was.status);
+          expect(onPage.words).toEqual(was.words);
         });
       }
     }

@@ -6,11 +6,12 @@
  */
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import App from '../../App';
 import { CheckIn } from '../../screens/CheckIn';
 import { Reaches } from '../../screens/Reaches';
+import { TONIGHT_CALLS_CURRENT } from '../../screens/__tests__/beforeTheReveal';
 import { installFakeCore, type FakeCore } from '../../screens/__tests__/fakeCore';
 import { reachesOfTheDay } from '../../screens/__tests__/tonightCases';
 
@@ -144,9 +145,12 @@ describe('Current through App', () => {
     expect(container.innerHTML).toContain(tonightHtml);
   });
 
-  it('asks the core the same things, with the same arguments, as Current does', async () => {
-    const script = async (look: 'Morning' | 'Current') => {
-      const view = await start(look);
+  it('asks the core the same things, with the same arguments, as Current did', async () => {
+    // The clock is held where the log was captured; the zone is the fixture's (Europe/London).
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date(2026, 8, 30, 20, 0));
+    try {
+      const view = await start('Morning');
       await tab('Today');
       await screen.findByText('video.example');
       await userEvent.click(screen.getByRole('button', { name: 'Over time' }));
@@ -156,16 +160,14 @@ describe('Current through App', () => {
       await tab('Today');
       await screen.findByText('Over time');
       const asked = core.calls.map((c) => `${c.cmd} ${JSON.stringify(c.args)}`);
-      core.calls.length = 0;
       view.unmount();
-      return asked;
-    };
-    const current = await script('Current');
-    const morning = await script('Morning');
-    for (const cmd of ['list_todays_reaches', 'summarize_reaches', 'get_day', 'get_quotes_shown']) {
-      expect(current.some((c) => c.startsWith(`${cmd} `)), cmd).toBe(true);
+      for (const cmd of ['list_todays_reaches', 'summarize_reaches', 'get_day', 'get_quotes_shown']) {
+        expect(TONIGHT_CALLS_CURRENT.some((c) => c.startsWith(`${cmd} `)), cmd).toBe(true);
+      }
+      expect([...asked].sort()).toEqual([...TONIGHT_CALLS_CURRENT].sort());
+    } finally {
+      vi.useRealTimers();
     }
-    expect([...morning].sort()).toEqual([...current].sort());
   });
 });
 
