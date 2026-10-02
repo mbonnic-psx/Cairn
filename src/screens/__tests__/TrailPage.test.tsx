@@ -1,6 +1,6 @@
 /**
  * What is protected told it is on a notebook page (slice `protection-page`, T007): the same words as
- * outside any shell, laid out as a spread with the list on the right.
+ * before the notebook, laid out as a spread with the list on the right.
  */
 import { render, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -9,6 +9,7 @@ import type { Trail as TrailData } from '../../ipc';
 import { NotebookShell } from '../../shell/NotebookShell';
 import type { NotebookLook } from '../../look/look';
 import { Trail } from '../Trail';
+import { baseline, wordsOf, TRAIL } from './beforeTheReveal';
 import { trailCases } from './pinCases';
 
 const tabs = [{ id: 'trail' as const, label: 'What is protected', current: true }];
@@ -26,20 +27,6 @@ function onPage(ui: React.ReactElement) {
   const pages = spread ? Array.from(spread.querySelectorAll<HTMLElement>(':scope > .nb-page')) : [];
   const main = view.container.querySelector('main') as HTMLElement;
   return { ...view, spread, left: pages[0], right: pages[1], pages, main };
-}
-
-function words(root: HTMLElement): string[] {
-  return Array.from(root.querySelectorAll('*'))
-    .filter((el) => el.children.length === 0 && el.textContent)
-    .map((el) => el.textContent as string)
-    .sort();
-}
-
-function wordsOutside(ui: React.ReactElement): string[] {
-  const view = render(ui);
-  const found = words(view.container);
-  view.unmount();
-  return found;
 }
 
 const inForce = trailCases['list in force']!;
@@ -145,9 +132,9 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (name) 
       ['not confirmed', notConfirmed],
       ['off', off],
     ] as const) {
-      it(`says the same words as outside any shell: ${name}`, () => {
+      it(`says the words it said before the notebook: ${name}`, () => {
         const { main } = onPage(<Trail {...c} />);
-        expect(words(main)).toEqual(wordsOutside(<Trail {...c} />));
+        expect(wordsOf(main)).toEqual(wordsOf(baseline(TRAIL[`list ${name}`]!)));
       });
     }
   });

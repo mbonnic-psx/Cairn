@@ -1,6 +1,6 @@
 /**
- * Protection told it is on a notebook page (slice `protection-page`, T004–T006): the same words as outside
- * any shell, laid out as a spread. Rendered inside `NotebookShell`; the core is a fake written in this tree.
+ * Protection told it is on a notebook page (slice `protection-page`, T004–T006): the same words as before the notebook,
+ * laid out as a spread. Rendered inside `NotebookShell`; the core is a fake written in this tree.
  */
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -10,6 +10,7 @@ import { NotebookShell } from '../../shell/NotebookShell';
 import type { NotebookLook } from '../../look/look';
 import { Protection } from '../Protection';
 import { installFakeCore, never, type FakeCore } from './fakeCore';
+import { baseline, wordsOf, PROTECTION } from './beforeTheReveal';
 import { cases, ready, waiting } from './pinCases';
 
 let core: FakeCore | undefined;
@@ -35,26 +36,9 @@ function onPage(ui: React.ReactElement) {
   return { ...view, spread, left: pages[0], right: pages[1], pages, main };
 }
 
-function outside(ui: React.ReactElement): string {
-  const view = render(ui);
-  const text = view.container.textContent ?? '';
-  view.unmount();
-  return text;
-}
-
-/** The words, one per leaf element, in a fixed order: the waiting note moves page, its words do not change. */
-function words(root: HTMLElement): string[] {
-  return Array.from(root.querySelectorAll('*'))
-    .filter((el) => el.children.length === 0 && el.textContent)
-    .map((el) => el.textContent as string)
-    .sort();
-}
-
-function wordsOutside(ui: React.ReactElement): string[] {
-  const view = render(ui);
-  const found = words(view.container);
-  view.unmount();
-  return found;
+/** The words the screen said before the notebook, from the baseline (`beforeTheReveal.ts`), never from a render. */
+function wasText(name: string): string {
+  return baseline(PROTECTION[name]!).textContent ?? '';
 }
 
 describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (name) => {
@@ -88,9 +72,9 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (name) 
           expect(right!.querySelector('button, a, input')).toBeNull();
         });
 
-        it('says the same words as outside any shell, and runs no entrance', () => {
+        it('says the words it said before the notebook, and runs no entrance', () => {
           const { main } = onPage(<Protection state={state} />);
-          expect(main.textContent).toBe(outside(<Protection state={state} />));
+          expect(main.textContent).toBe(wasText(name));
           expect(main.querySelector('.settle')).toBeNull();
         });
       });
@@ -131,9 +115,9 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (name) 
         expect(right!.innerHTML).not.toMatch(/red/i);
       });
 
-      it(`${name}: says the same words as outside any shell`, () => {
+      it(`${name}: says the words it said before the notebook`, () => {
         const { main } = onPage(<Protection state={state} pending={waiting} />);
-        expect(words(main)).toEqual(wordsOutside(<Protection state={state} pending={waiting} />));
+        expect(wordsOf(main)).toEqual(wordsOf(baseline(PROTECTION[`${name}, a change waiting`]!)));
       });
     }
 
@@ -177,7 +161,7 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (name) 
       expect(within(left!).getByText('Checking this machine…')).toBeInTheDocument();
       expect(right).toHaveClass('nb-page--ruled');
       expect(right!.textContent).toBe('');
-      expect(main.textContent).toBe(outside(<Protection />));
+      expect(main.textContent).toBe(wasText('checking'));
       expect(main.querySelector('button, dl, h2')).toBeNull();
     });
 
