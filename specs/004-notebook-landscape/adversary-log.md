@@ -37,3 +37,14 @@ No CRITICAL or HIGH. Current is byte-for-byte today's: `innerHTML` matched `main
 | concurrency, idempotency, ordering, retention, or time | already covered | row `frame` (time on the greeting): `src/shell/Greeting.tsx` changes only the words, chosen by the look; its clock code is untouched |
 
 Skipped: nothing widened, and the slice does not close the split. Covered by rows `frame` · release gate on the notebook and `frame` · time on the greeting.
+
+## protection-page · 10f55e1 · 2026-10-02
+
+| Trigger | Status | Evidence |
+|---|---|---|
+| driving adapter (HTTP route, CLI command, queue consumer) | not present | no IPC command, route or CLI added (`src-tauri/` untouched, `ipc_surface.rs` unchanged); the demo fake core lives under `specs/…/demo/` and ships in no build |
+| driven adapter or the provider types behind one | not present | no store, file or system call touched; the diff is `src/screens/Protection.tsx`, `src/screens/Trail.tsx`, `src/shell/`, `src/styles/` and one import line in `src/main.tsx` |
+| authorisation decision (who can reach one that already exists) | already covered | row `frame` (release gate on the notebook): `src/App.tsx` is untouched, so a released build still forces `current`; the new page context is provided only by `NotebookShell`, inside that gate |
+| concurrency, idempotency, ordering, retention, or time | already covered | row `frame` (time on the greeting): `Greeting.tsx` changes its element only (`h2` to `p`, D9); `whenWas` in `Protection.tsx` is today's, unchanged; "Keep things as they are" is the same handler in both layouts |
+
+Skipped: nothing widened, and the slice does not close the split. Covered by rows `frame` · release gate on the notebook and `frame` · time on the greeting.
