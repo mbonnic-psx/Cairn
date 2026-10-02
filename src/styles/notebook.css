@@ -1,0 +1,346 @@
+/* The morning look: a notebook in a landscape.
+ *
+ * Every colour is a token on [data-look="morning"]; nothing below the token
+ * block names a colour. Slice `looks` re-lights the notebook by adding blocks
+ * of tokens for other looks and touching nothing else. Serif carries the
+ * reading; mono is for tab names, small labels and buttons only. */
+
+[data-look="morning"] {
+  --nb-paper: #f8f1e3;
+  --nb-ink: #2a2119;
+  --nb-ink-body: #33291f;
+  --nb-ink-quiet: #6b5a47;
+  --nb-rule: #ebe0cb;
+  --nb-margin: #c99a83;
+  --nb-fold: #e3d6bf;
+  --nb-accent-amber: #7d5a22;
+  --nb-button: #33291f;
+  --nb-button-ink: #f8f1e3;
+
+  --nb-sky-top: #f7e7cc;
+  --nb-sky-mid: #f4d9b2;
+  --nb-sky-bottom: #efcd9f;
+  --nb-greeting-ink: #2a2119;
+  --nb-greeting-body: #4a3d2f;
+  --nb-greeting-quiet: #6b5440;
+  --nb-sun: #eda95e;
+  --nb-sun-glow: #eda95e59;
+  --nb-hill-far: #cdcfa8;
+  --nb-hill-mid: #a3b28a;
+  --nb-hill-near: #6f8a62;
+  --nb-stone-base: #33291f;
+  --nb-stone-moss: #4e6646;
+  --nb-stone-amber: #c4904a;
+  --nb-stone-pale: #f8f1e3;
+  --nb-shadow-edge: #c9b998;
+  --nb-shadow-soft: #33291f80;
+
+  --nb-tab-protection: #f8f1e3;
+  --nb-tab-trail: #b9c4a7;
+  --nb-tab-reaches: #dcbf8c;
+  --nb-tab-checkin: #d7b4a2;
+  --nb-tab-limits: #cfc5b3;
+  --nb-tab-ink: #2a2119;
+
+  --nb-font-serif: var(--font-notebook-serif);
+  --nb-font-mono: var(--font-notebook-mono);
+}
+
+/* The window. */
+.nb-root {
+  position: relative;
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: 250px minmax(0, 830px);
+  column-gap: 44px;
+  justify-content: center;
+  align-items: start;
+  width: 100%;
+  height: 100vh;
+  min-height: 600px;
+  padding: 70px 100px 50px 56px;
+  overflow: hidden;
+  font-family: var(--nb-font-serif);
+  color: var(--nb-ink-body);
+}
+.nb-root *,
+.nb-root *::before,
+.nb-root *::after {
+  box-sizing: border-box;
+}
+
+/* The scene. */
+.nb-landscape {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.nb-sky {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, var(--nb-sky-top) 0%, var(--nb-sky-mid) 60%, var(--nb-sky-bottom) 100%);
+}
+.nb-sun {
+  position: absolute;
+  width: 96px;
+  height: 96px;
+  left: 15%;
+  top: 37%;
+  border-radius: 50%;
+  background: var(--nb-sun);
+  box-shadow: 0 0 80px 30px var(--nb-sun-glow);
+}
+.nb-hill {
+  position: absolute;
+  border-radius: 50%;
+}
+.nb-hill--far {
+  width: 117vw;
+  height: 65%;
+  left: -33vw;
+  top: 59%;
+  background: var(--nb-hill-far);
+}
+.nb-hill--mid {
+  width: 102vw;
+  height: 65%;
+  left: 30vw;
+  top: 67%;
+  background: var(--nb-hill-mid);
+}
+.nb-hill--near {
+  width: 110vw;
+  height: 70%;
+  left: -44vw;
+  top: 75%;
+  background: var(--nb-hill-near);
+}
+.nb-cairn {
+  position: absolute;
+  left: 10%;
+  top: 69%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.nb-stone {
+  border-radius: 999px;
+}
+.nb-stone--base { background: var(--nb-stone-base); }
+.nb-stone--moss { background: var(--nb-stone-moss); }
+.nb-stone--amber { background: var(--nb-stone-amber); }
+.nb-stone--pale { background: var(--nb-stone-pale); }
+.nb-stone--1 { width: 18px; height: 12px; }
+.nb-stone--2 { width: 30px; height: 15px; }
+.nb-stone--3 { width: 44px; height: 17px; }
+.nb-stone--4 { width: 58px; height: 19px; }
+.nb-stone--5 { width: 74px; height: 21px; }
+
+/* Brand row. */
+.nb-titlebar {
+  position: absolute;
+  top: 12px;
+  left: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.nb-titlebar__name {
+  font-family: var(--nb-font-mono);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: var(--nb-greeting-body);
+}
+
+/* The greeting. */
+.nb-aside {
+  position: relative;
+  padding-top: 18px;
+}
+.nb-greeting {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.nb-greeting__time {
+  font-family: var(--nb-font-mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--nb-greeting-quiet);
+}
+.nb-greeting__words {
+  margin: 0;
+  font-weight: 400;
+  font-size: 40px;
+  line-height: 1.1;
+  color: var(--nb-greeting-ink);
+}
+
+/* The notebook. */
+.nb-notebook {
+  position: relative;
+  height: calc(100vh - 120px);
+  min-height: 480px;
+  background: var(--nb-paper);
+  border-radius: 6px;
+  box-shadow: 0 1px 0 var(--nb-shadow-edge), 0 24px 50px -20px var(--nb-shadow-soft);
+}
+.nb-spread {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+.nb-page {
+  position: relative;
+  min-width: 0;
+}
+.nb-page-area {
+  grid-column: 1 / -1;
+  height: 100%;
+  overflow-y: auto;
+  margin: 0;
+  padding: 40px 48px 36px 60px;
+  font-family: var(--nb-font-serif);
+  color: var(--nb-ink-body);
+  line-height: 1.65;
+}
+.nb-page-area::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 38px;
+  width: 1px;
+  background: var(--nb-margin);
+}
+.nb-page--ruled {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 31px,
+    var(--nb-rule) 31px,
+    var(--nb-rule) 32px
+  );
+  background-position: 0 150px;
+}
+.nb-margin {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 38px;
+  width: 1px;
+  background: var(--nb-margin);
+}
+.nb-label {
+  font-family: var(--nb-font-mono);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--nb-ink-quiet);
+}
+.nb-button {
+  min-height: 40px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 3px;
+  background: var(--nb-button);
+  color: var(--nb-button-ink);
+  font-family: var(--nb-font-mono);
+  font-size: 12.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* The tabs, fixed to the notebook's right edge. */
+.nb-tabs {
+  position: absolute;
+  right: -44px;
+  top: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.nb-tab {
+  width: 38px;
+  min-height: 80px;
+  padding: 10px 0;
+  border: 0;
+  border-radius: 0 6px 6px 0;
+  background: var(--nb-tab-limits);
+  color: var(--nb-tab-ink);
+  writing-mode: vertical-rl;
+  font-family: var(--nb-font-mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: filter 160ms ease;
+}
+.nb-tab--protection { background: var(--nb-tab-protection); }
+.nb-tab--trail { background: var(--nb-tab-trail); }
+.nb-tab--reaches { background: var(--nb-tab-reaches); }
+.nb-tab--checkin { background: var(--nb-tab-checkin); }
+.nb-tab--limits { background: var(--nb-tab-limits); }
+.nb-tab:hover {
+  filter: brightness(1.04);
+}
+.nb-tab[aria-current='page'] {
+  width: 44px;
+  background: var(--nb-paper);
+  color: var(--nb-ink);
+}
+.nb-tab:focus-visible,
+.nb-switch:focus-visible {
+  outline: 2px solid var(--nb-ink);
+  outline-offset: 2px;
+}
+
+/* Narrow windows: the greeting moves above the notebook. */
+@media (max-width: 1099px) {
+  .nb-root {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    row-gap: 12px;
+    padding: 44px 64px 24px 16px;
+  }
+  .nb-aside {
+    padding-top: 0;
+  }
+  .nb-greeting {
+    gap: 4px;
+  }
+  .nb-greeting__words {
+    font-size: 30px;
+  }
+  .nb-notebook {
+    height: 100%;
+    min-height: 0;
+  }
+  .nb-page-area {
+    padding: 28px 32px 28px 52px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+@media (forced-colors: active) {
+  .nb-notebook,
+  .nb-tab {
+    border: 1px solid CanvasText;
+  }
+  .nb-tab[aria-current='page'] {
+    border-width: 3px;
+  }
+  .nb-landscape {
+    forced-color-adjust: none;
+  }
+}

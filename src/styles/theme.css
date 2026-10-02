@@ -10,6 +10,47 @@
  * in force, the colour is a warm amber that says "not confirmed", never a red
  * that says "you are in trouble" (FR-052). */
 
+/* The notebook look's fonts, vendored (SIL OFL 1.1, see assets/fonts/OFL.txt). */
+@font-face {
+  font-family: 'Libre Caslon Text';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../assets/fonts/LibreCaslonText-400.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Libre Caslon Text';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../assets/fonts/LibreCaslonText-400i.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Libre Caslon Text';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('../assets/fonts/LibreCaslonText-700.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../assets/fonts/IBMPlexMono-400.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('../assets/fonts/IBMPlexMono-500.woff2') format('woff2');
+}
+
 @theme {
   /* Warm neutrals — the ground everything sits on. */
   --color-sand-50: #faf7f2;
@@ -50,6 +91,9 @@
 
 :root {
   color-scheme: light;
+  --font-notebook-serif: 'Libre Caslon Text', Georgia, 'Iowan Old Style', serif;
+  --font-notebook-mono:
+    'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
 }
 
 body {
