@@ -6,15 +6,13 @@
  */
 import { useEffect, useState } from 'react';
 
-import { Button } from './components/Button';
 import { tabsFor, type Step, type TabId } from './navigation';
 import { CheckIn, useCheckInSession } from './screens/CheckIn';
 import { Disclosure } from './screens/Disclosure';
 import { Limits } from './screens/Limits';
 import { Protection } from './screens/Protection';
 import { Reaches } from './screens/Reaches';
-import { Categories } from './screens/Setup/Categories';
-import { CustomEntry } from './screens/Setup/CustomEntry';
+import { Choosing } from './screens/Setup/Choosing';
 import { Trail } from './screens/Trail';
 import { LookSwitch } from './look/LookSwitch';
 import type { Look } from './look/look';
@@ -122,13 +120,12 @@ export default function App({ devBuild = import.meta.env.DEV }: { devBuild?: boo
   const screen = (
     <>
       {step === 'choosing' && (
-        <>
-          <Categories categories={categories} onToggle={toggle} note={note} />
-          <CustomEntry />
-          <div className="flex justify-end">
-            <Button onClick={() => setStep('disclosure')}>Turn protection on</Button>
-          </div>
-        </>
+        <Choosing
+          categories={categories}
+          onToggle={toggle}
+          note={note}
+          onTurnOn={() => setStep('disclosure')}
+        />
       )}
 
       {step === 'disclosure' && (
