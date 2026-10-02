@@ -227,3 +227,15 @@ describe('the shell contract in the stylesheet (contracts/ui-shell.md)', () => {
     expect(ruleFor('.nb-spread')[0]!.body).toMatch(/grid-template-columns:\s*1fr 1fr/);
   });
 });
+
+describe('the notebook renders the same on every platform', () => {
+  it('turns the tab label, not the button, sideways', () => {
+    expect(ruleFor('.nb-tab-label').some((r) => /writing-mode:\s*vertical-rl/.test(r.body))).toBe(true);
+    expect(ruleFor('.nb-tab').every((r) => !/writing-mode/.test(r.body))).toBe(true);
+  });
+
+  it("points the screens' serif at the bundled face, so no platform font stands in", () => {
+    const morning = ruleFor('[data-look="morning"]').map((r) => r.body).join('\n');
+    expect(morning).toMatch(/--font-serif:\s*var\(--font-notebook-serif\)/);
+  });
+});

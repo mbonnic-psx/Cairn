@@ -116,3 +116,15 @@ describe('NotebookShell assembly', () => {
     expect(src).not.toMatch(/ipc/);
   });
 });
+
+describe('NotebookShell tab labels on every webview', () => {
+  // WebKitGTK (Tauri on Linux) ignores writing-mode on a <button>, so the
+  // sideways label lives on an inner span that every engine turns.
+  it('puts each tab name in its own label span inside the button', () => {
+    shell();
+    for (const button of screen.getAllByRole('button')) {
+      const label = button.querySelector(':scope > .nb-tab-label');
+      expect(label?.textContent).toBe(button.textContent);
+    }
+  });
+});

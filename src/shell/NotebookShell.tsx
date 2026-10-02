@@ -41,7 +41,7 @@ export function NotebookShell({
               aria-current={tab.current ? 'page' : undefined}
               onClick={() => onSelect(tab.id)}
             >
-              {tab.label}
+              <span className="nb-tab-label">{tab.label}</span>
             </button>
           ))}
         </nav>

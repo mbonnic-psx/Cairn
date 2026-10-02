@@ -6,6 +6,9 @@
  * reading; mono is for tab names, small labels and buttons only. */
 
 [data-look="morning"] {
+  /* The screens' own serif is the bundled face here, so no platform font
+   * (Palatino on Windows, DejaVu on Linux) stands in for it. */
+  --font-serif: var(--font-notebook-serif);
   --nb-paper: #f8f1e3;
   --nb-ink: #2a2119;
   --nb-ink-body: #33291f;
@@ -276,7 +279,9 @@
   border-radius: 0 6px 6px 0;
   background: var(--nb-tab-limits);
   color: var(--nb-tab-ink);
-  writing-mode: vertical-rl;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-family: var(--nb-font-mono);
   font-size: 11px;
   line-height: 1.2;
@@ -290,12 +295,23 @@
     top: 40px;
     gap: 6px;
   }
+  .nb-tabs .nb-tab-label {
+    max-inline-size: none;
+  }
   .nb-tab {
     min-height: 80px;
     padding: 10px 0;
     font-size: 12px;
     letter-spacing: 0.08em;
   }
+}
+/* WebKitGTK (Tauri on Linux) ignores writing-mode on a <button>; the label
+ * span turns sideways in every engine. */
+.nb-tab-label {
+  writing-mode: vertical-rl;
+  /* A long name wraps into a second column rather than pushing the tabs
+   * past the notebook in a short window (T017). */
+  max-inline-size: 76px;
 }
 .nb-tab--protection { background: var(--nb-tab-protection); }
 .nb-tab--trail { background: var(--nb-tab-trail); }
