@@ -57,14 +57,40 @@ pub fn overlapping(gaps: &[Gap], from: i64, to: i64) -> Vec<Gap> {
 /// Each gap cut down to the part inside `[from, to)`, those with nothing left
 /// dropped. A gap that began the night before is only the day's for the hours
 /// that fall in it, and that is the span a day may be told about (T4).
+///
+/// Gaps that cover the same time are one gap: two Cairn processes at once, or a
+/// clock moved back, can leave rows that overlap, and the same hours are not
+/// unseen twice (R3).
 pub fn clipped(gaps: &[Gap], from: i64, to: i64) -> Vec<Gap> {
-    gaps.iter()
+    let cut: Vec<Gap> = gaps
+        .iter()
         .map(|gap| Gap {
             from: gap.from.max(from),
             to: gap.to.min(to),
         })
         .filter(|gap| gap.to > gap.from)
-        .collect()
+        .collect();
+    merged(&cut)
+}
+
+/// The same time with no stretch of it counted twice: gaps sorted by their
+/// start, those that overlap joined into one.
+pub fn merged(gaps: &[Gap]) -> Vec<Gap> {
+    let mut sorted: Vec<Gap> = gaps.to_vec();
+    sorted.sort_by_key(|gap| (gap.from, gap.to));
+    let mut joined: Vec<Gap> = Vec::with_capacity(sorted.len());
+    for gap in sorted {
+        match joined.last_mut() {
+            Some(last) if gap.from < last.to => last.to = last.to.max(gap.to),
+            _ => joined.push(gap),
+        }
+    }
+    joined
+}
+
+/// Seconds not observed, each stretch of time counted once.
+fn unobserved_seconds(gaps: &[Gap]) -> i64 {
+    merged(gaps).iter().map(Gap::seconds).sum()
 }
 
 /// A length of unobserved time in words, rounded toward admitting more
@@ -103,7 +129,7 @@ pub fn coverage_note(gaps: &[Gap]) -> Option<String> {
     if gaps.is_empty() {
         return None;
     }
-    let total = gaps.iter().map(Gap::seconds).sum::<i64>();
+    let total = unobserved_seconds(gaps);
     let lead = match span_in_words(total) {
         Span::Brief => "less than a minute".to_string(),
         Span::Minutes(s) | Span::Hours(s) | Span::Days(s) => format!("about {s}"),
@@ -123,7 +149,7 @@ pub fn range_coverage_note(gaps: &[Gap]) -> Option<String> {
     if gaps.is_empty() {
         return None;
     }
-    let total = gaps.iter().map(Gap::seconds).sum::<i64>();
+    let total = unobserved_seconds(gaps);
     let lead = match span_in_words(total) {
         Span::Brief => "for less than a minute of these days".to_string(),
         Span::Minutes(s) | Span::Hours(s) => format!("for about {s} of these days"),

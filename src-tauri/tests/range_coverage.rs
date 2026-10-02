@@ -166,3 +166,67 @@ fn of_these_days_never_follows_days() {
         assert!(!text.contains("days of these days"), "{text}");
     }
 }
+
+// --- R3: time is counted once ------------------------------------------------
+
+/// Two Cairn processes at once, or a clock moved back, can leave rows that
+/// cover the same time. The same hours are not unseen twice.
+#[test]
+fn gaps_over_the_same_time_are_counted_once_in_a_range() {
+    let start = 1_000_000;
+    let gaps = vec![
+        Gap {
+            from: start,
+            to: start + 2 * DAY,
+        },
+        Gap {
+            from: start,
+            to: start + 2 * DAY,
+        },
+        Gap {
+            from: start + DAY,
+            to: start + 3 * DAY,
+        },
+    ];
+    // Three days of time, however many rows say so.
+    let said = range_coverage_note(&gaps).unwrap();
+    assert!(said.contains("about 3 days across these days"), "{said}");
+}
+
+#[test]
+fn gaps_over_the_same_time_are_counted_once_in_a_day() {
+    let start = 1_000_000;
+    let gaps = vec![
+        Gap {
+            from: start,
+            to: start + 3 * HOUR,
+        },
+        Gap {
+            from: start + HOUR,
+            to: start + 4 * HOUR,
+        },
+    ];
+    let said = coverage_note(&gaps).unwrap();
+    assert!(said.contains("about 4 hours"), "{said}");
+}
+
+#[test]
+fn clipped_gaps_that_overlap_are_one_gap() {
+    use cairn::store::gaps::clipped;
+    let gaps = vec![
+        Gap { from: 0, to: 600 },
+        Gap {
+            from: 300,
+            to: 1_200,
+        },
+        Gap {
+            from: 2_000,
+            to: 2_100,
+        },
+    ];
+    let cut: Vec<(i64, i64)> = clipped(&gaps, 100, 5_000)
+        .iter()
+        .map(|gap| (gap.from, gap.to))
+        .collect();
+    assert_eq!(cut, vec![(100, 1_200), (2_000, 2_100)]);
+}
