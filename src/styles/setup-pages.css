@@ -128,7 +128,7 @@
 .nb-categories-note {
   margin: 24px 0 0;
   max-width: 34em;
-  color: var(--nb-ink-quiet);
+  color: var(--nb-accent-amber);
 }
 
 /* Anywhere else?: the box and its button on one line, what comes back under them. */
@@ -177,7 +177,13 @@
 .nb-custom-added {
   margin: 16px 0 0;
   max-width: 34em;
+}
+/* D17: in force is moss; not confirmed and off are amber, the warm colour of waiting (FR-016). */
+.nb-custom-added--in-force {
   color: var(--color-moss-600);
+}
+.nb-custom-added--waiting {
+  color: var(--nb-accent-amber);
 }
 /* A reason an address could not be taken: an amber edge, its words in amber too, never red. */
 .nb-custom-reason {

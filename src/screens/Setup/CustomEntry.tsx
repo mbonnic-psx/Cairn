@@ -88,7 +88,13 @@ export function CustomEntry({
           </button>
         </form>
 
-        {added.length > 0 && <p className="nb-custom-added">{addedSentence(status, added)}</p>}
+        {added.length > 0 && (
+          <p
+            className={`nb-custom-added ${status === 'in_force' ? 'nb-custom-added--in-force' : 'nb-custom-added--waiting'}`}
+          >
+            {addedSentence(status, added)}
+          </p>
+        )}
 
         {reason && (
           <p role="status" className="nb-custom-reason">

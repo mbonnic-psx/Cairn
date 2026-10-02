@@ -287,7 +287,8 @@ describe('every text colour the sheet declares meets its floor against what is b
       '.nb-categories-note',
       '.nb-custom-input',
       '.nb-custom-input::placeholder',
-      '.nb-custom-added',
+      '.nb-custom-added--in-force',
+      '.nb-custom-added--waiting',
       '.nb-custom-reason',
       '.nb-custom-button',
       '.nb-custom-button:hover',
@@ -331,8 +332,9 @@ describe('a colour that carries a meaning is its token and no other (FR-016, T02
     expect(edge![2]).toBe('--nb-accent-amber');
   });
 
-  it('draws the sentence for an address that was added, in all three read-backs, in moss', () => {
-    expect(colourOf('.nb-custom-added')).toBe('--color-moss-600');
+  it('draws the sentence for an address that was added in moss when in force, in amber when not confirmed or off (D17)', () => {
+    expect(colourOf('.nb-custom-added--in-force')).toBe('--color-moss-600');
+    expect(colourOf('.nb-custom-added--waiting')).toBe('--nb-accent-amber');
   });
 
   it('draws the dot of what is in force in moss, and the dot of what is not covered in quiet ink', () => {
@@ -340,8 +342,8 @@ describe('a colour that carries a meaning is its token and no other (FR-016, T02
     expect(fillOf('.nb-disclosure-dot--not-covered')).toBe('--nb-ink-quiet');
   });
 
-  it('draws the waiting note in quiet ink, as the paper\'s other asides', () => {
-    expect(colourOf('.nb-categories-note')).toBe('--nb-ink-quiet');
+  it('draws the waiting note beside the categories in amber (D17)', () => {
+    expect(colourOf('.nb-categories-note')).toBe('--nb-accent-amber');
   });
 
   it.each(LOOKS)('%s: amber holds 4.5:1 on the paper', (look) => {

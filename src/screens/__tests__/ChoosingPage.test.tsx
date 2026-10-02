@@ -235,6 +235,22 @@ describe('what comes back after an address is submitted, on a page (T006)', () =
     expect(found.className).not.toMatch(/text-moss/);
   });
 
+  describe.each(['morning', 'midday', 'night'] as const)('its colour class in the %s look (D17, T027)', (look) => {
+    it.each(reads)('read-back %s takes the class that names its colour', async (name, check) => {
+      const { main } = onPage(added(check), look);
+      const found = await submitted(main, 'added');
+      const wanted = name === 'in force' ? 'in-force' : 'waiting';
+      expect(found.className).toContain(`nb-custom-added--${wanted}`);
+      expect(found.className).not.toContain(`nb-custom-added--${wanted === 'waiting' ? 'in-force' : 'waiting'}`);
+      expect(found.className).toContain('nb-custom-added');
+    });
+
+    it('carries the waiting note in the page class the stylesheet draws amber', () => {
+      const { main } = onPage(<Categories categories={categories} onToggle={noop} note={waitingNote} />, look);
+      expect(within(main).getByText(waitingNote).className).toBe('nb-categories-note');
+    });
+  });
+
   it('says "Protected:" only for a read-back in force', async () => {
     for (const [name, check] of reads) {
       const ui = added(check);
