@@ -37,9 +37,15 @@ Each entry: decision, rationale, alternatives, and the artefact a stated fact wa
   you are protecting" or "What you have chosen"). `protection-page.css` gives it
   `.nb-trail-leaves > .nb-trail-sticky:focus-visible { outline: 2px solid var(--nb-ink); outline-offset: -4px; }`,
   the page area's ring (`notebook.css:478-481`).
-- **Rationale:** D30 and D19. A focused scroll container scrolls on the arrow keys in every engine; a `region` is
-  what `aria-labelledby` needs to name a plain element. Tab order: the page area (`main`, `tabIndex=0`) first, the
-  left page second, as the DOM has them.
+- **Rationale:** D30 and D19. A `region` is what `aria-labelledby` needs to name a plain element. Tab order: the
+  page area (`main`, `tabIndex=0`) first, the left page next, as the DOM has them; held by
+  `TrailPageKeyboard.test.tsx` ("the very next stop after the page area").
+- **Assumed, not observed:** that a focused scroll container scrolls on the arrow keys in every engine. It is the
+  premise D19 and D30 both rest on. jsdom has no layout, so no test here holds it. The demo shows it in Chromium,
+  and WebKit stays untested, as D19 records.
+- **Cost, accepted:** the left page is a tab stop whether or not it overflows. With a short list a keyboard user
+  meets one more stop, which has a ring and nothing to scroll, and a screen reader announces a region named by the
+  heading. The alternative needs layout (below).
 - **Alternatives:** the left page grows and drops its own scroll (loses D8's sticky leaf); a tab stop only when it
   overflows (needs layout, which jsdom does not have, and changes the tab order with the window size).
 

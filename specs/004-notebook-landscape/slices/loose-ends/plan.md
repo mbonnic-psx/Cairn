@@ -68,7 +68,7 @@ timeout is generous so a slow CI runner does not flake.
 (FR-023, D3). Scratch builds under `~/.cache/cairn-scratch`, never `/tmp` (RAM on this machine), removed after.
 
 **Scale/Scope**: Edited: `src/screens/Trail.tsx` and `src/screens/Protection.tsx` (page branches only),
-`src/styles/protection-page.css`, `src/styles/setup-pages.css`, the three guards
+`src/styles/protection-page.css`, `src/styles/setup-pages.css`, `src/styles/tonight-page.css` (its forced-colours block only, added by convergence task T013), the three guards
 `src/look/__tests__/tabFocusRing.test.ts`, `src/look/__tests__/hilltopCairn.test.ts` and the T016 `describe` of
 `src/look/__tests__/tokens.test.ts`. New tests, each in a new file (research R8): the released-build search, the
 left page by keyboard, the confirm through `App`, the forced-colours edge sweep, the no-fade sweep over every page

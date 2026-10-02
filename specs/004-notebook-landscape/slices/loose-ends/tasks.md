@@ -133,6 +133,17 @@ Converge pass 2 (at `65c264f`), graded. The bound is reached: only a CRITICAL wo
 - *Agent-Generated Change Meets the Same Bar* (`:376`): tests, lint and the guards were green in this pass, as recorded above.
 - *Acceptance-Driven Development* (`:456`): each pass-1 task's teeth went red for the stated reason (16 plants). Where a plant stayed green, it is recorded as T016 or T017, not as a pass.
 
+### After-converge gaps (drive-gaps · model: opus · delegated, fresh context; at `0b46a2e`)
+
+Six findings, none CRITICAL or HIGH, none needing a product decision. All closed by the host in the same commit, except 6, which is handed back:
+
+1. MEDIUM. The demo step for the left page could not be followed (no fake core named; "Tab twice" is wrong, because the dev switch takes the first stop), and the test did not hold "the very next stop after the page area". Closed: `quickstart.md` names protection-page's fake core and the URL; `TrailPageKeyboard.test.tsx` now asserts the Tab right after the page area lands on the leaf. Seen red by planting a button between them in `Trail.tsx`'s page branch (6 tests), restored with `git checkout -- src/screens/Trail.tsx`.
+2. MEDIUM. Three items cannot be shown at the demo: the note button (no waiting change is fetched, D11), the refusal half of the confirm (the setup fake core always succeeds), and forced colours (needs Windows or emulation). Closed: `quickstart.md` says which items are held by tests only, and how to emulate forced colours in Chromium.
+3. LOW. "The arrow keys scroll it" rests on no test. Closed as a record: R2 marks it *assumed*, and the demo shows it in Chromium only. WebKit stays untested, as D19 records.
+4. LOW. The left page is a tab stop even when it fits. Closed as a record: R2 states the cost and accepts it.
+5. LOW. The spec's "Nothing new for the person to see" and the plan's file list fell behind the diff. Closed: both aligned (the ring and the forced-colours edges; `tonight-page.css`).
+6. LOW, handed back. Decisions D26–D28 read `2026-10-02T15:40:00Z`, iteration 6, later than D29–D31 (`12:22Z`, iteration 7). It is D26–D28 whose time is wrong: it is later than this slice's own commits. The decision log is the host's, so it is not edited here.
+
 ## Questions for the host
 
 No product question arose. Three host questions, settled by the host (drive-slice) on 2026-10-02:

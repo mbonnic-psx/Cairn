@@ -49,20 +49,15 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (look) 
       expect(getByRole('region', { name: title })).toBe(leaf);
     });
 
-    it('is reached after the page area, then the rest in DOM order', async () => {
+    it('is the very next stop after the page area', async () => {
       const { container } = onPage();
       const main = container.querySelector('main') as HTMLElement;
       const leaf = container.querySelector(LEAF) as HTMLElement;
-      const order = Array.from(
-        main.parentElement!.querySelectorAll<HTMLElement>('[tabindex="0"], button, input, select, textarea, a[href]'),
-      );
-      expect(order.indexOf(main)).toBeLessThan(order.indexOf(leaf));
+      // Tab until the page area holds focus, then once more: the left leaf, nothing in between.
+      for (let i = 0; i < 20 && document.activeElement !== main; i += 1) await userEvent.tab();
+      expect(document.activeElement, 'the page area is reached').toBe(main);
       await userEvent.tab();
-      const first = document.activeElement;
-      // Tabbing from the start lands somewhere at or before the page area, and the leaf is reached by tabbing on.
-      for (let i = 0; i < 20 && document.activeElement !== leaf; i += 1) await userEvent.tab();
       expect(document.activeElement).toBe(leaf);
-      expect(first).not.toBe(leaf);
     });
 
     it('says what it said before', () => {
