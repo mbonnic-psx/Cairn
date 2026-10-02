@@ -307,7 +307,8 @@ describe('Protection\'s "Keep things as they are" on the page', () => {
 
   it('keeps the box the shared button gave it, from the sheet', () => {
     const body = ruleBody('.nb-protection-note__button');
-    expect(body).toMatch(/padding:\s*10px 20px/);
+    // board-scale (D39): the box grows with the notebook, 10 by 20 at today's size.
+    expect(body).toMatch(/padding:\s*calc\(10 \* var\(--nb-u\)\) calc\(20 \* var\(--nb-u\)\)/);
     expect(body).toMatch(/border-radius:\s*8px/);
     expect(body).toMatch(/font-weight:\s*500/);
     expect(body).toMatch(/line-height:\s*calc\(1\.25 \/ 0\.875\)/);

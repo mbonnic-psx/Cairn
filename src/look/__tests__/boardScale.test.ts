@@ -58,6 +58,8 @@ export function unscaledLengths(sheet: string, selector: RegExp, options: SweepO
       const prop = decl.slice(0, colon).trim();
       if (LINE_OR_RING.test(prop)) continue;
       let value = decl.slice(colon + 1).trim();
+      // A box one pixel wide or tall draws a 1px line (the margin line), and lines stay 1px (D39).
+      if ((prop === 'width' || prop === 'height') && value === '1px') continue;
       if (prop === 'background-image') value = value.replace(RULING_LINE, '');
       // A box with a 1px edge tiles a ruling one pixel off; the position puts it back by that edge's own 1px.
       if (prop === 'background-position') value = value.replace(/(?<![\w.-])-1px\b/, '');
@@ -95,6 +97,12 @@ describe('the sweep names an unscaled length and passes the scaled forms (the he
     expect(sweep('.x { background-position: 0 -2px; }')).toHaveLength(1);
     expect(sweep('.x { margin-top: -1px; }')).toHaveLength(1);
   });
+  it('passes a box one pixel wide or tall, which draws a 1px line, and nothing else at 1px (D39: 1px lines stay 1px)', () => {
+    expect(sweep('.x { width: 1px; }')).toEqual([]);
+    expect(sweep('.x { height: 1px; }')).toEqual([]);
+    expect(sweep('.x { padding: 1px; }')).toHaveLength(1);
+    expect(sweep('.x { width: 2px; }')).toHaveLength(1);
+  });
   it('reads only the rules whose selector matches, and not the text it is told to leave out', () => {
     expect(unscaledLengths('.y { width: 3px; } .x { width: 4px; }', /\.x/)).toEqual(['.x { width: 4px }']);
     expect(unscaledLengths('.x { width: 4px; } @media (max-width: 1099px) { .x { width: 5px; } }', /\.x/, { without: ['@media (max-width: 1099px) { .x { width: 5px; } }'] })).toHaveLength(1);
@@ -114,19 +122,21 @@ describe('everything inside the notebook grows by one factor (D39; notebook.css)
     expect(narrow, 'the narrow block').not.toBe('');
   });
 
+  it('draws the margin line 1px wide at every size, as the fold and the ruling are (D39)', () => {
+    expect(css).toMatch(/\.nb-margin\s*\{[^}]*\bwidth:\s*1px\s*;/);
+  });
+
   it('writes every px length of an interior rule as calc(N * var(--nb-u)) or 0, apart from lines and rings', () => {
     expect(unscaledLengths(css, NOTEBOOK_INTERIOR, { without: [narrow, forced] }), 'unscaled lengths').toEqual([]);
   });
 });
 
 /**
- * Lengths a page sheet still writes in px because the test that pins them is outside this slice's manifest
- * (nothingFades.test.tsx asserts `padding: 10px 20px` on Protection's "Keep things as they are" button). Scale the
- * declaration, update that one assertion, and delete the entry: the test below fails while an entry is stale.
+ * Lengths a page sheet may still write in px because the test that pins them is outside the slice's manifest. Empty:
+ * the last one (Protection's "Keep things as they are", pinned in nothingFades.test.tsx) is scaled. An entry here must
+ * name a length that is still there: the test below fails while an entry is stale.
  */
-export const PENDING_OUTSIDE_MANIFEST: Array<{ sheet: string; found: string }> = [
-  { sheet: 'protection-page.css', found: '.nb-protection-note__button { padding: 10px 20px }' },
-];
+export const PENDING_OUTSIDE_MANIFEST: Array<{ sheet: string; found: string }> = [];
 
 // T006: the same factor sizes every page. Each page sheet is read from disk; a length added to one later fails here.
 describe.each(['protection-page.css', 'quiet-pages.css', 'setup-pages.css', 'tonight-page.css'])(

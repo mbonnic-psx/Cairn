@@ -127,7 +127,7 @@
 .nb-protection-note__button {
   margin: calc(12 * var(--nb-u)) 0 0 calc(-8 * var(--nb-u));
   /* The box the shared button gave it (px-5, py-2.5, rounded-lg, text-sm's line, font-medium), now without its fade. */
-  padding: 10px 20px;
+  padding: calc(10 * var(--nb-u)) calc(20 * var(--nb-u));
   border-radius: 8px;
   font-weight: 500;
   line-height: calc(1.25 / 0.875);
