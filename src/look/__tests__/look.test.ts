@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { formatWeekdayTime, greetingFor } from '../look'
 
 // Thursday 2026-10-01, 07:48 and 19:05 local time (constructed from parts, so
@@ -11,8 +11,22 @@ describe('greetingFor', () => {
     expect(greetingFor('morning')).toBe('Good morning.')
   })
 
-  it('does not read the clock to choose the words', () => {
-    expect(greetingFor('morning')).toBe(greetingFor('morning'))
+  it('greets midday and night in their own words, and says nothing for Current', () => {
+    expect(greetingFor('midday')).toBe('Midday.')
+    expect(greetingFor('night')).toBe('Good evening.')
+    expect(greetingFor('current')).toBe('')
+  })
+
+  describe('does not read the clock to choose the words', () => {
+    afterEach(() => vi.useRealTimers())
+    it.each(['current', 'morning', 'midday', 'night'] as const)('%s at 06:00, 12:00 and 23:00', (look) => {
+      vi.useFakeTimers()
+      const words = [6, 12, 23].map((hour) => {
+        vi.setSystemTime(new Date(2026, 9, 1, hour, 0))
+        return greetingFor(look)
+      })
+      expect(new Set(words).size).toBe(1)
+    })
   })
 })
 
