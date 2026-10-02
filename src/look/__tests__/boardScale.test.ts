@@ -124,7 +124,7 @@ describe('everything inside the notebook grows by one factor (D39; notebook.css)
  * (nothingFades.test.tsx asserts `padding: 10px 20px` on Protection's "Keep things as they are" button). Scale the
  * declaration, update that one assertion, and delete the entry: the test below fails while an entry is stale.
  */
-const PENDING_OUTSIDE_MANIFEST: Array<{ sheet: string; found: string }> = [
+export const PENDING_OUTSIDE_MANIFEST: Array<{ sheet: string; found: string }> = [
   { sheet: 'protection-page.css', found: '.nb-protection-note__button { padding: 10px 20px }' },
 ];
 

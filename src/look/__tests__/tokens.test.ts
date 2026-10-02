@@ -2,6 +2,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { contrastRatio } from '../contrast';
+import { PENDING_OUTSIDE_MANIFEST, unscaledLengths } from './boardScale.test';
 
 // Vitest blanks CSS imports, and this project carries no Node typings, so the
 // stylesheets are read from disk through a module name TypeScript cannot see.
@@ -251,11 +252,7 @@ describe('the published shell contract says what the stylesheet and the shell do
   const contract = readFileSync('specs/004-notebook-landscape/contracts/ui-shell.md', 'utf8');
   const shellSource = readFileSync('src/shell/NotebookShell.tsx', 'utf8');
   // The scene is grouped by the table's own rows or lives in the look's sky, hills, stones and tabs.
-  // board-scale T002-T007: the two shared lengths wait here for the contract's rows, which T008 writes and then removes this exemption.
-  const lengthsAwaitingT008 = /^--nb-(u|g)$/;
-  const scene = new RegExp(
-    '^--nb-(sky-|greeting-|hill-|shadow-|tab-|star|sun$|sun-glow$|stone-(base|moss|amber|pale)$)|' + lengthsAwaitingT008.source,
-  );
+  const scene = /^--nb-(sky-|greeting-|hill-|shadow-|tab-|star|sun$|sun-glow$|stone-(base|moss|amber|pale)$)/;
   const tableRows = contract.slice(contract.indexOf('| Token |'));
 
   it('lists in its token table every token a look block defines, apart from the scene', () => {
@@ -264,6 +261,65 @@ describe('the published shell contract says what the stylesheet and the shell do
     );
     const missing = [...defined].filter((t) => !scene.test(t) && !tableRows.includes('`' + t + '`'));
     expect(missing, 'tokens the contract does not name').toEqual([]);
+  });
+
+  // board-scale T008 (FR-036, D39): the lengths the shared block defines, and what a page sheet does with them.
+  /** The custom properties the shared `[data-look]` block defines that are not fonts: its lengths. */
+  const sharedLengths = (sheet: string) => {
+    const block = noComments(sheet).match(/(?:^|\n)\[data-look\]\s*\{([^}]*)\}/)?.[1] ?? '';
+    return [...block.matchAll(/(--nb-[a-z0-9-]+)\s*:/g)].map((m) => m[1]!).filter((name) => !/^--nb-font-/.test(name));
+  };
+  /** The shared lengths no row of the contract's token table names. */
+  const withoutRow = (sheet: string, text: string) => {
+    const rows = text.slice(text.indexOf('| Token |'));
+    return sharedLengths(sheet).filter((name) => !rows.includes('`' + name + '`'));
+  };
+  const rowOf = (name: string) => tableRows.split('\n').find((line) => line.startsWith('| `' + name + '`')) ?? '';
+
+  it('names every shared length the stylesheet defines, derived from the sheet (--nb-u and --nb-g among them)', () => {
+    expect(sharedLengths(notebook)).toEqual(expect.arrayContaining(['--nb-u', '--nb-g']));
+    expect(withoutRow(notebook, contract), 'shared lengths with no row').toEqual([]);
+  });
+
+  it('fails when a shared length is added to the sheet without a row', () => {
+    const planted = notebook.replace(/(\[data-look\]\s*\{)/, '$1\n  --nb-planted: 7px;');
+    expect(withoutRow(planted, contract)).toEqual(['--nb-planted']);
+  });
+
+  it('says --nb-u is the shared length page sheets size by, and --nb-g the shell\'s own, for the greeting', () => {
+    expect(rowOf('--nb-u')).toMatch(/clamp\(1px, min\(100vw ?\/ ?1280, 100vh ?\/ ?800\), 2px\)/);
+    expect(rowOf('--nb-u')).toMatch(/page sheets/i);
+    expect(rowOf('--nb-u')).toMatch(/N ?(×|x|\*) ?this/);
+    expect(rowOf('--nb-g')).toMatch(/greeting/i);
+    expect(rowOf('--nb-g')).toMatch(/not for page sheets/i);
+  });
+
+  it('states the sizing rule: calc(N * var(--nb-u)), lines and rings keep their px', () => {
+    expect(contract).toContain('calc(N * var(--nb-u))');
+    expect(contract).toMatch(/`border\*`, `outline\*` and `box-shadow`/);
+    expect(contract).toMatch(/keep their px/);
+    expect(contract).toMatch(/viewport units/);
+  });
+
+  it('states the measure the shell holds a page\'s text column to, and that a page never sets its own', () => {
+    expect(contract).toContain('383');
+    expect(contract).toMatch(/383 ?(×|x|\*) ?s/);
+    expect(contract).toMatch(/never sets\s+its own measure/);
+    expect(contract).toContain('max-inline-size');
+  });
+
+  it('is extended by board-scale, in its opening line', () => {
+    const opening = contract.split('\n## ')[0]!;
+    expect(opening).toMatch(/`board-scale`/);
+    expect(opening).toMatch(/the scale length, the measure/);
+  });
+
+  it('holds no page sheet length that ignores --nb-u (the sweep of the page sheets, called here)', () => {
+    const pending = PENDING_OUTSIDE_MANIFEST.map((entry) => `${entry.sheet}: ${entry.found}`);
+    const unscaled = ['protection-page.css', 'quiet-pages.css', 'setup-pages.css', 'tonight-page.css'].flatMap((name) =>
+      unscaledLengths(readFileSync(`src/styles/${name}`, 'utf8'), /./).map((found) => `${name}: ${found}`),
+    );
+    expect(unscaled.filter((found) => !pending.includes(found)), 'page lengths that ignore --nb-u').toEqual([]);
   });
 
   it('names every aria-hidden element the shell draws inside the notebook as the shell\'s', () => {

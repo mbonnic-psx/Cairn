@@ -2,7 +2,7 @@
 
 What the page slices (`protection-page`, `tonight-page`, `setup-pages`, `quiet-pages`) build against. Settled by
 slice `frame`, extended by slice `looks` (more `Look` values and tokens), by `protection-page` (knowing it is on a
-page, headings) and by `fold-and-width` (the fold), and by nothing else.
+page, headings), by `fold-and-width` (the fold) and by `board-scale` (the scale length, the measure), and by nothing else.
 
 ## Navigation
 
@@ -65,6 +65,27 @@ Prefixes, one per screen: `setup-pages` uses `.nb-choosing-`, `.nb-categories-`,
 `quiet-pages` uses `.nb-limits-` and `.nb-teardown-`; `tonight-page` uses `.nb-reaches-` (the Today screen, both views)
 and `.nb-checkin-` (Tonight).
 
+## Size
+
+Added by `board-scale` (FR-036, D39). The notebook grows with the window, and everything inside it grows by one factor,
+so a page's writing, controls and spacing keep their proportions at any size.
+
+- **The rule.** A page sheet writes every length that lays out its page as `calc(N * var(--nb-u))`, N being the length
+  in px at 1280×800, or 0. Lines and rings, which are `border*`, `outline*` and `box-shadow`, keep their px, so a
+  1px line stays 1px. A length written in rem is a length that would not grow, and a page sheet has none. A font size
+  is written the same way, and an em then follows it. A page markup carries no Tailwind size utility (`w-`, `h-`,
+  `p-`, `gap-`, `leading-`, `text-sm` and the like) inside the page area, which would not grow either.
+- **Why viewport units.** `--nb-u` is written in viewport units, not container units, because a page's own container
+  (the trail leaf is one) would resolve a container unit against itself and not against the notebook. Where the
+  window is below 1280 wide or 800 tall, `--nb-u` is 1px, so a page is exactly today's size there, and at the narrow
+  layout.
+- **The measure.** The shell holds a page's text column to a measure of 383 × s (`calc(383 * var(--nb-u))`), set as
+  `max-inline-size` on the leaf's children (`.nb-page-area .nb-spread > .nb-page > *`) in windows 1100px wide and up.
+  The leaf keeps its full width, so its ruling runs to the edge and the fold stays on the gap. A page slice never sets
+  its own measure on the leaf or the spread, and the narrow layout takes none.
+- **What the shell owns.** The notebook's place and size, `--nb-u` and `--nb-g` are the shell's. A page sheet reads
+  `--nb-u` and never redefines it.
+
 ## Headings
 
 Added by `protection-page` (D9, frame T025). The notebook supplies one `h1`, "Cairn", visually hidden and read by
@@ -89,6 +110,8 @@ by every look with no change of its own:
 | `--nb-button` | the primary button's fill, with `--nb-button-ink` |
 | `--nb-font-serif` | headings, lists, reflective text; the same in every look, set once in the shared `[data-look]` block |
 | `--nb-font-mono` | tab names, small labels, buttons only; shared, as above |
+| `--nb-u` | the notebook's scale, a length: `clamp(1px, min(100vw / 1280, 100vh / 800), 2px)`, written once in the shared `[data-look]` block. It is the shared length page sheets size by: everything inside the notebook, the sun and the stones are N × this |
+| `--nb-g` | the shell's own greeting factor, `max(1px, 100vw / 1280)`: the greeting's words, time and gap grow by it. Not for page sheets |
 | `--nb-sun-size`, `--nb-sun-left`, `--nb-sun-top` | the sun's diameter and place, per look |
 | `--nb-stone-glow` | the glow around the cairn's stones; set by night alone (`looks`) |
 | `--nb-lamp-glow` | the lamp's glow on the notebook; set by night alone (`looks`) |
