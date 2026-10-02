@@ -319,6 +319,36 @@ describe('every text colour the sheet declares meets its floor against what is b
   });
 });
 
+describe('a colour that carries a meaning is its token and no other (FR-016, T020)', () => {
+  const colourOf = (selector: string) => tokenOf(last(own(selector), 'color'));
+  const fillOf = (selector: string) => tokenOf(last(own(selector), 'background-color'));
+  const edgeOfLeft = (selector: string) => last(own(selector), 'border-left')?.match(/^([\d.]+)px solid var\((--[a-z0-9-]+)\)$/);
+
+  it('draws the reason an address could not be taken in amber: its words and its left edge', () => {
+    expect(colourOf('.nb-custom-reason')).toBe('--nb-accent-amber');
+    const edge = edgeOfLeft('.nb-custom-reason');
+    expect(edge, 'a left edge from a token').not.toBeNull();
+    expect(edge![2]).toBe('--nb-accent-amber');
+  });
+
+  it('draws the sentence for an address that was added, in all three read-backs, in moss', () => {
+    expect(colourOf('.nb-custom-added')).toBe('--color-moss-600');
+  });
+
+  it('draws the dot of what is in force in moss, and the dot of what is not covered in quiet ink', () => {
+    expect(fillOf('.nb-disclosure-dot--in-force')).toBe('--color-moss-600');
+    expect(fillOf('.nb-disclosure-dot--not-covered')).toBe('--nb-ink-quiet');
+  });
+
+  it('draws the waiting note in quiet ink, as the paper\'s other asides', () => {
+    expect(colourOf('.nb-categories-note')).toBe('--nb-ink-quiet');
+  });
+
+  it.each(LOOKS)('%s: amber holds 4.5:1 on the paper', (look) => {
+    expect(contrastRatio(token('--nb-accent-amber', look), token('--nb-paper', look))).toBeGreaterThanOrEqual(4.5);
+  });
+});
+
 describe('the stylesheet import', () => {
   it('is in main.tsx exactly once, after notebook.css and protection-page.css', () => {
     const lines = main.split('\n').map((l) => l.trim());
