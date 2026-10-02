@@ -474,6 +474,11 @@
   background: var(--nb-paper);
   color: var(--nb-ink);
 }
+/* Inside the paper's edge, so the ring sits on the paper it is measured against. */
+.nb-page-area:focus-visible {
+  outline: 2px solid var(--nb-ink);
+  outline-offset: -4px;
+}
 .nb-tab:focus-visible,
 .nb-switch select:focus-visible {
   outline: 2px solid var(--nb-focus-sky);
