@@ -1,6 +1,6 @@
 # Cruise report — The notebook in the landscape (004)
 
-Written by the completion audit, iteration 6, 2026-10-02. Three `drive-gaps` reviews read the whole of `spec.md`
+Written by the completion audit, iteration 6, 2026-10-02; brought up to date in iteration 7, after `loose-ends` merged. Three `drive-gaps` reviews read the whole of `spec.md`
 against what is on `main` (frame and looks; setup and Protection pages; Today, Tonight, What Cairn covers and
 This machine is as it was).
 
@@ -15,22 +15,16 @@ This machine is as it was).
 ## What shipped
 
 1. `frame` (#28), `looks` (#30), `protection-page` (#31), `setup-pages` (#34), `quiet-pages` (#35),
-   `tonight-page` (#38) — six of seven slices, every one behind the switch.
-2. Host work: D19 (#40) — the page area takes focus, so a spread with no control scrolls from the keyboard, and
+   `tonight-page` (#38) — six slices, every one behind the switch.
+2. `loose-ends` (#42, D26, D29–D31): the seven things the pages promised are now held by tests. What is protected's left page now scrolls inside itself, and its focus ring has room (found at its demo).
+3. Host work: D19 (#40) — the page area takes focus, so a spread with no control scrolls from the keyboard, and
    each screen opens at its top.
-3. The audit found no criterion unbuilt. Every requirement it read is built and almost all are held by tests.
+4. The audit found no criterion unbuilt. Every requirement it read is built and almost all are held by tests.
 
 ## What is left
 
-1. **`loose-ends`** (slice 8, D26) — seven things the pages promise but no test holds yet. It runs next:
-   1. Search the release build for the look switch (SC-002).
-   2. Let the keyboard scroll What is protected's left page (FR-022, FR-025).
-   3. Press "Yes, set this up" on the page, for both outcomes (setup-pages T024).
-   4. Keep the setup and Protection buttons' edges in forced colours (setup-pages T025).
-   5. Stop the shared button fading on a change of look (looks T024, D3).
-   6. Make the focus and contrast guards read every rule, not only the base one (quiet-pages T013).
-   7. Pin the platform's own window frame (FR-007).
-2. **`reveal`** (slice 7) — never run by `/cruise`. It waits for your own demo of all three looks (D1).
+1. **`reveal`** (slice 7) — never run by `/cruise`. It waits for your own demo of all three looks (D1). Every other slice is merged.
+2. Three demo design notes for the reveal's review: the midday greeting sits on the sun; at 800×600 the sun or moon and the hilltop cairn are hidden behind the notebook (looks); under forced colours the landscape keeps its painted sun, moon and hills (loose-ends).
 
 ## Out of scope, by decision
 
@@ -44,14 +38,14 @@ This machine is as it was).
 1. **Choose a browser test runner for the real layout check at 800×600?** (frame T024, D27) Recommend Vitest
    Browser Mode: it runs the tests this repository already has, in a real browser. Until you choose, the demos'
    screenshots are the only proof of real layout.
-2. **Run the reveal demo?** Recommend yes, after `loose-ends`: see morning, midday and night on every page, at
+2. **Run the reveal demo?** Recommend yes, now that `loose-ends` has merged: see morning, midday and night on every page, at
    800×600 too, on macOS or Linux if you can — that is also the only WebKit check of D19.
 
 ## Decisions you have not yet reviewed
 
-1. Every entry in `decisions.md` decided by `host` or `drive-skipper` — D3 to D28. D1 and D2 are yours.
+1. Every entry in `decisions.md` decided by `host` or `drive-skipper` — D3 to D31. D1 and D2 are yours.
 2. Every demo `accepted-by: drive-hand` in `slices/README.md`: looks, protection-page, setup-pages, quiet-pages,
-   tonight-page. You have seen only `frame`.
+   tonight-page, loose-ends. You have seen only `frame`.
 
 ## Architecture decisions still `Proposed`
 
