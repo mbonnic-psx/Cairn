@@ -23,7 +23,7 @@ import {
   silentReader,
   todayCases,
 } from './tonightCases';
-import { baseline, wordsOf, OVER_TIME, TODAY } from './beforeTheReveal';
+import { baseline, wordsOf, BY_DAY_DELTA, OVER_TIME, TODAY } from './beforeTheReveal';
 
 const tabs = [{ id: 'reaches' as const, label: 'Today', current: true }];
 
@@ -166,7 +166,9 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (name) 
         <Reaches today={todayCases.sealed} read={silentReader} now={now} />,
       );
       await user.click(screen.getByRole('button', { name: 'Over time' }));
-      expect(words(spread!)).toEqual(wordsOf(baseline(OVER_TIME['looking']!)));
+      expect(words(spread!)).toEqual(
+        wordsOf(baseline(OVER_TIME['looking']!), [BY_DAY_DELTA]),
+      );
     });
   });
 
@@ -399,7 +401,9 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (name) 
         await waitFor(() =>
           expect(left!.lastElementChild).toHaveTextContent(sentenceFor[state]!),
         );
-        expect(words(spread!)).toEqual(wordsOf(baseline(OVER_TIME[state]!)));
+        expect(words(spread!)).toEqual(
+          wordsOf(baseline(OVER_TIME[state]!), [BY_DAY_DELTA]),
+        );
       },
     );
   });
@@ -555,7 +559,9 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (name) 
       async (state) => {
         const answer = overTimeCases[state] as Patterns;
         const { spread } = await listed(answer);
-        expect(words(spread!)).toEqual(wordsOf(baseline(OVER_TIME[state]!)));
+        expect(words(spread!)).toEqual(
+          wordsOf(baseline(OVER_TIME[state]!), [BY_DAY_DELTA]),
+        );
       },
     );
   });
@@ -652,7 +658,9 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (name) 
       'says the words it said before the notebook, notes moved: %s',
       async (state) => {
         const { spread } = await empty(state);
-        expect(words(spread!)).toEqual(wordsOf(baseline(OVER_TIME[state]!)));
+        expect(words(spread!)).toEqual(
+          wordsOf(baseline(OVER_TIME[state]!), [BY_DAY_DELTA]),
+        );
       },
     );
   });

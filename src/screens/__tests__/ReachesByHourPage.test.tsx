@@ -14,7 +14,7 @@ import { describe, expect, it, vi } from 'vitest';
 import type { Patterns } from '../../ipc/reaches';
 import { NotebookShell } from '../../shell/NotebookShell';
 import { Reaches } from '../Reaches';
-import { BY_HOUR_WORDS } from './beforeTheReveal';
+import { BY_DAY_DELTA, BY_HOUR_WORDS } from './beforeTheReveal';
 import { evening, rangeCoverageNote, sealedSentence, todayCases } from './tonightCases';
 import { never } from './fakeCore';
 
@@ -237,6 +237,8 @@ describe('the words it said before the notebook', () => {
     const { spread, user: pageUser } = await byHourOnPage(patterns);
     await pageUser.click(choose('By hour'));
 
-    expect(words(spread)).toEqual(BY_HOUR_WORDS[name]);
+    expect(words(spread)).toEqual(
+      [...BY_HOUR_WORDS[name]!, ...BY_DAY_DELTA.words!.added!].sort(),
+    );
   });
 });

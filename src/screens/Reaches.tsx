@@ -385,7 +385,9 @@ function OverTimeView({
                           <div
                             data-testid="bar"
                             className="nb-reaches-bar__fill"
-                            style={{ width: `${Math.round((row.count / largest) * 100)}%` }}
+                            style={{
+                              width: `${Math.round((row.count / largest) * 100)}%`,
+                            }}
                           />
                         </div>
                         <span className="nb-reaches-count">{row.count}</span>

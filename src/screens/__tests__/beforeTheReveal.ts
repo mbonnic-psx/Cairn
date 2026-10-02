@@ -26,6 +26,21 @@ export interface Delta {
   structure?: { added?: string[]; removed?: string[] };
 }
 
+/**
+ * 2026-10-02, slice `history-by-weekday`, decisions W1 and Y1 (D46): Over time's Seen by group gains a third choice,
+ * *By day*, beside *By site* and *By hour*. In every state of Over time that shows the group, one word and one
+ * control are added and nothing is removed. The words that belong to choosing it (the day names, "across N Mondays",
+ * "not in these days", "…because Cairn counts only what it saw") appear only once *By day* is chosen, which no
+ * captured state does, and are held by `ReachesByDayPage.test.tsx`.
+ */
+export const BY_DAY_DELTA: Delta = {
+  slice: 'history-by-weekday',
+  decision: 'W1',
+  date: '2026-10-02',
+  words: { added: ['By day'] },
+  controls: { added: ['button | By day | disabled=false | pressed=false'] },
+};
+
 /** record ∪ added − removed, in the fixed order. A removal takes out one occurrence; removing what is not there is an error. */
 function applied(record: string[], change: { added?: string[]; removed?: string[] }[]): string[] {
   const out = [...record];
