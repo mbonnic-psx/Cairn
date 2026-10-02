@@ -159,7 +159,7 @@ describe('the released interface (SC-002)', () => {
         const out = new Set<string>();
         const pattern = quoted ? /["'`]([^"'`\n]*)["'`]/g : /class="([^"]*)"/g;
         for (const m of text.matchAll(pattern)) {
-          for (const t of m[1].split(/\s+/)) if (/^[a-z][a-z0-9:_/.\-\[\]]*$/.test(t)) out.add(t);
+          for (const t of m[1].split(/\s+/)) if (/^[a-z][a-z0-9:_/.\-[\]]*$/.test(t)) out.add(t);
         }
         return out;
       };
@@ -173,7 +173,7 @@ describe('the released interface (SC-002)', () => {
           if (entry.isDirectory()) walk(full);
           else if (/\.(tsx?|html)$/.test(entry.name) && !/\.test\./.test(entry.name)) {
             const text = fs.readFileSync(full, 'utf8');
-            for (const t of text.split(/[^A-Za-z0-9:_/.\-\[\]]+/)) shipping.add(t);
+            for (const t of text.split(/[^A-Za-z0-9:_/.\-[\]]+/)) shipping.add(t);
           }
         }
       };
