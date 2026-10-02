@@ -113,6 +113,11 @@ describe('the fold (FR-034)', () => {
     const sheets = readdirSync('src/styles')
       .filter((f) => f.endsWith('.css'))
       .map((f) => ({ file: f, rules: rulesOf(readFileSync(`src/styles/${f}`, 'utf8')) }));
+    // The spread is the subject of a selector when its class is on the last compound (after the last combinator).
+    const isSubject = (selector: string, name: string) => {
+      const last = selector.trim().split(/\s*[\s>+~]\s*/).pop() ?? '';
+      return new RegExp(`\\.${name}(?![\\w-])`).test(last);
+    };
     const sides = (value: string): { left: string; right: string } | null => {
       const v = value.trim().split(/\s+/);
       if (v.length === 1) return { left: v[0]!, right: v[0]! };
@@ -129,9 +134,12 @@ describe('the fold (FR-034)', () => {
     it.each([...spreads])('.%s has equal columns and equal horizontal room on both sides', (name) => {
       for (const { file, rules } of sheets) {
         for (const r of rules) {
-          if (!r.selector.split(',').some((x) => x.trim() === `.${name}`)) continue;
+          if (!r.selector.split(',').some((x) => isSubject(x, name))) continue;
           const decl = (prop: string) =>
             [...r.body.matchAll(new RegExp(`(?:^|[;\\s])${prop}\\s*:\\s*([^;]+)`, 'g'))].map((m) => m[1]!.trim());
+          for (const prop of ['left', 'right', 'inset', 'inset-inline', 'inset-inline-start', 'inset-inline-end', 'translate', 'transform']) {
+            expect(decl(prop), `${file}: .${name} sets ${prop}, which moves the gap off the fold`).toEqual([]);
+          }
           for (const cols of decl('grid-template-columns')) {
             expect(cols, `${file}: .${name} columns`).toBe('1fr 1fr');
           }
