@@ -162,13 +162,13 @@ is the same either way); Q2 changes Y6's clause cases and `acrossInWords` in Y15
 
 ## Phase 3 — Hold it
 
-- [ ] Y19 `contracts/ui-ipc.md` and `contracts/patterns.md`, as amended on 2026-10-02 for this slice, match
+- [X] Y19 `contracts/ui-ipc.md` and `contracts/patterns.md`, as amended on 2026-10-02 for this slice, match
   `Patterns` and `WeekdayCount` in Rust (`ipc/state.rs`), `by_weekday` and `weekdays_in` in `domain/patterns.rs`, and
   `src/ipc/reaches.ts` field for field. Y3's wire-shape test holds the eight keys.
-- [ ] Y20 `make verify` green; `npm run check` (every guard), `npm test`, `npm run lint` and `npm run build` green;
+- [X] Y20 `make verify` green; `npm run check` (every guard), `npm test`, `npm run lint` and `npm run build` green;
   `cargo fmt --all` and `cargo clippy --all-targets -- -D warnings` clean; the Y1 runs green again. `make smoke` is
   not required: `main.rs` and the composition do not change.
-- [ ] Y21 [demo] In the running app, on every platform at hand: a reach's day on *By day* is the day *Today* lists
+- [X] Y21 [demo] In the running app, on every platform at hand: a reach's day on *By day* is the day *Today* lists
   it under. A reach recorded a little after midnight is counted on that day, not the day before. The week starts on
   the day the computer's locale gives, and the days are named as the computer names them. This is where the plan's
   *assumed* is seen or refuted: that each webview gives week info or falls back to Monday, that its default locale
