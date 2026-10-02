@@ -10,13 +10,18 @@ use crate::store::history::OpenHistory;
 /// The largest seasonal clock change any zone uses.
 const LARGEST_CLOCK_CHANGE: i64 = 2 * 3600;
 
+const DAY: i64 = 86_400;
+
 /// Whether `[range_start, range_end)` could be the days `first_day` to
 /// `last_day`, inclusive, somewhere on earth.
 ///
 /// The core does not know the person's zone, so each end is held to the rule
 /// that is true in every zone (the one `check_bounds` holds for a day), and the
-/// range to two more: its ends' offsets differ by no more than a clock change
-/// can, and it has begun.
+/// range to three more: its ends' offsets differ by no more than a clock change
+/// can, it has begun, and it ends no later than the end of today (the next
+/// midnight is at most a day and a clock change away), as the screen already
+/// limits it. A last day far in the future once sorted as text past the
+/// estimates and hid their count (R2).
 pub fn check_range(
     first_day: LocalDate,
     last_day: LocalDate,
@@ -40,6 +45,7 @@ pub fn check_range(
         || !could_begin(day_after_last, range_end)
         || !offsets_agree
         || range_start > now
+        || range_end > now.saturating_add(DAY + LARGEST_CLOCK_CHANGE)
     {
         return Err(Trouble::new(
             "Cairn could not tell which days those are just now, so it has shown \

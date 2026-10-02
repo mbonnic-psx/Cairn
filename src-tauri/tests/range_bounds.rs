@@ -133,10 +133,32 @@ fn the_ends_offsets_may_differ_by_two_hours_and_no_more() {
 #[test]
 fn a_range_that_begins_at_the_present_is_accepted_and_one_second_later_is_not() {
     let start = midnight(first());
-    let end = midnight(after_last());
-    assert!(check_range(first(), last(), start, end, start).is_ok());
-    assert!(check_range(first(), last(), start, end, start - 1).is_err());
-    assert!(check_range(first(), last(), start, end, start + 1).is_ok());
+    let end = midnight(first()) + DAY;
+    assert!(check_range(first(), first(), start, end, start).is_ok());
+    assert!(check_range(first(), first(), start, end, start - 1).is_err());
+    assert!(check_range(first(), first(), start, end, start + 1).is_ok());
+}
+
+#[test]
+fn a_range_may_end_no_later_than_the_end_of_today() {
+    // Today's own range ends at the next midnight: at most a day and a clock
+    // change from now. Anything later asks for days that have not happened,
+    // which the screen never does (R2).
+    let now = midnight(first()) + 12 * HOUR;
+    let end = midnight(first()) + DAY;
+    assert!(check_range(first(), first(), midnight(first()), end, now).is_ok());
+
+    let tomorrow = date("2026-09-04");
+    let far_end = midnight(tomorrow) + DAY;
+    assert!(check_range(tomorrow, tomorrow, midnight(tomorrow), far_end, now).is_err());
+
+    // Nor the last day there is: it used to slip past the estimates count by
+    // sorting as text.
+    let last_of_all = date("9999-12-31");
+    let start = midnight(last_of_all);
+    assert!(
+        check_range(first(), last_of_all, midnight(first()), start + DAY, now).is_err()
+    );
 }
 
 #[test]
