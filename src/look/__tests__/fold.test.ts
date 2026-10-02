@@ -97,6 +97,25 @@ describe('the fold (FR-034)', () => {
     expect(r.length).toBeGreaterThan(0);
     expect(r[0]!.body).toMatch(/(GrayText|CanvasText)/);
   });
+  it('lets every flex text child a page sheet lays out beside a mark wrap, so no word crosses the gap (T014)', () => {
+    const dir = 'src/styles';
+    const lines: string[] = [];
+    const all = readdirSync(dir)
+      .filter((f) => f.endsWith('.css'))
+      .flatMap((f) => rulesOf(readFileSync(`${dir}/${f}`, 'utf8')));
+    for (const r of all) {
+      if (!/display:\s*flex\s*;/.test(r.body) || /flex-direction:\s*column/.test(r.body)) continue;
+      for (const one of r.selector.split(',').map((x) => x.trim())) if (/^\.nb-[a-z-]+-line$/.test(one)) lines.push(one);
+    }
+    expect(lines, 'the flex lines found').toEqual(expect.arrayContaining(['.nb-limits-line', '.nb-teardown-line']));
+    for (const line of lines) {
+      const text = all.find((r) => r.selector.split(',').some((x) => x.trim() === `${line} > span:not([aria-hidden])`));
+      expect(text, `${line} has no rule for its text`).toBeDefined();
+      expect(text!.body, `${line} text can shrink`).toMatch(/min-width:\s*0\s*;/);
+      expect(text!.body, `${line} text wraps anywhere`).toMatch(/overflow-wrap:\s*anywhere\s*;/);
+    }
+  });
+
   describe('every spread the screens render keeps the fold on the centre of its gap', () => {
     // The spread selectors come from the markup: every class beside nb-spread in a className under src/screens.
     const screens = import.meta.glob(['../../screens/**/*.tsx', '!**/__tests__/**'], {

@@ -41,6 +41,13 @@
   gap: 14px;
   color: var(--nb-ink-body);
 }
+/* The words beside the mark may shrink below their longest unbroken run, so a long path wraps inside its page
+   instead of running across the gap and the fold. */
+.nb-limits-line > span:not([aria-hidden]),
+.nb-teardown-line > span:not([aria-hidden]) {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
 .nb-limits-line + .nb-limits-line,
 .nb-teardown-line + .nb-teardown-line {
   margin-top: 14px;
