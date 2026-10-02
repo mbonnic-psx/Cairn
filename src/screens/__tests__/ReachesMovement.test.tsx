@@ -13,6 +13,7 @@ import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 
 import type { MovementRow, OffsetChange, Patterns, TodaysReaches } from '../../ipc/reaches';
+import { shortDateInWords } from '../../localDays';
 import { Reaches, type ReachesReader } from '../Reaches';
 
 /** Friday 2 October 2026, 20:00 in London. */
@@ -87,6 +88,38 @@ async function openDayByDay(read: ReachesReader) {
 }
 
 const lines = () => screen.queryAllByRole('listitem');
+const text = () => document.body.textContent ?? '';
+
+/** What a line says, in the order it says it: the leaves of its markup. */
+const leaves = (line: HTMLElement) =>
+  Array.from(line.querySelectorAll('*'))
+    .filter((el) => el.children.length === 0 && el.textContent)
+    .map((el) => el.textContent as string);
+
+const barOf = (line: HTMLElement) => within(line).queryByTestId('bar');
+
+const NOTHING = 'Nothing here for these days.';
+const STANDING = 'Cairn counts only while it is running. This is what it saw over these days.';
+const SEALED = 'Your history is sealed for now.';
+
+/** What Day by day never says (M4, scenario 5, scenario 40): a reusable scan of the whole page. */
+function expectNoVerdict() {
+  expect(text()).not.toMatch(
+    /\b(up|down|more|fewer|better|worse|rising|falling|trend|average|per day|peak|worst|best|busiest|quietest|top|rank|than last week)\b/i,
+  );
+  expect(text()).not.toMatch(/\bday \d|streak|in a row|chain/i);
+  expect(text()).not.toMatch(/failed|denied|violation|relapse|forbidden|you lost/i);
+  expect(text()).not.toMatch(/\b(unblock|pause|turn off|allow|snooze|disable)\b/i);
+  for (const line of lines()) expect(line.textContent).not.toMatch(/^\s*\d+[.)]/);
+  expect(screen.getAllByRole('button').map((b) => b.textContent)).toEqual([
+    'Today',
+    'Over time',
+    'By site',
+    'By hour',
+    'By day',
+    'Day by day',
+  ]);
+}
 
 describe('Seen by: By site | By hour | By day | Day by day', () => {
   it('stands under the range with By site pressed, then the other three not', async () => {
@@ -183,5 +216,104 @@ describe('what it asks for', () => {
         [{ from: seconds(new Date(2026, 8, 5)), offset: 3600 }],
       ],
     ]);
+  });
+});
+
+describe('how a day row reads (scenario 31)', () => {
+  it('draws 28 lines, oldest first, each named by its date, the count as text and a bar against the largest', async () => {
+    const { read } = fakeRead();
+    await openDayByDay(read);
+    await waitFor(() => expect(lines()).toHaveLength(28));
+
+    const rows = patterns().movement;
+    expect(lines().map((line) => leaves(line)[0])).toEqual(
+      rows.map((row) => shortDateInWords(row.day, false)),
+    );
+    expect(lines()[3]).toHaveTextContent(`${shortDateInWords('2026-09-08', false)}2`);
+    expect(leaves(lines()[10]!)).toEqual([shortDateInWords('2026-09-15', false), '5']);
+    expect(barOf(lines()[10]!)).toHaveStyle({ width: '100%' });
+    expect(barOf(lines()[3]!)).toHaveStyle({ width: '40%' });
+    expectNoVerdict();
+  });
+
+  it('shows a 0 as 0 with an empty bar, as plainly as any other row', async () => {
+    const { read } = fakeRead();
+    await openDayByDay(read);
+    await waitFor(() => expect(lines()).toHaveLength(28));
+
+    expect(leaves(lines()[0]!)).toEqual([shortDateInWords('2026-09-05', false), '0']);
+    expect(barOf(lines()[0]!)).toHaveStyle({ width: '0%' });
+  });
+
+  it('carries the year on every name when the range crosses one', async () => {
+    const rows: MovementRow[] = [
+      { day: '2025-12-31', days: 1, span: 'day', count: 1, seen: 'whole', so_far: false },
+      { day: '2026-01-01', days: 1, span: 'day', count: 0, seen: 'whole', so_far: true },
+    ];
+    const { read } = fakeRead(async () => patterns({ movement: rows }));
+    await openDayByDay(read);
+    await waitFor(() => expect(lines()).toHaveLength(2));
+
+    expect(lines().map((line) => leaves(line)[0])).toEqual([
+      shortDateInWords('2025-12-31', true),
+      shortDateInWords('2026-01-01', true),
+    ]);
+  });
+
+  it('stands the coverage note above the rows and the standing sentence at the close', async () => {
+    const note = 'Cairn was not running for part of these days.';
+    const { read } = fakeRead(async () => patterns({ coverage_note: note }));
+    await openDayByDay(read);
+    await waitFor(() => expect(lines()).toHaveLength(28));
+
+    const noteEl = screen.getByText(note);
+    const list = screen.getByRole('list');
+    expect(noteEl.compareDocumentPosition(list) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    const standing = screen.getByText(STANDING);
+    expect(
+      noteEl.compareDocumentPosition(standing) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+  });
+});
+
+describe('a quiet range (scenario 37)', () => {
+  it('says there is nothing here and keeps every row under it', async () => {
+    const { read } = fakeRead(async () => patterns({ movement: dayRows() }));
+    await openDayByDay(read);
+
+    expect(await screen.findByText(NOTHING)).toBeInTheDocument();
+    expect(lines()).toHaveLength(28);
+    for (const line of lines()) expect(leaves(line)[1]).toBe('0');
+    expectNoVerdict();
+  });
+});
+
+describe('when it cannot be shown (scenario 38)', () => {
+  it('shows what By site shows when sealed: the sentence and no rows', async () => {
+    const { read } = fakeRead(async () =>
+      patterns({ by_site: [], by_hour: [], by_weekday: [], movement: [], sealed: SEALED }),
+    );
+    await openDayByDay(read);
+
+    expect(await screen.findByText(SEALED)).toBeInTheDocument();
+    expect(lines()).toHaveLength(0);
+    expect(screen.queryByText(NOTHING)).toBeNull();
+    expectNoVerdict();
+  });
+
+  it('shows one plain sentence when the read throws', async () => {
+    const { read } = fakeRead(async () => {
+      throw new Error('boom');
+    });
+    await openDayByDay(read);
+
+    expect(
+      await screen.findByText(
+        'Cairn could not read your history just now. Protection is unaffected.',
+      ),
+    ).toBeInTheDocument();
+    expect(lines()).toHaveLength(0);
+    expect(text()).not.toContain('boom');
+    expectNoVerdict();
   });
 });

@@ -22,6 +22,7 @@ import {
   offsetChanges,
   rangeBounds,
   rangeInWords,
+  shortDateInWords,
   weekdayInWords,
 } from '../localDays';
 import {
@@ -117,8 +118,20 @@ const rowsOf = (answer: Patterns, seen: Seen, weekStart: number): Row[] => {
       count: one.count,
     }));
   }
-  // Day by day: the rows come from the answer; the names and clauses are V13 onward.
-  if (seen === 'movement') return [];
+  // Day by day: one row for each the answer holds, oldest first, as the core sent them.
+  if (seen === 'movement') {
+    const rows = answer.movement;
+    const last = rows[rows.length - 1];
+    // The year is written on every row when the range crosses one, as the range's own name does.
+    const withYear =
+      last !== undefined &&
+      rows[0]!.day.slice(0, 4) !== addDays(last.day, last.days - 1).slice(0, 4);
+    return rows.map((row) => ({
+      key: row.day,
+      name: shortDateInWords(row.day, withYear),
+      count: row.count,
+    }));
+  }
   // An answer with no days at all (sealed) draws none; otherwise all seven are drawn (W3), a weekday
   // the answer left out as a name with no count known.
   if (answer.by_weekday.length === 0) return [];
