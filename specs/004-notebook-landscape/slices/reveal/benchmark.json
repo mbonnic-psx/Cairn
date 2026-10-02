@@ -106,17 +106,59 @@
       "started": "2026-10-02T17:47:10Z",
       "planned": "tasks: fast → sonnet — Claude Code: the Agent tool's `model` parameter, set per call",
       "tasks": {
-        "start": null
+        "start": null,
+        "end": {
+          "open": 13,
+          "done": 0
+        }
       },
-      "cursor": {
-        "source": "claude",
-        "session": "7953f214-69ad-494c-97da-cb3203c107d8",
-        "files": {
-          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/7953f214-69ad-494c-97da-cb3203c107d8.jsonl": 779129
+      "ended": "2026-10-02T17:49:20Z",
+      "seconds": 130,
+      "span": {
+        "from": {
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/7953f214-69ad-494c-97da-cb3203c107d8.jsonl": 779129,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/7953f214-69ad-494c-97da-cb3203c107d8/subagents/agent-a848c0cb576de9ebf.jsonl": 1223295
         },
-        "subagents": {
+        "to": {
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/7953f214-69ad-494c-97da-cb3203c107d8.jsonl": 815640,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/7953f214-69ad-494c-97da-cb3203c107d8/subagents/agent-a1bfc3b586128a8e1.jsonl": 364912,
           "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/7953f214-69ad-494c-97da-cb3203c107d8/subagents/agent-a848c0cb576de9ebf.jsonl": 1223295
         }
+      },
+      "usage": {
+        "source": "claude",
+        "session": "7953f214-69ad-494c-97da-cb3203c107d8",
+        "read": "message.usage on each assistant line, once per requestId",
+        "host": {
+          "claude-opus-5-5": {
+            "input": 8,
+            "output": 2165,
+            "cache_read": 501845,
+            "cache_creation": 4774
+          }
+        },
+        "subagents": {
+          "claude-sonnet-5-5": {
+            "input": 12,
+            "output": 1064,
+            "cache_read": 245345,
+            "cache_creation": 84401
+          }
+        },
+        "agents": [
+          "drive-tasks"
+        ]
+      },
+      "ran": [
+        "claude-opus-5-5",
+        "claude-sonnet-5-5"
+      ],
+      "agents": [
+        "drive-tasks"
+      ],
+      "delegated": true,
+      "signals": {
+        "driver": "cruise"
       }
     }
   ]
