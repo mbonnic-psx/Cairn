@@ -95,7 +95,7 @@ against the glow colour (`--nb-sun-glow`, its alpha composited) over the sky sto
   9.73:1 on the disc (T016's move).
 - Night, 600 tall: the moon's top is at 246px, its glow at 136px; only the words' band is reached, by the glow, where
   `--nb-greeting-ink` holds 6.90:1 over `--nb-sky-mid`. On the moon itself the night inks are 1.05–1.32:1, so a
-  `--nb-sun-top` move of about 9% would turn the test red, as it should.
+  `--nb-sun-top` move of about 9 percentage points (night 41% to 32%, observed) turns the sweep red, as it should.
 
 **Expected outcome**: no overlap that breaks a floor, so the test change is the whole fix and `notebook.css` is not
 touched for T020. If the sweep finds one, the GREEN moves only `--nb-sun-top` and records it in
