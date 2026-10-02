@@ -46,6 +46,54 @@
         "gaps": 4,
         "driver": "cruise"
       }
+    },
+    {
+      "stage": "plan",
+      "started": "2026-10-02T05:30:31Z",
+      "planned": "plan: strong → host model — `strong` maps to the host model",
+      "tasks": {
+        "start": null,
+        "end": null
+      },
+      "ended": "2026-10-02T05:33:42Z",
+      "seconds": 191,
+      "span": {
+        "from": {
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/abe2056c-0ebc-4293-ad12-5c3e3597b844.jsonl": 752610,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/abe2056c-0ebc-4293-ad12-5c3e3597b844/subagents/agent-ae893a61841c96348.jsonl": 613772
+        },
+        "to": {
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/abe2056c-0ebc-4293-ad12-5c3e3597b844.jsonl": 753819,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/abe2056c-0ebc-4293-ad12-5c3e3597b844/subagents/agent-ae893a61841c96348.jsonl": 804886
+        }
+      },
+      "usage": {
+        "source": "claude",
+        "session": "abe2056c-0ebc-4293-ad12-5c3e3597b844",
+        "read": "message.usage on each assistant line, once per requestId",
+        "host": {},
+        "subagents": {
+          "claude-opus-5-5": {
+            "input": 36,
+            "output": 1252,
+            "cache_read": 2789953,
+            "cache_creation": 27856
+          }
+        },
+        "agents": [
+          "drive-slice"
+        ]
+      },
+      "ran": [
+        "claude-opus-5-5"
+      ],
+      "agents": [
+        "drive-slice"
+      ],
+      "delegated": true,
+      "signals": {
+        "driver": "cruise"
+      }
     }
   ]
 }
