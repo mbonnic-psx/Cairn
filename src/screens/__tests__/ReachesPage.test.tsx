@@ -5,14 +5,22 @@
 declare const process: { env: Record<string, string | undefined> };
 process.env.TZ = 'Europe/London';
 
-import { render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { rangeInWords } from '../../localDays';
 import type { NotebookLook } from '../../look/look';
 import { NotebookShell } from '../../shell/NotebookShell';
 import { Reaches } from '../Reaches';
-import { evening, silentReader, todayCases } from './tonightCases';
+import {
+  evening,
+  overTimeCases,
+  overTimeReader,
+  sealedSentence,
+  silentReader,
+  todayCases,
+} from './tonightCases';
 
 const tabs = [{ id: 'reaches' as const, label: 'Today', current: true }];
 
@@ -268,6 +276,137 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (name) 
           <Reaches today={today} read={silentReader} now={now} />,
         );
         expect(words(spread!)).toEqual(outside);
+      },
+    );
+  });
+
+  describe('Over time on a notebook page: looking, could not read, sealed', () => {
+    const COULD_NOT_READ =
+      'Cairn could not read your history just now. Protection is unaffected.';
+    const sentenceFor: Record<string, string | null> = {
+      looking: 'Looking…',
+      'could not read': COULD_NOT_READ,
+      sealed: sealedSentence,
+    };
+    const RANGE = rangeInWords('2026-09-03', '2026-09-30');
+
+    async function overTime(answer: string, extra?: { calls?: Array<[string, string]> }) {
+      const user = userEvent.setup();
+      const reader = overTimeReader(overTimeCases[answer]!);
+      const read = {
+        ...reader,
+        summarizeReaches: (a: string, b: string, c: number, d: number) => {
+          extra?.calls?.push([a, b]);
+          return reader.summarizeReaches(a, b, c, d);
+        },
+      };
+      const view = onPage(<Reaches today={todayCases.sealed} read={read} now={now} />);
+      await user.click(
+        within(view.spread!.firstElementChild as HTMLElement).getByRole('button', {
+          name: 'Over time',
+        }),
+      );
+      // The view's pages are new elements: find them again.
+      const pages = Array.from(
+        view.spread!.querySelectorAll<HTMLElement>(':scope > .nb-page'),
+      );
+      return { ...view, left: pages[0], right: pages[1] };
+    }
+
+    it.each(Object.keys(sentenceFor))(
+      'left page: the range heading, From and To, then one sentence, last: %s',
+      async (state) => {
+        const { left } = await overTime(state);
+        const sentence = sentenceFor[state]!;
+        await waitFor(() => expect(left!.lastElementChild).toHaveTextContent(sentence));
+        const [heading, range, last] = Array.from(left!.children) as HTMLElement[];
+        expect(left!.children).toHaveLength(3);
+        expect(heading!.tagName).toBe('H2');
+        expect(heading).toHaveTextContent(RANGE);
+        expect(within(range!).getByLabelText('From')).toBeInTheDocument();
+        expect(within(range!).getByLabelText('To')).toBeInTheDocument();
+        expect(last).toHaveClass('nb-reaches-sentence');
+      },
+    );
+
+    it.each(Object.keys(sentenceFor))(
+      'right page: ruled, empty, no control: %s',
+      async (state) => {
+        const { right, left } = await overTime(state);
+        await waitFor(() =>
+          expect(left!.lastElementChild).toHaveTextContent(sentenceFor[state]!),
+        );
+        expect(right).toHaveClass('nb-page--ruled');
+        expect(right!.textContent).toBe('');
+        expect(within(right!).queryAllByRole('button')).toHaveLength(0);
+        expect(right!.querySelector('input')).toBeNull();
+      },
+    );
+
+    it('draws the date boxes as plain date inputs with the slice class and Current rules', async () => {
+      const { left } = await overTime('looking');
+      const from = within(left!).getByLabelText('From') as HTMLInputElement;
+      const to = within(left!).getByLabelText('To') as HTMLInputElement;
+      expect(from).toHaveAttribute('type', 'date');
+      expect(to).toHaveAttribute('type', 'date');
+      for (const box of [from, to]) {
+        expect(box).toHaveClass('nb-reaches-date');
+        expect(box.className).not.toMatch(/rounded|border|bg-|px-|py-/);
+      }
+      expect([from.value, from.max, from.min]).toEqual(['2026-09-03', '2026-09-30', '']);
+      expect([to.value, to.max, to.min]).toEqual([
+        '2026-09-30',
+        '2026-09-30',
+        '2026-09-03',
+      ]);
+    });
+
+    it('re-asks the reader and renames the range when From changes', async () => {
+      const calls: Array<[string, string]> = [];
+      const { left } = await overTime('sealed', { calls });
+      await waitFor(() =>
+        expect(left!.lastElementChild).toHaveTextContent(sealedSentence),
+      );
+      expect(calls).toEqual([['2026-09-03', '2026-09-30']]);
+      fireEvent.change(within(left!).getByLabelText('From'), {
+        target: { value: '2026-09-10' },
+      });
+      await waitFor(() => expect(calls).toHaveLength(2));
+      expect(calls[1]).toEqual(['2026-09-10', '2026-09-30']);
+      expect(within(left!).getByRole('heading', { level: 2 })).toHaveTextContent(
+        rangeInWords('2026-09-10', '2026-09-30'),
+      );
+    });
+
+    it('keeps the Which days group the same node, and focus on the button just pressed', async () => {
+      const { spread } = await overTime('looking');
+      const group = spread!.firstElementChild as HTMLElement;
+      expect(document.activeElement).toBe(
+        within(group).getByRole('button', { name: 'Over time' }),
+      );
+      expect(within(group).getByRole('button', { name: 'Over time' })).toHaveAttribute(
+        'aria-pressed',
+        'true',
+      );
+    });
+
+    it.each(Object.keys(sentenceFor))(
+      'says the same words as outside any shell: %s',
+      async (state) => {
+        const user = userEvent.setup();
+        const reader = overTimeReader(overTimeCases[state]!);
+        const outside = render(
+          <Reaches today={todayCases.sealed} read={reader} now={now} />,
+        );
+        await user.click(screen.getByRole('button', { name: 'Over time' }));
+        await screen.findByText(sentenceFor[state]!);
+        const expected = words(outside.container);
+        outside.unmount();
+        const { spread, left } = await overTime(state);
+        await waitFor(() =>
+          expect(left!.lastElementChild).toHaveTextContent(sentenceFor[state]!),
+        );
+        expect(words(spread!)).toEqual(expected);
       },
     );
   });

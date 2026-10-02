@@ -297,38 +297,100 @@ function OverTimeView({
     if (isLocalDate(value) && value >= firstDay && value <= todayDay) setLastDay(value);
   };
 
+  const boxes = (
+    <DateBoxes
+      onPage={onPage}
+      firstDay={firstDay}
+      lastDay={lastDay}
+      todayDay={todayDay}
+      onFirst={changeFirst}
+      onLast={changeLast}
+    />
+  );
+
+  if (onPage) {
+    const sentence =
+      answer === 'looking'
+        ? LOOKING
+        : answer === 'unreadable'
+          ? COULD_NOT_READ
+          : answer.sealed;
+    return (
+      <>
+        <div className="nb-page">
+          <h2 className="nb-reaches-title">{rangeInWords(firstDay, lastDay)}</h2>
+          {boxes}
+          {sentence ? (
+            <p className="nb-reaches-sentence">{sentence}</p>
+          ) : (
+            <RangeBody answer={answer} />
+          )}
+        </div>
+        <div className="nb-page nb-page--ruled" />
+      </>
+    );
+  }
+
   return (
-    <Frame onPage={onPage}>
+    <Frame onPage={false}>
       <h2 className="reflective text-3xl text-ink-900">
         {rangeInWords(firstDay, lastDay)}
       </h2>
 
-      <div className="mt-6 flex flex-wrap gap-6 text-sm text-ink-500">
-        <label className="flex items-center gap-2">
-          From
-          <input
-            type="date"
-            value={firstDay}
-            max={lastDay}
-            onChange={(event) => changeFirst(event.target.value)}
-            className="rounded-lg border border-sand-300 bg-white/70 px-2 py-1 text-ink-700"
-          />
-        </label>
-        <label className="flex items-center gap-2">
-          To
-          <input
-            type="date"
-            value={lastDay}
-            min={firstDay}
-            max={todayDay}
-            onChange={(event) => changeLast(event.target.value)}
-            className="rounded-lg border border-sand-300 bg-white/70 px-2 py-1 text-ink-700"
-          />
-        </label>
-      </div>
+      {boxes}
 
       <RangeBody answer={answer} />
     </Frame>
+  );
+}
+
+/** From and To: the one set of rules (`min`, `max`, what a change does) for Current and the page. */
+function DateBoxes({
+  onPage,
+  firstDay,
+  lastDay,
+  todayDay,
+  onFirst,
+  onLast,
+}: {
+  onPage: boolean;
+  firstDay: string;
+  lastDay: string;
+  todayDay: string;
+  onFirst: (value: string) => void;
+  onLast: (value: string) => void;
+}) {
+  const wrap = onPage
+    ? 'nb-reaches-range'
+    : 'mt-6 flex flex-wrap gap-6 text-sm text-ink-500';
+  const field = onPage ? 'nb-reaches-field' : 'flex items-center gap-2';
+  const box = onPage
+    ? 'nb-reaches-date'
+    : 'rounded-lg border border-sand-300 bg-white/70 px-2 py-1 text-ink-700';
+  return (
+    <div className={wrap}>
+      <label className={field}>
+        From
+        <input
+          type="date"
+          value={firstDay}
+          max={lastDay}
+          onChange={(event) => onFirst(event.target.value)}
+          className={box}
+        />
+      </label>
+      <label className={field}>
+        To
+        <input
+          type="date"
+          value={lastDay}
+          min={firstDay}
+          max={todayDay}
+          onChange={(event) => onLast(event.target.value)}
+          className={box}
+        />
+      </label>
+    </div>
   );
 }
 
