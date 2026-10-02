@@ -174,9 +174,15 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (lookNa
   });
 });
 
-describe('outside any shell', () => {
-  it('renders no spread', () => {
-    const { container } = render(<Teardown report={teardownCases['as it was, nothing listed']!} />);
-    expect(container.querySelector('.nb-spread, .nb-page')).toBeNull();
-  });
+describe('rendered alone', () => {
+  it.each([...Object.entries(teardownCases), ['complete, with residue', completeWithResidue] as const])(
+    'it is its spread, %s',
+    (_name, report) => {
+      const { container } = render(<Teardown report={report} />);
+      const spread = container.querySelector('.nb-spread');
+      expect(spread).toHaveClass('nb-teardown-leaves');
+      expect(spread!.querySelectorAll(':scope > .nb-page')).toHaveLength(2);
+      expect(container.querySelector('.settle')).toBeNull();
+    },
+  );
 });

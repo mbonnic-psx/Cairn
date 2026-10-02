@@ -134,9 +134,12 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (lookNa
   });
 });
 
-describe('outside any shell', () => {
-  it('renders no spread', () => {
-    const { container } = render(<Limits disclosures={disclosureCases['the background component can run']!} />);
-    expect(container.querySelector('.nb-spread, .nb-page')).toBeNull();
+describe('rendered alone', () => {
+  it.each(Object.entries(disclosureCases))('it is its spread, %s', (_name, d: Disclosures) => {
+    const { container } = render(<Limits disclosures={d} />);
+    const spread = container.querySelector('.nb-spread');
+    expect(spread).toHaveClass('nb-limits-leaves');
+    expect(spread!.querySelectorAll(':scope > .nb-page')).toHaveLength(2);
+    expect(container.querySelector('.settle')).toBeNull();
   });
 });
