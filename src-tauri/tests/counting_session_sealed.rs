@@ -102,7 +102,7 @@ fn starts_that_could_not_store_leave_the_mark_so_the_next_good_start_records_all
         categories: CategoryStore::at(&data),
         shipped_categories: PathBuf::from("none"),
         shipped_quotes: PathBuf::from("none.json"),
-        hosts: Box::new(SystemHosts::at(&directory.path().join("hosts"))),
+        hosts: Box::new(SystemHosts::at(directory.path().join("hosts"))),
         helper: Box::new(Handing),
         elevation: Box::new(CannotRunHere),
         reserved: ReservedNames::default(),

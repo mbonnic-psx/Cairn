@@ -89,7 +89,7 @@ fn a_session_with_an_open_history_records_the_gap_since_the_last_mark_and_keeps_
         categories: CategoryStore::at(&data),
         shipped_categories: PathBuf::from("none"),
         shipped_quotes: PathBuf::from("none.json"),
-        hosts: Box::new(SystemHosts::at(&directory.path().join("hosts"))),
+        hosts: Box::new(SystemHosts::at(directory.path().join("hosts"))),
         helper: Box::new(Handing),
         elevation: Box::new(CannotRunHere),
         reserved: ReservedNames::default(),

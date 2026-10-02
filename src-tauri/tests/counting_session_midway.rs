@@ -110,15 +110,10 @@ fn once_a_reach_cannot_be_stored_the_mark_stops_for_good() {
     // While reaches are being stored the mark moves.
     reach(address);
     assert!(wait_until(|| {
-        History::open(&data, &key)
-            .is_open()
-            .then(|| {
-                let History::Open(open) = History::open(&data, &key) else {
-                    return false;
-                };
-                !open.between(0, i64::MAX).unwrap().is_empty()
-            })
-            .unwrap_or(false)
+        let History::Open(open) = History::open(&data, &key) else {
+            return false;
+        };
+        !open.between(0, i64::MAX).unwrap().is_empty()
     }));
     assert!(storing.load(Ordering::SeqCst));
     mark_if_storing(&mark, SEEN + 60, &storing);
