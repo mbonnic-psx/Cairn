@@ -90,3 +90,66 @@ export function rangeInWords(firstDay: string, lastDay: string): string {
   const crossesYears = firstDay.slice(0, 4) !== lastDay.slice(0, 4);
   return `From ${dayInWords(firstDay, crossesYears)} to ${dayInWords(lastDay, crossesYears)}`;
 }
+
+/** An offset taking effect: from `from` (epoch seconds) the clock is `offset` seconds east of UTC. */
+export interface OffsetChange {
+  from: number;
+  offset: number;
+}
+
+/**
+ * How far east of UTC the computer's clock is at an instant, in whole seconds. `Date` applies the
+ * zone's full history; the `+ 0` turns a negative zero, which UTC itself would give, into zero.
+ */
+const offsetAt = (epochSeconds: number): number =>
+  Math.round(-new Date(epochSeconds * 1000).getTimezoneOffset() * 60) + 0;
+
+/**
+ * The offsets the computer's clock has across `firstDay` to `lastDay`: the one in force where the
+ * range begins, then one entry for every instant inside the range at which it changes.
+ *
+ * Found by asking `Date` for the offset at each local midnight, as `rangeBounds` finds the
+ * midnights; where neighbouring midnights differ, the first instant of the new offset is searched
+ * to the second. The core buckets each reach by the offset in force at its instant from this list
+ * (`domain::patterns::by_hour`), so every hour agrees with the times the Today log prints. Holds no
+ * reach data.
+ */
+export function offsetChanges(firstDay: string, lastDay: string): OffsetChange[] {
+  const [fy, fm, fd] = parse(firstDay);
+  const [ly, lm, ld] = parse(lastDay);
+  const days =
+    Math.round(Date.UTC(ly, lm, ld) / 86_400_000) -
+    Math.round(Date.UTC(fy, fm, fd) / 86_400_000);
+  const { start, end } = rangeBounds(firstDay, lastDay);
+
+  const changes: OffsetChange[] = [{ from: start, offset: offsetAt(start) }];
+  let before = start;
+  for (let day = 1; day <= days + 1; day += 1) {
+    const midnight = day === days + 1 ? end : seconds(new Date(fy, fm, fd + day));
+    const old = changes[changes.length - 1].offset;
+    if (offsetAt(midnight) !== old) {
+      // `before` has the old offset and `midnight` has not: the first second of the new one.
+      let low = before;
+      let high = midnight;
+      while (high - low > 1) {
+        const middle = Math.floor((low + high) / 2);
+        if (offsetAt(middle) === old) low = middle;
+        else high = middle;
+      }
+      if (high < end) changes.push({ from: high, offset: offsetAt(high) });
+    }
+    before = midnight;
+  }
+  return changes;
+}
+
+/**
+ * An hour of the day by its start, `14:00`, in the form the Today log prints a time. Made from a
+ * fixed instant in UTC, so no zone's clock change can skip or double a label.
+ */
+export const hourInWords = (hour: number): string =>
+  new Date(Date.UTC(2000, 0, 1, hour)).toLocaleTimeString([], {
+    hour: '2-digit',
+    minute: '2-digit',
+    timeZone: 'UTC',
+  });
