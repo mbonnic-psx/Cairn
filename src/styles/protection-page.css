@@ -20,14 +20,32 @@
   padding-top: 22px;
   overflow-wrap: anywhere;
 }
-/* What is protected: its left leaf keeps its own height and stays put while the list scrolls past. */
+/* What is protected: its left leaf keeps its own height and stays put while the list scrolls past.
+   The spread is exactly as tall as the page area (a definite height) and is a size container, so the leaf can
+   be bounded by that height in cqh. A percentage would resolve against the leaf's own grid row, which grows
+   with the list, and the leaf would never be bounded. The rows still grow past the spread with a long list. */
+.nb-trail-leaves {
+  height: 100%;
+  container-type: size;
+}
 .nb-trail-leaves > .nb-trail-sticky {
   position: sticky;
   top: 0;
   align-self: start;
   /* However much it says, it never outgrows the page area: it scrolls inside itself instead of clipping. */
   max-height: 100%;
+  /* The line above stays for a webview that does not know cqh; the one below is the bound that works. */
+  max-height: 100cqh;
   overflow-y: auto;
+  /* Room for the ring below: 4px inset plus its 2px line, and a little air, so the ring never crosses the text. */
+  padding-inline: 12px;
+  /* The same width back again, so the text keeps its place and its measure; the box reaches into the gutters. */
+  margin-inline: -12px;
+}
+/* Inside the leaf's edge, as the page area's own ring is: the ink every look holds at 3:1 on its paper. */
+.nb-trail-leaves > .nb-trail-sticky:focus-visible {
+  outline: 2px solid var(--nb-ink);
+  outline-offset: -4px;
 }
 
 /* The state of protection, on the left leaf. */
@@ -108,6 +126,11 @@
 }
 .nb-protection-note__button {
   margin: 12px 0 0 -8px;
+  /* The box the shared button gave it (px-5, py-2.5, rounded-lg, text-sm's line, font-medium), now without its fade. */
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 500;
+  line-height: calc(1.25 / 0.875);
   font-family: var(--nb-font-mono);
   font-size: 12.5px;
   color: var(--nb-ink-quiet);
@@ -184,4 +207,12 @@
   font-family: var(--nb-font-mono);
   font-size: 12px;
   color: var(--nb-ink-quiet);
+}
+
+/* Forced colours drop the fill and the quiet ink, so the button keeps an edge of the system's text colour.
+   Only here, so nothing moves outside forced colours. */
+@media (forced-colors: active) {
+  .nb-protection-note__button {
+    border: 1px solid CanvasText;
+  }
 }

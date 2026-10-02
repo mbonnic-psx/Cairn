@@ -286,7 +286,7 @@ Every product decision a `/cruise` run took, in order. A person overrides one by
 - **Status:** standing
 
 ## D26 — What becomes of what the completion audit found the pages promise but no test holds?
-- **Stage:** completion audit · **Slice:** loose-ends · **When:** 2026-10-02T15:40:00Z · **Iteration:** 6
+- **Stage:** completion audit · **Slice:** loose-ends · **When:** 2026-10-02T12:15:00Z · **Iteration:** 6
 - **Question:** Three audits over 004 found no criterion unbuilt, and these held by nothing: the release bundle is never searched for the look switch (SC-002); What is protected's left page scrolls on its own with no tab stop (FR-022, FR-025); "Yes, set this up" is never pressed on the page (setup-pages T024); the setup and Protection buttons lose their edge in forced colours (setup-pages T025); the shared button still fades its colours on a change of look (looks T024, D3); the focus and contrast guards read only the base rule (quiet-pages T013); nothing pins the platform's own window frame (FR-007).
 - **Options:** (a) one slice, `loose-ends`, before `reveal`, carrying all seven as tasks (recommended by the audits); (b) leave them as open tasks in the slices that merged; (c) out of scope
 - **Decision:** (a). Slice 8, `loose-ends`, depends on protection-page, setup-pages and quiet-pages, and `reveal` waits on it.
@@ -297,7 +297,7 @@ Every product decision a `/cruise` run took, in order. A person overrides one by
 - **Status:** standing
 
 ## D27 — Does this run choose a browser test runner so the real layout at 800×600 is held?
-- **Stage:** completion audit · **Slice:** frame · **When:** 2026-10-02T15:40:00Z · **Iteration:** 6
+- **Stage:** completion audit · **Slice:** frame · **When:** 2026-10-02T12:15:00Z · **Iteration:** 6
 - **Question:** All three audits name frame T024: nothing renders the notebook in a real browser, so the tabs, greeting and spreads at 800×600 (FR-025, FR-029) rest on text-match tests and demo screenshots. A runner (Vitest Browser Mode or Playwright) is a new dependency in `package.json`.
 - **Options:** (a) leave T024 open for the owner to choose a runner, said in the report (recommended: D10 left it so); (b) choose one here; (c) withdraw T024
 - **Decision:** (a). T024 stays open; the cruise report asks the owner to choose.
@@ -308,7 +308,7 @@ Every product decision a `/cruise` run took, in order. A person overrides one by
 - **Status:** standing
 
 ## D28 — Does 004 announce Tonight's loading and could-not-be-read sentences?
-- **Stage:** completion audit · **Slice:** tonight-page · **When:** 2026-10-02T15:40:00Z · **Iteration:** 6
+- **Stage:** completion audit · **Slice:** tonight-page · **When:** 2026-10-02T12:15:00Z · **Iteration:** 6
 - **Question:** D23 asks for one polite live region in every state, but Tonight's loading and load-failure sentences sit in none, on the page and in Current alike, and a test holds "nothing announced".
 - **Options:** (a) hand it to 003's check-in as a task, since announcing them changes Current (recommended by the audit); (b) announce them on the page only; (c) read D23 as open and sealed days only
 - **Decision:** (a). 003 task T080.
@@ -316,4 +316,37 @@ Every product decision a `/cruise` run took, in order. A person overrides one by
 - **Decided by:** host (stage recommendation)
 - **Confidence:** high · **Would reverse if:** the owner reads D23 as open and sealed days only
 - **Written to:** `specs/003-reflection-and-history/tasks.md` (T080)
+- **Status:** standing
+
+## D29 — What does SC-002's "search of the released interface" search?
+- **Stage:** slice gaps · **Slice:** loose-ends · **When:** 2026-10-02T12:22:00Z · **Iteration:** 7
+- **Question:** SC-002 says a search of the released interface finds no control, label or announcement for the look switch. Today only a comment and `import.meta.env.DEV` stand behind it; nothing searches what ships.
+- **Options:** a test that makes a production build of the interface itself and searches every file it emits for the switch's words, its choices as the switch names them and its accessible name (recommended); a new check script run by CI; leave it to the guard on `import.meta.env.DEV`
+- **Decision:** A test that builds the interface in production mode into a scratch directory and searches every emitted file. None of the switch's words, choices or accessible name may appear. The test proves it has teeth by finding them in a development build.
+- **Why:** A person using a released Cairn must never meet a testing control. A test lives in the tree the slice owns; a new CI check would change the gate, which no slice may do.
+- **Decided by:** host (stage recommendation)
+- **Confidence:** high · **Would reverse if:** a production build inside the test suite proves too slow for `npm test`, and the owner prefers a CI step
+- **Written to:** `specs/004-notebook-landscape/spec.md` (Clarifications)
+- **Status:** standing
+
+## D30 — How does a keyboard reach What is protected's left page?
+- **Stage:** slice gaps · **Slice:** loose-ends · **When:** 2026-10-02T12:22:00Z · **Iteration:** 7
+- **Question:** The left page of What is protected stays put while the list scrolls, and scrolls inside itself when it is long (`protection-page.css`, `.nb-trail-sticky`). With no control on it, a keyboard cannot scroll it in every webview.
+- **Options:** on the page only, make the left page a tab stop of its own, named, with the page area's focus ring (D19) (recommended); let it grow and drop its own scroll, which loses the sticky leaf D8 chose; leave it
+- **Decision:** On the page only, the left page is a tab stop with a name and the page area's focus ring, so the arrow keys scroll it. Current is unchanged.
+- **Why:** FR-022 and FR-025 promise every part of every page by keyboard. A person reading the note on taking things out must be able to reach all of it. This is the same answer D19 gave the page area.
+- **Decided by:** host (standing decision D19)
+- **Confidence:** high · **Would reverse if:** the owner, at the reveal demo, wants the left page to scroll with the list
+- **Written to:** `specs/004-notebook-landscape/spec.md` (Clarifications)
+- **Status:** standing
+
+## D31 — What pins "each platform's own window frame MUST be kept"?
+- **Stage:** slice gaps · **Slice:** loose-ends · **When:** 2026-10-02T12:22:00Z · **Iteration:** 7
+- **Question:** FR-007 keeps the platform's own frame. Nothing holds it: a later change could turn decorations off and draw a frame of Cairn's own.
+- **Options:** a test over the window configuration and the interface code: decorations not turned off, no title bar overlay, no transparent window, and no call that turns decorations off at run time (recommended); a Rust test over the same file; leave it
+- **Decision:** A test over `tauri.conf.json`'s windows and a search of the interface code for a run-time call that turns decorations off.
+- **Why:** The person's own close, minimise and move controls are where they expect them on their platform. One file says so, and a test over it is the cheapest pin.
+- **Decided by:** host (stage recommendation)
+- **Confidence:** high · **Would reverse if:** a later feature chooses a frame of Cairn's own and the owner accepts it
+- **Written to:** `specs/004-notebook-landscape/spec.md` (Clarifications)
 - **Status:** standing
