@@ -460,3 +460,33 @@ describe('a row Cairn did not count for (scenario 33, first half)', () => {
     expect(leaves(lines()[1]!)).toEqual([shortDateInWords('2026-09-06', false), 'not seen']);
   });
 });
+
+describe('a row Cairn saw part of (scenario 33, second half; scenario 39)', () => {
+  it('shows its name, partly seen, the bar and the count', async () => {
+    await openWeeks(weekRows({ 2: { seen: 'part', count: 3 } }));
+
+    const line = lines()[2]!;
+    expect(leaves(line)).toEqual([weekOfInWords('2026-08-21', false), 'partly seen', '3']);
+    expect(barOf(line)).not.toBeNull();
+    expect(leaves(lines()[3]!)).toEqual([weekOfInWords('2026-08-28', false), '4']);
+  });
+
+  it('shows a row sent as none with a count as partly seen, count and bar kept', async () => {
+    await openWeeks(weekRows({ 4: { seen: 'none', count: 2 } }));
+
+    const line = lines()[4]!;
+    expect(leaves(line)).toEqual([weekOfInWords('2026-09-04', false), 'partly seen', '2']);
+    expect(barOf(line)).not.toBeNull();
+    expect(text()).not.toContain('not seen');
+  });
+
+  it('keeps the across clause first: across 3 days, partly seen', async () => {
+    await openWeeks(weekRows({ 8: { days: 3, seen: 'part', so_far: false } }));
+
+    expect(leaves(lines()[8]!)).toEqual([
+      weekOfInWords('2026-10-02', false),
+      'across 3 days, partly seen',
+      '9',
+    ]);
+  });
+});

@@ -107,7 +107,9 @@ const clauseOf = (row: MovementRow): string => {
   if (row.span === 'week' && row.days < 7) {
     parts.push(`across ${row.days} ${row.days === 1 ? 'day' : 'days'}`);
   }
-  if (row.seen === 'none') parts.push('not seen');
+  if (row.seen === 'none' && row.count === 0) parts.push('not seen');
+  // A count is never hidden (Y23): a row sent as none that holds a reach reads as part seen.
+  else if (row.seen !== 'whole') parts.push('partly seen');
   return parts.join(', ');
 };
 
