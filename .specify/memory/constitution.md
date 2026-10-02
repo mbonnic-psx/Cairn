@@ -1,6 +1,30 @@
 <!--
 SYNC IMPACT REPORT
 ==================
+Version change: 1.4.0 → 1.5.0
+Rationale: MINOR. Principle VI's visual constraint is widened. It said "serif for
+reflective moments, sans for UI". It now says serif for headings, lists, and
+reflective writing, and a typewriter-style monospace or a sans for small UI labels,
+tabs, and buttons. A guard is added: body text a person reads at length MUST NOT be
+monospace. The owner chose the "notebook in the landscape" redesign (a field
+notebook resting on a time-of-day landscape), which sets its labels and tabs in a
+typewriter face. Every other visual rule is unchanged: warm palette, generous
+whitespace, soft motion, no locks, shields, alarm-red, broken chains, or
+neumorphism. Principle VI is not NON-NEGOTIABLE, and no NON-NEGOTIABLE principle
+changes.
+Modified principles: VI. Voice, Language, and Gamification Discipline (visual
+constraints bullet only)
+Added sections: none
+Removed sections: none
+Migration impact: none on existing specs or code. The current interface (system
+sans for UI) still complies. The redesign will arrive as its own feature spec.
+Downstream artifacts updated: CLAUDE.md (the mirrored rule and the version line),
+VISION.md (its Visuals line, owner-approved 2026-10-01: "2. yes").
+Approved: by the project owner, 2026-10-01 ("Lets amend the Constitution I believe
+I really like the look you have put on the mockup").
+Follow-up TODOs: none
+
+Previous amendment, 1.3.0 → 1.4.0:
 Version change: 1.3.0 → 1.4.0
 Rationale: MINOR. Principle V gains a rule: Cairn raises no notification of any kind,
 the evening check-in included. The person opens the check-in when they choose, and
@@ -220,9 +244,11 @@ The interface speaks like a good sponsor, not a firewall log.
 - Use *protected*, *you reached for this*, *a slip*, *back on the trail*.
 - Feature names in the UI MUST be plain-language, never mechanism names — e.g.
   "Prevent browser workarounds", never "DoH policy enforcement".
-- Visual constraints: warm palette, generous whitespace, soft motion; serif for
-  reflective moments, sans for UI. No locks, no shields, no red as an alarm color,
-  no broken chains, no neumorphism.
+- Visual constraints: warm palette, generous whitespace, soft motion. Serif for
+  headings, lists, and reflective writing; a typewriter-style monospace or a sans
+  for small UI labels, tabs, and buttons. Body text a person reads at length MUST
+  NOT be set in monospace. No locks, no shields, no red as an alarm color, no
+  broken chains, no neumorphism.
 - Streaks and any later gamification MUST be opt-in, chosen at setup, and
   reversible without ceremony. With streaks off, no counter, no "day N", and no
   broken-chain imagery may appear anywhere. Turning streaks off MUST NEVER produce
@@ -517,4 +543,4 @@ verify compliance explicitly. Runtime development guidance for agents lives in
 `CLAUDE.md`; it MUST NOT contradict this document, and MUST be updated when this
 document changes.
 
-**Version**: 1.4.0 | **Ratified**: 2026-08-18 | **Last Amended**: 2026-10-01
+**Version**: 1.5.0 | **Ratified**: 2026-08-18 | **Last Amended**: 2026-10-01
