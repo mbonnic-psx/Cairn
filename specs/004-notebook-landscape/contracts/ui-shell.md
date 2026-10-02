@@ -13,6 +13,11 @@ page, headings), by `fold-and-width` (the fold), by `board-scale` (the scale len
 - The tab column belongs to the shell and is bounded by the notebook's height: a tab that cannot fit its label on
   one line shrinks and wraps it, so every tab stays whole and reachable down to an 800x600 window.
 - Tab accessible names are exactly today's header labels. The existing tests find them by role `button` and name.
+- Order (D47): `<nav aria-label="Pages">` comes before `<main>` inside the notebook, in the DOM, so it comes first in
+  reading order and in Tab order. From the start of the shell, Tab reaches every tab in `tabsFor` order, then the page
+  area (D19), then the page's own controls; on What is protected the left page (D30) is a stop after the page area. Only
+  the order changed: the tabs are still placed absolutely outside the notebook's right edge, with a stacking order so
+  the page area never paints over them. `NotebookShell.test.tsx` pins the sequence.
 
 ## The page area
 

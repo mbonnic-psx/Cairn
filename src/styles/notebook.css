@@ -427,6 +427,8 @@
   flex-direction: column;
   align-items: flex-start;
   gap: calc(4 * var(--nb-u));
+  /* The tabs come before the page in the DOM (D47); this keeps the page area from painting over them. Place unchanged. */
+  z-index: 1;
 }
 .nb-tab {
   flex: 0 1 auto;
