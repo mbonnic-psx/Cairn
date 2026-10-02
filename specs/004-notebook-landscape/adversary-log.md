@@ -81,3 +81,14 @@ Skipped: nothing widened, and the slice does not close the split. Covered by row
 | concurrency, idempotency, ordering, retention, or time | already covered | the spreads render the state and handlers the screens already had: a day ending under an open check-in, a save returning after more was typed, and Over time's range are 003's, attacked in `specs/003-reflection-and-history/adversary-log.md` (history-by-site R2–R5, the check-in rows); the on-page branch reads them and adds no clock, ordering or retry |
 
 Skipped: nothing widened, and the slice does not close the split (`reveal` remains). Covered by row `frame` · release gate on the notebook, and 003's `history-by-site` and check-in rows.
+
+## loose-ends · 96472f7 · 2026-10-02
+
+| Trigger | Status | Evidence |
+|---|---|---|
+| driving adapter (HTTP route, CLI command, queue consumer) | not present | no IPC command, route or CLI added (`src-tauri/`, `src/App.tsx` and `package.json` untouched; `ipc_surface.rs` unchanged) |
+| driven adapter or the provider types behind one | not present | no store, file or system call touched; the production diff is the on-page branches of `src/screens/Trail.tsx` and `src/screens/Protection.tsx` (a named tab stop, no fade on the note button) and rules in `protection-page.css`, `setup-pages.css` and `tonight-page.css`; the rest is tests |
+| authorisation decision (who can reach one that already exists) | already covered | row `frame` (release gate on the notebook): a released build still forces `current`, now held by a search of a production build too (`releasedBuild.test.ts`, D29); "Yes, set this up" calls today's `confirm` (`AppSetupConfirm.test.tsx`) |
+| concurrency, idempotency, ordering, retention, or time | not present | nothing reads time, retries or orders anything new |
+
+Skipped: nothing widened, and the slice does not close the split (`reveal` remains). Covered by row `frame` · release gate on the notebook.
