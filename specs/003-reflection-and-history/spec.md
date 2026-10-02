@@ -336,12 +336,12 @@ this, 4. … just match the time of the computer"):
   change, is not approximate, and there is no "approximate" note. This supersedes R4's accepted approximation for
   the hour breakdown; `dst_approximate` stays false whenever the hours are exact.
 
-- **B4, clarified (2026-10-02; the host proceeded on the recommendation, to be confirmed by the owner).** "The
+- **B4, clarified (2026-10-02; taken on the host's recommendation, confirmed by the owner: "keep both").** "The
   computer's own clock" is the clock as it is set now, with its own daylight-saving history: across a clock change
   the hours are exact; after the computer moves to another time zone, every reach reads in the zone it has now, as
   the Today log already prints times. Keeping the zone a reach happened in would mean recording an offset with each
   reach, which Principle II's "domain and timestamp only" does not allow without an amendment.
-- **B5 — a quiet range by hour (same footing).** Both the quiet sentence ("Nothing here for these days.", FR-024)
+- **B5 — a quiet range by hour (confirmed by the owner, same message).** Both the quiet sentence ("Nothing here for these days.", FR-024)
   and the 24 hours at zero under it (B2).
 
 Already stated, and held by this slice as written: day-level estimates are excluded from the hour breakdown and
