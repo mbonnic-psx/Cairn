@@ -1,0 +1,213 @@
+/*
+ * The steps before protection is on, as spreads (slice `setup-pages`): choosing what to protect, with
+ * Anywhere else? beside it, and Before Cairn changes anything.
+ *
+ * Colour comes only from the shell's tokens (and the theme's moss, which the shell re-points), so every look
+ * re-points it and every pair is already proved at its floor (look/__tests__/tokens.test.ts). Nothing here
+ * moves: no animation, no transition. The typewriter face is for small labels only: a category's count and
+ * the buttons. Everything a person reads, and the address they type, is the page's serif.
+ *
+ * Design (frontend-design, second pass). The notebook look already chose the palette, the serif and the
+ * two-page spread, so this sheet spends no boldness of its own: one quiet column to a page, headings at the
+ * protection pages' size so the three page families read as one notebook, a category to one 32px line (the
+ * notebook's own pitch) so all nine fit beside the sentence at 1280x800, and a foot on the right page where
+ * the way forward sits: the last thing the eye reaches, after the address box and after the limits.
+ */
+
+/* Two pages inside the shell's one scrolling page area. The spread is at least as tall as the area (whose
+   height is definite), so the right page's foot reaches the bottom of it; a longer left page grows both. */
+.nb-choosing-spread,
+.nb-disclosure-spread {
+  column-gap: 48px;
+  min-height: 100%;
+}
+/* A long unbroken word breaks only when it alone is wider than the page. */
+.nb-choosing-left,
+.nb-disclosure-left,
+.nb-categories-section,
+.nb-custom-section {
+  overflow-wrap: break-word;
+}
+/* The right page is a column whose last item, the foot, takes the remaining height. */
+.nb-choosing-right,
+.nb-disclosure-right {
+  display: flex;
+  flex-direction: column;
+  overflow-wrap: break-word;
+}
+.nb-choosing-foot,
+.nb-disclosure-foot {
+  margin-top: auto;
+  padding-top: 32px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Headings and sentences, the same size as the protection pages'. */
+.nb-categories-title,
+.nb-custom-title,
+.nb-disclosure-title {
+  margin: 0;
+  font-family: var(--nb-font-serif);
+  font-size: 30px;
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--nb-ink);
+}
+.nb-categories-lead,
+.nb-custom-lead,
+.nb-disclosure-lead {
+  margin: 12px 0 0;
+  max-width: 34em;
+  font-size: 18px;
+  color: var(--nb-ink-body);
+}
+
+/* The categories: one column, a category to a line. */
+.nb-categories-list {
+  margin: 24px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.nb-categories-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 32px;
+  cursor: pointer;
+}
+/* The name and its count share a line, and wrap together when the page is too narrow for both. */
+.nb-categories-row > span {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 12px;
+  min-width: 0;
+}
+.nb-categories-box {
+  flex-shrink: 0;
+  margin: 0;
+}
+.nb-categories-name {
+  color: var(--nb-ink);
+}
+.nb-categories-count {
+  font-family: var(--nb-font-mono);
+  font-size: 12px;
+  color: var(--nb-ink-quiet);
+}
+.nb-categories-note {
+  margin: 24px 0 0;
+  max-width: 34em;
+  color: var(--nb-ink-quiet);
+}
+
+/* Anywhere else?: the box and its button on one line, what comes back under them. */
+.nb-custom-form {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+.nb-custom-input {
+  flex: 1;
+  min-width: 0;
+  padding: 8px 12px;
+  background-color: transparent;
+  font-family: var(--nb-font-serif);
+  font-size: 18px;
+  color: var(--nb-ink);
+}
+.nb-custom-input::placeholder {
+  color: var(--nb-ink-quiet);
+  opacity: 1;
+}
+.nb-custom-button {
+  min-height: 40px;
+  padding: 0 20px;
+  background-color: transparent;
+  font-family: var(--nb-font-mono);
+  font-size: 12.5px;
+  letter-spacing: 0.04em;
+  color: var(--nb-ink);
+  cursor: pointer;
+}
+.nb-custom-added {
+  margin: 16px 0 0;
+  max-width: 34em;
+  color: var(--color-moss-600);
+}
+/* A reason an address could not be taken: an amber edge, its words in amber too, never red. */
+.nb-custom-reason {
+  margin: 16px 0 0;
+  max-width: 34em;
+  padding: 2px 0 2px 16px;
+  border-left: 3px solid var(--nb-accent-amber);
+  color: var(--nb-accent-amber);
+}
+
+/* The buttons that leave the step. */
+.nb-choosing-turn-on,
+.nb-disclosure-confirm,
+.nb-disclosure-back {
+  min-height: 40px;
+  padding: 0 20px;
+  background-color: transparent;
+  font-family: var(--nb-font-mono);
+  font-size: 12.5px;
+  letter-spacing: 0.04em;
+  color: var(--nb-ink);
+  cursor: pointer;
+}
+
+/* Before Cairn changes anything: what changes on the left, what it does not cover on the right. */
+.nb-disclosure-list {
+  margin: 24px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.nb-disclosure-subtitle + .nb-disclosure-list {
+  margin-top: 16px;
+}
+.nb-disclosure-line {
+  display: flex;
+  gap: 12px;
+  margin-top: 12px;
+  color: var(--nb-ink-body);
+}
+.nb-disclosure-line:first-child {
+  margin-top: 0;
+}
+/* A dot is decoration (aria-hidden); the words carry the meaning. */
+.nb-disclosure-dot {
+  flex-shrink: 0;
+  width: 6px;
+  height: 6px;
+  margin-top: 0.8em;
+  border-radius: 50%;
+}
+.nb-disclosure-dot--in-force {
+  background-color: var(--color-moss-600);
+}
+.nb-disclosure-dot--not-covered {
+  background-color: var(--nb-ink-quiet);
+}
+.nb-disclosure-helper {
+  margin: 24px 0 0;
+  max-width: 34em;
+  color: var(--nb-ink-body);
+}
+.nb-disclosure-subtitle {
+  margin: 0;
+  font-family: var(--nb-font-serif);
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--nb-ink);
+}
+.nb-disclosure-administrator {
+  margin: 24px 0 0;
+  max-width: 34em;
+  color: var(--nb-ink-quiet);
+}
