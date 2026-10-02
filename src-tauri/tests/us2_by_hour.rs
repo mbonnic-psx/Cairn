@@ -654,14 +654,20 @@ mod with_history {
             refused(Vec::new()),
             refused(vec![change(start + 1, HOUR)]),
             // London implies +1 h; a first offset a clock change from it is
-            // the offset in force, and three hours is not.
-            refused(vec![change(start, -2 * HOUR)]),
+            // the offset in force, and three hours and a second is not.
+            refused(vec![change(start, -2 * HOUR - 1)]),
             refused(vec![change(start, HOUR), change(start, 0)]),
             refused(vec![change(start, HOUR), change(london.end, 0)]),
             refused(vec![change(start, 15 * HOUR)]),
             refused(vec![change(start, HOUR), change(start + HOUR, HOUR)]),
-            refused(vec![change(start, HOUR), change(start + HOUR, 4 * HOUR)]),
-            refused(vec![change(start, HOUR), change(start + HOUR, -HOUR - 1)]),
+            refused(vec![
+                change(start, HOUR),
+                change(start + HOUR, 4 * HOUR + 1),
+            ]),
+            refused(vec![
+                change(start, HOUR),
+                change(start + HOUR, -2 * HOUR - 1),
+            ]),
             refused(many),
             refused(vec![change(i64::MIN, 0)]),
             refused(vec![change(start, i64::MAX)]),
@@ -767,7 +773,13 @@ mod with_history {
         assert_eq!(occupied(&new), [(1, 1)], "in hour 01, not 00");
 
         // Every first offset the core accepts here, each with its hour.
-        for (offset, hour) in [(3_600, 23), (7_200, 0), (10_800, 1), (14_400, 2)] {
+        for (offset, hour) in [
+            (3_600, 23),
+            (7_200, 0),
+            (10_800, 1),
+            (14_400, 2),
+            (18_000, 3),
+        ] {
             let patterns = ask(offset);
             assert_eq!(patterns.sealed, None, "{offset} is placed");
             assert_eq!(patterns.by_site.len(), 1);
@@ -775,7 +787,7 @@ mod with_history {
         }
 
         // One more than a clock change from the implied one is sealed.
-        for offset in [3_599, 14_401] {
+        for offset in [-1, 18_001] {
             let patterns = ask(offset);
             assert!(patterns.sealed.is_some(), "{offset} is sealed");
             assert!(patterns.by_hour.is_empty(), "never 24 zeros");

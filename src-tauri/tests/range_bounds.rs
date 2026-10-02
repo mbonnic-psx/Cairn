@@ -121,13 +121,14 @@ fn an_end_a_day_short_is_refused() {
 }
 
 #[test]
-fn the_ends_offsets_may_differ_by_two_hours_and_no_more() {
-    assert!(check(0, 2 * HOUR));
-    assert!(!check(0, 2 * HOUR + 1));
-    assert!(check(2 * HOUR, 0));
-    assert!(!check(2 * HOUR + 1, 0));
-    assert!(check(0, -2 * HOUR));
-    assert!(!check(0, -2 * HOUR - 1));
+fn the_ends_offsets_may_differ_by_three_hours_and_no_more() {
+    // Three hours is the largest change in tzdata (Antarctica/Casey, +11 to +08).
+    assert!(check(0, 3 * HOUR));
+    assert!(!check(0, 3 * HOUR + 1));
+    assert!(check(3 * HOUR, 0));
+    assert!(!check(3 * HOUR + 1, 0));
+    assert!(check(0, -3 * HOUR));
+    assert!(!check(0, -3 * HOUR - 1));
 }
 
 #[test]
@@ -208,9 +209,9 @@ fn an_instant_at_either_extreme_is_refused_not_a_panic() {
 #[test]
 fn the_end_may_be_a_day_and_a_clock_change_past_now_and_no_more() {
     // The latest an end can be: the next midnight is at most a day and the
-    // largest clock change (two hours) after now.
-    let end = midnight(after_last()) + 2 * HOUR;
-    let now = end - DAY - 2 * HOUR;
+    // largest clock change (three hours) after now.
+    let end = midnight(after_last()) + 3 * HOUR;
+    let now = end - DAY - 3 * HOUR;
     let start = midnight(first());
     assert!(check_range(first(), last(), start, end, now).is_ok());
     assert!(check_range(first(), last(), start, end, now - 1).is_err());

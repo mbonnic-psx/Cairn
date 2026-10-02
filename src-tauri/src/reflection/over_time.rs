@@ -7,8 +7,10 @@ use crate::services::Trouble;
 use crate::store::gaps::{clipped, Gap};
 use crate::store::history::OpenHistory;
 
-/// The largest seasonal clock change any zone uses.
-const LARGEST_CLOCK_CHANGE: i64 = 2 * 3600;
+/// The largest clock change in tzdata: three hours (Antarctica/Casey, +11:00 to
+/// +08:00 in 2018; Vostok and Ust-Nera have had one too). It was once taken to
+/// be two (adversary A1, `history-by-hour`).
+const LARGEST_CLOCK_CHANGE: i64 = 3 * 3600;
 
 const DAY: i64 = 86_400;
 

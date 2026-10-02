@@ -535,11 +535,11 @@ mod with_history {
             range_end() - DAY,
             &offsets_of(range_start()),
         );
-        let offsets_three_hours_apart = state.summarize_reaches(
+        let offsets_over_three_hours_apart = state.summarize_reaches(
             first_day(),
             last_day(),
             range_start(),
-            range_end() + 3 * HOUR,
+            range_end() + 3 * HOUR + 1,
             &offsets_of(range_start()),
         );
         let tomorrow = date("2026-10-01");
@@ -555,7 +555,7 @@ mod with_history {
             first_after_last,
             bad_start,
             a_day_short,
-            offsets_three_hours_apart,
+            offsets_over_three_hours_apart,
             not_begun,
         ]
         .into_iter()

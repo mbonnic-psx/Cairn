@@ -149,6 +149,44 @@ fn londons_two_years_are_accepted_with_four_changes() {
 }
 
 #[test]
+fn antarctica_caseys_three_hour_change_of_2018_is_accepted() {
+    // Casey went from +11:00 to +08:00 at 2018-03-10 17:00 UTC, the largest change in
+    // tzdata. Epoch integers found with Node under TZ=Antarctica/Casey.
+    let case = Case {
+        first: "2018-03-01",
+        last: "2018-03-31",
+        after_last: "2018-04-01",
+    };
+    assert_eq!(case.start(39_600), 1_519_822_800);
+    let (first, changes) = case
+        .check(
+            39_600,
+            28_800,
+            &[(1_519_822_800, 39_600), (1_520_701_200, 28_800)],
+        )
+        .unwrap();
+    assert_eq!(first, 39_600);
+    assert_eq!(
+        changes,
+        [OffsetChange {
+            from: 1_520_701_200,
+            offset_seconds: 28_800
+        }]
+    );
+    // And the way back, 2018-10-06 at 20:00 UTC, +08:00 to +11:00 (2018-10-01 to 14).
+    let back = Case {
+        first: "2018-10-01",
+        last: "2018-10-14",
+        after_last: "2018-10-15",
+    };
+    accepted(back.check(
+        28_800,
+        39_600,
+        &[(1_538_323_200, 28_800), (1_538_856_000, 39_600)],
+    ));
+}
+
+#[test]
 fn lord_howes_half_hour_change_is_accepted() {
     let case = Case {
         first: "2026-10-01",
@@ -183,10 +221,10 @@ fn the_first_offset_is_within_a_clock_change_of_the_one_range_start_implies() {
     // the implied one, and no further.
     let start = FOUR_DAYS.start(3600);
     accepted(FOUR_DAYS.check(3600, 3600, &[(start, 3600)]));
-    accepted(FOUR_DAYS.check(3600, 3600, &[(start, 3600 - 2 * HOUR)]));
-    accepted(FOUR_DAYS.check(3600, 3600, &[(start, 3600 + 2 * HOUR)]));
-    refused(FOUR_DAYS.check(3600, 3600, &[(start, 3600 - 2 * HOUR - 1)]));
-    refused(FOUR_DAYS.check(3600, 3600, &[(start, 3600 + 2 * HOUR + 1)]));
+    accepted(FOUR_DAYS.check(3600, 3600, &[(start, 3600 - 3 * HOUR)]));
+    accepted(FOUR_DAYS.check(3600, 3600, &[(start, 3600 + 3 * HOUR)]));
+    refused(FOUR_DAYS.check(3600, 3600, &[(start, 3600 - 3 * HOUR - 1)]));
+    refused(FOUR_DAYS.check(3600, 3600, &[(start, 3600 + 3 * HOUR + 1)]));
     refused(FOUR_DAYS.check(3600, 3600, &[(start, 3600 + 5 * HOUR)]));
 }
 
@@ -212,7 +250,7 @@ fn an_offset_is_between_minus_twelve_and_plus_fourteen_hours() {
     for offset in [-12 * HOUR, 14 * HOUR] {
         accepted(FOUR_DAYS.check(offset, offset, &[(FOUR_DAYS.start(offset), offset)]));
     }
-    for offset in [-12 * HOUR - 1, 14 * HOUR + 1] {
+    for offset in [-13 * HOUR - 1, 14 * HOUR + 1] {
         refused(FOUR_DAYS.check(offset, offset, &[(FOUR_DAYS.start(offset), offset)]));
     }
     // And in a later entry.
@@ -231,32 +269,32 @@ fn an_offset_is_between_minus_twelve_and_plus_fourteen_hours() {
 }
 
 #[test]
-fn neighbours_differ_by_no_more_than_two_hours_and_by_something() {
+fn neighbours_differ_by_no_more_than_three_hours_and_by_something() {
     let at = start() + HOUR;
     // Equal.
     refused(FOUR_DAYS.check(0, 0, &[(start(), 0), (at, 0)]));
-    // Exactly two hours apart, up and down.
-    accepted(FOUR_DAYS.check(0, 2 * HOUR, &[(start(), 0), (at, 2 * HOUR)]));
+    // Exactly three hours apart, up and down.
+    accepted(FOUR_DAYS.check(0, 3 * HOUR, &[(start(), 0), (at, 3 * HOUR)]));
     accepted(FOUR_DAYS.check(
-        2 * HOUR,
+        3 * HOUR,
         0,
-        &[(FOUR_DAYS.start(2 * HOUR), 2 * HOUR), (at, 0)],
+        &[(FOUR_DAYS.start(3 * HOUR), 3 * HOUR), (at, 0)],
     ));
-    // Two hours and a second.
-    refused(FOUR_DAYS.check(0, 2 * HOUR + 1, &[(start(), 0), (at, 2 * HOUR + 1)]));
+    // Three hours and a second.
+    refused(FOUR_DAYS.check(0, 3 * HOUR + 1, &[(start(), 0), (at, 3 * HOUR + 1)]));
     refused(FOUR_DAYS.check(
-        2 * HOUR + 1,
+        3 * HOUR + 1,
         0,
-        &[(FOUR_DAYS.start(2 * HOUR + 1), 2 * HOUR + 1), (at, 0)],
+        &[(FOUR_DAYS.start(3 * HOUR + 1), 3 * HOUR + 1), (at, 0)],
     ));
 }
 
 #[test]
-fn the_last_offset_is_within_two_hours_of_the_one_range_end_implies() {
-    accepted(FOUR_DAYS.check(0, 2 * HOUR, &[(start(), 0)]));
-    accepted(FOUR_DAYS.check(0, -2 * HOUR, &[(start(), 0)]));
-    refused(FOUR_DAYS.check(0, 2 * HOUR + 1, &[(start(), 0)]));
-    refused(FOUR_DAYS.check(0, -2 * HOUR - 1, &[(start(), 0)]));
+fn the_last_offset_is_within_three_hours_of_the_one_range_end_implies() {
+    accepted(FOUR_DAYS.check(0, 3 * HOUR, &[(start(), 0)]));
+    accepted(FOUR_DAYS.check(0, -3 * HOUR, &[(start(), 0)]));
+    refused(FOUR_DAYS.check(0, 3 * HOUR + 1, &[(start(), 0)]));
+    refused(FOUR_DAYS.check(0, -3 * HOUR - 1, &[(start(), 0)]));
 }
 
 #[test]
@@ -410,9 +448,9 @@ fn a_first_offset_more_than_a_clock_change_from_the_implied_one_is_still_refused
         after_last: "2026-05-01",
     };
     let at = cairo.start(7200);
-    refused(cairo.check(7200, 10_800, &[(at, 7200 + 2 * HOUR + 1)]));
-    refused(cairo.check(7200, 10_800, &[(at, 7200 - 2 * HOUR - 1)]));
-    accepted(cairo.check(7200, 10_800, &[(at, 7200 + 2 * HOUR)]));
+    refused(cairo.check(7200, 10_800, &[(at, 7200 + 3 * HOUR + 1)]));
+    refused(cairo.check(7200, 10_800, &[(at, 7200 - 3 * HOUR - 1)]));
+    accepted(cairo.check(7200, 10_800, &[(at, 7200 + 3 * HOUR)]));
 }
 
 #[test]
@@ -432,7 +470,7 @@ fn a_range_ending_on_a_skipped_midnight_is_placed_and_its_last_offset_held() {
     refused(ends_at_change.check(7200, 7200, &[(s, 7200), (1_776_981_600, 10_800)]));
     accepted(ends_at_change.check(7200, 7200, &[(s, 7200), (1_776_981_599, 10_800)]));
     // The last offset is held to the one the end implies.
-    refused(ends_at_change.check(7200, 7200, &[(s, 7200 + 2 * HOUR + 1)]));
+    refused(ends_at_change.check(7200, 7200, &[(s, 7200 + 3 * HOUR + 1)]));
 
     let after = Case {
         first: "2026-04-20",
@@ -445,7 +483,7 @@ fn a_range_ending_on_a_skipped_midnight_is_placed_and_its_last_offset_held() {
     refused(after.check(
         7200,
         10_800,
-        &[(s, 7200), (1_776_981_600, 10_800 + 2 * HOUR + 1)],
+        &[(s, 7200), (1_776_981_600, 10_800 + 3 * HOUR + 1)],
     ));
 }
 
@@ -468,7 +506,7 @@ fn a_repeated_midnight_is_placed_at_the_start_and_at_the_end_of_a_range() {
     );
     // Beginning at the second midnight: -05:00 is both implied and in force.
     assert_placed(&from_it, -18_000, -18_000, &[(1_793_509_200, -18_000)]);
-    refused(from_it.check(-14_400, -18_000, &[(1_793_505_600, -14_400 + 2 * HOUR + 1)]));
+    refused(from_it.check(-14_400, -18_000, &[(1_793_505_600, -14_400 + 3 * HOUR + 1)]));
 
     let to_it = Case {
         first: "2026-10-28",
@@ -479,7 +517,7 @@ fn a_repeated_midnight_is_placed_at_the_start_and_at_the_end_of_a_range() {
     let s = to_it.start(-14_400);
     assert_placed(&to_it, -14_400, -14_400, &[(s, -14_400)]);
     refused(to_it.check(-14_400, -14_400, &[(s, -14_400), (1_793_505_600, -18_000)]));
-    refused(to_it.check(-14_400, -14_400, &[(s, -14_400 + 2 * HOUR + 1)]));
+    refused(to_it.check(-14_400, -14_400, &[(s, -14_400 + 3 * HOUR + 1)]));
 
     let through_it = Case {
         first: "2026-10-28",
@@ -499,6 +537,6 @@ fn a_repeated_midnight_is_placed_at_the_start_and_at_the_end_of_a_range() {
     refused(through_it.check(
         -14_400,
         -18_000,
-        &[(s, -14_400), (1_793_509_200, -18_000 - 2 * HOUR - 1)],
+        &[(s, -14_400), (1_793_509_200, -18_000 - 3 * HOUR - 1)],
     ));
 }
