@@ -100,7 +100,7 @@ interface Row {
   absent?: boolean;
 }
 
-/** What is said beside a row's name, joined by `, `: how many dates a short week holds, then what was seen. */
+/** What is said beside a row's name, joined by `, `: how many dates a short week holds, what was seen, then so far. */
 const clauseOf = (row: MovementRow): string => {
   const parts: string[] = [];
   // Only a week that holds fewer than seven dates says how many it holds; the core's `span` says which is a week.
@@ -110,6 +110,7 @@ const clauseOf = (row: MovementRow): string => {
   if (row.seen === 'none' && row.count === 0) parts.push('not seen');
   // A count is never hidden (Y23): a row sent as none that holds a reach reads as part seen.
   else if (row.seen !== 'whole') parts.push('partly seen');
+  if (row.so_far) parts.push('so far');
   return parts.join(', ');
 };
 

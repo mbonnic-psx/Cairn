@@ -283,7 +283,7 @@ describe('a quiet range (scenario 37)', () => {
 
     expect(await screen.findByText(NOTHING)).toBeInTheDocument();
     expect(lines()).toHaveLength(28);
-    for (const line of lines()) expect(leaves(line)[1]).toBe('0');
+    for (const line of lines()) expect(leaves(line)).toContain('0');
     expectNoVerdict();
   });
 });
@@ -445,7 +445,7 @@ describe('a row Cairn did not count for (scenario 33, first half)', () => {
 
     expect(screen.getByText(NOTHING)).toBeInTheDocument();
     for (const line of lines()) {
-      expect(leaves(line)[1]).toMatch(/not seen$/);
+      expect(leaves(line)[1]).toMatch(/not seen(, so far)?$/);
       expect(barOf(line)).toBeNull();
     }
   });
@@ -488,5 +488,43 @@ describe('a row Cairn saw part of (scenario 33, second half; scenario 39)', () =
       'across 3 days, partly seen',
       '9',
     ]);
+  });
+});
+
+describe('the row holding today (scenarios 34 and 32, second part)', () => {
+  it.each([
+    ['whole', 3, 'so far'],
+    ['part', 3, 'partly seen, so far'],
+    ['none', 0, 'not seen, so far'],
+  ] as const)('ends its clause with so far: %s', async (seen, count, clause) => {
+    const rows = dayRows();
+    rows[27] = { ...rows[27]!, seen, count, so_far: true };
+    const { read } = fakeRead(async () => patterns({ movement: rows }));
+    await openDayByDay(read);
+    await waitFor(() => expect(lines()).toHaveLength(28));
+
+    expect(leaves(lines()[27]!).slice(0, 2)).toEqual([
+      shortDateInWords('2026-10-02', false),
+      clause,
+    ]);
+    expectNoVerdict();
+  });
+
+  it.each([
+    [1, 'whole', 'across 1 day, so far'],
+    [3, 'part', 'across 3 days, partly seen, so far'],
+    [2, 'none', 'across 2 days, not seen, so far'],
+  ] as const)('puts a short week in order: %i dates, %s', async (days, seen, clause) => {
+    await openWeeks(
+      weekRows({ 8: { days, seen, so_far: true, count: seen === 'none' ? 0 : 5 } }),
+    );
+
+    expect(leaves(lines()[8]!)[1]).toBe(clause);
+  });
+
+  it('never says so far on a row that is not so far', async () => {
+    await openWeeks(weekRows({ 8: { days: 3, seen: 'part', so_far: false } }));
+
+    expect(text()).not.toContain('so far');
   });
 });
