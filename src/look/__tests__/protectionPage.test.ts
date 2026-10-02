@@ -152,6 +152,23 @@ describe('the protection-page stylesheet', () => {
     it('keeps the rule pitch: a line is 32px', () => {
       expect(line).toMatch(/line-height:\s*32px/);
     });
+
+    it('is a whole number of rules tall: items start-aligned, none with a block-axis box of its own (T018)', () => {
+      expect(line).not.toMatch(/align-items:\s*baseline/);
+      expect(line).toMatch(/align-items:\s*flex-start/);
+      for (const item of [address, body('.nb-trail-inventory__aside')]) {
+        expect(item).not.toMatch(/(?:^|[;\s])(?:padding|margin)(?:-top|-bottom|-block(?:-start|-end)?)\s*:/);
+        expect(item).not.toMatch(/border(-top|-bottom)?\s*:/);
+        expect(item).not.toMatch(/line-height:(?!\s*32px)/);
+      }
+    });
+
+    it('sets a note on the address above, never at the address column, when the aside is alone (T019)', () => {
+      const aside = body('.nb-trail-inventory__aside');
+      const margin = aside.match(/margin-left:\s*auto/);
+      const indent = aside.match(/(?:margin-left|padding-left):\s*([\d.]+)em/);
+      expect(margin !== null || (indent !== null && Number(indent[1]) >= 1.5)).toBe(true);
+    });
   });
 
   describe('the leaves fill the page area and the sticky one keeps its own height (T014)', () => {

@@ -144,7 +144,7 @@
 .nb-trail-inventory__line {
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
+  align-items: flex-start;
   justify-content: space-between;
   column-gap: 16px;
   line-height: 32px;
@@ -159,6 +159,8 @@
   overflow-wrap: break-word;
 }
 .nb-trail-inventory__aside {
+  /* Alone on its line it sits to the right, never in the address column, so it reads as a note. */
+  margin-left: auto;
   font-size: 14px;
   color: var(--nb-ink-quiet);
 }
