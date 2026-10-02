@@ -12,7 +12,7 @@ import type { NotebookLook } from '../../look/look';
 import { Categories } from '../Setup/Categories';
 import { Choosing } from '../Setup/Choosing';
 import { CustomEntry } from '../Setup/CustomEntry';
-import { categories, readBack, waitingNote } from './setupCases';
+import { categories, localhostReason, readBack, waitingNote } from './setupCases';
 
 const noop = () => undefined;
 
@@ -188,5 +188,87 @@ describe('CustomEntry on a notebook page (T005)', () => {
   it('says the same words as outside any shell', () => {
     const ui = <CustomEntry add={async () => []} />;
     expect(onPage(ui).main.textContent).toBe(outside(ui));
+  });
+});
+
+describe('what comes back after an address is submitted, on a page (T006)', () => {
+  type Check = NonNullable<Parameters<typeof CustomEntry>[0]['check']>;
+
+  async function submitted(root: HTMLElement, wait: 'added' | 'reason') {
+    await userEvent.type(within(root).getByLabelText('Address to protect'), 'Example.com');
+    await userEvent.click(within(root).getByRole('button', { name: 'Protect it' }));
+    return wait === 'added' ? within(root).findByText(/example\.com, www\.example\.com/) : within(root).findByRole('status');
+  }
+
+  const added = (check: Check) => (
+    <CustomEntry add={async () => ['example.com', 'www.example.com']} check={check} />
+  );
+  const reads: Array<[string, Check, RegExp]> = [
+    ['in force', async () => readBack('in_force'), /^Protected: example\.com, www\.example\.com$/],
+    ['off', async () => readBack('off'), /^Added — Cairn will protect these once protection is on: /],
+    ['not confirmed', async () => readBack('not_verified'), /^Added to your list, though Cairn has not confirmed it is in force just now: /],
+    [
+      'could not be made',
+      async () => {
+        throw 'no read-back';
+      },
+      /^Added to your list, though Cairn has not confirmed/,
+    ],
+  ];
+
+  it.each(reads)('puts the sentence for a read-back %s under the box, in a plain p', async (_name, check, sentence) => {
+    const ui = added(check);
+    const { main } = onPage(ui);
+    const found = await submitted(main, 'added');
+    expect(found.tagName).toBe('P');
+    expect(found.getAttribute('role')).toBeNull();
+    expect(found.textContent).toMatch(sentence);
+    const form = main.querySelector('form') as HTMLElement;
+    expect(form.compareDocumentPosition(found) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(found.className).not.toMatch(/text-moss/);
+  });
+
+  it('says "Protected:" only for a read-back in force', async () => {
+    for (const [name, check] of reads) {
+      const ui = added(check);
+      const { main, unmount } = onPage(ui);
+      await submitted(main, 'added');
+      expect(main.textContent?.includes('Protected:'), name).toBe(name === 'in force');
+      unmount();
+    }
+  });
+
+  it.each(reads)('says the same words as outside any shell for a read-back %s', async (_name, check) => {
+    const ui = added(check);
+    const { main, unmount } = onPage(ui);
+    await submitted(main, 'added');
+    const here = main.textContent;
+    unmount();
+    const out = render(ui);
+    await submitted(out.container, 'added');
+    expect(here).toBe(out.container.textContent);
+  });
+
+  const refusals: Array<[string, unknown, string]> = [
+    ['a localhost rejection', { reason: localhostReason, kind: 'keeps_the_machine_working' }, localhostReason],
+    ['a sentence', 'Cairn could not reach its settings just now.', 'Cairn could not reach its settings just now.'],
+    ['a core that rejects with nothing readable', 42, 'Cairn could not add that just now. Nothing has changed.'],
+  ];
+
+  it.each(refusals)('shows %s under the box in amber, never red, as a status', async (_name, problem, words) => {
+    const ui = (
+      <CustomEntry
+        add={async () => {
+          throw problem;
+        }}
+      />
+    );
+    const { main } = onPage(ui);
+    const found = await submitted(main, 'reason');
+    expect(found.textContent).toBe(words);
+    expect(found.getAttribute('role')).toBe('status');
+    expect(found.className).toContain('nb-custom-reason');
+    expect(found.className).not.toMatch(/red|rose|crimson|text-amber|--nb-accent-red/);
+    expect(main.innerHTML).not.toMatch(/red/i);
   });
 });

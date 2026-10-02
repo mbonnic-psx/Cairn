@@ -84,6 +84,14 @@ export function CustomEntry({
             Protect it
           </button>
         </form>
+
+        {added.length > 0 && <p className="nb-custom-added">{addedSentence(status, added)}</p>}
+
+        {reason && (
+          <p role="status" className="nb-custom-reason">
+            {reason}
+          </p>
+        )}
       </section>
     );
   }
