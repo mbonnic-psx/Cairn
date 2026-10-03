@@ -462,7 +462,7 @@ with so far, a year on a row, the quiet range with rows not seen).
 - [ ] V35 [US2] **MEDIUM** [M8, FR-022, FR-024; owner question at the demo] A range with no seen time at all still
   says "Nothing here for these days." above rows that all read *not seen* (`Reaches.tsx` 172, 419; screen test
   `ReachesMovement.test.tsx` 442). Inherited from by site and by hour; the extension was the plan's, not the owner's.
-- [ ] V36 [US2] **LOW** A reach exactly on a later row's local midnight, under a non-zero offset, daily and weekly, is
+- [x] V36 [US2] **LOW** A reach exactly on a later row's local midnight, under a non-zero offset, daily and weekly, is
   not pinned (only `range.from`, 23:59 and 00:01 are). *Sweep:* one example per span at `row_begins(k)`.
   *Files:* `src-tauri/tests/patterns_movement.rs`.
 - [ ] V37 [US2] **LOW** [owner question at the demo] A range wholly inside a past year names no year on its title or
