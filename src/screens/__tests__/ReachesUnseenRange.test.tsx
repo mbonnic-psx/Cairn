@@ -114,15 +114,22 @@ describe('a range Cairn saw none of', () => {
     expect(screen.queryAllByTestId('bar')).toHaveLength(0);
   });
 
-  it('keeps the left page: the coverage note and the standing sentence', async () => {
-    await openView('By hour');
+  it.each(['By site', 'By hour', 'By day', 'Day by day'] as const)(
+    'keeps the left page under %s: the coverage note and the standing sentence',
+    async (view) => {
+      await openView(view);
 
-    expect(screen.getByText(COVERAGE)).toBeInTheDocument();
-    expect(
-      screen.getByText(
-        'Cairn counts only while it is running. This is what it saw over these days.',
-      ),
-    ).toBeInTheDocument();
+      expect(screen.getByText(COVERAGE)).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          'Cairn counts only while it is running. This is what it saw over these days.',
+        ),
+      ).toBeInTheDocument();
+    },
+  );
+
+  it('says no number, rank or verdict in the sentence', () => {
+    expect(NOT_COUNTING).not.toMatch(/\d|top|most|worst|best|failed|denied|violation/i);
   });
 
   it('makes one read for all four views and says the same in each', async () => {
