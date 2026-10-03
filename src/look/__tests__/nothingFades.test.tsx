@@ -268,7 +268,9 @@ describe('no sheet the app loads declares a fade', () => {
       core?.remove();
       core = undefined;
     }
-  });
+    // Renders every scene in one test: about 4 s alone, past vitest's 5 s default
+    // under a full parallel run, which then left the file's later scenes empty.
+  }, 30_000);
 });
 
 describe('nothing a page can show fades', () => {
