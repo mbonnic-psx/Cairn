@@ -363,7 +363,7 @@ Appended by convergence pass 1 of 2 (2026-10-02, at `f7aad64`). Only CRITICAL an
   the last row; `now` at a row's local midnight; then each mutant above, and one per swept bound, is shown killed.
   Record in the plan's *Constitution Check* that Track A's REDs were not independent and that this pass stands in.
   *Files:* `src-tauri/tests/patterns_movement.rs`, `src-tauri/tests/us2_movement.rs`.
-- [ ] V28 [US2] **MEDIUM** [pin row 4; SC-006] V4 is ticked, but its GREEN (`\bmovement\b` in `REACH_DATA`) left this
+- [x] V28 [US2] **MEDIUM** [pin row 4; SC-006] V4 is ticked, but its GREEN (`\bmovement\b` in `REACH_DATA`) left this
   branch in `02eab7a` for host PR #60, still open. Until #60 merges, `check-no-ambient-counts` does not refuse the
   field outside the reaches screen. *Sweep:* every guard or pin this slice's tasks claim (V1's pins, V4's guard,
   pin rows 1–4) is on `main` or in this diff before this slice merges. Merge #60 first, or state the order in this
@@ -380,7 +380,7 @@ Appended by convergence pass 1 of 2 (2026-10-02, at `f7aad64`). Only CRITICAL an
   `src-tauri/tests/` is built from the value under test (`grep -n "patterns\.[a-z_]*\.clone()"` and the like: this
   is the only hit today). Replace it with the 28 rows at 0, `whole`, the last `so_far`, or compare every other
   field and name the test that holds `movement`. *Files:* `src-tauri/tests/us2_by_site.rs`.
-- [ ] V31 [US2] **LOW** [lead a; V2, V21] `contracts/ui-ipc.md` lines 143, 215 and 252 still say `movement` is absent,
+- [x] V31 [US2] **LOW** [lead a; V2, V21] `contracts/ui-ipc.md` lines 143, 215 and 252 still say `movement` is absent,
   and this slice's amendment supersedes only `[{ day, count }]`. V2 rightly keeps the old text as the record.
   *Sweep:* every statement in `ui-ipc.md` and `patterns.md` that a field is absent or not yet computed has a
   pointer in the amendment that ends it (today only `movement`'s three). Add one sentence to this slice's amendment

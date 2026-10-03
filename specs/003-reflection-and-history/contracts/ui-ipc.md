@@ -263,7 +263,9 @@ holds the range against.
 
     movement: [{ day, days, span, count, seen, so_far }]   // oldest first; [] when sealed
 
-This supersedes the original `[{ day, count }]` above. The field was never sent before.
+This supersedes the original `[{ day, count }]` above. The field was never sent before. It also ends the three earlier
+statements that `movement` is absent (in the `history-by-site`, `history-by-hour` and `history-by-weekday` amendments),
+which stay as the record of when they were true.
 
 - `day` (`YYYY-MM-DD`) is the row's first date. `days` is how many dates it holds. `span` is `"day"` when the
   range holds 56 dates or fewer, each row one date (`days: 1`), and `"week"` when it holds more, each row seven
