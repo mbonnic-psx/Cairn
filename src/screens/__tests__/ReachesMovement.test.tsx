@@ -99,6 +99,7 @@ const leaves = (line: HTMLElement) =>
 const barOf = (line: HTMLElement) => within(line).queryByTestId('bar');
 
 const NOTHING = 'Nothing here for these days.';
+const NOT_COUNTING = "Cairn wasn't counting on these days.";
 const STANDING = 'Cairn counts only while it is running. This is what it saw over these days.';
 const SEALED = 'Your history is sealed for now.';
 
@@ -298,7 +299,17 @@ describe('when it cannot be shown (scenario 38)', () => {
     expect(await screen.findByText(SEALED)).toBeInTheDocument();
     expect(lines()).toHaveLength(0);
     expect(screen.queryByText(NOTHING)).toBeNull();
+    expect(screen.queryByText(NOT_COUNTING)).toBeNull();
     expectNoVerdict();
+  });
+
+  it('says neither of the two sentences while looking', async () => {
+    const { read } = fakeRead(() => new Promise<Patterns>(() => {}));
+    await openDayByDay(read);
+
+    expect(await screen.findByText('Looking…')).toBeInTheDocument();
+    expect(screen.queryByText(NOTHING)).toBeNull();
+    expect(screen.queryByText(NOT_COUNTING)).toBeNull();
   });
 
   it('shows one plain sentence when the read throws', async () => {
@@ -314,6 +325,8 @@ describe('when it cannot be shown (scenario 38)', () => {
     ).toBeInTheDocument();
     expect(lines()).toHaveLength(0);
     expect(text()).not.toContain('boom');
+    expect(screen.queryByText(NOTHING)).toBeNull();
+    expect(screen.queryByText(NOT_COUNTING)).toBeNull();
     expectNoVerdict();
   });
 });
@@ -439,11 +452,12 @@ describe('a row Cairn did not count for (scenario 33, first half)', () => {
     expect(barOf(lines()[5]!)).toBeNull();
   });
 
-  it('shows it in the quiet list too, with the sentence above', async () => {
+  it('shows it in a list Cairn saw none of, with the sentence that says so above', async () => {
     const rows = weekRows().map((row) => ({ ...row, ...unseen }));
     await openWeeks(rows);
 
-    expect(screen.getByText(NOTHING)).toBeInTheDocument();
+    expect(screen.getByText(NOT_COUNTING)).toBeInTheDocument();
+    expect(screen.queryByText(NOTHING)).toBeNull();
     for (const line of lines()) {
       expect(leaves(line)[1]).toMatch(/not seen(, so far)?$/);
       expect(barOf(line)).toBeNull();

@@ -63,6 +63,7 @@ const OVER_TIME = 'Over time';
 const LOOKING = 'Looking…';
 const NOTHING_TODAY = 'Nothing here for today.';
 const NOTHING_THESE_DAYS = 'Nothing here for these days.';
+const NOT_COUNTING_THESE_DAYS = "Cairn wasn't counting on these days.";
 const COUNTED_ONLY_TODAY =
   'Cairn counts only while it is running. This is what it saw today.';
 const COUNTED_ONLY_WHILE_RUNNING =
@@ -186,6 +187,15 @@ const labelled = (row: Row, seen: Seen): boolean =>
 
 /** Whether the view has nothing to count: no sites, or no reach in any hour. */
 const isQuiet = (rows: Row[]) => rows.every((row) => row.count === 0);
+
+/**
+ * Whether Cairn saw none of the range: the answer holds a row, and every row is not seen with no reach.
+ * Judged once, from the core's own marks. An empty answer (sealed, or from before rows were sent) is
+ * never this, and a row holding a count is never unseen (Y23).
+ */
+const sawNone = (answer: Patterns): boolean =>
+  answer.movement?.length > 0 &&
+  answer.movement.every((row) => row.seen === 'none' && row.count === 0);
 
 /** Where a view sits: the two pages of a spread (the right one ruled and empty for now). */
 function Frame({ children }: { children: ReactNode }) {
@@ -389,7 +399,10 @@ function OverTimeView({
         : answer.sealed;
   // The answer to draw as a list: none while looking, unreadable or sealed.
   const list = typeof answer === 'string' || answer.sealed ? null : answer;
-  const rows = list ? rowsOf(list, seen, weekStart) : [];
+  const unseen = list !== null && sawNone(list);
+  // Under the sentence that Cairn saw none, only Day by day draws rows: each is true on its own.
+  const quiet = list ? isQuiet(rowsOf(list, seen, weekStart)) : false;
+  const rows = list && (!unseen || seen === 'movement') ? rowsOf(list, seen, weekStart) : [];
   const largest = largestCount(rows);
   return (
     <>
@@ -416,7 +429,11 @@ function OverTimeView({
       <div className="nb-page nb-page--ruled">
         {!list ? null : (
           <>
-            {isQuiet(rows) && <p className="nb-reaches-empty">{NOTHING_THESE_DAYS}</p>}
+            {unseen ? (
+              <p className="nb-reaches-empty">{NOT_COUNTING_THESE_DAYS}</p>
+            ) : (
+              quiet && <p className="nb-reaches-empty">{NOTHING_THESE_DAYS}</p>
+            )}
             {rows.length > 0 && (seen !== 'site' || !isQuiet(rows)) && (
               <ul className="nb-reaches-log">
                 {rows.map((row) => (
