@@ -477,7 +477,7 @@ the two rows of host PR #61; characterised first by C1–C3 (`289d573`). Two tra
 
 ### Track A — the core
 
-- [ ] V39 [US2] [M12; rule 6 as superseded; scenarios 57–61] A row is *partly seen* only when Cairn missed more than half
+- [x] V39 [US2] [M12; rule 6 as superseded; scenarios 57–61] A row is *partly seen* only when Cairn missed more than half
   of its seeable time (`2 * unseen > seeable`); exactly half is whole; a row holding a reach is never `none`.
   RED: scenarios 57–61 in the domain and through `AppState::summarize_reaches`, and every existing example that used one
   unseen second to mean `part` re-read against M12 (change its expectation, or its gap, and say which in the commit).
@@ -487,19 +487,19 @@ the two rows of host PR #61; characterised first by C1–C3 (`289d573`). Two tra
 
 ### Track B — the screen
 
-- [ ] V40 [US2] [rules 13, 15, 16; M13, M15; scenarios 43–46, 48–50] *Cairn wasn't counting on these days.* where Cairn
+- [x] V40 [US2] [rules 13, 15, 16; M13, M15; scenarios 43–46, 48–50] *Cairn wasn't counting on these days.* where Cairn
   saw none of the range, in all four views, judged once from `movement`; by hour and by day draw no rows under it;
   day by day keeps its *not seen* rows; never from an empty, sealed or loading answer. RED: rewrite C1
   (`ReachesUnseenRange.test.tsx`) to the new behaviour, plus scenarios 48–50. *Files:* `src/screens/Reaches.tsx`,
   `src/screens/__tests__/ReachesUnseenRange.test.tsx`, `src/screens/__tests__/ReachesMovement.test.tsx`.
-- [ ] V41 [US2] [rule 14; scenarios 42, 47] Where Cairn saw any of the range, the quiet sentence and its rows are exactly as
+- [x] V41 [US2] [rule 14; scenarios 42, 47] Where Cairn saw any of the range, the quiet sentence and its rows are exactly as
   before. Held by the existing quiet tests (`movement: []`) and C1's seen variant. *Files:* as V40.
-- [ ] V42 [US2] [rules 17, 18; M14; scenarios 52–56] The title and day by day's rows name the year when either date is
+- [x] V42 [US2] [rules 17, 18; M14; scenarios 52–56] The title and day by day's rows name the year when either date is
   outside the current local year by the screen's `now`. RED: change C2's no-year case and C3 to the new behaviour, and add
   the rows. *Files:* `src/localDays.ts`, `src/__tests__/localDays.test.ts`, `src/screens/Reaches.tsx`,
   `src/screens/__tests__/ReachesOverTime.test.tsx`, `src/screens/__tests__/ReachesPage.test.tsx`,
   `src/screens/__tests__/ReachesMovement.test.tsx`.
-- [ ] V43 [US2] [rule 19, M16; scenario 51] The standing sentence stays under every view, and both guards pass.
+- [x] V43 [US2] [rule 19, M16; scenario 51] The standing sentence stays under every view, and both guards pass.
   *Files:* as V40.
 - [ ] V44 `make -f delivery/Makefile verify` green, then the demo again (V23), the app stopped afterwards.
 
