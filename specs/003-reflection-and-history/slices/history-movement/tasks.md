@@ -470,6 +470,25 @@ with so far, a year on a row, the quiet range with rows not seen).
 - [x] V38 [US2] **LOW** The comment in `shortDateInWords` says `new Date(100, …)` reads year 100 as 2000; JavaScript
   remaps only years 0–99. Correct it. *Files:* `src/localDays.ts`.
 
+Appended by the convergence pass after the demo (2026-10-03, at `2a9d796`; Phase 5 only). Only a CRITICAL re-opens
+the loop.
+
+- [ ] V45 [US2] **LOW** [M14; scope question for the owner, not a fix] M14 reaches every date the *Over time* view
+  writes: the title (`Reaches.tsx` 416) and *Day by day*'s rows (148–157), both through `namesYear`
+  (`localDays.ts` 92). *Sweep of every other date written:* the *Today* header is the word *Today* (`Reaches.tsx`
+  313, 322); both coverage notes give a length and no date (`store/gaps.rs` 128–164); the *From*/*To* boxes are
+  native date inputs that always show the year. One place does not follow M14: the check-in names an ended day it
+  held open past midnight as *Wednesday 30 September* with no year (`CheckIn.tsx` 115–119, 283), so on 1 January it
+  says *Thursday 31 December*. Recommendation: leave it. That day is at most yesterday and its weekday makes it
+  unambiguous, and M14 names the four views' titles and *Day by day*'s rows. Ask the owner only if they want M14 to
+  apply wherever a date is written. *Files:* none unless the owner extends M14 (`src/screens/CheckIn.tsx`).
+- [ ] V46 [US2] **LOW** [V29; the screen at scale] `OverTimeView` builds the rows twice on every render: once for
+  `quiet` (`Reaches.tsx` 410) and again for `rows` (411). On *Day by day* at the widest range (100 534 weekly rows,
+  V29) that doubles the work V29 is there to time. It is also built for `quiet` under M13's sentence when nothing
+  reads it. *Sweep:* every value derived from `rowsOf` in `OverTimeView` comes from one call per render. Build the
+  rows once and judge `quiet` from them (on *By site* and the others, an empty list under the M13 sentence is never
+  read as quiet, because `unseen` comes first at 438). *Files:* `src/screens/Reaches.tsx`.
+
 ## Phase 5: After the demo (owner decisions M12–M16)
 
 Plan: *After the demo: M13 and M14* (rules 13–19, scenarios 42–56) and *After the demo: M12* (scenarios 57–61). Pins:
@@ -602,3 +621,24 @@ line (V32); not timed at the widest range (V29, demo). **Published contract** (`
 - **Tests first, ADD:** Track A's REDs were not independent (`plan.md` 668–674). V27's edge examples stand in, and
   the mutants above confirm them.
 - **I, IV, V, VII:** not touched: nothing changes protection, no system file, no notification, nothing gated.
+
+**After the demo, Phase 5 only (2026-10-03, at `2a9d796`): converged.** M12–M16 (V39–V43) hold at every level they
+touch. No CRITICAL or HIGH. V45 and V46 are LOW and re-open nothing. `make -f delivery/Makefile verify` is green at
+`2a9d796` (all gates; vitest 92 files, 3 124 tests, under #62's `maxWorkers: 8`), so V44's first half is met. The demo
+again (V44's second half) is the host's. Three mutants, each applied alone and then restored with `git checkout --`, were each killed:
+`> seeable` to `>=` in `patterns.rs` 438 (5 tests fail, among them *exactly twelve hours … is whole*); `sawNone`'s
+`length > 0` to `>= 0` (*never says it of an answer with no rows* fails); `namesYear`'s `||` to `&&` (5 fail).
+*Domain:* `patterns.rs` 434–447, `2 * unseen > seeable` (saturating), exactly half is whole, `None` still needs every
+seeable second unseen and no reach. A row with nothing seeable stays whole. *Screen:* `sawNone` (`Reaches.tsx`
+202–204) is judged once from `movement` (408), and only from a list that is neither loading, unreadable nor sealed
+(407). The four views follow M13/M15 (411, 437–443). The standing sentence stays on the left page in every listed
+state (431, M16). One year rule serves both title and rows (416, 148–151). *Published contract:* the `seen` bullet in
+`ui-ipc.md` 278–281 matches 438. `patterns.md` 138 ("adding unseen time never makes a row more seen") still holds
+under a threshold. *III / FR-022:* nothing presents unseen time as zero. Under M13's sentence *By hour* and *By day*
+draw no zeros (411), and *Day by day*'s rows stay *not seen* with no count or bar (`absent`, 161). `sawNone` is false
+for `[]` (`length > 0`), and sealed or loading never reach it. A row holding a reach is `part`, never `none` (contract
+281, `Reaches.tsx` 203). *VI voice / no streaks:* the new sentence (67) holds no banned word. `check-banned-words` and
+`check-no-streaks` are clean in the gate. *Clock:* `localDays.ts` 92–101 takes `today` as an argument, and every
+`new Date` in the file builds from given values (no `Date.now`, no bare `new Date()`). *Sweeps:* the only other quiet
+sentences are *Nothing here for today.* and the check-in's *Nothing here for {day}.*, which speak of a day Cairn is
+counting as it is read, so not M13's class. For dates, see V45.
