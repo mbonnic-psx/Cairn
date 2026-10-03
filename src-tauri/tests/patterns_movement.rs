@@ -828,3 +828,370 @@ fn the_last_weekly_row_holding_today_is_so_far() {
     assert_eq!(so_far_of(&rows), [date(2026, 10, 2)]);
     assert_eq!(rows[8].days, 1);
 }
+
+// --- V27: an example at the exact edge of each bound ---------------------------------
+//
+// Written after the GREEN by an author who did not write it, so that each
+// comparison and each clamp in `movement`, `coverage` and `for_each_piece` has an
+// example that fails when its bound moves by one.
+
+/// `from` in UTC to `to` in UTC, 0 until `at`, then `+3 h`: an offsets list
+/// `check_offsets` accepts, because a clock change is no more than 3 h and the
+/// last offset is within one of the 0 the range's end implies. A reach in the
+/// last 3 h of the last UTC date reads as the date after `last_day`.
+fn clock_forward_near_the_end(
+    first_day: LocalDate,
+    last_day: LocalDate,
+    change_at: i64,
+    reaches: &[Reach],
+    now: i64,
+) -> Vec<MovementRow> {
+    let changes = [OffsetChange {
+        from: change_at,
+        offset_seconds: 3 * 3600,
+    }];
+    let range = LocalRange {
+        first_day,
+        last_day,
+        from: first_day.days_since_epoch() * DAY,
+        to: (last_day.days_since_epoch() + 1) * DAY,
+        first_offset: 0,
+        changes: &changes,
+    };
+    movement(reaches, &range, &[], now)
+}
+
+#[test]
+fn a_daily_reach_that_reads_as_the_date_after_the_last_is_in_the_last_row() {
+    let (first, last) = (date(2026, 10, 1), date(2026, 10, 3));
+    let change_at = last.days_since_epoch() * DAY + 12 * HOUR;
+    // 2026-10-03 22:00 UTC is 2026-10-04 01:00 at +3 h: after `last_day`.
+    let late = last.days_since_epoch() * DAY + 22 * HOUR;
+    let rows = clock_forward_near_the_end(first, last, change_at, &reaches(&[late]), 0);
+
+    assert_eq!(rows.len(), 3);
+    assert_eq!(counts(&rows), [0, 0, 1]);
+}
+
+#[test]
+fn a_reach_on_the_last_date_before_the_change_is_in_the_last_row_too() {
+    // The same range, a reach that reads as the last date itself: the clamp's
+    // upper end is the last row, not one short of it.
+    let (first, last) = (date(2026, 10, 1), date(2026, 10, 3));
+    let change_at = last.days_since_epoch() * DAY + 12 * HOUR;
+    let on_the_last = last.days_since_epoch() * DAY + 5 * HOUR;
+    let rows =
+        clock_forward_near_the_end(first, last, change_at, &reaches(&[on_the_last]), 0);
+    assert_eq!(counts(&rows), [0, 0, 1]);
+}
+
+#[test]
+fn a_weekly_reach_that_reads_as_the_date_after_the_last_is_in_the_last_row() {
+    // 63 dates are nine whole weeks, so a date past the last would index a tenth.
+    let first = date(2026, 8, 1);
+    let last = date(2026, 10, 2);
+    assert_eq!(last.days_since_epoch() - first.days_since_epoch() + 1, 63);
+    let change_at = last.days_since_epoch() * DAY + 12 * HOUR;
+    let late = last.days_since_epoch() * DAY + 22 * HOUR;
+    let rows = clock_forward_near_the_end(first, last, change_at, &reaches(&[late]), 0);
+
+    assert_eq!(rows.len(), 9);
+    assert!(rows
+        .iter()
+        .all(|row| row.span == Span::Week && row.days == 7));
+    assert_eq!(counts(&rows), [0, 0, 0, 0, 0, 0, 0, 0, 1]);
+}
+
+#[test]
+fn the_pieces_of_a_range_whose_end_reads_as_the_date_after_are_in_rows_that_exist() {
+    // Not over, under `now` before the range, asks `for_each_piece` for every
+    // row; the last piece's end reads as the date after `last_day`.
+    let (first, last) = (date(2026, 10, 1), date(2026, 10, 3));
+    let change_at = last.days_since_epoch() * DAY + 21 * HOUR;
+    let rows = clock_forward_near_the_end(first, last, change_at, &[], 0);
+    assert_eq!(rows.len(), 3);
+    assert!(rows.iter().all(|row| row.so_far));
+
+    let weeks = clock_forward_near_the_end(
+        date(2026, 8, 1),
+        date(2026, 10, 2),
+        date(2026, 10, 2).days_since_epoch() * DAY + 21 * HOUR,
+        &[],
+        0,
+    );
+    assert_eq!(weeks.len(), 9);
+    assert!(weeks.iter().all(|row| row.so_far));
+}
+
+#[test]
+fn now_exactly_at_a_rows_local_midnight_leaves_the_row_before_not_so_far() {
+    // 2026-09-20 00:00 BST: the end of the 19th and the beginning of the 20th.
+    let midnight_20th = date(2026, 9, 20).days_since_epoch() * DAY - HOUR;
+    let rows = four_weeks(&[], &[], midnight_20th);
+    let so_far = so_far_of(&rows);
+    assert_eq!(so_far.first(), Some(&date(2026, 9, 20)));
+    assert_eq!(so_far.len(), 13);
+
+    // One second earlier, the 19th is still going.
+    let rows = four_weeks(&[], &[], midnight_20th - 1);
+    assert_eq!(so_far_of(&rows).first(), Some(&date(2026, 9, 19)));
+}
+
+#[test]
+fn now_at_the_very_end_of_the_range_leaves_no_row_so_far() {
+    let rows = four_weeks(&[], &[], 1_790_982_000);
+    assert_eq!(so_far_of(&rows), Vec::<LocalDate>::new());
+    let rows = four_weeks(&[], &[], 1_790_982_000 - 1);
+    assert_eq!(so_far_of(&rows), [date(2026, 10, 2)]);
+}
+
+#[test]
+fn now_exactly_at_a_weekly_rows_boundary_leaves_the_week_before_not_so_far() {
+    // Weeks of 2026-08-07: the second begins 2026-08-14 00:00 BST.
+    let range = LocalRange {
+        first_day: date(2026, 8, 7),
+        last_day: date(2026, 10, 2),
+        from: 1_786_057_200,
+        to: 1_790_982_000,
+        first_offset: 3600,
+        changes: &[],
+    };
+    let second_week = date(2026, 8, 14).days_since_epoch() * DAY - HOUR;
+    let rows = movement(&[], &range, &[], second_week);
+    assert_eq!(rows.iter().filter(|row| row.so_far).count(), 8);
+    assert!(!rows[0].so_far);
+    assert!(rows[1].so_far);
+    let rows = movement(&[], &range, &[], second_week - 1);
+    assert_eq!(rows.iter().filter(|row| row.so_far).count(), 9);
+}
+
+#[test]
+fn a_range_of_no_instants_has_no_row_so_far() {
+    // `from == to` at mid-day: nothing of the date lies in the range.
+    let day = date(2026, 10, 2);
+    let noon = day.days_since_epoch() * DAY + 12 * HOUR;
+    let range = LocalRange {
+        first_day: day,
+        last_day: day,
+        from: noon,
+        to: noon,
+        first_offset: 0,
+        changes: &[],
+    };
+    let rows = movement(&reaches(&[noon]), &range, &[], 0);
+    assert_eq!(rows.len(), 1);
+    assert_eq!((rows[0].count, rows[0].so_far), (0, false));
+}
+
+#[test]
+fn dates_that_run_backwards_have_no_rows_even_with_a_reach_in_the_instants() {
+    let range = LocalRange {
+        first_day: date(2026, 10, 3),
+        last_day: date(2026, 10, 2),
+        from: date(2026, 10, 2).days_since_epoch() * DAY,
+        to: date(2026, 10, 4).days_since_epoch() * DAY,
+        first_offset: 0,
+        changes: &[],
+    };
+    let at = date(2026, 10, 3).days_since_epoch() * DAY + 100;
+    assert!(movement(&reaches(&[at]), &range, &[], 0).is_empty());
+}
+
+#[test]
+fn a_range_one_date_over_the_daily_limit_is_weekly_and_holds_every_reach_once() {
+    // 57 dates at the first and last instants of the range.
+    let first = date(2026, 8, 7);
+    let last = date(2026, 10, 2);
+    let from = first.days_since_epoch() * DAY;
+    let to = (last.days_since_epoch() + 1) * DAY;
+    let rows = at_offset(first, last, 0, &[], &reaches(&[from, to - 1]), 0);
+    assert_eq!(rows.len(), 9);
+    assert_eq!(counts(&rows), [1, 0, 0, 0, 0, 0, 0, 0, 1]);
+}
+
+#[test]
+fn a_weekly_range_leaves_out_a_reach_at_each_side_edge_and_counts_the_next_in() {
+    let first = date(2026, 8, 7);
+    let last = date(2026, 10, 2);
+    let from = first.days_since_epoch() * DAY;
+    let to = (last.days_since_epoch() + 1) * DAY;
+    let rows = at_offset(
+        first,
+        last,
+        0,
+        &[],
+        &reaches(&[from - 1, from, to - 1, to]),
+        0,
+    );
+    assert_eq!(counts(&rows), [1, 0, 0, 0, 0, 0, 0, 0, 1]);
+}
+
+// Coverage's edges.
+
+/// 2026-09-05 to 2026-10-03 in London, asked at `now`: one row past today.
+fn four_weeks_and_tomorrow(unseen: &[(i64, i64)], now: i64) -> Vec<MovementRow> {
+    let range = LocalRange {
+        first_day: date(2026, 9, 5),
+        last_day: date(2026, 10, 3),
+        from: 1_788_562_800,
+        to: 1_791_068_400,
+        first_offset: 3600,
+        changes: &[],
+    };
+    movement(&[], &range, unseen, now)
+}
+
+#[test]
+fn a_gap_elsewhere_leaves_a_row_wholly_after_now_whole_not_none() {
+    // 2026-09-06 02:00-03:00 BST; tomorrow, the 3rd, has no seconds before `now`.
+    let night = date(2026, 9, 6).days_since_epoch() * DAY - HOUR;
+    let rows = four_weeks_and_tomorrow(&[(night + 2 * HOUR, night + 3 * HOUR)], NOW);
+    let tomorrow = row_of(&rows, date(2026, 10, 3));
+    assert_eq!((tomorrow.seen, tomorrow.so_far), (Seen::Whole, true));
+    assert_eq!(row_of(&rows, date(2026, 9, 6)).seen, Seen::Part);
+}
+
+#[test]
+fn one_unseen_second_makes_the_row_part_and_none_makes_it_whole() {
+    let day = date(2026, 9, 10);
+    let midnight = day.days_since_epoch() * DAY - HOUR;
+    let rows = four_weeks(&[(midnight + 100, midnight + 101)], &[], NOW);
+    assert_eq!(row_of(&rows, day).seen, Seen::Part);
+    assert!(rows
+        .iter()
+        .filter(|row| row.day != day)
+        .all(|row| row.seen == Seen::Whole));
+    let rows = four_weeks(&[(midnight + 100, midnight + 100)], &[], NOW);
+    assert!(rows.iter().all(|row| row.seen == Seen::Whole));
+}
+
+#[test]
+fn a_gap_over_all_but_the_last_second_of_a_date_is_part_and_over_all_of_it_is_none() {
+    let day = date(2026, 9, 10);
+    let midnight = day.days_since_epoch() * DAY - HOUR;
+    let rows = four_weeks(&[(midnight, midnight + DAY - 1)], &[], NOW);
+    assert_eq!(row_of(&rows, day).seen, Seen::Part);
+    let rows = four_weeks(&[(midnight, midnight + DAY)], &[], NOW);
+    assert_eq!(row_of(&rows, day).seen, Seen::None);
+    // And a gap that begins one second late leaves a second seen.
+    let rows = four_weeks(&[(midnight + 1, midnight + DAY)], &[], NOW);
+    assert_eq!(row_of(&rows, day).seen, Seen::Part);
+}
+
+#[test]
+fn a_gap_ending_at_a_rows_first_instant_or_beginning_at_its_last_leaves_it_whole() {
+    let day = date(2026, 9, 10);
+    let midnight = day.days_since_epoch() * DAY - HOUR;
+    // Ends as the 10th begins: all of the 9th, none of the 10th.
+    let rows = four_weeks(&[(midnight - DAY, midnight)], &[], NOW);
+    assert_eq!(row_of(&rows, day).seen, Seen::Whole);
+    assert_eq!(row_of(&rows, date(2026, 9, 9)).seen, Seen::None);
+    // Begins as the 10th ends: none of the 10th.
+    let rows = four_weeks(&[(midnight + DAY, midnight + 2 * DAY)], &[], NOW);
+    assert_eq!(row_of(&rows, day).seen, Seen::Whole);
+    assert_eq!(row_of(&rows, date(2026, 9, 11)).seen, Seen::None);
+}
+
+#[test]
+fn now_inside_a_row_counts_only_the_seconds_before_it() {
+    // The 10th, asked at its 06:00; a gap over its first 6 h is all it has.
+    let day = date(2026, 9, 10);
+    let midnight = day.days_since_epoch() * DAY - HOUR;
+    let now = midnight + 6 * HOUR;
+    let rows = four_weeks(&[(midnight, now)], &[], now);
+    assert_eq!(row_of(&rows, day).seen, Seen::None);
+    // A gap one second short of `now` leaves one second seen.
+    let rows = four_weeks(&[(midnight, now - 1)], &[], now);
+    assert_eq!(row_of(&rows, day).seen, Seen::Part);
+    // A gap that runs on past `now` adds no unseen second after it.
+    let rows = four_weeks(&[(midnight + 6 * HOUR - 1, now + HOUR)], &[], now);
+    assert_eq!(row_of(&rows, day).seen, Seen::Part);
+    assert_eq!(row_of(&rows, date(2026, 9, 11)).seen, Seen::Whole);
+}
+
+#[test]
+fn now_before_the_range_leaves_every_row_whole_even_under_a_gap() {
+    let from = 1_788_562_800;
+    let rows = four_weeks(&[(from, from + DAY)], &[], from - 1);
+    assert!(rows.iter().all(|row| row.seen == Seen::Whole && row.so_far));
+}
+
+#[test]
+fn a_gap_before_the_range_starts_counts_nothing() {
+    let from = 1_788_562_800;
+    let rows = four_weeks(&[(from - DAY, from)], &[], NOW);
+    assert!(rows.iter().all(|row| row.seen == Seen::Whole));
+}
+
+#[test]
+fn a_weekly_row_is_none_only_when_every_one_of_its_seconds_is_unseen() {
+    let range = LocalRange {
+        first_day: date(2026, 8, 7),
+        last_day: date(2026, 10, 2),
+        from: 1_786_057_200,
+        to: 1_790_982_000,
+        first_offset: 3600,
+        changes: &[],
+    };
+    let week = 7 * DAY;
+    let begins = 1_786_057_200 + week; // the second week
+    let all = movement(&[], &range, &[(begins, begins + week)], NOW);
+    assert_eq!(all[1].seen, Seen::None);
+    assert_eq!((all[0].seen, all[2].seen), (Seen::Whole, Seen::Whole));
+    let most = movement(&[], &range, &[(begins, begins + week - 1)], NOW);
+    assert_eq!(most[1].seen, Seen::Part);
+    let spill = movement(&[], &range, &[(begins - 1, begins + week + 1)], NOW);
+    assert_eq!(
+        (spill[0].seen, spill[1].seen, spill[2].seen),
+        (Seen::Part, Seen::None, Seen::Part)
+    );
+}
+
+#[test]
+fn a_clock_change_inside_a_weekly_row_sums_the_unseen_seconds_of_both_stretches() {
+    // 63 dates, 2026-08-31 to 2026-11-01 in London: nine weeks. The eighth begins
+    // at 2026-10-19 00:00 BST, holds the change at 2026-10-25 01:00 UTC, and is 7
+    // days and an hour long; the ninth begins at 2026-10-26 00:00 GMT.
+    let changes = [OffsetChange {
+        from: 1_792_890_000,
+        offset_seconds: 0,
+    }];
+    let range = LocalRange {
+        first_day: date(2026, 8, 31),
+        last_day: date(2026, 11, 1),
+        from: date(2026, 8, 31).days_since_epoch() * DAY - HOUR,
+        to: date(2026, 11, 2).days_since_epoch() * DAY,
+        first_offset: 3600,
+        changes: &changes,
+    };
+    let begins = date(2026, 10, 19).days_since_epoch() * DAY - HOUR;
+    let ends = date(2026, 10, 26).days_since_epoch() * DAY;
+    assert_eq!(ends - begins, 7 * DAY + HOUR);
+    let ask = |unseen: &[(i64, i64)]| movement(&[], &range, unseen, i64::MAX / 2);
+    let seen = |rows: &[MovementRow]| (rows[6].seen, rows[7].seen, rows[8].seen);
+
+    assert_eq!(ask(&[]).len(), 9);
+    // The last second of the week before is that week's, and only a second.
+    assert_eq!(
+        seen(&ask(&[(begins - 1, begins)])),
+        (Seen::Part, Seen::Whole, Seen::Whole)
+    );
+    // The two seconds around the change are both the eighth week's.
+    assert_eq!(
+        seen(&ask(&[(1_792_890_000 - 1, 1_792_890_000 + 1)])),
+        (Seen::Whole, Seen::Part, Seen::Whole)
+    );
+    // Every second of the eighth, across both stretches, is none; one short of
+    // either end is part.
+    assert_eq!(
+        seen(&ask(&[(begins, ends)])),
+        (Seen::Whole, Seen::None, Seen::Whole)
+    );
+    assert_eq!(seen(&ask(&[(begins, ends - 1)])).1, Seen::Part);
+    assert_eq!(seen(&ask(&[(begins + 1, ends)])).1, Seen::Part);
+    // A gap that spills one second either side makes the neighbours part.
+    assert_eq!(
+        seen(&ask(&[(begins - 1, ends + 1)])),
+        (Seen::Part, Seen::None, Seen::Part)
+    );
+}
