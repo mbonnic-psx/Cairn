@@ -415,6 +415,15 @@ may be very long), and the decisions of the three views before it. Decided by th
 - **M11 — a range of centuries (same message).** Weekly rows however long the range: nothing is hidden. Whether a
   range may start before Cairn first counted is left to slice `first-counted` (H5).
 
+- **M13 — a range Cairn saw none of (owner, at the demo, 2026-10-02: "recommended for all").** Where Cairn saw no part
+  of the range, the quiet sentence is not shown: the view says "Cairn wasn't counting on these days." instead.
+  "Nothing here for these days." would claim a quiet stretch Cairn never watched (FR-022). This holds for all four views
+  of *Over time* (by site, by hour, by day, day by day). Where Cairn saw any of the range and there were no reaches,
+  the quiet sentence stands (FR-024, M8).
+- **M14 — a range in a past year names its year (same message).** When a range does not lie wholly in the current
+  year, its title and every row's date carry the year. A range wholly in the current year stays as it is. This holds
+  for the title of all four views and for *Day by day*'s rows.
+
 Already stated, and held by this slice as written: no streak, day count or chain, and no "day N" (scenario 5) —
 rows are named by their dates, never numbered; everything is available with no journal entry ever written
 (scenario 3); a sealed answer shows the sentence and nothing else.
