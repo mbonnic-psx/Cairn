@@ -248,8 +248,7 @@ describe.each(LOOKS)('focus on the paper, in the %s look (T016)', (look) => {
       core = undefined;
     }
     expect([...found].sort()).toEqual(Object.keys(CONTROLS).sort());
-    // Renders every scene in one test: past vitest's 5 s default under a full parallel run.
-  }, 30_000);
+  });
 });
 
 const FADES = /transition|duration-|animate-|settle/;
