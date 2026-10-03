@@ -740,6 +740,350 @@ None needs a new seam, because each is already observed:
 The implementer runs row 4's planted violation and records that it was refused before relying on the guard, as
 `CLAUDE.md` requires of every guard ("each one has been verified to fail on a planted violation").
 
+## After the demo: M13 and M14
+
+The owner saw the slice at the demo (2026-10-02) and decided two things, recorded in `../../spec.md` under the
+`history-movement` gaps review: **M13** (a range Cairn saw none of) and **M14** (a range in a past year names its
+year). They answer V35 and V37 of `tasks.md`. Neither changes the core, the wire, the request or `ipc_surface`'s
+`CLASSIFIED`: both are the interface's. The contract amendments above stand as written.
+
+### M13: how the screen knows Cairn saw none of the range
+
+**Chosen: from `movement`, in `Reaches.tsx`.** Cairn saw none of the range when the answer holds at least one row
+and every row is `seen: "none"` with `count` 0:
+
+```ts
+const sawNone = (answer: Patterns) =>
+  answer.movement.length > 0 &&
+  answer.movement.every((row) => row.seen === 'none' && row.count === 0);
+```
+
+Why this works:
+
+- **The core sends `movement` on every answer, whatever the view.** One read serves all four views
+  (`Reaches.tsx` lines 350–363). `summarize_reaches` reads the clock once (`ipc/state.rs` line 846) and fills
+  `movement` on every placed answer (line 881). So *By site*, *By hour* and *By day* can read it too, with no new
+  field.
+- **A `none` row holds no reach.** `movement` sets `Seen::None` only when every seeable second is unseen **and**
+  `row.count == 0`. Otherwise it sets `Seen::Part` (`domain/patterns.rs` lines 432–443). So if every row is
+  `none`, the range holds no reach: `by_site` is empty, and every hour and weekday is 0. *Saw none* is a strict
+  subset of *quiet* (`isQuiet`, `Reaches.tsx` line 188). M13 replaces a sentence and never hides a count.
+- **`count === 0` is checked here too.** It matches `clauseOf` and `absent` (lines 110, 154). A hand-built `none`
+  row with a count (scenario 39) draws as *partly seen*, so it cannot also count as unseen (Y23).
+- **`length > 0` is required.** `[].every(...)` is `true`. A sealed answer has `movement: []`
+  (`Patterns::sealed`, `ipc/state.rs` lines 219–226). It never reaches this test anyway, because `list` is `null`
+  when sealed (line 391). But most screen fixtures written before this slice send a placed answer with
+  `movement: []`: `tonightCases.ts` line 80, `ReachesOverTime.test.tsx` line 34, `ReachesByHour.test.tsx` line 42,
+  `ReachesByDay.test.tsx` line 57, `ReachesByHourPage.test.tsx` line 34, `ReachesByDayPage.test.tsx` line 43,
+  `ReachesEdges.test.tsx` line 32, `ReachesToday.test.tsx` line 26. So does `ReachesRowGuard.test.tsx` line 166.
+  Without the guard, every one of them would flip to M13's sentence. With it, an empty `movement` never reads as
+  *saw none* (rule 15).
+- **It is the core's judgement, made once.** The `seen` marks already come from the same offsets and the same
+  `now` as the counts and *so far* (*What Cairn saw of each row*, *Today*). The screen reads them and judges
+  nothing again.
+- **It lives in `Reaches.tsx`.** It reads `movement`, which `check-no-ambient-counts` allows only there and in
+  `src/ipc/` (Pin, row 4 above). It cannot go in `localDays.ts`.
+
+**Rejected: deriving it from `gaps` in the interface.** The wire's `gaps` are clipped to `[range_start, range_end)`
+(`reflection/over_time.rs` line 131, `store/gaps.rs` lines 64–74), not to the present. To say *saw none*, the
+screen would have to show that the gaps cover `[range_start, min(range_end, now))`. That needs its own `now`: a
+second clock beside the core's, which *Today* rejected for *so far* (*Today*, *Rejected*, first row). It would also
+restate the core's merge and coverage arithmetic in JavaScript, which *What Cairn saw of each row*, *Rejected*,
+first row, already refused. And when `first-counted` (5e) lands, it adds instants to the unseen set the rows are
+judged against (*A limit this slice keeps*). `seen` would then carry the time before Cairn first counted. `gaps`
+would not, unless 5e also sends that time as gaps.
+
+**H5, checked against both candidates.** Time before Cairn first counted, while protection was off, or while the
+person chose silence is not a gap (H5). So both candidates read it as seen. A range wholly before Cairn was
+installed has every row `"whole"` (scenario 1's second half: no gap, no reach, 28 rows at 0, all `"whole"`), and
+it still says *Nothing here for these days.* Neither candidate can do better until 5e records when Cairn first
+counted, and the owner chose that order (H5, "1. yes"). The candidates differ in what 5e must then do:
+
+- With `seen`, 5e changes nothing on the screen. Its rows become `none`, and M13's sentence follows.
+- With `gaps`, the screen would need a second change.
+
+The standing sentence (*Cairn counts only while it is running…*) stays under every view, as H5 requires.
+
+**What M13 covers in practice.** M13 changes the screen only where the gaps Cairn recorded cover the whole range up
+to the present: a stretch the computer was off, or Cairn was not running, and which Cairn noticed when it started
+again (`counting/presence.rs` lines 100–116, `record_gap_since_last_seen`). That is V35's case and the one shown at the demo. A range that
+ends today is almost never wholly unseen: Cairn is running while the screen is open, so it saw the seconds since it
+started, and today's row is `"part"` (scenario 42).
+
+### M13: what each view shows under the sentence
+
+M13 replaces the quiet sentence only: *"the quiet sentence is not shown: the view says 'Cairn wasn't counting on
+these days.' instead."* The new sentence takes its place on the right page, as the first child, in the same
+element (`nb-reaches-empty`, `Reaches.tsx` line 419). The left page does not change: the title, the date boxes,
+*Seen by*, the coverage note (H4), the estimates sentence and the standing sentence.
+
+What stands under the sentence is a product decision that M13 does not settle. B5 says the 24 hours at zero stand
+under the quiet sentence, W3 says all seven days are shown, and M8 says rows Cairn did not see still read *not
+seen*. This plan is written to the recommendation in *Open questions for the owner*, Q4, below:
+
+| View | Under the sentence | Why |
+|---|---|---|
+| *By site* | nothing (unchanged) | `by_site` is empty, and the list guard already draws no list for a quiet site view (line 420) |
+| *By hour* | no rows | 24 rows at `0` would present 24 unseen hours as zero, under a sentence saying Cairn was not counting. That is what FR-022 forbids and what M13 cites. B5's zeros stand wherever Cairn saw any of the range (rule 14) |
+| *By day* | no rows | The same reason, for seven weekdays at `0` with *across 4 Mondays* |
+| *Day by day* | every row, named, *not seen* (and *so far* on today's), no count, no bar (unchanged) | M5 and M8 already settle it: each row is true on its own and names its date. This is scenario 37's all-unseen case and `ReachesMovement.test.tsx` line 442, with the sentence above changed |
+
+The implementer changes lines 419–420 so that, when `sawNone(list)` is true:
+
+- M13's sentence replaces the quiet sentence;
+- the list is drawn only for `'movement'`.
+
+Everything else in the guard stays.
+
+### M14: where the year rule lives
+
+**Today.**
+
+- `rangeInWords(firstDay, lastDay)` (`src/localDays.ts` lines 88–92) names the years only when the range crosses
+  one (line 90).
+- `rowsOf`'s `withYear` (`Reaches.tsx` lines 141–144) applies the same rule to *Day by day*'s rows, from the first
+  row's day and the last row's last date.
+
+**Chosen: one predicate in `localDays.ts`, given today, used by both.**
+
+- `namesYear(firstDay, lastDay, today): boolean` is true when `firstDay` or `lastDay` is in a different year from
+  `today`, comparing the first four characters, as line 90 already does. A range that crosses a year always makes
+  it true, so the old rule is part of the new one and no case loses a year it had.
+- `rangeInWords(firstDay, lastDay, today)` takes `today` as a **required** third argument. It names the year on
+  both dates when `namesYear` is true. Making it required means the type checker finds every caller, and
+  `localDays.ts` still reads no clock: every function in it is given its date (`localToday(now)`, line 46, takes
+  the instant).
+- `rowsOf` gains `todayDay`, and its `withYear` becomes `namesYear(rows[0].day, <the last row's last date>,
+  todayDay)`. The rows keep deriving their dates from the answer, so they stay consistent with what was drawn. In
+  steady state the title and the rows use one predicate and one `today`, so they cannot disagree.
+
+**"The current year" is the interface's clock, in the computer's zone.**
+
+- `Reaches` takes `now: () => Date`, which defaults to `realNow = () => new Date()` (`Reaches.tsx` lines 57, 203).
+  It passes `now` to `OverTimeView` (line 230), which reads `todayDay = localToday(now())` on every render
+  (line 343).
+- `todayDay` already sets the *To* box's `max` (lines 369, 376), so the year rule and the range's last day come
+  from the one reading.
+- It is injectable. Every screen test passes `now={() => NOW}` (for example `ReachesOverTime.test.tsx` line 17,
+  `ReachesMovement.test.tsx` line 20, `tonightCases.ts` line 16).
+- The year is the **local** one: at 00:30 on 1 January in London, it is the new year.
+- The core's `now` is not used. The title shows before any answer exists (*Looking…*) and through sealed and
+  unreadable states, and the rows must agree with it.
+
+**Every caller of `rangeInWords`:**
+
+- `Reaches.tsx` line 397, the title of all four views, which passes `todayDay`.
+- `ReachesPage.test.tsx` lines 295, 388, 425, 560 and 579, which compute expected titles. They gain
+  `'2026-09-30'`, the date of `evening` (`tonightCases.ts` line 16), and their values do not change.
+
+`dayInWords` is called only by `rangeInWords` and `localDays.test.ts` (lines 130–155), so it does not change. The
+check-in's date heading (*Wednesday 30 September*) is not `rangeInWords`, and M14 does not cover it.
+
+### The words
+
+| Where | Text | Source |
+|---|---|---|
+| A range Cairn saw none of, in each of the four views | *Cairn wasn't counting on these days.* (the owner's words, a straight apostrophe as `spec.md` writes it) | M13 |
+| A range Cairn saw part of, with no reaches | *Nothing here for these days.* (unchanged) | M8, FR-024 |
+| The title, a range not wholly in this year | *From 3 September 2025 to 30 September 2025* | M14 |
+| The title, a range in this year | *From 3 September to 30 September* (unchanged) | M14 |
+| A *Day by day* row, a range not wholly in this year | `shortDateInWords(day, true)`, `weekOfInWords(day, true)`: *Sep 3, 2025*, *week of 6 Oct 2025* in the computer's own form | M14, M10 |
+
+How the new text was checked against the guards:
+
+- **`check-banned-words.mjs`** (lines 21–30): none of *failed, fail, denied, violation, relapsed, relapse,
+  forbidden, you lost* appears in any of these strings.
+- **`check-no-streaks.mjs`** (lines 27–34): *these days* is not `day` followed by a number, and a year follows a
+  month name, never `day`. There is no *streak*, *chain*, *in a row* or *don't break*.
+- **A warning for the implementer, as in *The words* above.** Both guards scan every source line, comments
+  included. So a comment such as `// day 2025…` or `// if the year check fails` fails a guard. Write *the year is
+  named when…*.
+- **The constant.** Put the sentence in a constant beside `NOTHING_THESE_DAYS` (line 65), written in double quotes
+  so the apostrophe needs no escape. It is not inline JSX text.
+
+### Acceptance, as scenarios through the driving port
+
+Scenario 42 enters through `AppState::summarize_reaches`, with the fixtures of *Acceptance* above. Scenarios 43–51
+and 53–56 are the person on the reaches screen, with a fake reader written in the test tree (no `vi.mock`) and
+`now` passed as a prop, in `TZ=Europe/London`. Scenario 52 is `src/localDays.ts`'s own functions.
+
+42. **One second seen is not "saw none" (rule 14).**
+    - **Given** scenario 1's range, no reaches, and one gap from before `range_start` to `NOW − 60` (Cairn started
+      a minute ago), **When** `summarize_reaches` is called at `NOW`, **Then** every row is `"none"` except
+      2026-10-02, which is `"part"` and `so_far`.
+    - (In `us2_movement.rs`. It pins the core's side of rule 14. The core does not change.)
+43. **Saw none, *By site* (rules 13, 16).**
+    - **Given** a placed answer with 28 `movement` rows, all `"none"` with count 0 and the last `so_far`,
+      `by_site: []`, 24 hours at 0, seven weekdays at 0, and a coverage note, **When** *Over time* opens on *By
+      site*, **Then** the right page's text is exactly *Cairn wasn't counting on these days.* Its first child is
+      `nb-reaches-empty`, with no list item and no bar.
+    - *Nothing here for these days.* appears nowhere.
+    - The left page holds the title, the coverage note and the standing sentence, as before.
+44. **Saw none, *By hour* (rules 13, 16).** **Given** scenario 43's answer, **When** the person chooses *By hour*,
+    **Then** the right page holds the sentence alone: no hour rows, no `0`.
+45. **Saw none, *By day* (rules 13, 16).** **Given** scenario 43's answer, **When** the person chooses *By day*,
+    **Then** the right page holds the sentence alone: no weekday rows, no *across* clause.
+46. **Saw none, *Day by day* (rules 13, 16).** **Given** scenario 43's answer, **When** the person chooses *Day by
+    day*, **Then** the sentence is first, then 28 rows, each its date and *not seen*, the last *not seen, so far*,
+    with no count and no bar. (This replaces the sentence in scenario 37's all-unseen case.)
+47. **Saw part (rule 14).** **Given** scenario 43's answer with one row `"part"`, and again with one row
+    `"whole"`, still no reaches, **Then** each view shows *Nothing here for these days.* with its rows exactly as
+    before:
+    - *By site*: no list;
+    - *By hour*: 24 rows at `0` (B5);
+    - *By day*: seven rows with *across* (W3);
+    - *Day by day*: every row, unseen rows *not seen* (M8).
+48. **Never from an empty or sealed answer (rule 15).**
+    - **Given** a placed answer with `movement: []` and no reaches, **Then** every view shows *Nothing here for
+      these days.* as today, and never M13's sentence.
+    - **Given** `sealed`, or a read that throws, **then** each view shows its sentence alone and neither of the two
+      sentences (extends scenario 38).
+    - While looking, neither appears.
+49. **A count is never hidden (rule 15, Y23).** **Given** scenario 43's rows with one built by hand as `"none"`
+    with count 2 (and `by_site` holding the site), **Then** M13's sentence does not appear. The row draws as
+    *partly seen* with its bar and `2` (scenario 39).
+50. **One read, one judgement (rule 13).** **Given** scenario 43's answer, **When** the person goes through all
+    four *Seen by* buttons, **Then** there is one `summarizeReaches` call, and the sentence is the same in each
+    view. **When** they change *From* to a date whose answer has a `"part"` row, **then** the quiet sentence
+    returns.
+51. **The voice (rule 19).** **Given** scenarios 43–47 and 53–56, **Then** no text holds a word from *What it
+    never says* or a banned word, and M13's sentence holds no number. `npm run check` is clean.
+52. **The year in words (rule 17).** Given `today` `'2026-10-02'`:
+    - `rangeInWords('2026-09-05', '2026-10-02', today)` is *From 5 September to 2 October*.
+    - `('2025-09-03', '2025-09-30', today)` is *From 3 September 2025 to 30 September 2025*.
+    - `('2025-12-20', '2026-01-10', today)` names both years.
+    - **Given** `today` `'2027-01-01'`, `('2026-12-04', '2026-12-31')` names 2026 on both dates.
+    - `namesYear` agrees with each case.
+    - The same calls under `TZ=Pacific/Kiritimati` give the same text: no function reads a clock or a zone.
+53. **The title, a past year (rule 17).** **Given** `NOW` 2026-09-30 20:00, **When** the person sets *From*
+    2025-09-03 and then *To* 2025-09-30, **Then** the heading is *From 3 September 2025 to 30 September 2025*:
+    - while *Looking…*;
+    - once the list arrives;
+    - in each of the four views;
+    - when the answer is sealed or the read throws.
+54. **The title, this year (rule 17).** **Given** the default range at `NOW`, **Then** the heading holds no year
+    (`ReachesOverTime.test.tsx` line 228 stands). **Given** a range that crosses a year, **then** both years, as
+    line 215 asserts.
+55. **Day by day's rows, a past year (rule 18).** **Given** `NOW` in 2026 and an answer whose rows lie wholly in
+    2025, **Then** every row is named with its year:
+    - by `shortDateInWords(day, true)`;
+    - or, for weeks, by `weekOfInWords(day, true)`.
+
+    **Given** rows wholly in 2026, **then** no row has a year (`ReachesMovement.test.tsx`'s current-year cases
+    stand).
+56. **New Year, by the interface's clock (rules 17, 18).** **Given** the range 2026-12-04 to 2026-12-31 on *Day by
+    day*:
+    - **when** `now` is 2027-01-01 00:30 London time, **then** the title and every row carry 2026;
+    - **when** `now` is 2026-12-31 23:30, **then** neither does.
+
+### Rules, continued
+
+| Rule | Decision | What must be true | Scenarios |
+|---|---|---|---|
+| 13 | M13, FR-022 | Where the answer holds at least one row and every row is not seen with no reach, each of the four views says *Cairn wasn't counting on these days.* where the quiet sentence stands, and never *Nothing here for these days.* Judged once, from `movement`, in `Reaches.tsx` | 43, 44, 45, 46, 50 |
+| 14 | M13, M8, FR-024, B5, W3 | Where Cairn saw any instant of the range, a range with no reaches keeps the quiet sentence and its rows exactly as before | 42, 47 |
+| 15 | M13, III, Y23 | *Saw none* is never read from an answer with no rows, a sealed or unreadable one, or one still looking. A row holding a count never counts as unseen | 48, 49 |
+| 16 | M13, Q4 (recommended) | Under M13's sentence, *By site*, *By hour* and *By day* draw no rows. *Day by day* draws every row as *not seen*, with no count and no bar. The left page is unchanged | 43, 44, 45, 46 |
+| 17 | M14 | The title names the year on both dates when either date is outside the current local year by the interface's clock (`now`), in every view and every state. A range wholly in this year is unchanged. `localDays.ts` reads no clock | 52, 53, 54, 56 |
+| 18 | M14, M10 | *Day by day*'s rows carry the year by the same predicate and the same `today` as the title | 55, 56 |
+| 19 | VI, M4 | Neither change adds a count, rank, verdict or praise. Both pass `check-banned-words` and `check-no-streaks` | 51 |
+
+### Open questions for the owner
+
+**Q4: what stands under "Cairn wasn't counting on these days."**
+
+M13 replaces the quiet sentence, but B5 put 24 hours at zero under it, and W3 shows all seven days.
+
+*Recommendation*, which this section is written to: *By hour* and *By day* show the sentence alone, and *Day by
+day* keeps its rows, each *not seen*. One-line reason: a zero under "wasn't counting" says Cairn saw nothing there,
+which is the claim M13 removes, while a dated *not seen* row is true on its own.
+
+The alternatives:
+
+- (a) every hour and weekday shown with *not seen*, no count, no bar, as *Day by day* does;
+- (b) the zeros kept, as B5 and W3 say.
+
+(b) contradicts the sentence above it. Choosing (a) changes rule 16 and scenarios 44–45 only.
+
+**Q5: the standing sentence under a range Cairn saw none of.**
+
+It reads *Cairn counts only while it is running. This is what it saw over these days.* under every view (H5), and
+M13 does not mention it.
+
+*Recommendation*: keep it unchanged. One-line reason: it is true, H5 requires it everywhere, and M13 names only the
+quiet sentence. The alternative is to leave it out when Cairn saw none of the range, which changes rule 16 and
+scenario 43.
+
+### Pin
+
+Two behaviours of code accepted before change. Both are in `Reaches.tsx`'s *Over time*, on `main` since
+`history-by-site`, `history-by-hour` and `history-by-weekday`. *Day by day*'s rows are this slice's own code, not
+on `main` (`origin/main`'s `Reaches.tsx` holds no `movement`), so their tests change in the slice with no pin:
+`ReachesMovement.test.tsx` lines 442 and 248–262, and lines 404–415.
+
+**What observes them today.**
+
+- **The quiet sentence in *By site*, *By hour* and *By day*:**
+  - `ReachesOverTime.test.tsx` line 327;
+  - `ReachesByHour.test.tsx` line 339;
+  - `ReachesByDay.test.tsx` line 419;
+  - `ReachesPage.test.tsx` lines 625–637;
+  - `ReachesByHourPage.test.tsx` line 186;
+  - `ReachesByDayPage.test.tsx` line 209;
+  - `ReachesRowGuard.test.tsx`;
+  - `tonightPageControls.test.tsx` lines 100–101;
+  - the captured words in `TonightWordsKept.test.tsx`.
+
+  Every one of them sends a placed answer with `movement: []`, so all of them pass unchanged under rule 15. They
+  hold the part that does not change. **No test observes these three views given a range Cairn saw none of.** On
+  `main` no test can, because `main`'s answer has no `movement`. So the changed behaviour needs a
+  characterisation test first (C1 below).
+- **The title of a range wholly in a past year:** no test observes it.
+  - `rangeInWords` has no unit test: `localDays.test.ts` tests `dayInWords` only (lines 130–155).
+  - `ReachesOverTime.test.tsx` observes the two cases that do not change: crossing a year (line 215) and inside
+    this year (line 228).
+  - `ReachesPage.test.tsx` builds its expected titles with `rangeInWords` itself.
+  - The captured titles in `beforeTheReveal.ts` (lines 331–343, *From 3 September to 30 September* at
+    2026-09-30) are in the current year, so they do not change.
+
+  So characterisation examples come first (C2, C3).
+
+**Characterisation tests, written and seen green against this branch's head before either RED:**
+
+- **C1, `src/screens/__tests__/ReachesUnseenRange.test.tsx` (new;** `TZ=Europe/London`, `NOW` 2026-10-02 20:00, a
+  fake reader in the file).
+  - Given scenario 43's answer (28 rows all `"none"` with count 0, `by_site: []`, 24 hours at 0, seven weekdays at
+    0 with `days: 4`, a coverage note), it asserts what the screen shows today:
+    - *By site*: the right page's text is exactly *Nothing here for these days.*, with no list item;
+    - *By hour*: that sentence, then 24 lines each `0`;
+    - *By day*: that sentence, then seven lines, each a weekday, `acrossInWords(weekday, 4)` and `0`.
+  - The M13 RED then rewrites these three expectations to scenarios 43–45. The test's name and answer stay.
+- **C2, `src/__tests__/localDays.test.ts`.** A new `describe('rangeInWords')` asserts today's two-argument form:
+  - `('2026-09-03', '2026-09-30')` is *From 3 September to 30 September*;
+  - `('2025-09-03', '2025-09-30')` is *From 3 September to 30 September*, with no year (the behaviour M14
+    changes);
+  - `('2025-12-20', '2026-09-30')` is *From 20 December 2025 to 30 September 2026*.
+
+  The M14 RED adds `today` and changes the second case to scenario 52.
+- **C3, `src/screens/__tests__/ReachesOverTime.test.tsx`.** A new example: at its `NOW` (2026-09-30 20:00), after
+  *From* 2025-09-03 and then *To* 2025-09-30, the heading is *From 3 September to 30 September*. The M14 RED
+  changes it to scenario 53.
+
+The host lands these rows on `main` before the change does:
+
+```markdown
+| 2026-10-02 | Over time's quiet sentence in *By site*, *By hour* and *By day*, where every row of the answer's `movement` is not seen and holds no reach (Cairn saw none of the range): the right page says *Cairn wasn't counting on these days.* where it said *Nothing here for these days.*, and *By hour* and *By day* draw no rows under it where they drew 24 hours and seven days at 0 (*By site* drew none already). Where Cairn saw any of the range, or the answer holds no rows, or it is sealed, the quiet sentence, its rows and every captured words-kept state are unchanged. Nothing observed these views for a range Cairn saw none of before this row; pinned first by a characterisation test, green on the old behaviour. A deliberate change: 003 gaps review M13, slice `history-movement` | `Reaches.tsx` *Over time* on the notebook page (props `read`, `now`) | `ReachesUnseenRange.test.tsx` (new: characterisation, then rewritten by the M13 RED); unchanged: `ReachesOverTime.test.tsx`, `ReachesByHour.test.tsx`, `ReachesByDay.test.tsx`, `ReachesPage.test.tsx`, `ReachesByHourPage.test.tsx`, `ReachesByDayPage.test.tsx`, `ReachesRowGuard.test.tsx`, `TonightWordsKept.test.tsx`, `tonightPageControls.test.tsx` | `npx vitest run src/screens/__tests__/ReachesUnseenRange.test.tsx src/screens/__tests__/ReachesOverTime.test.tsx src/screens/__tests__/ReachesByHour.test.tsx src/screens/__tests__/ReachesByDay.test.tsx src/screens/__tests__/ReachesPage.test.tsx src/screens/__tests__/ReachesByHourPage.test.tsx src/screens/__tests__/ReachesByDayPage.test.tsx src/screens/__tests__/ReachesRowGuard.test.tsx src/screens/__tests__/TonightWordsKept.test.tsx src/look/__tests__/tonightPageControls.test.tsx` |
+| 2026-10-02 | Over time's title for a range not wholly in the current local year, by the interface's clock (`now`): both dates carry the year, *From 3 September 2025 to 30 September 2025*, where only a range crossing a year named one. A range wholly in this year, and one crossing a year, read as before; so does every captured words-kept title (2026). `rangeInWords` takes the interface's today as a required third argument, and `localDays.ts` still reads no clock. Nothing observed a past-year title before this row; pinned first by characterisation examples. A deliberate change: 003 gaps review M14, slice `history-movement` | `rangeInWords` (`src/localDays.ts`), the title in `Reaches.tsx` *Over time* | `localDays.test.ts` (`rangeInWords`, new: characterisation, then changed by the M14 RED); `ReachesOverTime.test.tsx` (the past-year example, new likewise; *names the years where the range crosses one* and *holds no year … inside one year* unchanged); `ReachesPage.test.tsx` (its titles, given today, unchanged); `TonightWordsKept.test.tsx` (unchanged) | `npx vitest run src/__tests__/localDays.test.ts src/screens/__tests__/ReachesOverTime.test.tsx src/screens/__tests__/ReachesPage.test.tsx src/screens/__tests__/TonightWordsKept.test.tsx` |
+```
+
+**What does not change**, re-run before and after:
+
+- every row above;
+- `us2_movement`, `patterns_movement` and the wire (no Rust file changes, except scenario 42's example in
+  `us2_movement.rs`);
+- `ipc_surface`;
+- `npm run check`.
+
 ## Complexity Tracking
 
 | Deviation | Why | What was done instead |
