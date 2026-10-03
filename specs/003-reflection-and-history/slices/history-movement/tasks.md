@@ -278,13 +278,13 @@ track waits for the other. Within a track no task is `[P]`.
   there is no model here and the host decides (see the report). *Files:* `delivery/docs/event-model/mockups/` only.
   *Host, 2026-10-02:* closed with no mockups. This repository has no event model (`delivery/docs/event-model/` is absent,
   as for the three history slices before it), so there is nowhere a mockup is checked against. The demo is the record.
-- [ ] V21 [US2] `contracts/ui-ipc.md` and `contracts/patterns.md`, as amended by V2 and V3, match `Patterns`,
+- [x] V21 [US2] `contracts/ui-ipc.md` and `contracts/patterns.md`, as amended by V2 and V3, match `Patterns`,
   `MovementRow`, `Span` and `Seen` in Rust (`ipc/state.rs`), `LocalRange`, `movement`, `DAILY_UP_TO` in
   `domain/patterns.rs`, and `MovementRow` and `Patterns.movement` in `src/ipc/reaches.ts`, field for field. Every
   sentence that claims an invariant of `movement` is one the core enforces or one the contract says holds only for the
   offsets the screen sends (the weekday slice's Y23). V6's wire-shape test holds the nine keys. *Files:* the two
   contracts, if they differ.
-- [ ] V22 [US2] `make -f delivery/Makefile verify` green; `npm run check` (every guard, including V4's), `npm test`,
+- [x] V22 [US2] `make -f delivery/Makefile verify` green; `npm run check` (every guard, including V4's), `npm test`,
   `npm run lint` and `npm run build` green; `cargo fmt --all` and `cargo clippy --all-targets -- -D warnings` clean;
   V1's runs green again. Run `make smoke` if `main.rs` or the composition changed (the plan says neither does). *Files:*
   none.
