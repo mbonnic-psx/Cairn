@@ -237,7 +237,8 @@ export function acrossInWords(weekday: number, days: number): string {
  * 99 are not read as 1900 to 1999.
  */
 export function shortDateInWords(day: string, withYear: boolean): string {
-  // Not `parse`: `isLocalDate` round-trips through `new Date(y, ...)`, which reads year 100 as 2000.
+  // Not `parse`: `isLocalDate` round-trips through `format`, which does not pad the year, so 0100-01-04
+  // comes back as 100-01-04 and is refused (and `new Date(y, ...)` maps years 0–99 to 1900–1999).
   if (!/^\d{4}-\d{2}-\d{2}$/.test(day))
     throw new RangeError(`not a calendar date: ${JSON.stringify(day)}`);
   const [y, m, d] = split(day);

@@ -467,7 +467,7 @@ with so far, a year on a row, the quiet range with rows not seen).
   *Files:* `src-tauri/tests/patterns_movement.rs`.
 - [ ] V37 [US2] **LOW** [owner question at the demo] A range wholly inside a past year names no year on its title or
   rows (`localDays.ts` `rangeInWords`, followed by `Reaches.tsx` 136–139); before this slice too, now up to 52 rows.
-- [ ] V38 [US2] **LOW** The comment in `shortDateInWords` says `new Date(100, …)` reads year 100 as 2000; JavaScript
+- [x] V38 [US2] **LOW** The comment in `shortDateInWords` says `new Date(100, …)` reads year 100 as 2000; JavaScript
   remaps only years 0–99. Correct it. *Files:* `src/localDays.ts`.
 
 ## Convergence
