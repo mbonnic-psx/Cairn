@@ -242,6 +242,33 @@
         "cycle": "rule",
         "split": 0
       }
+    },
+    {
+      "stage": "converge",
+      "started": "2026-10-03T02:30:59Z",
+      "planned": "converge: strong → host model — `strong` maps to the host model",
+      "tasks": {
+        "start": {
+          "open": 4,
+          "done": 20
+        }
+      },
+      "cursor": {
+        "source": "claude",
+        "session": "beb113a0-0614-4833-8a55-53ca692431a6",
+        "files": {
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/beb113a0-0614-4833-8a55-53ca692431a6.jsonl": 1675175
+        },
+        "subagents": {
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/beb113a0-0614-4833-8a55-53ca692431a6/subagents/agent-a20dc09c718109c91.jsonl": 277046,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/beb113a0-0614-4833-8a55-53ca692431a6/subagents/agent-a2ccc0a5d683de558.jsonl": 617014,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/beb113a0-0614-4833-8a55-53ca692431a6/subagents/agent-a3bd4b59a4d6a02d5.jsonl": 296856,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/beb113a0-0614-4833-8a55-53ca692431a6/subagents/agent-a448461a6c8a63f42.jsonl": 853379,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/beb113a0-0614-4833-8a55-53ca692431a6/subagents/agent-a49bffb2387fc9670.jsonl": 1209738,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/beb113a0-0614-4833-8a55-53ca692431a6/subagents/agent-a9d8920e4a85c016a.jsonl": 1427333,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/beb113a0-0614-4833-8a55-53ca692431a6/subagents/agent-ada19455fb6671110.jsonl": 306141
+        }
+      }
     }
   ]
 }

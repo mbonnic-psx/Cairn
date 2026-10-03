@@ -326,8 +326,103 @@ Reviewed: _pending, written by V19 step 4_
 
 ## Phase 4: Convergence
 
-No pass yet.
+Appended by convergence pass 1 of 2 (2026-10-02, at `f7aad64`). Only CRITICAL and HIGH re-open the loop.
+
+- [ ] V25 [US2] **HIGH** [rule 3, scenario 41; V19 step 3] A row whose name and clause do not fit the right page's line
+  wraps to two to five ruled lines. *Evidence:* headless Chromium (playwright's `chromium-1234`), the app's own
+  `notebook.css` and `tonight-page.css` and vendored fonts, notebook 830 units at `--nb-u: 1px`, right page 337 units,
+  en-US: *week of Dec 29* + *across 3 days, partly seen, so far* is 128 units tall with the name squeezed to 39 units;
+  with the year, 160; *week of Dec 29, 2025* + *across 3 days*, + *partly seen, so far* or + *across 3 days, so far*
+  are each 64; *week of Dec 29* + *across 3 days, partly seen* is 64. Daily rows, with or without the year and any
+  clause, measured 32. V19's GREEN rule ("a layout rule only if the longest clause does not sit on one ruled line")
+  was decided in jsdom, which lays nothing out, so `ReachesMovementPage.test.tsx` passes whatever the width.
+  *Sweep (the class):* every name form (day, day with year, week, week with year) times every clause `clauseOf` can
+  produce, in en-US and en-GB (*Sept*), at the floor of `--nb-u` and in the single-column layout of
+  `notebook.css` line 519, measured in a layout engine; every one sits on one 32-unit line, or the design pass
+  chooses a form that keeps the ruling (for example the clause on its own ruled line under the name, a row of
+  exactly 64) and writes it into `tonight-page.css` with no colour, font or focus rule of its own. The guard that
+  keeps it is the host's choice (no browser test harness is installed here, and adding one is a dependency
+  decision): at the least, the measured table goes into the demo evidence under V23.
+  *Files:* `src/styles/tonight-page.css`, `src/screens/Reaches.tsx` (row markup only, if the chosen form needs it),
+  `src/screens/__tests__/ReachesMovementPage.test.tsx`.
+- [ ] V26 [US2] **MEDIUM** [V19 steps 1 and 4] V19 is ticked while *Design review* still reads `Designed: _pending_`
+  and `Reviewed: _pending_`: the `frontend-design` second pass and the `web-interface-guidelines` review were not
+  recorded, and V25 is what the first would have caught. *Sweep:* every ticked task in this file whose text requires
+  a written record (V19's two lines, V1's log, V4's recorded refusal, V20's note) has it, or is un-ticked. Write
+  both lines after V25, before the demo. *Files:* this file's *Design review* (host).
+- [ ] V27 [US2] **MEDIUM** [rules 4 and 7; the RED independence of *Constitution Check*, Delivery Method] Two
+  mutants of `domain/patterns.rs` survive all 71 tests of `patterns_movement` and `us2_movement`:
+  `.clamp(0, dates - 1)` to `.clamp(0, dates)` at line 419 (a reach whose local date falls *after* `last_day` is
+  never exercised; on a daily range the mutant indexes past the rows and would panic), and `ends > now` to
+  `ends >= now` at line 426 (no example puts `now` exactly on a row's local midnight, where the row before must not
+  be `so_far`). Killed, for comparison: `unseen_part > seeable` (6 fail), dropping `row.count == 0` from `None`
+  (3 fail), coverage ignoring `now` (3 fail). The implementer wrote each Track A RED and its GREEN, against the
+  task's rule. *Sweep:* every comparison and bound in `movement`, `coverage` and `for_each_piece` (lines 410, 419,
+  426, 437, 467, 479, 493, 512, 516) gets an example at its exact boundary, written by an agent that did not write
+  the GREEN: a reach after `last_day` under an offsets list `check_offsets` accepts (daily and weekly), counted in
+  the last row; `now` at a row's local midnight; then each mutant above, and one per swept bound, is shown killed.
+  Record in the plan's *Constitution Check* that Track A's REDs were not independent and that this pass stands in.
+  *Files:* `src-tauri/tests/patterns_movement.rs`, `src-tauri/tests/us2_movement.rs`.
+- [ ] V28 [US2] **MEDIUM** [pin row 4; SC-006] V4 is ticked, but its GREEN (`\bmovement\b` in `REACH_DATA`) left this
+  branch in `02eab7a` for host PR #60, still open. Until #60 merges, `check-no-ambient-counts` does not refuse the
+  field outside the reaches screen. *Sweep:* every guard or pin this slice's tasks claim (V1's pins, V4's guard,
+  pin rows 1–4) is on `main` or in this diff before this slice merges. Merge #60 first, or state the order in this
+  slice's PR. *Files:* none of this slice's.
+- [ ] V29 [US2] **MEDIUM** [M11, R5; the screen at scale] The core's widest answer is measured (100 534 rows inside
+  1 000 ms) but the screen drawing them is not: `Reaches.tsx` renders one `<li>` per row with no windowing, and a
+  person can type *0100* in *From*. *Sweep:* every view whose row count grows with the range (today only *Day by
+  day*) is timed in the running app at the widest range the screen sends. If it stalls, the remedy (a coarser span,
+  windowing, or the range starting at `first-counted`, H5) is the owner's decision, handed back, not chosen here.
+  *Files:* the demo log and its evidence (V23).
+- [ ] V30 [US2] **LOW** [lead d] `us2_by_site.rs` line 328, the quiet-range test, copies `movement` from the answer into
+  its expectation, so that test holds nothing about the rows (they are proved at
+  `us2_movement.rs::no_reaches_still_28_rows_at_zero_never_an_empty_list`, line 325). *Sweep:* no expectation in
+  `src-tauri/tests/` is built from the value under test (`grep -n "patterns\.[a-z_]*\.clone()"` and the like: this
+  is the only hit today). Replace it with the 28 rows at 0, `whole`, the last `so_far`, or compare every other
+  field and name the test that holds `movement`. *Files:* `src-tauri/tests/us2_by_site.rs`.
+- [ ] V31 [US2] **LOW** [lead a; V2, V21] `contracts/ui-ipc.md` lines 143, 215 and 252 still say `movement` is absent,
+  and this slice's amendment supersedes only `[{ day, count }]`. V2 rightly keeps the old text as the record.
+  *Sweep:* every statement in `ui-ipc.md` and `patterns.md` that a field is absent or not yet computed has a
+  pointer in the amendment that ends it (today only `movement`'s three). Add one sentence to this slice's amendment
+  naming them as superseded. *Files:* `specs/003-reflection-and-history/contracts/ui-ipc.md`.
 
 ## Convergence
 
-Pending.
+**Pass 1 of 2 (2026-10-02, at `f7aad64`): not converged.** One HIGH (V25) re-opens the loop; V26–V29 MEDIUM and
+V30–V31 LOW do not. Run on this branch: the seven Rust suites the slice touches (`patterns_movement` 38,
+`us2_movement` 33, `us2_by_site`, `us2_by_hour`, `us2_by_weekday`, `range_allocation`, `patterns_at_scale`) green;
+`dates`, `ReachesMovement`, `ReachesMovementPage`, `ReachesRowGuard`, `TonightWordsKept` (176 tests) green; `npm run
+check` green. The full `make verify` was not run (V22's place).
+
+*Levels.* **Domain** (`domain/patterns.rs` 318–548): rows contiguous, daily to 56 dates and weekly beyond, counts
+conserved, coverage walked by pieces with no per-date work, `None` only with no reach; two boundaries unproved
+(V27). **Use case** (`reflection/over_time.rs` 100–143): rows built from reaches alone (line 135), the same clipped
+and merged gaps as the note (131–132), `now` passed in. **Delivery adapter** (`ipc/state.rs` 847, 879, 224;
+`commands.rs` doc only; `src/ipc/reaches.ts` 68–98): one clock read for the range check and the rows, `[]` when
+sealed, nine keys held by the wire-shape tests; fields match the contract (V21's match holds on this reading).
+**Screen** (`Reaches.tsx` 104–155, 411–425): the fourth option, names, clauses, *not seen* with no count or bar,
+quiet and sealed shared with the other views; on the notebook page the longer rows break the ruling (V25), and the
+design record is missing (V26). **Published contract** (`ui-ipc.md` 256–283, `patterns.md` 122–139): matches the
+code; stale "absent" lines (V31).
+
+*Constitution (v1.5.0).*
+- **III Honest About Limits / FR-022:** a row Cairn did not see is never a zero: `patterns.rs` 437–442 (`None` only
+  when all seeable time is unseen and no reach), `Reaches.tsx` 113, 153–154, 420 (`absent` draws name and *not
+  seen*, no count, no bar); *partly seen* 115; *so far* 116 and `patterns.rs` 426; coverage counts only before `now`,
+  467. Known and owned elsewhere: rows before Cairn first counted read as seen (H5, slice `first-counted`, M11).
+- **VI Voice, no streak or day count:** rows named by date (`localDays.ts` 238–256), never numbered; clause built as
+  `across ${days} ${days === 1 ? 'day' : 'days'}` (`Reaches.tsx` 108); `check-banned-words` and `check-no-streaks`
+  clean; the *What it never says* scan in `ReachesMovement.test.tsx`. Mono only for the clause and count (small
+  labels, `tonight-page.css` 199–206).
+- **SC-006 no ambient counts:** the field is read only in `Reaches.tsx` and `src/ipc/`; the guard that would refuse it
+  elsewhere is in open PR #60, not this diff (V28).
+- **FR-023 estimates:** never in a row (`over_time.rs` 135 passes reaches only), stated on the view (`Reaches.tsx` 83).
+- **FR-024 quiet:** *Nothing here for these days.* over every row (`Reaches.tsx` 180, 411–412); sealed is `[]`
+  (`state.rs` 224).
+- **II Local-first:** no dependency added (no `Cargo.toml`, `Cargo.lock` or `package.json` in the diff); nothing new
+  stored; `check-no-network-deps` clean.
+- **Domain purity:** `movement` takes `now` and the offsets as values (`patterns.rs` 370–375); no clock, zone, locale
+  or I/O; `check-domain-purity` clean.
+- **Tests first, ADD:** the driving-port scenarios enter through `AppState::summarize_reaches` (`us2_movement.rs`);
+  RED independence not as planned (V27).
+- **I, IV, V, VII:** not touched: no control changes protection, no system file, no notification, nothing gated.
