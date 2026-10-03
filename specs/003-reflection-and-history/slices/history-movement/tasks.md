@@ -328,7 +328,7 @@ Reviewed: _pending, written by V19 step 4_
 
 Appended by convergence pass 1 of 2 (2026-10-02, at `f7aad64`). Only CRITICAL and HIGH re-open the loop.
 
-- [ ] V25 [US2] **HIGH** [rule 3, scenario 41; V19 step 3] A row whose name and clause do not fit the right page's line
+- [x] V25 [US2] **HIGH** [rule 3, scenario 41; V19 step 3] A row whose name and clause do not fit the right page's line
   wraps to two to five ruled lines. *Evidence:* headless Chromium (playwright's `chromium-1234`), the app's own
   `notebook.css` and `tonight-page.css` and vendored fonts, notebook 830 units at `--nb-u: 1px`, right page 337 units,
   en-US: *week of Dec 29* + *across 3 days, partly seen, so far* is 128 units tall with the name squeezed to 39 units;
@@ -350,7 +350,7 @@ Appended by convergence pass 1 of 2 (2026-10-02, at `f7aad64`). Only CRITICAL an
   recorded, and V25 is what the first would have caught. *Sweep:* every ticked task in this file whose text requires
   a written record (V19's two lines, V1's log, V4's recorded refusal, V20's note) has it, or is un-ticked. Write
   both lines after V25, before the demo. *Files:* this file's *Design review* (host).
-- [ ] V27 [US2] **MEDIUM** [rules 4 and 7; the RED independence of *Constitution Check*, Delivery Method] Two
+- [x] V27 [US2] **MEDIUM** [rules 4 and 7; the RED independence of *Constitution Check*, Delivery Method] Two
   mutants of `domain/patterns.rs` survive all 71 tests of `patterns_movement` and `us2_movement`:
   `.clamp(0, dates - 1)` to `.clamp(0, dates)` at line 419 (a reach whose local date falls *after* `last_day` is
   never exercised; on a daily range the mutant indexes past the rows and would panic), and `ends > now` to
@@ -374,7 +374,7 @@ Appended by convergence pass 1 of 2 (2026-10-02, at `f7aad64`). Only CRITICAL an
   day*) is timed in the running app at the widest range the screen sends. If it stalls, the remedy (a coarser span,
   windowing, or the range starting at `first-counted`, H5) is the owner's decision, handed back, not chosen here.
   *Files:* the demo log and its evidence (V23).
-- [ ] V30 [US2] **LOW** [lead d] `us2_by_site.rs` line 328, the quiet-range test, copies `movement` from the answer into
+- [x] V30 [US2] **LOW** [lead d] `us2_by_site.rs` line 328, the quiet-range test, copies `movement` from the answer into
   its expectation, so that test holds nothing about the rows (they are proved at
   `us2_movement.rs::no_reaches_still_28_rows_at_zero_never_an_empty_list`, line 325). *Sweep:* no expectation in
   `src-tauri/tests/` is built from the value under test (`grep -n "patterns\.[a-z_]*\.clone()"` and the like: this

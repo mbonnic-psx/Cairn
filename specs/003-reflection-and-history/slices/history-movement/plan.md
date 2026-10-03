@@ -665,6 +665,13 @@ answer arrives. There is no inline height or overflow.
   *so far* in `domain/patterns.rs`, and the dates in words in `localDays.ts`. The adapter is held by scenarios
   21, 22 and the wire shape. `check-no-ambient-counts` only grows, and its new pattern is seen refusing a planted
   violation before it is trusted (Pin, row 4).
+  *As built (converge pass 1, V27):* Track A's Rust REDs were **not** independent. One agent wrote each RED, watched
+  it fail, then wrote its GREEN. In their place stands V27: a second agent, which had written none of the code, wrote
+  an example at every comparison and bound of `movement`, `coverage` and `for_each_piece`. It showed 25 mutants
+  killed, and argued the 9 that survive equivalent under every input `check_offsets` accepts (V27's evidence in
+  `tasks.md`).
+  The widening also fixed the weekday rows: V25's layout rule is shared by *By day*, whose rows broke the ruling
+  the same way (64 to 288 units at the narrow widths, measured in Chromium).
 
 ## Open questions, for the owner
 
