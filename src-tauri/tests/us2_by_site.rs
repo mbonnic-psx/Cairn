@@ -218,6 +218,7 @@ fn the_answer_serialises_to_exactly_nine_keys() {
 mod with_history {
     use super::*;
 
+    use cairn::domain::patterns::{MovementRow, Seen, Span};
     use cairn::ipc::state::{HourCount, WeekdayCount};
     use cairn::store::history::{CoverageGap, History, OpenHistory};
     use cairn::store::key::HistoryKey;
@@ -322,10 +323,34 @@ mod with_history {
 
         let patterns = summarize(&state);
 
+        // The rows are written out from the calendar, never read off the answer:
+        // 28 dates, each a daily row at zero, whole, and not over only from the
+        // date `now` falls on.
+        let now = 1_790_726_400 + 20 * 3600;
+        let movement: Vec<MovementRow> = (0..28)
+            .map(|index| {
+                let day = LocalDate::from_days_since_epoch(
+                    first_day().days_since_epoch() + index,
+                );
+                MovementRow {
+                    day,
+                    days: 1,
+                    span: Span::Day,
+                    count: 0,
+                    seen: Seen::Whole,
+                    so_far: midnight(day) + DAY > now,
+                }
+            })
+            .collect();
+        assert_eq!(movement.len(), 28);
+        assert_eq!(movement[0].day, first_day());
+        assert_eq!(movement[27].day, last_day());
+        assert!(movement.iter().any(|row| row.so_far));
+
         assert_eq!(
             patterns,
             Patterns {
-                movement: patterns.movement.clone(),
+                movement,
                 by_site: Vec::new(),
                 by_hour: (0..24).map(|hour| HourCount { hour, count: 0 }).collect(),
                 // Four weeks: four of each day, none reached.
