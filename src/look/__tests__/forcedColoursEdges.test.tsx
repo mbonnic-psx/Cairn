@@ -314,5 +314,6 @@ describe('forced colours keep every control an edge', () => {
     ]) {
       expect(found.has(needed), `${needed} is rendered by a scene`).toBe(true);
     }
-  });
+    // Renders every scene in one test: past vitest's 5 s default under a full parallel run.
+  }, 30_000);
 });
