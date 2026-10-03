@@ -450,6 +450,26 @@ input `check_offsets` accepts (9): `!unseen.is_empty()`→`true`; dropping `.max
 `change.from < range.to`→`<=`; `row_at(ends - 1)`→`row_at(ends)`. Each is a zero-length piece or an unreachable
 input. Script: the session scratchpad's `mut.py`. Converge pass 2 re-ran five of them: each failed 2–4 tests.
 
+### After-converge gaps read (`drive-gaps` · host model · delegated, fresh context, 2026-10-02)
+
+No CRITICAL or HIGH. Every state named in its brief is pinned (56/57 dates, a weekly row wholly not seen, partly seen
+with so far, a year on a row, the quiet range with rows not seen).
+
+- [ ] V34 [US2] **MEDIUM** [M5; owner question at the demo] *Partly seen* is set by any unseen second
+  (`domain/patterns.rs` 434–443), and a gap is recorded whenever Cairn starts after a stop (`counting/presence.rs`
+  103–115), so a computer shut down overnight marks both dates *partly seen*: over weeks, nearly every row. Shown to
+  the owner with the demo data's partial night; their answer decides whether the rule stands or a new one is made.
+- [ ] V35 [US2] **MEDIUM** [M8, FR-022, FR-024; owner question at the demo] A range with no seen time at all still
+  says "Nothing here for these days." above rows that all read *not seen* (`Reaches.tsx` 172, 419; screen test
+  `ReachesMovement.test.tsx` 442). Inherited from by site and by hour; the extension was the plan's, not the owner's.
+- [ ] V36 [US2] **LOW** A reach exactly on a later row's local midnight, under a non-zero offset, daily and weekly, is
+  not pinned (only `range.from`, 23:59 and 00:01 are). *Sweep:* one example per span at `row_begins(k)`.
+  *Files:* `src-tauri/tests/patterns_movement.rs`.
+- [ ] V37 [US2] **LOW** [owner question at the demo] A range wholly inside a past year names no year on its title or
+  rows (`localDays.ts` `rangeInWords`, followed by `Reaches.tsx` 136–139); before this slice too, now up to 52 rows.
+- [ ] V38 [US2] **LOW** The comment in `shortDateInWords` says `new Date(100, …)` reads year 100 as 2000; JavaScript
+  remaps only years 0–99. Correct it. *Files:* `src/localDays.ts`.
+
 ## Convergence
 
 **Pass 1 of 2 (2026-10-02, at `f7aad64`): not converged.** One HIGH (V25) re-opens the loop; V26–V29 MEDIUM and
