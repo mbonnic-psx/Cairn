@@ -709,13 +709,14 @@ mod with_history {
 
     // Scenario 15, the first part
     #[test]
-    fn a_gap_over_the_last_two_hours_of_yesterday_leaves_it_partly_seen() {
+    fn a_gap_over_the_last_thirteen_hours_of_yesterday_leaves_it_partly_seen() {
+        // M12: two hours is whole now; thirteen is more than half.
         let setup = setup();
         let history = seed(&setup.data);
         let midnight = 1_790_895_600;
         history
             .record_gap(&CoverageGap {
-                from: midnight - 2 * HOUR,
+                from: midnight - 13 * HOUR,
                 to: midnight,
             })
             .unwrap();
@@ -751,14 +752,15 @@ mod with_history {
     }
 
     #[test]
-    fn a_week_with_a_gap_over_two_of_its_dates_is_partly_seen() {
+    fn a_week_with_a_gap_over_four_of_its_dates_is_partly_seen() {
+        // M12: two of seven is whole (scenario 61); four is more than half.
         let setup = setup();
         let history = seed(&setup.data);
         let weekly = Range::new("2026-08-07", "2026-10-02", HOUR, HOUR, &[]);
         history
             .record_gap(&CoverageGap {
                 from: weekly.start + 2 * DAY,
-                to: weekly.start + 4 * DAY,
+                to: weekly.start + 6 * DAY,
             })
             .unwrap();
         let state = app(&setup, &Keychain::available());
@@ -803,6 +805,74 @@ mod with_history {
         );
     }
 
+    // Scenarios 57 to 61 (M12), through `summarize_reaches`
+    fn gap_in_four_weeks(from: i64, to: i64, now: fn() -> i64) -> Patterns {
+        let setup = setup();
+        let history = seed(&setup.data);
+        history.record_gap(&CoverageGap { from, to }).unwrap();
+        let state = app_at(&setup, &Keychain::available(), now);
+        Range::four_weeks().ask(&state)
+    }
+
+    #[test]
+    fn an_eight_hour_night_unseen_leaves_the_date_whole_and_thirteen_hours_make_it_part()
+    {
+        let midnight = 1_788_994_800; // 2026-09-10 00:00 BST
+        let eight = gap_in_four_weeks(midnight, midnight + 8 * HOUR, || NOW);
+        assert_eq!(named(&eight.movement[5]), "2026-09-10");
+        assert_eq!(eight.movement[5].seen, Seen::Whole);
+
+        let thirteen = gap_in_four_weeks(midnight, midnight + 13 * HOUR, || NOW);
+        assert_eq!(thirteen.movement[5].seen, Seen::Part);
+    }
+
+    #[test]
+    fn exactly_twelve_hours_unseen_is_whole_and_one_second_more_is_part() {
+        let midnight = 1_788_994_800;
+        let half = gap_in_four_weeks(midnight, midnight + 12 * HOUR, || NOW);
+        assert_eq!(half.movement[5].seen, Seen::Whole);
+
+        let more = gap_in_four_weeks(midnight, midnight + 12 * HOUR + 1, || NOW);
+        assert_eq!(more.movement[5].seen, Seen::Part);
+    }
+
+    #[test]
+    fn today_at_ten_with_six_of_its_ten_hours_unseen_is_part_and_five_is_whole() {
+        let midnight = 1_790_895_600;
+        let six = gap_in_four_weeks(midnight, midnight + 6 * HOUR, || {
+            1_790_895_600 + 10 * HOUR
+        });
+        assert_eq!(
+            (six.movement[27].so_far, six.movement[27].seen),
+            (true, Seen::Part)
+        );
+
+        let five = gap_in_four_weeks(midnight, midnight + 5 * HOUR, || {
+            1_790_895_600 + 10 * HOUR
+        });
+        assert_eq!(five.movement[27].seen, Seen::Whole);
+    }
+
+    #[test]
+    fn a_week_with_two_dates_unseen_is_whole_and_with_four_is_part() {
+        let weekly = Range::new("2026-08-07", "2026-10-02", HOUR, HOUR, &[]);
+        for (days, expected) in [(2, Seen::Whole), (4, Seen::Part)] {
+            let setup = setup();
+            let history = seed(&setup.data);
+            history
+                .record_gap(&CoverageGap {
+                    from: weekly.start,
+                    to: weekly.start + days * DAY,
+                })
+                .unwrap();
+            let state = app(&setup, &Keychain::available());
+
+            let patterns = weekly.ask(&state);
+
+            assert_eq!(patterns.movement[0].seen, expected, "{days} dates unseen");
+        }
+    }
+
     // Scenarios 1, 2 and 17, the so far part
     #[test]
     fn only_the_last_row_of_four_weeks_is_so_far_and_every_row_is_seen_whole() {
@@ -831,14 +901,15 @@ mod with_history {
     }
 
     #[test]
-    fn an_hours_gap_today_leaves_it_so_far_and_partly_seen() {
+    fn an_eleven_hour_gap_today_leaves_it_so_far_and_partly_seen() {
+        // M12: an hour is whole; today has 20 hours before NOW, and eleven is more than half.
         let setup = setup();
         let history = seed(&setup.data);
         let midnight = 1_790_895_600;
         history
             .record_gap(&CoverageGap {
                 from: midnight + HOUR,
-                to: midnight + 2 * HOUR,
+                to: midnight + 12 * HOUR,
             })
             .unwrap();
         let state = app(&setup, &Keychain::available());

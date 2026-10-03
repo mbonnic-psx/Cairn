@@ -634,17 +634,21 @@ fn a_24_hour_gap_from_autumns_midnight_leaves_that_row_part_and_the_next_whole()
 }
 
 #[test]
-fn a_24_hour_gap_from_springs_midnight_leaves_that_row_none_and_the_next_part() {
-    let rows = spring(&[(1_774_742_400, 1_774_828_800)]);
+fn a_gap_from_springs_midnight_over_its_date_and_thirteen_hours_of_the_next_is_none_then_part(
+) {
+    // M12: the gap once ended an hour into the 30th, which is now a whole row.
+    // Widened to 13 hours of it, so that "the next row is part" is still proved.
+    let rows = spring(&[(1_774_742_400, 1_774_825_200 + 13 * HOUR)]);
 
     assert_eq!(row_of(&rows, date(2026, 3, 29)).seen, Seen::None);
     assert_eq!(row_of(&rows, date(2026, 3, 30)).seen, Seen::Part);
 }
 
 #[test]
-fn a_gap_over_the_last_two_hours_of_yesterday_leaves_it_part_and_today_whole() {
+fn a_gap_over_the_last_thirteen_hours_of_yesterday_leaves_it_part_and_today_whole() {
+    // M12: two hours is now a whole row; thirteen is more than half.
     let midnight = 1_790_895_600;
-    let rows = four_weeks(&[(midnight - 2 * HOUR, midnight)], &[], NOW);
+    let rows = four_weeks(&[(midnight - 13 * HOUR, midnight)], &[], NOW);
 
     assert_eq!(row_of(&rows, date(2026, 10, 1)).seen, Seen::Part);
     assert_eq!(row_of(&rows, date(2026, 10, 2)).seen, Seen::Whole);
@@ -662,7 +666,8 @@ fn a_row_holding_a_reach_inside_a_gap_over_all_of_it_is_part_with_its_count() {
 }
 
 #[test]
-fn a_week_with_a_gap_over_two_of_its_seven_dates_is_part() {
+fn a_week_with_a_gap_over_four_of_its_seven_dates_is_part() {
+    // M12: two of seven is now whole (scenario 61); four is more than half.
     let range = LocalRange {
         first_day: date(2026, 8, 7),
         last_day: date(2026, 10, 2),
@@ -672,7 +677,7 @@ fn a_week_with_a_gap_over_two_of_its_seven_dates_is_part() {
         changes: &[],
     };
     let third_date = 1_786_057_200 + 2 * DAY;
-    let rows = movement(&[], &range, &[(third_date, third_date + 2 * DAY)], NOW);
+    let rows = movement(&[], &range, &[(third_date, third_date + 4 * DAY)], NOW);
 
     assert_eq!(rows[0].seen, Seen::Part);
     assert_eq!(rows[1].seen, Seen::Whole);
@@ -702,6 +707,71 @@ fn the_goose_bay_date_under_a_gap_over_the_whole_range_is_part() {
 
     assert_eq!(rows.len(), 1);
     assert_eq!((rows[0].seen, rows[0].count), (Seen::Part, 2));
+}
+
+// --- Scenarios 57 to 61: a row is partly seen only when more than half was missed (M12) --
+
+fn tenth_midnight() -> i64 {
+    date(2026, 9, 10).days_since_epoch() * DAY - HOUR
+}
+
+// Scenario 57
+#[test]
+fn an_eight_hour_night_unseen_in_a_date_leaves_it_whole() {
+    let midnight = tenth_midnight();
+    let rows = four_weeks(&[(midnight, midnight + 8 * HOUR)], &[], NOW);
+
+    assert_eq!(row_of(&rows, date(2026, 9, 10)).seen, Seen::Whole);
+}
+
+// Scenario 58
+#[test]
+fn thirteen_hours_unseen_in_a_date_make_it_part() {
+    let midnight = tenth_midnight();
+    let rows = four_weeks(&[(midnight, midnight + 13 * HOUR)], &[], NOW);
+
+    assert_eq!(row_of(&rows, date(2026, 9, 10)).seen, Seen::Part);
+}
+
+// Scenario 59
+#[test]
+fn exactly_twelve_hours_unseen_in_a_date_is_whole_and_one_second_more_is_part() {
+    let midnight = tenth_midnight();
+    let rows = four_weeks(&[(midnight, midnight + 12 * HOUR)], &[], NOW);
+    assert_eq!(row_of(&rows, date(2026, 9, 10)).seen, Seen::Whole);
+
+    let rows = four_weeks(&[(midnight, midnight + 12 * HOUR + 1)], &[], NOW);
+    assert_eq!(row_of(&rows, date(2026, 9, 10)).seen, Seen::Part);
+}
+
+// Scenario 60
+#[test]
+fn today_at_ten_with_six_of_its_ten_hours_unseen_is_part_and_five_is_whole() {
+    let midnight = 1_790_895_600;
+    let now = midnight + 10 * HOUR;
+    let rows = four_weeks(&[(midnight, midnight + 6 * HOUR)], &[], now);
+    assert_eq!(row_of(&rows, date(2026, 10, 2)).seen, Seen::Part);
+
+    let rows = four_weeks(&[(midnight, midnight + 5 * HOUR)], &[], now);
+    assert_eq!(row_of(&rows, date(2026, 10, 2)).seen, Seen::Whole);
+}
+
+// Scenario 61
+#[test]
+fn a_week_with_two_dates_unseen_is_whole_and_with_four_is_part() {
+    let range = LocalRange {
+        first_day: date(2026, 8, 7),
+        last_day: date(2026, 10, 2),
+        from: 1_786_057_200,
+        to: 1_790_982_000,
+        first_offset: 3600,
+        changes: &[],
+    };
+    let two = movement(&[], &range, &[(range.from, range.from + 2 * DAY)], NOW);
+    assert_eq!(two[0].seen, Seen::Whole);
+
+    let four = movement(&[], &range, &[(range.from, range.from + 4 * DAY)], NOW);
+    assert_eq!(four[0].seen, Seen::Part);
 }
 
 mod holding_a_reach {
@@ -770,9 +840,10 @@ fn one_date_which_is_today_is_so_far() {
 }
 
 #[test]
-fn a_gap_an_hour_long_today_leaves_todays_row_so_far_and_part() {
+fn a_gap_eleven_hours_long_today_leaves_todays_row_so_far_and_part() {
+    // M12: an hour is whole. Today has 20 hours before `NOW`; eleven is more than half.
     let midnight = 1_790_895_600;
-    let rows = four_weeks(&[(midnight + HOUR, midnight + 2 * HOUR)], &[], NOW);
+    let rows = four_weeks(&[(midnight + HOUR, midnight + 12 * HOUR)], &[], NOW);
 
     let today = row_of(&rows, date(2026, 10, 2));
     assert_eq!((today.so_far, today.seen), (true, Seen::Part));
@@ -1043,24 +1114,21 @@ fn four_weeks_and_tomorrow(unseen: &[(i64, i64)], now: i64) -> Vec<MovementRow> 
 
 #[test]
 fn a_gap_elsewhere_leaves_a_row_wholly_after_now_whole_not_none() {
-    // 2026-09-06 02:00-03:00 BST; tomorrow, the 3rd, has no seconds before `now`.
+    // 2026-09-06 02:00-15:00 BST (M12: an hour is whole, thirteen is part); tomorrow, the 3rd, has no seconds before `now`.
     let night = date(2026, 9, 6).days_since_epoch() * DAY - HOUR;
-    let rows = four_weeks_and_tomorrow(&[(night + 2 * HOUR, night + 3 * HOUR)], NOW);
+    let rows = four_weeks_and_tomorrow(&[(night + 2 * HOUR, night + 15 * HOUR)], NOW);
     let tomorrow = row_of(&rows, date(2026, 10, 3));
     assert_eq!((tomorrow.seen, tomorrow.so_far), (Seen::Whole, true));
     assert_eq!(row_of(&rows, date(2026, 9, 6)).seen, Seen::Part);
 }
 
 #[test]
-fn one_unseen_second_makes_the_row_part_and_none_makes_it_whole() {
+fn one_unseen_second_leaves_the_row_whole_and_so_does_an_empty_gap() {
+    // M12 changes this expectation: one unseen second was part, and is now whole.
     let day = date(2026, 9, 10);
     let midnight = day.days_since_epoch() * DAY - HOUR;
     let rows = four_weeks(&[(midnight + 100, midnight + 101)], &[], NOW);
-    assert_eq!(row_of(&rows, day).seen, Seen::Part);
-    assert!(rows
-        .iter()
-        .filter(|row| row.day != day)
-        .all(|row| row.seen == Seen::Whole));
+    assert!(rows.iter().all(|row| row.seen == Seen::Whole));
     let rows = four_weeks(&[(midnight + 100, midnight + 100)], &[], NOW);
     assert!(rows.iter().all(|row| row.seen == Seen::Whole));
 }
@@ -1103,9 +1171,11 @@ fn now_inside_a_row_counts_only_the_seconds_before_it() {
     // A gap one second short of `now` leaves one second seen.
     let rows = four_weeks(&[(midnight, now - 1)], &[], now);
     assert_eq!(row_of(&rows, day).seen, Seen::Part);
-    // A gap that runs on past `now` adds no unseen second after it.
-    let rows = four_weeks(&[(midnight + 6 * HOUR - 1, now + HOUR)], &[], now);
-    assert_eq!(row_of(&rows, day).seen, Seen::Part);
+    // A gap that runs on past `now` adds no unseen second after it: three hours
+    // before `now` is exactly half of six (whole), where counting the hour after
+    // it would make four of six (part). M12 widened this from one second.
+    let rows = four_weeks(&[(midnight + 3 * HOUR, now + HOUR)], &[], now);
+    assert_eq!(row_of(&rows, day).seen, Seen::Whole);
     assert_eq!(row_of(&rows, date(2026, 9, 11)).seen, Seen::Whole);
 }
 
@@ -1140,7 +1210,13 @@ fn a_weekly_row_is_none_only_when_every_one_of_its_seconds_is_unseen() {
     assert_eq!((all[0].seen, all[2].seen), (Seen::Whole, Seen::Whole));
     let most = movement(&[], &range, &[(begins, begins + week - 1)], NOW);
     assert_eq!(most[1].seen, Seen::Part);
-    let spill = movement(&[], &range, &[(begins - 1, begins + week + 1)], NOW);
+    // M12: a second of spill is whole, so the gap spills four dates either side.
+    let spill = movement(
+        &[],
+        &range,
+        &[(begins - 4 * DAY, begins + week + 4 * DAY)],
+        NOW,
+    );
     assert_eq!(
         (spill[0].seen, spill[1].seen, spill[2].seen),
         (Seen::Part, Seen::None, Seen::Part)
@@ -1171,14 +1247,22 @@ fn a_clock_change_inside_a_weekly_row_sums_the_unseen_seconds_of_both_stretches(
     let seen = |rows: &[MovementRow]| (rows[6].seen, rows[7].seen, rows[8].seen);
 
     assert_eq!(ask(&[]).len(), 9);
-    // The last second of the week before is that week's, and only a second.
+    // M12: seconds are no longer enough to make a row part, so each of these is
+    // widened to what it was written to prove.
+    // The last four dates of the week before are that week's, and only theirs.
     assert_eq!(
-        seen(&ask(&[(begins - 1, begins)])),
+        seen(&ask(&[(begins - 4 * DAY, begins)])),
         (Seen::Part, Seen::Whole, Seen::Whole)
     );
-    // The two seconds around the change are both the eighth week's.
+    // The eighth week is 169 hours: 146 before the change, 23 after. A gap across
+    // the change that ends where the ninth begins is summed over both stretches.
+    // 84 hours is under half and whole; 85 is over and part.
     assert_eq!(
-        seen(&ask(&[(1_792_890_000 - 1, 1_792_890_000 + 1)])),
+        seen(&ask(&[(1_792_890_000 - 61 * HOUR, ends)])),
+        (Seen::Whole, Seen::Whole, Seen::Whole)
+    );
+    assert_eq!(
+        seen(&ask(&[(1_792_890_000 - 62 * HOUR, ends)])),
         (Seen::Whole, Seen::Part, Seen::Whole)
     );
     // Every second of the eighth, across both stretches, is none; one short of
@@ -1189,9 +1273,9 @@ fn a_clock_change_inside_a_weekly_row_sums_the_unseen_seconds_of_both_stretches(
     );
     assert_eq!(seen(&ask(&[(begins, ends - 1)])).1, Seen::Part);
     assert_eq!(seen(&ask(&[(begins + 1, ends)])).1, Seen::Part);
-    // A gap that spills one second either side makes the neighbours part.
+    // A gap that spills four dates either side makes the neighbours part.
     assert_eq!(
-        seen(&ask(&[(begins - 1, ends + 1)])),
+        seen(&ask(&[(begins - 4 * DAY, ends + 4 * DAY)])),
         (Seen::Part, Seen::None, Seen::Part)
     );
 }

@@ -275,9 +275,10 @@ which stay as the record of when they were true.
   then (M3, W5). A local date before `first_day` or after `last_day`, which only a clock change across midnight
   produces (adversary W-A1), counts in the nearest row. The counts sum to every reach in the range. Built from
   reaches alone: an estimate is never counted in a row (M7), and `estimates_excluded` states it.
-- `seen` is `"whole"`, `"part"` or `"none"`: whether the row's instants before the present lie inside `gaps`, none,
-  some, or all (M5). A row holding a reach is never `"none"`. A row with no instant before the present is
-  `"whole"`. The interface shows `"none"` as *not seen*, with no count and no bar, never a zero (FR-022).
+- `seen` is `"whole"`, `"part"` or `"none"`: whether Cairn saw the row's instants before the present. `"none"` is
+  every one of them inside `gaps`; `"part"` is more than half of them inside `gaps` (M12, which replaced "any");
+  `"whole"` is half or less, so exactly half is whole. A row holding a reach is never `"none"`, so one Cairn missed
+  wholly is `"part"`. A row with no instant before the present is `"whole"`. The interface shows `"none"` as *not seen*, with no count and no bar, never a zero (FR-022).
 - `so_far` is true when any of the row's instants is at or after the present: the row holding today, and any row
   after it (M6).
 - A quiet range has every row with `count` 0 (M8, FR-024). A sealed answer is `[]`, never rows at zero.
