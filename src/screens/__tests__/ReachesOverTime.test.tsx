@@ -225,6 +225,20 @@ describe('the heading', () => {
     ).toBeInTheDocument();
   });
 
+  it('names no year for a range wholly in a past year, as it reads today', async () => {
+    const { calls, read } = fakeRead();
+    await openOverTime(read);
+    await screen.findByText('a.example');
+
+    fireEvent.change(screen.getByLabelText('From'), { target: { value: '2025-09-03' } });
+    fireEvent.change(screen.getByLabelText('To'), { target: { value: '2025-09-30' } });
+
+    await waitFor(() => expect(calls).toHaveLength(3));
+    expect(
+      screen.getByRole('heading', { name: 'From 3 September to 30 September' }),
+    ).toBeInTheDocument();
+  });
+
   it('holds no year, count or ranking word inside one year', async () => {
     const { read } = fakeRead();
     await openOverTime(read);

@@ -16,6 +16,7 @@ import {
   isLocalDate,
   localToday,
   rangeBounds,
+  rangeInWords,
 } from '../localDays';
 
 const seconds = (d: Date) => Math.round(d.getTime() / 1000);
@@ -153,5 +154,21 @@ describe('dayInWords', () => {
   it('refuses what is not a calendar date, and says which', () => {
     expect(() => dayInWords('2026-02-30')).toThrow(RangeError);
     expect(() => dayInWords('2026-02-30')).toThrow('not a calendar date: "2026-02-30"');
+  });
+});
+
+describe('rangeInWords', () => {
+  it('names a range inside one year without the year', () => {
+    expect(rangeInWords('2026-09-03', '2026-09-30')).toBe('From 3 September to 30 September');
+  });
+
+  it('names no year for a range wholly in another year, since only a crossing names one', () => {
+    expect(rangeInWords('2025-09-03', '2025-09-30')).toBe('From 3 September to 30 September');
+  });
+
+  it('names the year on both dates where the range crosses one', () => {
+    expect(rangeInWords('2025-12-20', '2026-09-30')).toBe(
+      'From 20 December 2025 to 30 September 2026',
+    );
   });
 });
