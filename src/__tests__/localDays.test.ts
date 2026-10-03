@@ -16,6 +16,7 @@ import {
   isLocalDate,
   localToday,
   rangeBounds,
+  namesYear,
   rangeInWords,
 } from '../localDays';
 
@@ -158,17 +159,42 @@ describe('dayInWords', () => {
 });
 
 describe('rangeInWords', () => {
-  it('names a range inside one year without the year', () => {
-    expect(rangeInWords('2026-09-03', '2026-09-30')).toBe('From 3 September to 30 September');
+  const today = '2026-10-02';
+
+  it('names a range inside this year without the year', () => {
+    expect(rangeInWords('2026-09-05', '2026-10-02', today)).toBe('From 5 September to 2 October');
   });
 
-  it('names no year for a range wholly in another year, since only a crossing names one', () => {
-    expect(rangeInWords('2025-09-03', '2025-09-30')).toBe('From 3 September to 30 September');
+  it('names the year on both dates for a range wholly in another year', () => {
+    expect(rangeInWords('2025-09-03', '2025-09-30', today)).toBe(
+      'From 3 September 2025 to 30 September 2025',
+    );
   });
 
   it('names the year on both dates where the range crosses one', () => {
-    expect(rangeInWords('2025-12-20', '2026-09-30')).toBe(
-      'From 20 December 2025 to 30 September 2026',
+    expect(rangeInWords('2025-12-20', '2026-01-10', today)).toBe(
+      'From 20 December 2025 to 10 January 2026',
     );
+  });
+
+  it('judges by the day it is given: a range in the year just ended names it once it is the new year', () => {
+    expect(rangeInWords('2026-12-04', '2026-12-31', '2026-12-31')).toBe(
+      'From 4 December to 31 December',
+    );
+    expect(rangeInWords('2026-12-04', '2026-12-31', '2027-01-01')).toBe(
+      'From 4 December 2026 to 31 December 2026',
+    );
+  });
+});
+
+describe('namesYear', () => {
+  it.each([
+    ['2026-09-05', '2026-10-02', '2026-10-02', false],
+    ['2025-09-03', '2025-09-30', '2026-10-02', true],
+    ['2025-12-20', '2026-01-10', '2026-10-02', true],
+    ['2026-12-04', '2026-12-31', '2027-01-01', true],
+    ['2026-12-04', '2026-12-31', '2026-12-31', false],
+  ])('%s to %s, today %s: %s', (first, last, today, expected) => {
+    expect(namesYear(first, last, today)).toBe(expected);
   });
 });

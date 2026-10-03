@@ -85,10 +85,19 @@ export function dayInWords(day: string, withYear = false): string {
   return `${d} ${MONTHS[m]}${withYear ? ` ${y}` : ''}`;
 }
 
-/** A range in words: `From 3 September to 30 September`, the years named only across one. */
-export function rangeInWords(firstDay: string, lastDay: string): string {
-  const crossesYears = firstDay.slice(0, 4) !== lastDay.slice(0, 4);
-  return `From ${dayInWords(firstDay, crossesYears)} to ${dayInWords(lastDay, crossesYears)}`;
+/**
+ * Whether a range names its year: when either end is outside the year of `today`. A range that crosses a
+ * year always does. The day is given, never read, so this reads no clock.
+ */
+export function namesYear(firstDay: string, lastDay: string, today: string): boolean {
+  const year = today.slice(0, 4);
+  return firstDay.slice(0, 4) !== year || lastDay.slice(0, 4) !== year;
+}
+
+/** A range in words: `From 3 September to 30 September`, the year on both dates when `namesYear` says so. */
+export function rangeInWords(firstDay: string, lastDay: string, today: string): string {
+  const withYear = namesYear(firstDay, lastDay, today);
+  return `From ${dayInWords(firstDay, withYear)} to ${dayInWords(lastDay, withYear)}`;
 }
 
 /** An offset taking effect: from `from` (epoch seconds) the clock is `offset` seconds east of UTC. */

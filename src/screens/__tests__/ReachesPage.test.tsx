@@ -292,7 +292,7 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (name) 
       'could not read': COULD_NOT_READ,
       sealed: sealedSentence,
     };
-    const RANGE = rangeInWords('2026-09-03', '2026-09-30');
+    const RANGE = rangeInWords('2026-09-03', '2026-09-30', '2026-09-30');
 
     async function overTime(answer: string, extra?: { calls?: Array<[string, string]> }) {
       const user = userEvent.setup();
@@ -385,7 +385,7 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (name) 
       await waitFor(() => expect(calls).toHaveLength(2));
       expect(calls[1]).toEqual(['2026-09-10', '2026-09-30']);
       expect(within(left!).getByRole('heading', { level: 2 })).toHaveTextContent(
-        rangeInWords('2026-09-10', '2026-09-30'),
+        rangeInWords('2026-09-10', '2026-09-30', '2026-09-30'),
       );
     });
 
@@ -422,7 +422,7 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (name) 
       'Your own estimate for 1 day is not counted here, because an estimate has no site.';
     const MANY =
       'Your own estimates for 3 days are not counted here, because an estimate has no site.';
-    const RANGE = rangeInWords('2026-09-03', '2026-09-30');
+    const RANGE = rangeInWords('2026-09-03', '2026-09-30', '2026-09-30');
 
     const listCases: Array<[string, string[]]> = [
       ['a list', [CLOSING]],
@@ -557,7 +557,7 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (name) 
       });
       await waitFor(() => expect(right!.textContent).toContain('later.example'));
       expect(within(left!).getByRole('heading', { level: 2 })).toHaveTextContent(
-        rangeInWords('2026-09-10', '2026-09-30'),
+        rangeInWords('2026-09-10', '2026-09-30', '2026-09-30'),
       );
     });
 
@@ -576,7 +576,7 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (name) 
   describe('Over time with no sites on a notebook page', () => {
     const CLOSING =
       'Cairn counts only while it is running. This is what it saw over these days.';
-    const RANGE = rangeInWords('2026-09-03', '2026-09-30');
+    const RANGE = rangeInWords('2026-09-03', '2026-09-30', '2026-09-30');
     const emptyCases: Array<[string, string[]]> = [
       ['nothing here', [CLOSING]],
       [

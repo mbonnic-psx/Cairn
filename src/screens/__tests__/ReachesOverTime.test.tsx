@@ -225,7 +225,7 @@ describe('the heading', () => {
     ).toBeInTheDocument();
   });
 
-  it('names no year for a range wholly in a past year, as it reads today', async () => {
+  it('names the year on both dates for a range wholly in a past year', async () => {
     const { calls, read } = fakeRead();
     await openOverTime(read);
     await screen.findByText('a.example');
@@ -235,8 +235,36 @@ describe('the heading', () => {
 
     await waitFor(() => expect(calls).toHaveLength(3));
     expect(
-      screen.getByRole('heading', { name: 'From 3 September to 30 September' }),
+      screen.getByRole('heading', { name: 'From 3 September 2025 to 30 September 2025' }),
     ).toBeInTheDocument();
+  });
+
+  it('names that year while looking, in each view, and when sealed or unreadable', async () => {
+    const answers: Array<() => Promise<Patterns>> = [
+      async () => patterns(),
+      async () => patterns({ by_site: [], sealed: 'Your history is sealed for now.' }),
+      async () => {
+        throw new Error('boom');
+      },
+    ];
+    for (const answer of answers) {
+      const { read } = fakeRead(answer);
+      const user = userEvent.setup();
+      const view = render(<Reaches read={read} now={() => NOW} />);
+      await user.click(await screen.findByRole('button', { name: 'Over time' }));
+      await waitFor(() => expect(screen.queryByText('Looking…')).toBeNull());
+      fireEvent.change(screen.getByLabelText('From'), { target: { value: '2025-09-03' } });
+      fireEvent.change(screen.getByLabelText('To'), { target: { value: '2025-09-30' } });
+      const heading = 'From 3 September 2025 to 30 September 2025';
+
+      expect(screen.getByRole('heading', { name: heading })).toBeInTheDocument();
+      await waitFor(() => expect(screen.queryByText('Looking…')).toBeNull());
+      for (const name of ['By hour', 'By day', 'Day by day', 'By site']) {
+        await user.click(screen.getByRole('button', { name }));
+        expect(screen.getByRole('heading', { name: heading })).toBeInTheDocument();
+      }
+      view.unmount();
+    }
   });
 
   it('holds no year, count or ranking word inside one year', async () => {

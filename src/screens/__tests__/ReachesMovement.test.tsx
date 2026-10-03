@@ -542,3 +542,92 @@ describe('the row holding today (scenarios 34 and 32, second part)', () => {
     expect(text()).not.toContain('so far');
   });
 });
+
+describe('the year on the rows (rules 17 and 18, scenarios 55, 56)', () => {
+  /** A row for each date from `first` to `last`, all whole and holding no reach. */
+  const rowsBetween = (first: string, last: string): MovementRow[] => {
+    const rows: MovementRow[] = [];
+    for (let at = Date.parse(first); at <= Date.parse(last); at += 86_400_000) {
+      rows.push({
+        day: new Date(at).toISOString().slice(0, 10),
+        days: 1,
+        span: 'day',
+        count: 1,
+        seen: 'whole',
+        so_far: false,
+      });
+    }
+    return rows;
+  };
+
+  async function openAt(now: Date, rows: MovementRow[]) {
+    const { read } = fakeRead(async () => patterns({ movement: rows }));
+    const user = userEvent.setup();
+    render(<Reaches read={read} now={() => now} />);
+    await user.click(await screen.findByRole('button', { name: 'Over time' }));
+    await user.click(await screen.findByRole('button', { name: 'Day by day' }));
+    await waitFor(() => expect(lines().length).toBeGreaterThan(0));
+  }
+
+  it('names the year on every row of a range wholly in a past year', async () => {
+    const rows = rowsBetween('2025-09-03', '2025-09-30');
+    await openAt(NOW, rows);
+
+    expect(lines()).toHaveLength(rows.length);
+    lines().forEach((line, place) => {
+      expect(leaves(line)[0]).toBe(shortDateInWords(rows[place]!.day, true));
+    });
+  });
+
+  it('names the year on every week of a past year', async () => {
+    const rows: MovementRow[] = [
+      { day: '2025-10-06', days: 7, span: 'week', count: 1, seen: 'whole', so_far: false },
+      { day: '2025-10-13', days: 7, span: 'week', count: 1, seen: 'whole', so_far: false },
+    ];
+    await openAt(NOW, rows);
+
+    expect(leaves(lines()[0]!)[0]).toBe(weekOfInWords('2025-10-06', true));
+  });
+
+  it('names no year on rows wholly in this year', async () => {
+    const rows = rowsBetween('2026-09-05', '2026-10-02');
+    await openAt(NOW, rows);
+
+    expect(leaves(lines()[0]!)[0]).toBe(shortDateInWords('2026-09-05', false));
+  });
+
+  it('judges the year by the interface clock: at New Year the rows and the title name the year just ended', async () => {
+    const rows = rowsBetween('2026-12-04', '2026-12-31');
+    const newYear = new Date(2027, 0, 1, 0, 30);
+    const { read } = fakeRead(async () => patterns({ movement: rows }));
+    const user = userEvent.setup();
+    render(<Reaches read={read} now={() => newYear} />);
+    await user.click(await screen.findByRole('button', { name: 'Over time' }));
+    fireEvent.change(screen.getByLabelText('From'), { target: { value: '2026-12-04' } });
+    fireEvent.change(screen.getByLabelText('To'), { target: { value: '2026-12-31' } });
+    await user.click(await screen.findByRole('button', { name: 'Day by day' }));
+    await waitFor(() => expect(lines()).toHaveLength(rows.length));
+
+    expect(
+      screen.getByRole('heading', { name: 'From 4 December 2026 to 31 December 2026' }),
+    ).toBeInTheDocument();
+    expect(leaves(lines()[0]!)[0]).toBe(shortDateInWords('2026-12-04', true));
+  });
+
+  it('names neither on the evening before New Year', async () => {
+    const rows = rowsBetween('2026-12-04', '2026-12-31');
+    const eve = new Date(2026, 11, 31, 23, 30);
+    const { read } = fakeRead(async () => patterns({ movement: rows }));
+    const user = userEvent.setup();
+    render(<Reaches read={read} now={() => eve} />);
+    await user.click(await screen.findByRole('button', { name: 'Over time' }));
+    fireEvent.change(screen.getByLabelText('From'), { target: { value: '2026-12-04' } });
+    await user.click(await screen.findByRole('button', { name: 'Day by day' }));
+    await waitFor(() => expect(lines()).toHaveLength(rows.length));
+
+    expect(
+      screen.getByRole('heading', { name: 'From 4 December to 31 December' }),
+    ).toBeInTheDocument();
+    expect(leaves(lines()[0]!)[0]).toBe(shortDateInWords('2026-12-04', false));
+  });
+});

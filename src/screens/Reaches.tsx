@@ -21,6 +21,7 @@ import {
   localToday,
   offsetChanges,
   rangeBounds,
+  namesYear,
   rangeInWords,
   shortDateInWords,
   weekdayInWords,
@@ -120,7 +121,12 @@ const clauseOf = (row: MovementRow): string => {
  * days of the week from `weekStart`. Each day is picked by its own `weekday`, not by its place in the
  * answer.
  */
-const rowsOf = (answer: Patterns, seen: Seen, weekStart: number): Row[] => {
+const rowsOf = (
+  answer: Patterns,
+  seen: Seen,
+  weekStart: number,
+  todayDay: string,
+): Row[] => {
   if (seen === 'site') {
     return answer.by_site.map((site) => ({
       key: site.domain,
@@ -139,10 +145,10 @@ const rowsOf = (answer: Patterns, seen: Seen, weekStart: number): Row[] => {
   if (seen === 'movement') {
     const rows = answer.movement;
     const last = rows[rows.length - 1];
-    // The year is written on every row when the range crosses one, as the range's own name does.
+    // The year is written on every row when the range's own name writes it: the same rule, the same today.
     const withYear =
       last !== undefined &&
-      rows[0]!.day.slice(0, 4) !== addDays(last.day, last.days - 1).slice(0, 4);
+      namesYear(rows[0]!.day, addDays(last.day, last.days - 1), todayDay);
     return rows.map((row) => ({
       key: row.day,
       name:
@@ -401,13 +407,13 @@ function OverTimeView({
   const list = typeof answer === 'string' || answer.sealed ? null : answer;
   const unseen = list !== null && sawNone(list);
   // Under the sentence that Cairn saw none, only Day by day draws rows: each is true on its own.
-  const quiet = list ? isQuiet(rowsOf(list, seen, weekStart)) : false;
-  const rows = list && (!unseen || seen === 'movement') ? rowsOf(list, seen, weekStart) : [];
+  const quiet = list ? isQuiet(rowsOf(list, seen, weekStart, todayDay)) : false;
+  const rows = list && (!unseen || seen === 'movement') ? rowsOf(list, seen, weekStart, todayDay) : [];
   const largest = largestCount(rows);
   return (
     <>
       <div className="nb-page">
-        <h2 className="nb-reaches-title">{rangeInWords(firstDay, lastDay)}</h2>
+        <h2 className="nb-reaches-title">{rangeInWords(firstDay, lastDay, todayDay)}</h2>
         {boxes}
         {choice}
         {!list ? (
