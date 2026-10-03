@@ -386,6 +386,70 @@ Appended by convergence pass 1 of 2 (2026-10-02, at `f7aad64`). Only CRITICAL an
   pointer in the amendment that ends it (today only `movement`'s three). Add one sentence to this slice's amendment
   naming them as superseded. *Files:* `specs/003-reflection-and-history/contracts/ui-ipc.md`.
 
+Appended by convergence pass 2 of 2 (2026-10-02, at `1133d75`). This is the loop's bound: only a CRITICAL re-opens it.
+
+- [x] V32 [US2] **HIGH** [V25's own rule; scenario 41; the weekday view, which V25 widened to] V25 keeps every row on
+  the ruling but takes the bar off the row's first line, on *Day by day* **and** on *By day*, a view that shipped
+  before this slice. `.nb-reaches-line--label > .nb-reaches-bar` (`tonight-page.css` 230–233) adds
+  `margin-top: calc(13 * var(--nb-u))` but leaves `.nb-reaches-bar`'s `align-self: center` (line 252) in force, so
+  the margin and the centring add up: the bar's middle sits 22.5 units into a 32-unit row (6.5 low, toward the rule)
+  and 38.5 into a 64-unit row (on the clause's line). The rule's own comment says "centred on the row's first
+  line" (16). On `origin/main` the weekday bar was centred by `align-items: center` on a 32-unit line.
+  *Evidence:* headless Chromium (`chromium-1234`, `--dump-dom`), the app's `theme.css`, `notebook.css` and
+  `tonight-page.css` with the vendored Libre Caslon and Plex Mono loaded, the row markup `Reaches.tsx` 423–460
+  draws, at `--nb-u` 1px and 2px, content widths 260, 300, 337, 420 and 520 units: 9 name forms (day, day with
+  year, week, week with year; en-US and en-GB *Sept*; year 100) x 11 clauses, and 5 *By day* rows (up to *across
+  5218 Wednesdays*). Every row is 32 or 64 units and no name wraps, so V25 holds as a class. All 425 rows that
+  draw a bar have it at 22.5 or 38.5. With `align-self: flex-start` added to that one rule, all 520 rows measure
+  32 or 64 with the bar's middle at 16 (tried, then restored with `git checkout -- src/styles/tonight-page.css`).
+  The jsdom sheet test (`ReachesMovementPage.test.tsx` 323–371) cannot see this, as V25 already says of jsdom.
+  *Sweep:* every flex child of a `nb-reaches-line--label` row (bar, count, clause) is placed relative to the first
+  ruled line, measured in a layout engine across the table above. The table goes into V23's demo evidence beside
+  V25's. *Files:* `src/styles/tonight-page.css`, `src/screens/__tests__/ReachesMovementPage.test.tsx` (the sheet
+  test may name `align-self: flex-start` on the bar rule).
+- [x] V33 [US2] **LOW** [V25, V27; Delivery Method, evidence] Two closures cite evidence this file does not hold. The
+  plan's *Constitution Check* (`plan.md` 668–674) calls V27's "25 mutants killed, 9 argued equivalent" "V27's
+  evidence in `tasks.md`". V25 is ticked with only pass 1's finding text and its own "at the least, the
+  measured table goes into the demo evidence under V23". Pass 2 re-ran what it could: the five mutants it applied
+  to `patterns.rs` (`clamp(0, dates)` at 419 and 505, `ends >= now` at 426, `unseen_part > seeable` at 437,
+  `coverage` ignoring `now` at 467) each fail 2 to 4 of `patterns_movement`'s 58 tests, so V27 holds. The list of
+  the 34 and the equivalence argument for the 9 are not on disk. *Sweep:* every ticked task in Phase 4 carries its
+  closing evidence (what was run, the counts) in its own text or a file it names. Write V27's mutant list and the
+  9 equivalence arguments under V27, and V25's measured table under V23's evidence. *Files:* this file (host).
+
+### Evidence recorded for V25, V27 and V32 (host, 2026-10-02, V33)
+
+**V25: row heights in `--nb-u` units, headless Chromium (agent-browser), the app's own `notebook.css` and
+`tonight-page.css`, vendored fonts, morning look.** 480 rows per cell: 10 names (day, day with year, week, week
+with year, over 5 dates) × 24 clauses (across none/1/3/6 days × nothing/not seen/partly seen × so far).
+
+| Viewport (right page) | Before | After |
+|---|---|---|
+| 1280×800 (337) | 32–512, 14 distinct heights | en-US 32 ×195, 64 ×285; en-GB 32 ×202, 64 ×278 |
+| 1100×800 (278.6) | 32–512 | en-US 32 ×118, 64 ×362; en-GB 32 ×119, 64 ×361 |
+| 800×600 (294) | 32–512 | en-US 32 ×146, 64 ×334; en-GB 32 ×144, 64 ×336 |
+| 1920×1080 (u 1.35) | 43.2–691 | 43.2 ×267, 86.4 ×213 (32 and 64 units) |
+
+*By day* (7 days × counts 1, 4, 52, 780), the same rule: before 64–288 at 1100 and 800 wide, up to 96 at 1280;
+after only 32 or 64. Converge pass 2 re-measured every form at `--nb-u` 1px and 2px, widths 260–520: all 32 or 64.
+
+**V32:** with `align-self: flex-start` on `.nb-reaches-line--label > .nb-reaches-bar`, all 520 rows that draw a bar
+centre it at 16 units, the middle of the first line (converge pass 2's trial of exactly this rule, then applied by the
+host with a RED first: `ReachesMovementPage.test.tsx`, "sets a labelled row's bar on its first line").
+
+**V27: mutants of `domain/patterns.rs`, by an agent that wrote none of the code.** Killed (25): the `movement` clamp
+upper `(0, dates-1)`→`(0, dates)` (2 new tests, as panics) and lower 0→1 (11); the same clamps in `for_each_piece`
+(4; 13); `ends > now`→`>=` (3 new); `dates > 0`→`>= 0`; `dates <= 56`→`< 56`; `dates % length > 0`→`>= 0` (25);
+`.min(length)`→`.max` (11); `reach.at < from`→`<=`; `reach.at >= to`→`>`; `unseen_part > 0`→`>= 0` (21) and `> 1`
+(4 new); `unseen_part >= seeable`→`>` (14); `row.count == 0`→`!= 0` (19); `to.min(now)`→`.max(now)` (7);
+`.max(range.from)`→`.min` (28); `begins.max(range.from)`→`.min` (19); `ends.min(end)`→`.max` (18);
+`gap_to.min(to)`→`.max` (7); `gap_from.max(from)`→`.min` (9); `ends <= begins`→`<` (1 new); `row == first_row`→`!=`
+(19); `row == last_row`→`!=` (20); `row_begins(row+1)`→`row_begins(row)` (24). Survivors argued equivalent under every
+input `check_offsets` accepts (9): `!unseen.is_empty()`→`true`; dropping `.max(range.from)` from `end`; dropping
+`begins.max(range.from)`; `to <= from`→`<`; gap `.1 <= from`→`<`; `gap_from >= to`→`>`; `change.from <= cursor`→`<`;
+`change.from < range.to`→`<=`; `row_at(ends - 1)`→`row_at(ends)`. Each is a zero-length piece or an unreachable
+input. Script: the session scratchpad's `mut.py`. Converge pass 2 re-ran five of them: each failed 2–4 tests.
+
 ## Convergence
 
 **Pass 1 of 2 (2026-10-02, at `f7aad64`): not converged.** One HIGH (V25) re-opens the loop; V26–V29 MEDIUM and
@@ -426,3 +490,62 @@ code; stale "absent" lines (V31).
 - **Tests first, ADD:** the driving-port scenarios enter through `AppState::summarize_reaches` (`us2_movement.rs`);
   RED independence not as planned (V27).
 - **I, IV, V, VII:** not touched: no control changes protection, no system file, no notification, nothing gated.
+
+**Pass 2 of 2, the confirming pass (2026-10-02, at `1133d75`): converged at the loop's bound, with one HIGH (V32)
+and one LOW (V33) owed before merge.** No finding is CRITICAL, so the loop stops here as bounded. V32 is a
+one-declaration fix that should land before V23's demo, so the demo checks it. Run on this branch:
+`patterns_movement` 58 (38 + V27's 20), `us2_movement` 33, `us2_by_site` 12, `us2_by_hour` 19, `us2_by_weekday`
+23, `range_allocation` 1, `patterns_at_scale` 1, `ipc_surface` 10 (all with `--features history`) green.
+`src/screens`, `src/look` and `dates` (68 files, 2 770 tests) green. `npm run check` (all eight guards) green. The
+full `make verify` was not run (V22's place).
+
+*Pass-1 findings, each confirmed as a class.*
+- **V25 closed.** Every name form x every clause x en-US/en-GB x `--nb-u` 1 and 2 x five widths, plus the *By day*
+  rows the shared `labelled()` markup now reaches: all 32 or 64 units, no name wraps. The fix took the bar off the
+  first line, though (V32, HIGH).
+- **V27 closed.** The two named mutants and three more, applied one at a time and restored, are each killed by
+  V27's examples (2 to 4 failures each). The evidence it cites is not on disk (V33, LOW).
+- **V28 closed.** `scripts/` is identical to `origin/main` (`ec64105`, #60 merged). A planted
+  `summary.movement` in `src/look/` is refused by `check-no-ambient-counts` (exit 1), then removed (exit 0). Pins
+  #59 and #60 are both on `main`.
+- **V30 closed.** The quiet-range rows are built from the calendar (`us2_by_site.rs` 326–348). The sweep finds no
+  expectation in `src-tauri/tests/` built from the answer: the two `patterns.sealed.clone()` hits read the value
+  under test, they do not build the expected one.
+- **V31 closed.** `ui-ipc.md` 266–268 names the three `movement`-absent statements (143, 215, 252) as ended. No other
+  "absent / not computed" line in either contract concerns this slice's field.
+- **V26, V29 left for the demo, as their text says:** V26 "before the demo" (*Design review* still `_pending_`);
+  V29's files are "the demo log and its evidence (V23)". Neither is closed here.
+
+*What the fixes introduced.* `labelled()` changes the *By day* rows' markup: its tests were updated (children
+counts, the label wrapper) and pass, and the bar placement is V32. `nothingFades.test.tsx`'s 30 s timeout hides
+nothing the slice caused. Its all-scenes test takes 1 016, 1 023 and 1 034 ms alone on this branch against 1 019,
+1 036 and 1 021 ms on `origin/main` (a detached worktree, three runs each, then removed). The timeout guards
+parallel load, not a slower render. (The commit's "about 4 s alone" is high: it measures about 1 s here.)
+
+*Levels.* **Domain** (`domain/patterns.rs` 370–548): the bounds at 419, 426, 437, 467, 505 are now held at their
+edges. **Use case** (`reflection/over_time.rs` 135): unchanged since pass 1, rows from reaches alone. **Delivery
+adapter** (`ipc/state.rs` 200, 224, 881; `src/ipc/reaches.ts`): unchanged, nine keys held. **Screen**
+(`Reaches.tsx` 104–117, 137–181, 419, 423–460; `tonight-page.css` 212–233): rows on the ruling, bar off the first
+line (V32); not timed at the widest range (V29, demo). **Published contract** (`ui-ipc.md` 256–283, `patterns.md`
+122–139): matches the code, stale lines pointed at.
+
+*Constitution (v1.5.0).*
+- **III Honest About Limits / FR-022:** a row Cairn did not see is never a zero: `patterns.rs` 437–442 (`None` only
+  when all seeable time is unseen and no reach), `Reaches.tsx` 154 and 446 (`absent` draws no count and no bar),
+  110 (*not seen*), 112 (*partly seen*), 113 and `patterns.rs` 426 (*so far*). `patterns.rs` 467: only time
+  before `now` is seeable. Rows before Cairn first counted read as seen (H5, owned by `first-counted`).
+- **VI Voice, no streak or day count:** rows named by date (`localDays.ts` 239–256), never numbered. The short-week
+  clause is `Reaches.tsx` 107–108. `check-banned-words` and `check-no-streaks` are clean. Mono only for clause and
+  count (`tonight-page.css` 199–206). The V25 rules add no colour, font or focus (`ReachesMovementPage.test.tsx`
+  356–370).
+- **SC-006 no ambient counts:** `movement` is read only in `Reaches.tsx` and `src/ipc/`. The guard that refuses it
+  elsewhere is `scripts/check-no-ambient-counts.mjs` 69, on `main`, seen refusing a planted read.
+- **FR-023 estimates:** never in a row (`over_time.rs` 135), stated on the view (`Reaches.tsx` 81–86, 407–409).
+- **FR-024 quiet:** *Nothing here for these days.* (`Reaches.tsx` 65, 419). Sealed is `[]` (`state.rs` 224).
+- **II Local-first:** no dependency added (no `Cargo.toml`, `Cargo.lock` or `package.json` in the diff).
+  `check-no-network-deps` is clean on 3 targets.
+- **Domain purity:** `movement` takes `now` and the offsets as values (`patterns.rs` 370–375).
+  `check-domain-purity` is clean.
+- **Tests first, ADD:** Track A's REDs were not independent (`plan.md` 668–674). V27's edge examples stand in, and
+  the mutants above confirm them.
+- **I, IV, V, VII:** not touched: nothing changes protection, no system file, no notification, nothing gated.

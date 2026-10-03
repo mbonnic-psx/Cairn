@@ -353,6 +353,14 @@ describe("a row keeps the notebook's ruling (V25)", () => {
     );
   });
 
+  it("sets a labelled row's bar on its first line, from the top, not centred on the whole row (V32)", () => {
+    // The base bar rule centres it (align-self: center); added to the 13-unit top margin, that put the bar's
+    // middle at 22.5 units of a 32-unit row and on the clause's line in a 64-unit one (measured in Chromium).
+    const bar = bodyOf('.nb-reaches-line--label > .nb-reaches-bar');
+    expect(bar).toMatch(/align-self:\s*flex-start/);
+    expect(bar).toMatch(/margin-top:\s*calc\(13 \* var\(--nb-u\)\)/);
+  });
+
   it("writes every length it adds in the notebook's unit, and adds no colour, font or focus", () => {
     const added = [
       '.nb-reaches-line--label',

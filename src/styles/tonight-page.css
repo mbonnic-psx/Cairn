@@ -228,7 +228,8 @@
   overflow-wrap: normal;
 }
 .nb-reaches-line--label > .nb-reaches-bar {
-  /* Centred on the row's first line: half of the pitch less half of the bar. */
+  /* Centred on the row's first line, set from the top: half of the pitch less half of the bar. */
+  align-self: flex-start;
   margin-top: calc(13 * var(--nb-u));
 }
 
