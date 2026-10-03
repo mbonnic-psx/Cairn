@@ -990,6 +990,8 @@ and 53–56 are the person on the reaches screen, with a fake reader written in 
 
 ### Open questions for the owner
 
+**Answered by the owner, 2026-10-02 ("do the recommended"): Q4 → M15, Q5 → M16, as recommended.**
+
 **Q4: what stands under "Cairn wasn't counting on these days."**
 
 M13 replaces the quiet sentence, but B5 put 24 hours at zero under it, and W3 shows all seven days.
@@ -1083,6 +1085,18 @@ The host lands these rows on `main` before the change does:
   `us2_movement.rs`);
 - `ipc_surface`;
 - `npm run check`.
+
+## After the demo: M12, when a row is partly seen
+
+M12 replaces rule 6's threshold. In `domain::patterns` (the coverage of each row, `patterns.rs` around 434–443), a row
+is `part` when its unseen seconds are **more than half** of its seeable seconds (`2 * unseen > seeable`, in integer
+arithmetic, saturating), where it was "any unseen second". Unchanged: `none` (every seeable second unseen and no reach);
+a row holding a reach is never `none` (Y23); `seeable` stops at `now` (rule 7). So a row with a reach that Cairn missed
+wholly is `part` (more than half). Exactly half is `whole`. The coverage note is untouched. Scenarios 57–61, through
+`AppState::summarize_reaches` and the domain: an 8-hour night in a day (whole); 13 hours unseen (part); exactly 12 hours
+(whole); today at 10:00 with 6 hours unseen of 10 (part); a week with two whole days unseen (whole, 2/7) and with four
+(part). The screen is unchanged: it draws `part` as before. The `proptest` "adding unseen time never makes a row more
+seen" still holds. Day by day is not on main, so no pin.
 
 ## Complexity Tracking
 

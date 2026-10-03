@@ -423,6 +423,15 @@ may be very long), and the decisions of the three views before it. Decided by th
 - **M14 — a range in a past year names its year (same message).** When a range does not lie wholly in the current
   year, its title and every row's date carry the year. A range wholly in the current year stays as it is. This holds
   for the title of all four views and for *Day by day*'s rows.
+- **M12 — when a row is *partly seen* (owner, after the demo, 2026-10-02: "do the recommended").** A row is *partly
+  seen* only when Cairn missed more than half of the time in it that has passed. A night with the computer off (about a
+  third of a day) does not mark it; a day Cairn missed most of does. The coverage note above the rows still states every
+  stretch Cairn was not running (H4). *Not seen* is unchanged (M5). This supersedes M5's "a row Cairn saw only part of".
+- **M15 — under "Cairn wasn't counting on these days." (same message).** *By hour* and *By day* show the sentence alone,
+  with no hours or days at zero under it: a zero would claim Cairn saw nothing there. *By site* shows none already.
+  *Day by day* keeps its dated rows, each *not seen*. This supersedes B5's and W3's zeros for that case only.
+- **M16 — the standing sentence (same message).** "Cairn counts only while it is running. This is what it saw over
+  these days." stays under every view, including a range Cairn saw none of (H5).
 
 Already stated, and held by this slice as written: no streak, day count or chain, and no "day N" (scenario 5) —
 rows are named by their dates, never numbered; everything is available with no journal entry ever written
