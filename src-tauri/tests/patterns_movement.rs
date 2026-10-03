@@ -1195,3 +1195,97 @@ fn a_clock_change_inside_a_weekly_row_sums_the_unseen_seconds_of_both_stretches(
         (Seen::Part, Seen::None, Seen::Part)
     );
 }
+
+// --- A reach on a later row's local midnight is in that row ---------------------------
+
+#[test]
+fn a_reach_on_a_dates_local_midnight_in_summer_time_is_in_that_dates_daily_row() {
+    // 2026-09-14 00:00 BST is 2026-09-13 23:00 UTC: the 14th's row, not the 13th's.
+    let midnight = date(2026, 9, 14).days_since_epoch() * DAY - HOUR;
+    let rows = london_summer(date(2026, 9, 5), date(2026, 10, 2), &reaches(&[midnight]));
+    assert_eq!(rows.len(), 28);
+    assert_eq!(holding(&rows, 1), [date(2026, 9, 14)]);
+}
+
+#[test]
+fn a_reach_on_a_dates_local_midnight_west_of_utc_is_in_that_dates_daily_row() {
+    // 2026-09-14 00:00 at four hours behind UTC is 04:00 UTC.
+    let offset = -4 * 3600;
+    let midnight = date(2026, 9, 14).days_since_epoch() * DAY + 4 * HOUR;
+    let rows = at_offset(
+        date(2026, 9, 5),
+        date(2026, 10, 2),
+        offset,
+        &[],
+        &reaches(&[midnight]),
+        i64::MAX / 2,
+    );
+    assert_eq!(holding(&rows, 1), [date(2026, 9, 14)]);
+}
+
+#[test]
+fn a_reach_on_a_weeks_first_local_midnight_is_in_that_week_not_the_one_before() {
+    // 57 dates from 2026-08-07: the second row begins on 2026-08-14. Its local
+    // midnight in summer time is 2026-08-13 23:00 UTC.
+    let midnight = date(2026, 8, 14).days_since_epoch() * DAY - HOUR;
+    let rows = london_summer(date(2026, 8, 7), date(2026, 10, 2), &reaches(&[midnight]));
+    assert_eq!(rows.len(), 9);
+    assert_eq!(rows[1].day, date(2026, 8, 14));
+    assert_eq!(counts(&rows), [0, 1, 0, 0, 0, 0, 0, 0, 0]);
+}
+
+#[test]
+fn a_reach_on_a_weeks_first_local_midnight_west_of_utc_is_in_that_week() {
+    let offset = -4 * 3600;
+    let midnight = date(2026, 8, 21).days_since_epoch() * DAY + 4 * HOUR;
+    let rows = at_offset(
+        date(2026, 8, 7),
+        date(2026, 10, 2),
+        offset,
+        &[],
+        &reaches(&[midnight]),
+        i64::MAX / 2,
+    );
+    assert_eq!(rows[2].day, date(2026, 8, 21));
+    assert_eq!(counts(&rows), [0, 0, 1, 0, 0, 0, 0, 0, 0]);
+}
+
+#[test]
+fn a_reach_on_the_first_local_midnight_after_springs_change_is_in_that_dates_row() {
+    // Clocks go forward at 01:00 UTC on 2026-03-29. 2026-03-30 00:00 BST is
+    // 2026-03-29 23:00 UTC: the 30th's row, not the 29th's.
+    let changes = [OffsetChange {
+        from: date(2026, 3, 29).days_since_epoch() * DAY + HOUR,
+        offset_seconds: 3600,
+    }];
+    let midnight = date(2026, 3, 30).days_since_epoch() * DAY - HOUR;
+    let rows = at_offset(
+        date(2026, 3, 23),
+        date(2026, 4, 19),
+        0,
+        &changes,
+        &reaches(&[midnight]),
+        i64::MAX / 2,
+    );
+    assert_eq!(holding(&rows, 1), [date(2026, 3, 30)]);
+}
+
+#[test]
+fn a_reach_on_the_first_local_midnight_after_autumns_change_is_in_that_dates_row() {
+    // Clocks go back at 01:00 UTC on 2026-10-25. 2026-10-26 00:00 GMT is
+    // 00:00 UTC: the 26th's row, not the 25th's.
+    let changes = [OffsetChange {
+        from: date(2026, 10, 25).days_since_epoch() * DAY + HOUR,
+        offset_seconds: 0,
+    }];
+    let midnight = date(2026, 10, 26).days_since_epoch() * DAY;
+    let rows = at_offset(
+        date(2026, 10, 19),
+        date(2026, 11, 15),
+        BST,
+        &changes,
+        &reaches(&[midnight]),
+        i64::MAX / 2,
+    );
+    assert_eq!(holding(&rows, 1), [date(2026, 10, 26)]);
+}
