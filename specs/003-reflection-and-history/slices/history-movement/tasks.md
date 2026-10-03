@@ -482,7 +482,7 @@ the loop.
   says *Thursday 31 December*. Recommendation: leave it. That day is at most yesterday and its weekday makes it
   unambiguous, and M14 names the four views' titles and *Day by day*'s rows. Ask the owner only if they want M14 to
   apply wherever a date is written. *Files:* none unless the owner extends M14 (`src/screens/CheckIn.tsx`).
-- [ ] V46 [US2] **LOW** [V29; the screen at scale] `OverTimeView` builds the rows twice on every render: once for
+- [x] V46 [US2] **LOW** [V29; the screen at scale] `OverTimeView` builds the rows twice on every render: once for
   `quiet` (`Reaches.tsx` 410) and again for `rows` (411). On *Day by day* at the widest range (100 534 weekly rows,
   V29) that doubles the work V29 is there to time. It is also built for `quiet` under M13's sentence when nothing
   reads it. *Sweep:* every value derived from `rowsOf` in `OverTimeView` comes from one call per render. Build the

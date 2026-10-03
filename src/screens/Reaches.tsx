@@ -407,8 +407,9 @@ function OverTimeView({
   const list = typeof answer === 'string' || answer.sealed ? null : answer;
   const unseen = list !== null && sawNone(list);
   // Under the sentence that Cairn saw none, only Day by day draws rows: each is true on its own.
-  const quiet = list ? isQuiet(rowsOf(list, seen, weekStart, todayDay)) : false;
-  const rows = list && (!unseen || seen === 'movement') ? rowsOf(list, seen, weekStart, todayDay) : [];
+  const all = list ? rowsOf(list, seen, weekStart, todayDay) : [];
+  const quiet = list ? isQuiet(all) : false;
+  const rows = !unseen || seen === 'movement' ? all : [];
   const largest = largestCount(rows);
   return (
     <>
