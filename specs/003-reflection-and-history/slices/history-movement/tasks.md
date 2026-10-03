@@ -455,20 +455,53 @@ input. Script: the session scratchpad's `mut.py`. Converge pass 2 re-ran five of
 No CRITICAL or HIGH. Every state named in its brief is pinned (56/57 dates, a weekly row wholly not seen, partly seen
 with so far, a year on a row, the quiet range with rows not seen).
 
-- [ ] V34 [US2] **MEDIUM** [M5; owner question at the demo] *Partly seen* is set by any unseen second
+- [x] V34 [US2] **MEDIUM** [M5; owner question at the demo] *Partly seen* is set by any unseen second
   (`domain/patterns.rs` 434–443), and a gap is recorded whenever Cairn starts after a stop (`counting/presence.rs`
   103–115), so a computer shut down overnight marks both dates *partly seen*: over weeks, nearly every row. Shown to
   the owner with the demo data's partial night; their answer decides whether the rule stands or a new one is made.
-- [ ] V35 [US2] **MEDIUM** [M8, FR-022, FR-024; owner question at the demo] A range with no seen time at all still
+- [x] V35 [US2] **MEDIUM** [M8, FR-022, FR-024; owner question at the demo] A range with no seen time at all still
   says "Nothing here for these days." above rows that all read *not seen* (`Reaches.tsx` 172, 419; screen test
   `ReachesMovement.test.tsx` 442). Inherited from by site and by hour; the extension was the plan's, not the owner's.
 - [x] V36 [US2] **LOW** A reach exactly on a later row's local midnight, under a non-zero offset, daily and weekly, is
   not pinned (only `range.from`, 23:59 and 00:01 are). *Sweep:* one example per span at `row_begins(k)`.
   *Files:* `src-tauri/tests/patterns_movement.rs`.
-- [ ] V37 [US2] **LOW** [owner question at the demo] A range wholly inside a past year names no year on its title or
+- [x] V37 [US2] **LOW** [owner question at the demo] A range wholly inside a past year names no year on its title or
   rows (`localDays.ts` `rangeInWords`, followed by `Reaches.tsx` 136–139); before this slice too, now up to 52 rows.
 - [x] V38 [US2] **LOW** The comment in `shortDateInWords` says `new Date(100, …)` reads year 100 as 2000; JavaScript
   remaps only years 0–99. Correct it. *Files:* `src/localDays.ts`.
+
+## Phase 5: After the demo (owner decisions M12–M16)
+
+Plan: *After the demo: M13 and M14* (rules 13–19, scenarios 42–56) and *After the demo: M12* (scenarios 57–61). Pins:
+the two rows of host PR #61; characterised first by C1–C3 (`289d573`). Two tracks, disjoint files, run concurrently.
+
+### Track A — the core
+
+- [ ] V39 [US2] [M12; rule 6 as superseded; scenarios 57–61] A row is *partly seen* only when Cairn missed more than half
+  of its seeable time (`2 * unseen > seeable`); exactly half is whole; a row holding a reach is never `none`.
+  RED: scenarios 57–61 in the domain and through `AppState::summarize_reaches`, and every existing example that used one
+  unseen second to mean `part` re-read against M12 (change its expectation, or its gap, and say which in the commit).
+  GREEN: the threshold in `domain/patterns.rs`. Keep the `proptest`s; update the contract sentence for `seen: "part"`.
+  *Files:* `src-tauri/src/domain/patterns.rs`, `src-tauri/tests/patterns_movement.rs`, `src-tauri/tests/us2_movement.rs`,
+  `specs/003-reflection-and-history/contracts/ui-ipc.md` (the `seen` bullet of the `history-movement` amendment only).
+
+### Track B — the screen
+
+- [ ] V40 [US2] [rules 13, 15, 16; M13, M15; scenarios 43–46, 48–50] *Cairn wasn't counting on these days.* where Cairn
+  saw none of the range, in all four views, judged once from `movement`; by hour and by day draw no rows under it;
+  day by day keeps its *not seen* rows; never from an empty, sealed or loading answer. RED: rewrite C1
+  (`ReachesUnseenRange.test.tsx`) to the new behaviour, plus scenarios 48–50. *Files:* `src/screens/Reaches.tsx`,
+  `src/screens/__tests__/ReachesUnseenRange.test.tsx`, `src/screens/__tests__/ReachesMovement.test.tsx`.
+- [ ] V41 [US2] [rule 14; scenarios 42, 47] Where Cairn saw any of the range, the quiet sentence and its rows are exactly as
+  before. Held by the existing quiet tests (`movement: []`) and C1's seen variant. *Files:* as V40.
+- [ ] V42 [US2] [rules 17, 18; M14; scenarios 52–56] The title and day by day's rows name the year when either date is
+  outside the current local year by the screen's `now`. RED: change C2's no-year case and C3 to the new behaviour, and add
+  the rows. *Files:* `src/localDays.ts`, `src/__tests__/localDays.test.ts`, `src/screens/Reaches.tsx`,
+  `src/screens/__tests__/ReachesOverTime.test.tsx`, `src/screens/__tests__/ReachesPage.test.tsx`,
+  `src/screens/__tests__/ReachesMovement.test.tsx`.
+- [ ] V43 [US2] [rule 19, M16; scenario 51] The standing sentence stays under every view, and both guards pass.
+  *Files:* as V40.
+- [ ] V44 `make -f delivery/Makefile verify` green, then the demo again (V23), the app stopped afterwards.
 
 ## Convergence
 
