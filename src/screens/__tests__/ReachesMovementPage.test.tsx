@@ -72,7 +72,12 @@ async function onPage(patterns: Patterns) {
   const user = userEvent.setup();
   const view = render(
     <NotebookShell tabs={tabs} onSelect={vi.fn()} look="midday">
-      <Reaches today={todayCases.sealed} read={readerOf(patterns)} now={now} firstDay={0} />
+      <Reaches
+        today={todayCases.sealed}
+        read={readerOf(patterns)}
+        now={now}
+        firstDay={0}
+      />
     </NotebookShell>,
   );
   const main = view.container.querySelector('main') as HTMLElement;
@@ -138,7 +143,11 @@ describe('the rows, on the right page', () => {
     expect(lines).toHaveLength(9);
     const first = lines[0]!;
     expect(first).toHaveClass('nb-reaches-line');
-    const [name, bar, count] = Array.from(first.children) as HTMLElement[];
+    const [label, bar, count] = Array.from(first.children) as HTMLElement[];
+    expect(label).toHaveClass('nb-reaches-label');
+    // A row with no clause is still a label: the name alone, so it too never wraps.
+    expect(label!.children).toHaveLength(1);
+    const name = label!.firstElementChild!;
     expect(name).toHaveClass('nb-reaches-site');
     expect(name).toHaveTextContent(weekOfInWords('2026-08-07', false));
     expect(bar).toHaveClass('nb-reaches-bar');
@@ -148,8 +157,8 @@ describe('the rows, on the right page', () => {
     expect(first.children).toHaveLength(3);
 
     const last = lines[8]!;
-    expect(last.children).toHaveLength(4);
-    const [, clause] = Array.from(last.children) as HTMLElement[];
+    expect(last.children).toHaveLength(3);
+    const [, clause] = Array.from(last.firstElementChild!.children) as HTMLElement[];
     expect(clause).toHaveClass('nb-reaches-time');
     expect(clause).toHaveTextContent('across 1 day, so far');
   });
@@ -163,8 +172,8 @@ describe('the rows, on the right page', () => {
 
     const line = within(right!).getAllByRole('listitem')[3]!;
     expect(line).toHaveClass('nb-reaches-line');
-    expect(line.children).toHaveLength(2);
-    const [name, clause] = Array.from(line.children) as HTMLElement[];
+    expect(line.children).toHaveLength(1);
+    const [name, clause] = Array.from(line.firstElementChild!.children) as HTMLElement[];
     expect(name).toHaveClass('nb-reaches-site');
     expect(name).toHaveTextContent(weekOfInWords('2026-08-28', false));
     expect(clause).toHaveClass('nb-reaches-time');
@@ -220,7 +229,13 @@ describe('the rows, on the right page', () => {
 
   it('are none, with the sentence on the left, when sealed', async () => {
     const { user, pages } = await onPage(
-      answer({ by_site: [], by_hour: [], by_weekday: [], movement: [], sealed: sealedSentence }),
+      answer({
+        by_site: [],
+        by_hour: [],
+        by_weekday: [],
+        movement: [],
+        sealed: sealedSentence,
+      }),
     );
     await user.click(choose('Day by day'));
     const [left, right] = pages();
@@ -255,12 +270,23 @@ describe('the rows, on the right page', () => {
 describe('the same words as outside any shell', () => {
   it.each([
     ['a list', answer()],
-    ['a note and estimates', answer({ coverage_note: rangeCoverageNote, estimates_excluded: 1 })],
-    ['not seen and so far', answer({ movement: weeks({ 2: { seen: 'none', count: 0 } }) })],
+    [
+      'a note and estimates',
+      answer({ coverage_note: rangeCoverageNote, estimates_excluded: 1 }),
+    ],
+    [
+      'not seen and so far',
+      answer({ movement: weeks({ 2: { seen: 'none', count: 0 } }) }),
+    ],
   ])('day by day: %s', async (_name, patterns) => {
     const user = userEvent.setup();
     const outside = render(
-      <Reaches today={todayCases.sealed} read={readerOf(patterns)} now={now} firstDay={0} />,
+      <Reaches
+        today={todayCases.sealed}
+        read={readerOf(patterns)}
+        now={now}
+        firstDay={0}
+      />,
     );
     await user.click(screen.getByRole('button', { name: 'Over time' }));
     await user.click(await screen.findByRole('button', { name: 'Day by day' }));
@@ -272,5 +298,74 @@ describe('the same words as outside any shell', () => {
     await pageUser.click(choose('Day by day'));
 
     expect(words(spread)).toEqual(expected);
+  });
+});
+
+/**
+ * V25: a row never breaks the ruling. jsdom lays nothing out, so this holds the rule's presence and its
+ * structure; that a row is then exactly 32 or 64 units is proved by the measurement in the task's evidence
+ * (a layout engine, every name form x every clause x en-US and en-GB x the smallest widths).
+ */
+const nodeFs = 'node:' + 'fs';
+const { readFileSync } = (await import(/* @vite-ignore */ nodeFs)) as {
+  readFileSync: (path: string, encoding: 'utf8') => string;
+};
+const sheet = readFileSync('src/styles/tonight-page.css', 'utf8').replace(
+  /\/\*[\s\S]*?\*\//g,
+  '',
+);
+const bodyOf = (selector: string): string =>
+  Array.from(sheet.matchAll(/([^{}]+)\{([^{}]*)\}/g))
+    .filter((m) => m[1]!.split(',').some((one) => one.trim() === selector))
+    .map((m) => m[2]!)
+    .join('');
+
+describe("a row keeps the notebook's ruling (V25)", () => {
+  it('lays the clause as its own element beside the name, not inside it', async () => {
+    const { user, pages } = await onPage(answer());
+    await user.click(choose('Day by day'));
+    const last = within(pages()[1]!).getAllByRole('listitem')[8]!;
+    const label = last.firstElementChild!;
+    const [name, clause] = Array.from(label.children);
+    expect(label).toHaveClass('nb-reaches-label');
+    expect(last).toHaveClass('nb-reaches-line--label');
+    expect(name).toHaveClass('nb-reaches-site');
+    expect(clause).toHaveClass('nb-reaches-time');
+    expect(name!.contains(clause!)).toBe(false);
+  });
+
+  it('keeps the name on one line and lets the clause drop under it', () => {
+    expect(bodyOf('.nb-reaches-label > .nb-reaches-site')).toMatch(
+      /white-space:\s*nowrap/,
+    );
+    expect(bodyOf('.nb-reaches-label > .nb-reaches-site')).toMatch(/flex:\s*0 0 auto/);
+    expect(bodyOf('.nb-reaches-label')).toMatch(/flex-wrap:\s*wrap/);
+    expect(bodyOf('.nb-reaches-label')).toMatch(/min-width:\s*0/);
+  });
+
+  it("keeps the clause's own line on the 32-unit pitch, with no row gap to push it off", () => {
+    expect(bodyOf('.nb-reaches-line')).toMatch(
+      /line-height:\s*calc\(32 \* var\(--nb-u\)\)/,
+    );
+    expect(bodyOf('.nb-reaches-label')).not.toMatch(/(^|[\s;])(row-gap|gap|padding|margin)\s*:/);
+    expect(bodyOf('.nb-reaches-label')).toMatch(
+      /column-gap:\s*calc\(12 \* var\(--nb-u\)\)/,
+    );
+  });
+
+  it("writes every length it adds in the notebook's unit, and adds no colour, font or focus", () => {
+    const added = [
+      '.nb-reaches-line--label',
+      '.nb-reaches-label',
+      '.nb-reaches-label > .nb-reaches-site',
+      '.nb-reaches-line--label > .nb-reaches-bar',
+    ]
+      .map(bodyOf)
+      .join('');
+    expect(added).not.toBe('');
+    for (const length of added.match(/[\d.]+(px|rem|em)\b/g) ?? [])
+      throw new Error(`a bare length: ${length}`);
+    expect(added).not.toMatch(/color|font|outline|focus/);
+    expect(sheet).not.toMatch(/\.nb-reaches-label[^{]*:focus/);
   });
 });

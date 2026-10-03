@@ -176,6 +176,14 @@ const rowsOf = (answer: Patterns, seen: Seen, weekStart: number): Row[] => {
   );
 };
 
+/**
+ * Whether a row's name and clause are laid as one label: the name on a line of its own that never wraps, the
+ * clause beside it or under it. Every row of Day by day, and a row of By day with a clause (the tonight page
+ * sheet says how it falls).
+ */
+const labelled = (row: Row, seen: Seen): boolean =>
+  row.clause !== undefined || seen === 'movement';
+
 /** Whether the view has nothing to count: no sites, or no reach in any hour. */
 const isQuiet = (rows: Row[]) => rows.every((row) => row.count === 0);
 
@@ -412,10 +420,28 @@ function OverTimeView({
             {rows.length > 0 && (seen !== 'site' || !isQuiet(rows)) && (
               <ul className="nb-reaches-log">
                 {rows.map((row) => (
-                  <li key={row.key} className="nb-reaches-line">
-                    <span className="nb-reaches-site">{row.name}</span>
-                    {row.clause !== undefined && (
-                      <span className="nb-reaches-time">{row.clause}</span>
+                  <li
+                    key={row.key}
+                    className={
+                      labelled(row, seen)
+                        ? 'nb-reaches-line nb-reaches-line--label'
+                        : 'nb-reaches-line'
+                    }
+                  >
+                    {labelled(row, seen) ? (
+                      <span className="nb-reaches-label">
+                        <span className="nb-reaches-site">{row.name}</span>
+                        {row.clause !== undefined && (
+                          <span className="nb-reaches-time">{row.clause}</span>
+                        )}
+                      </span>
+                    ) : (
+                      <>
+                        <span className="nb-reaches-site">{row.name}</span>
+                        {row.clause !== undefined && (
+                          <span className="nb-reaches-time">{row.clause}</span>
+                        )}
+                      </>
                     )}
                     {!row.absent && (
                       <>

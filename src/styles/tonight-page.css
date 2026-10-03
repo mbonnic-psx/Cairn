@@ -209,6 +209,29 @@
   min-width: 2ch;
   text-align: right;
 }
+/* Day by day: the name never wraps. It keeps one line beside the bar and count; the clause sits beside it when
+   it fits and drops onto the ruled line below, under the name, when it does not. A row is one line or two,
+   32 or 64 units, always on the pitch. */
+.nb-reaches-line--label {
+  align-items: flex-start;
+}
+.nb-reaches-label {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: calc(12 * var(--nb-u));
+}
+.nb-reaches-label > .nb-reaches-site {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  overflow-wrap: normal;
+}
+.nb-reaches-line--label > .nb-reaches-bar {
+  /* Centred on the row's first line: half of the pitch less half of the bar. */
+  margin-top: calc(13 * var(--nb-u));
+}
+
 /* "Nothing here…": where the first line of the log would begin. */
 .nb-reaches-empty {
   margin: 0;
