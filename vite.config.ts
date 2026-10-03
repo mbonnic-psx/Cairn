@@ -35,5 +35,9 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: ['./src/test-setup.ts'],
+    // One worker per core (32 here) runs ~3,000 jsdom tests so crowded that the
+    // whole-scene sweeps, 1-3 s alone, pass the 5 s timeout. Measured on main
+    // 2026-10-02: 32 workers, 155 failed in 76 s; 8 workers, all passed in 67 s.
+    maxWorkers: 8,
   },
 });
