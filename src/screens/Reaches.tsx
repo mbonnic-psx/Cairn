@@ -460,12 +460,8 @@ function OverTimeView({
                         )}
                       </span>
                     ) : (
-                      <>
-                        <span className="nb-reaches-site">{row.name}</span>
-                        {row.clause !== undefined && (
-                          <span className="nb-reaches-time">{row.clause}</span>
-                        )}
-                      </>
+                      // Unlabelled means no clause (`labelled`), so the name stands alone.
+                      <span className="nb-reaches-site">{row.name}</span>
                     )}
                     {!row.absent && (
                       <>

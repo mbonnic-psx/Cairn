@@ -1009,6 +1009,31 @@ fn now_exactly_at_a_rows_local_midnight_leaves_the_row_before_not_so_far() {
 }
 
 #[test]
+fn a_clock_change_one_second_before_midnight_ends_the_row_at_the_change() {
+    // The clock goes from UTC to +1 at 23:59:59 on 2026-01-05, so the 5th ends
+    // there: `now`, at that instant, is 00:59:59 on the 6th, and only the 6th is
+    // so far. No zone does this; the core accepts it, so it is held.
+    let midnight_6th = date(2026, 1, 6).days_since_epoch() * DAY;
+    let changes = [OffsetChange {
+        from: midnight_6th - 1,
+        offset_seconds: 3600,
+    }];
+    let range = LocalRange {
+        first_day: date(2026, 1, 5),
+        last_day: date(2026, 1, 7),
+        from: date(2026, 1, 5).days_since_epoch() * DAY,
+        to: date(2026, 1, 8).days_since_epoch() * DAY - HOUR,
+        first_offset: 0,
+        changes: &changes,
+    };
+    let rows = movement(&[], &range, &[], midnight_6th - 1);
+    assert_eq!(
+        rows.iter().map(|row| row.so_far).collect::<Vec<_>>(),
+        [false, true, true]
+    );
+}
+
+#[test]
 fn now_at_the_very_end_of_the_range_leaves_no_row_so_far() {
     let rows = four_weeks(&[], &[], 1_790_982_000);
     assert_eq!(so_far_of(&rows), Vec::<LocalDate>::new());

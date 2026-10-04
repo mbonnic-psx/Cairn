@@ -194,6 +194,7 @@ describe('namesYear', () => {
     ['2025-12-20', '2026-01-10', '2026-10-02', true],
     ['2026-12-04', '2026-12-31', '2027-01-01', true],
     ['2026-12-04', '2026-12-31', '2026-12-31', false],
+    ['2026-12-20', '2027-01-03', '2026-12-28', true],
   ])('%s to %s, today %s: %s', (first, last, today, expected) => {
     expect(namesYear(first, last, today)).toBe(expected);
   });

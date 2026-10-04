@@ -39,6 +39,11 @@ describe('the date in words', () => {
     expect(shortDateInWords('2026-10-01', false)).toMatch(/\b1\b/);
   });
 
+  it('refuses a day that is not written as YYYY-MM-DD', () => {
+    for (const day of ['2026-9-1', 'x2026-09-01', '2026-09-011'])
+      expect(() => shortDateInWords(day, false)).toThrow(/not a calendar date/);
+  });
+
   it('names a week by its first date', () => {
     expect(weekOfInWords('2026-10-06', false)).toBe(`week of ${expected(2026, 10, 6, false)}`);
     expect(weekOfInWords('2025-12-29', true)).toBe(`week of ${expected(2025, 12, 29, true)}`);
