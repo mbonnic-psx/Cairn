@@ -300,8 +300,21 @@ track waits for the other. Within a track no task is `[P]`.
 
 ## Design review
 
-Designed: _pending, written by V19 step 1_
-Reviewed: _pending, written by V19 step 4_
+Designed: 2026-10-04, by an agent (V26), after the build rather than before it. The `frontend-design` second pass was
+applied to *Day by day*'s lines: the notebook look's palette as it stands, row names in the page's serif, the clause and
+count as 12-unit Plex Mono labels in the quiet ink, the one warm bar set on the row's first line, and no colour for
+*seen* (*not seen* and *partly seen* are words). The longest clause, *across 3 days, partly seen, so far*, drops onto
+its own ruled line under a name that never wraps, so a row is 32 or 64 units; *Cairn wasn't counting on these days.*
+takes the empty-sentence slot, and year-named rows (*week of Dec 29, 2025*) keep one line at 337 and 294 units wide.
+Reviewed: 2026-10-04, by an agent (V26), against `web-interface-guidelines` (every section), on the notebook page in
+headless Chromium with the app's own CSS and a fake core, in morning, midday and night at 1280×800 and 800×600 (there
+is no card form after the reveal). The clause and *not seen* measure 5.88:1 (morning, midday) and 5.34:1 (night) on the
+paper; the *Seen by* focus ring is a 2px ink outline (12.8–14.1:1); Tab moves Which days → From/To → Seen by and leaves,
+with no trap; the bar is `aria-hidden` and the count is text; a *not seen* row reads as name plus *not seen*, never 0;
+nothing on the page moves; the banned-words, no-streaks and ambient-counts guards are clean. No HIGH: one MEDIUM (V47)
+and one LOW (V48) carried; the rest were already owned (Q2's two date orders, the straight apostrophe in the owner's
+words, V29's windowing) or older than the slice (the right page's list has no name or live region, every view).
+Screenshots: `~/.cache/cairn-scratch/v26/`.
 
 ## Parallel opportunities
 
@@ -345,7 +358,7 @@ Appended by convergence pass 1 of 2 (2026-10-02, at `f7aad64`). Only CRITICAL an
   decision): at the least, the measured table goes into the demo evidence under V23.
   *Files:* `src/styles/tonight-page.css`, `src/screens/Reaches.tsx` (row markup only, if the chosen form needs it),
   `src/screens/__tests__/ReachesMovementPage.test.tsx`.
-- [ ] V26 [US2] **MEDIUM** [V19 steps 1 and 4] V19 is ticked while *Design review* still reads `Designed: _pending_`
+- [x] V26 [US2] **MEDIUM** [V19 steps 1 and 4] V19 is ticked while *Design review* still reads `Designed: _pending_`
   and `Reviewed: _pending_`: the `frontend-design` second pass and the `web-interface-guidelines` review were not
   recorded, and V25 is what the first would have caught. *Sweep:* every ticked task in this file whose text requires
   a written record (V19's two lines, V1's log, V4's recorded refusal, V20's note) has it, or is un-ticked. Write
@@ -473,7 +486,7 @@ with so far, a year on a row, the quiet range with rows not seen).
 Appended by the convergence pass after the demo (2026-10-03, at `2a9d796`; Phase 5 only). Only a CRITICAL re-opens
 the loop.
 
-- [ ] V45 [US2] **LOW** [M14; scope question for the owner, not a fix] M14 reaches every date the *Over time* view
+- [x] V45 [US2] **LOW** [M14; scope question for the owner, not a fix] M14 reaches every date the *Over time* view
   writes: the title (`Reaches.tsx` 416) and *Day by day*'s rows (148–157), both through `namesYear`
   (`localDays.ts` 92). *Sweep of every other date written:* the *Today* header is the word *Today* (`Reaches.tsx`
   313, 322); both coverage notes give a length and no date (`store/gaps.rs` 128–164); the *From*/*To* boxes are
@@ -482,12 +495,24 @@ the loop.
   says *Thursday 31 December*. Recommendation: leave it. That day is at most yesterday and its weekday makes it
   unambiguous, and M14 names the four views' titles and *Day by day*'s rows. Ask the owner only if they want M14 to
   apply wherever a date is written. *Files:* none unless the owner extends M14 (`src/screens/CheckIn.tsx`).
+  *Closed 2026-10-04 by D1 (`../../decisions.md`): left as it is, on the recommendation.*
 - [x] V46 [US2] **LOW** [V29; the screen at scale] `OverTimeView` builds the rows twice on every render: once for
   `quiet` (`Reaches.tsx` 410) and again for `rows` (411). On *Day by day* at the widest range (100 534 weekly rows,
   V29) that doubles the work V29 is there to time. It is also built for `quiet` under M13's sentence when nothing
   reads it. *Sweep:* every value derived from `rowsOf` in `OverTimeView` comes from one call per render. Build the
   rows once and judge `quiet` from them (on *By site* and the others, an empty list under the M13 sentence is never
   read as quiet, because `unseen` comes first at 438). *Files:* `src/screens/Reaches.tsx`.
+
+Appended by V26's design review (2026-10-04). Neither re-opens the loop; both are carried to `first-counted`, which
+edits `Reaches.tsx`'s rows next.
+
+- [ ] V47 [US2] **MEDIUM** [V26 finding 1; carried to `first-counted`] A row's count has no unit for a screen reader,
+  and with the year-named rows the item's text runs together (*week of Nov 3, 20255*: the year, then the count 5).
+  Add a visually hidden *reach*/*reaches* inside the count span (`sr-only`, `NotebookShell.tsx` 37), every view.
+  *Files:* `src/screens/Reaches.tsx`, its tests.
+- [ ] V48 [US2] **LOW** [V26 finding 2; carried to `first-counted`] Counts are not grouped (*1234*), and a wider count
+  moves its bar's start, against `tonight-page.css` 194–195. `toLocaleString()` and a fixed `min-width` for the count.
+  *Files:* `src/screens/Reaches.tsx`, `src/styles/tonight-page.css`, their tests.
 
 ## Phase 5: After the demo (owner decisions M12–M16)
 
