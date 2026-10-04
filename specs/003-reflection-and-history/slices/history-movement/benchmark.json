@@ -648,6 +648,72 @@
         "driver": "cruise",
         "outcome": "behaviour"
       }
+    },
+    {
+      "stage": "adversary",
+      "started": "2026-10-04T05:12:41Z",
+      "planned": "adversary: strong → host model — `strong` maps to the host model",
+      "tasks": {
+        "start": {
+          "open": 3,
+          "done": 45
+        },
+        "end": {
+          "open": 3,
+          "done": 45
+        }
+      },
+      "ended": "2026-10-04T05:18:56Z",
+      "seconds": 375,
+      "span": {
+        "from": {
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/23450b4b-4759-42e8-8ec2-16a744743411.jsonl": 810690,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/23450b4b-4759-42e8-8ec2-16a744743411/subagents/agent-a3a13295d0bc3e4f4.jsonl": 1780655,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/23450b4b-4759-42e8-8ec2-16a744743411/subagents/agent-adef7c790f2bad2af.jsonl": 2814585
+        },
+        "to": {
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/23450b4b-4759-42e8-8ec2-16a744743411.jsonl": 852916,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/23450b4b-4759-42e8-8ec2-16a744743411/subagents/agent-a2c817b2bc323b01f.jsonl": 516039,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/23450b4b-4759-42e8-8ec2-16a744743411/subagents/agent-a3a13295d0bc3e4f4.jsonl": 1780655,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/23450b4b-4759-42e8-8ec2-16a744743411/subagents/agent-adef7c790f2bad2af.jsonl": 2814585
+        }
+      },
+      "usage": {
+        "source": "claude",
+        "session": "23450b4b-4759-42e8-8ec2-16a744743411",
+        "read": "message.usage on each assistant line, once per requestId",
+        "host": {
+          "claude-opus-5-5": {
+            "input": 4,
+            "output": 3120,
+            "cache_read": 252557,
+            "cache_creation": 5538
+          }
+        },
+        "subagents": {
+          "claude-opus-5-5": {
+            "input": 50,
+            "output": 1387,
+            "cache_read": 1745413,
+            "cache_creation": 108114
+          }
+        },
+        "agents": [
+          "drive-adversary"
+        ]
+      },
+      "ran": [
+        "claude-opus-5-5"
+      ],
+      "agents": [
+        "drive-adversary"
+      ],
+      "delegated": true,
+      "signals": {
+        "driver": "cruise",
+        "findings": 0,
+        "seams": 1
+      }
     }
   ]
 }
