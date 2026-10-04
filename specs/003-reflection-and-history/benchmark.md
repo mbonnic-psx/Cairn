@@ -1,15 +1,17 @@
 # Benchmark — 003-reflection-and-history
 
-Drawn 2026-10-02T17:37:06Z at `0408593` from 4 record(s) under `specs/003-reflection-and-history/` by `scripts/agents/benchmark.py overview`; `/benchmark` redraws it, and so does closing a slice. Regenerated whole, never edited: the records beside each slice are the source.
+Drawn 2026-10-04T06:31:29Z at `864fed9` from 6 record(s) under `specs/003-reflection-and-history/` by `scripts/agents/benchmark.py overview`; `/benchmark` redraws it, and so does closing a slice. Regenerated whole, never edited: the records beside each slice are the source.
 
 ## Slices
 
-4 slice(s) recorded, 7h58m in all.
+6 slice(s) recorded, 19h07m in all.
 
 | slice | delegate/cycle | wall | in | out | models | sessions | converge | +tasks | gaps | mutation | adversary | demo | verify✗ | rework | tasks | files | ±lines |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | history-by-hour | rule/rule, story/rule | 1h32m | 43.4M | 25.5k | claude-opus-5-5, claude-sonnet-5-5 | 1 | 2 | 3 | 0/0 | interface 94.68% before closing (one gap killed, two equivalent); core 53/54 viable, 1 Tauri wrapper app-only | 3 | — | 0 | 0 | 25 | 39 | +4300/-155 |
 | history-by-site | rule/rule, story/rule | 2h03m | 44.7M | 32.9k | claude-opus-5-5, claude-sonnet-5-5 | 1 | 1 | 4 | 0/0 | interface 97.07% (Stryker, scoped, TZ=Europe/London); core 107/108 viable caught, 1 Tauri wrapper app-only | 5 | — | 0 | 0 | 26 | 48 | +4450/-101 |
+| history-by-weekday | story/rule | 1h27m | 44.7M | 23.7k | claude-opus-5-5, claude-sonnet-5-5 | 1 | 1 | 2 | 0/0 | interface 96.92% (Stryker, 5 zone runs merged; every survivor equivalent, a class name or a key); core 28/29 viable, the miss equivalent | 1 | — | 1 | 0 | 24 | 34 | +3597/-131 |
+| history-movement | story/rule | 9h41m | 75.3M | 89.8k | claude-opus-5-5, claude-sonnet-5-5 | 2 | 2 | 11 | 8/0 | — | 0 | behaviour | 5 | 0 | 48 | 97 | +18781/-77 |
 | quote | none/rule, rule/rule | 2h56m | 53.6M | 43.8k | claude-opus-5-5, claude-sonnet-5-5 | 1 | 2 | 7 | 0/0 | interface 95.86% (Stryker, scoped); core 29/32 live (7 wrappers app-only), dead quote() removed | 6 | — | 1 | 0 | 19 | 94 | +11149/-674 |
 | write-tonight | rule/rule | 1h26m | 42.6M | 45.5k | claude-opus-5-5, claude-sonnet-5-5 | 1 | 0 | 0 | 0/0 | interface 96.96% (Stryker, scoped); core 22/24 viable | 10 | — | 0 | 0 | 16 | 49 | +5816/-604 |
 
@@ -39,6 +41,32 @@ delegate/cycle = how implementation was delegated and driven; in = input + cache
 | adversary | 2026-10-02 03:01 | 19m35s | 6.2M | 6.2k | claude-opus-5-5 | drive-adversary | yes | findings=5, seams=1 |
 | implement | 2026-10-02 03:21 | 9m58s | 7.8M | 4.8k | claude-opus-5-5, claude-sonnet-5-5 | drive-implement | yes | verify_failures=0, delegate=rule, cycle=rule, split=0 |
 | mutation | 2026-10-02 03:31 | 1h09m | 12.2M | 7.6k | claude-opus-5-5, claude-sonnet-5-5 | drive-implement | yes | mutation_score=interface 97.07% (Stryker, scoped, TZ=Europe/London); core 107/108 viable caught, 1 Tauri wrapper app-only |
+
+### history-by-weekday — 1h27m
+
+| stage | started (UTC) | wall | in | out | model | agent | delegated | reported |
+|---|---|---|---|---|---|---|---|---|
+| implement | 2026-10-02 17:39 | 32m21s | 24.5M | 8.9k | claude-opus-5-5, claude-sonnet-5-5 | drive-implement | yes | verify_failures=1, delegate=story, cycle=rule, split=0 |
+| converge | 2026-10-02 18:11 | 5m49s | 5M | 3.4k | claude-opus-5-5 | drive-converge | yes | — |
+| adversary | 2026-10-02 18:36 | 10m49s | 9.9M | 7.9k | claude-opus-5-5, claude-sonnet-5-5 | drive-adversary, drive-implement | yes | findings=1, seams=1 |
+| mutation | 2026-10-02 18:47 | 38m59s | 5.3M | 3.4k | claude-opus-5-5, claude-sonnet-5-5 | drive-implement, drive-mutation | yes | mutation_score=interface 96.92% (Stryker, 5 zone runs merged; every survivor equivalent, a class name or a key); core 28/29 viable, the miss equivalent |
+
+### history-movement — 9h41m
+
+| stage | started (UTC) | wall | in | out | model | agent | delegated | reported |
+|---|---|---|---|---|---|---|---|---|
+| gaps | 2026-10-02 20:36 | 11m40s | 702.5k | 3k | claude-opus-5-5 | — | no | gaps=8 |
+| plan | 2026-10-02 20:48 | 13m51s | 8.2M | 3.6k | claude-opus-5-5 | general-purpose | yes | — |
+| tasks | 2026-10-02 21:17 | 9m49s | 1.4M | 3.1k | claude-opus-5-5, claude-sonnet-5-5 | drive-tasks | yes | — |
+| implement | 2026-10-02 21:27 | 5h03m | 15M | 12.8k | claude-opus-5-5, claude-sonnet-5-5 | drive-implement | yes | verify_failures=2, delegate=story, cycle=rule, split=0 |
+| converge | 2026-10-03 02:30 | 25m29s | 19.3M | 19.2k | claude-opus-5-5, claude-sonnet-5-5 | drive-converge, drive-implement | yes | — |
+| demo | 2026-10-03 03:01 | 42m08s | 1M | 3.5k | claude-opus-5-5 | — | no | outcome=behaviour |
+| implement | 2026-10-03 04:18 | 42m50s | 12.3M | 17.7k | claude-opus-5-5, claude-sonnet-5-5 | drive-implement | yes | verify_failures=3, delegate=story, cycle=rule, split=0 |
+| converge | 2026-10-03 05:00 | 38m16s | 4M | 4.4k | claude-opus-5-5 | drive-converge | yes | — |
+| hand | 2026-10-04 04:55 | 16m36s | 6.3M | 8.8k | claude-opus-5-5 | drive-hand | yes | driver=cruise, outcome=behaviour |
+| adversary | 2026-10-04 05:12 | 6m15s | 2.1M | 4.5k | claude-opus-5-5 | drive-adversary | yes | driver=cruise, findings=0, seams=1 |
+| mutation | 2026-10-04 05:19 | 1h08m | 3.2M | 3.7k | claude-opus-5-5, claude-sonnet-5-5 | drive-mutation | yes | — |
+| implement | 2026-10-04 06:28 | 1m48s | 1.7M | 5.5k | claude-opus-5-5 | — | no | driver=cruise, red=observed |
 
 ### quote — 2h56m
 
@@ -70,6 +98,7 @@ delegate/cycle = how implementation was delegated and driven; in = input + cache
 - history-by-hour: implemented as rule/rule and story/rule — its wall compares with neither
 - history-by-site: implemented as rule/rule and story/rule — its wall compares with neither
 - quote: implemented as none/rule and rule/rule — its wall compares with neither
+- history-movement mutation: cut off — a new `implement` entry started while it was open; its wall is real, its signals were never reported
 
 ## Reading these numbers
 
