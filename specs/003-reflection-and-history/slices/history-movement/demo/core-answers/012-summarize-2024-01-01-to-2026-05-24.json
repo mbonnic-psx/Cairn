@@ -1,0 +1,289 @@
+{
+  "answer": {
+    "by_hour": [
+      {
+        "count": 0,
+        "hour": 0
+      },
+      {
+        "count": 0,
+        "hour": 1
+      },
+      {
+        "count": 0,
+        "hour": 2
+      },
+      {
+        "count": 0,
+        "hour": 3
+      },
+      {
+        "count": 0,
+        "hour": 4
+      },
+      {
+        "count": 0,
+        "hour": 5
+      },
+      {
+        "count": 0,
+        "hour": 6
+      },
+      {
+        "count": 0,
+        "hour": 7
+      },
+      {
+        "count": 0,
+        "hour": 8
+      },
+      {
+        "count": 30,
+        "hour": 9
+      },
+      {
+        "count": 24,
+        "hour": 10
+      },
+      {
+        "count": 0,
+        "hour": 11
+      },
+      {
+        "count": 18,
+        "hour": 12
+      },
+      {
+        "count": 0,
+        "hour": 13
+      },
+      {
+        "count": 12,
+        "hour": 14
+      },
+      {
+        "count": 0,
+        "hour": 15
+      },
+      {
+        "count": 6,
+        "hour": 16
+      },
+      {
+        "count": 0,
+        "hour": 17
+      },
+      {
+        "count": 0,
+        "hour": 18
+      },
+      {
+        "count": 0,
+        "hour": 19
+      },
+      {
+        "count": 0,
+        "hour": 20
+      },
+      {
+        "count": 0,
+        "hour": 21
+      },
+      {
+        "count": 0,
+        "hour": 22
+      },
+      {
+        "count": 0,
+        "hour": 23
+      }
+    ],
+    "by_site": [
+      {
+        "count": 36,
+        "domain": "reddit.com"
+      },
+      {
+        "count": 24,
+        "domain": "youtube.com"
+      },
+      {
+        "count": 18,
+        "domain": "x.com"
+      },
+      {
+        "count": 12,
+        "domain": "instagram.com"
+      }
+    ],
+    "by_weekday": [
+      {
+        "count": 15,
+        "days": 125,
+        "weekday": 0
+      },
+      {
+        "count": 15,
+        "days": 125,
+        "weekday": 1
+      },
+      {
+        "count": 14,
+        "days": 125,
+        "weekday": 2
+      },
+      {
+        "count": 13,
+        "days": 125,
+        "weekday": 3
+      },
+      {
+        "count": 12,
+        "days": 125,
+        "weekday": 4
+      },
+      {
+        "count": 11,
+        "days": 125,
+        "weekday": 5
+      },
+      {
+        "count": 10,
+        "days": 125,
+        "weekday": 6
+      }
+    ],
+    "coverage_note": "Cairn was not running for about 21 days across these days, so anything you reached for then is not here. This is what Cairn saw, not everything that happened.",
+    "dst_approximate": false,
+    "estimates_excluded": 0,
+    "gaps": [
+      {
+        "from": 1777870800,
+        "to": 1779685200
+      }
+    ],
+    "movement": [
+      {
+        "count": 0,
+        "day": "2024-01-01",
+        "days": 7,
+        "seen": "whole",
+        "so_far": false,
+        "span": "week"
+      },
+      {
+        "count": 0,
+        "day": "2024-01-08",
+        "days": 7,
+        "seen": "whole",
+        "so_far": false,
+        "span": "week"
+      },
+      {
+        "count": 0,
+        "day": "2024-01-15",
+        "days": 7,
+        "seen": "whole",
+        "so_far": false,
+        "span": "week"
+      },
+      {
+        "count": 0,
+        "day": "2024-01-22",
+        "days": 7,
+        "seen": "whole",
+        "so_far": false,
+        "span": "week"
+      },
+      {
+        "count": 0,
+        "day": "2024-01-29",
+        "days": 7,
+        "seen": "whole",
+        "so_far": false,
+        "span": "week"
+      },
+      "... 115 rows not copied into this log ...",
+      {
+        "count": 0,
+        "day": "2026-04-20",
+        "days": 7,
+        "seen": "whole",
+        "so_far": false,
+        "span": "week"
+      },
+      {
+        "count": 0,
+        "day": "2026-04-27",
+        "days": 7,
+        "seen": "whole",
+        "so_far": false,
+        "span": "week"
+      },
+      {
+        "count": 0,
+        "day": "2026-05-04",
+        "days": 7,
+        "seen": "none",
+        "so_far": false,
+        "span": "week"
+      },
+      {
+        "count": 0,
+        "day": "2026-05-11",
+        "days": 7,
+        "seen": "none",
+        "so_far": false,
+        "span": "week"
+      },
+      {
+        "count": 0,
+        "day": "2026-05-18",
+        "days": 7,
+        "seen": "none",
+        "so_far": false,
+        "span": "week"
+      }
+    ],
+    "movement_len_in_answer": 125,
+    "sealed": null
+  },
+  "answer_bytes": 11750,
+  "asked_at": 1791090252,
+  "core_ms": 0.828603,
+  "request": {
+    "args": {
+      "firstDay": "2024-01-01",
+      "lastDay": "2026-05-24",
+      "offsets": [
+        {
+          "from": 1704088800,
+          "offset": -21600
+        },
+        {
+          "from": 1710057600,
+          "offset": -18000
+        },
+        {
+          "from": 1730617200,
+          "offset": -21600
+        },
+        {
+          "from": 1741507200,
+          "offset": -18000
+        },
+        {
+          "from": 1762066800,
+          "offset": -21600
+        },
+        {
+          "from": 1772956800,
+          "offset": -18000
+        }
+      ],
+      "rangeEnd": 1779685200,
+      "rangeStart": 1704088800
+    },
+    "cmd": "summarize_reaches"
+  }
+}

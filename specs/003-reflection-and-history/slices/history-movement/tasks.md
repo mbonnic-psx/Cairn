@@ -288,7 +288,7 @@ track waits for the other. Within a track no task is `[P]`.
   `npm run lint` and `npm run build` green; `cargo fmt --all` and `cargo clippy --all-targets -- -D warnings` clean;
   V1's runs green again. Run `make smoke` if `main.rs` or the composition changed (the plan says neither does). *Files:*
   none.
-- [ ] V23 [US2] [demo] In the running app, on every platform at hand: a reach's row on *Day by day* is the date *Today*
+- [x] V23 [US2] [demo] In the running app, on every platform at hand: a reach's row on *Day by day* is the date *Today*
   lists it under; a reach just after midnight is in that day's row; widen to 9 weeks and the rows are weeks named by
   their first date, the last short and saying how many days; a stretch Cairn was not running reads *not seen* with no
   count; today reads *so far*; the date is written as the computer writes it. This is where the plan's *assumed* is
@@ -381,12 +381,15 @@ Appended by convergence pass 1 of 2 (2026-10-02, at `f7aad64`). Only CRITICAL an
   field outside the reaches screen. *Sweep:* every guard or pin this slice's tasks claim (V1's pins, V4's guard,
   pin rows 1–4) is on `main` or in this diff before this slice merges. Merge #60 first, or state the order in this
   slice's PR. *Files:* none of this slice's.
-- [ ] V29 [US2] **MEDIUM** [M11, R5; the screen at scale] The core's widest answer is measured (100 534 rows inside
+- [x] V29 [US2] **MEDIUM** [M11, R5; the screen at scale] The core's widest answer is measured (100 534 rows inside
   1 000 ms) but the screen drawing them is not: `Reaches.tsx` renders one `<li>` per row with no windowing, and a
   person can type *0100* in *From*. *Sweep:* every view whose row count grows with the range (today only *Day by
   day*) is timed in the running app at the widest range the screen sends. If it stalls, the remedy (a coarser span,
   windowing, or the range starting at `first-counted`, H5) is the owner's decision, handed back, not chosen here.
   *Files:* the demo log and its evidence (V23).
+  *Closed 2026-10-04 (`demo/v29-timing.json`):* it stalls. The widest range is 1000-01-01 (`isLocalDate` refuses
+  earlier years), 53 574 weekly rows: core 64 ms, in the page at 458 ms, rows drawn at 10 269 ms with the page blocked
+  up to 9 812 ms, coming back to *Day by day* 17 137 ms. Carried to `first-counted` under M11 (D3).
 - [x] V30 [US2] **LOW** [lead d] `us2_by_site.rs` line 328, the quiet-range test, copies `movement` from the answer into
   its expectation, so that test holds nothing about the rows (they are proved at
   `us2_movement.rs::no_reaches_still_28_rows_at_zero_never_an_empty_list`, line 325). *Sweep:* no expectation in
@@ -545,7 +548,7 @@ the two rows of host PR #61; characterised first by C1–C3 (`289d573`). Two tra
   `src/screens/__tests__/ReachesMovement.test.tsx`.
 - [x] V43 [US2] [rule 19, M16; scenario 51] The standing sentence stays under every view, and both guards pass.
   *Files:* as V40.
-- [ ] V44 `make -f delivery/Makefile verify` green, then the demo again (V23), the app stopped afterwards.
+- [x] V44 `make -f delivery/Makefile verify` green, then the demo again (V23), the app stopped afterwards.
 
 ## Convergence
 

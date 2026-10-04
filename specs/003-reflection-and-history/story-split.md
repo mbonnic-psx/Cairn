@@ -59,6 +59,10 @@ command, apart from `quote` and `one-day`, which both edit `CheckIn.tsx`. Run th
   sealed state is what a Linux user sees, which is why `write-tonight` treats the sealed state as a first-class
   path rather than an error.
 
+- `first-counted` decides, with `history-movement`'s V29 measurement, whether a range starts no earlier than Cairn's
+  first count: at the widest range the screen sends (1000-01-01), *Day by day* blocks the page for about 10 s
+  (`decisions.md` D3, M11). It also takes V47 and V48, the count's unit for a screen reader and its grouping (D2).
+
 ## History, split (2026-10-01)
 
 Split by **rule** (SPIDR): each breakdown is a rule a person can use alone, and the range and the screen are

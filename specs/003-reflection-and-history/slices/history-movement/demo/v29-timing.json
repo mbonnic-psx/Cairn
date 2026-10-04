@@ -1,0 +1,20 @@
+{
+  "measured_at": "2026-10-04T00:06:26-05:00",
+  "where": "Chromium (agent-browser 0.38.1, headless) on WSL2, viewport 1280x800, Vite dev build, answers from the real core over 127.0.0.1 HTTP (not Tauri IPC); the WebKitGTK webview was not timed",
+  "widest_range_the_screen_sends": "1000-01-01 to 2026-10-04 (isLocalDate refuses any year before 1000: 0100-01-01 snaps the From box back and sends nothing)",
+  "rows": 53574,
+  "core_ms_inside_summarize_reaches": 63.7,
+  "answer_bytes": 4501651,
+  "ms_input_to_answer_in_page": 458,
+  "ms_input_to_rows_on_page": 10269,
+  "longest_main_thread_block_ms": 9812,
+  "after_drawn": {
+    "scroll_to_today_ms": 59,
+    "scroll_to_middle_ms": 37,
+    "switch_to_by_site_ms": 1099,
+    "switch_to_by_hour_ms": 32,
+    "switch_back_to_day_by_day_ms": 17137,
+    "leave_to_today_ms": 940
+  },
+  "not_reachable": "0100-01-01 to today (about 100 534 rows), the plan's widest range: the screen does not send it"
+}

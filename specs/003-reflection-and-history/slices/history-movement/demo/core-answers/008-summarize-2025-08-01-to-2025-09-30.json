@@ -1,0 +1,254 @@
+{
+  "answer": {
+    "by_hour": [
+      {
+        "count": 0,
+        "hour": 0
+      },
+      {
+        "count": 0,
+        "hour": 1
+      },
+      {
+        "count": 0,
+        "hour": 2
+      },
+      {
+        "count": 0,
+        "hour": 3
+      },
+      {
+        "count": 0,
+        "hour": 4
+      },
+      {
+        "count": 0,
+        "hour": 5
+      },
+      {
+        "count": 0,
+        "hour": 6
+      },
+      {
+        "count": 0,
+        "hour": 7
+      },
+      {
+        "count": 0,
+        "hour": 8
+      },
+      {
+        "count": 30,
+        "hour": 9
+      },
+      {
+        "count": 24,
+        "hour": 10
+      },
+      {
+        "count": 0,
+        "hour": 11
+      },
+      {
+        "count": 18,
+        "hour": 12
+      },
+      {
+        "count": 0,
+        "hour": 13
+      },
+      {
+        "count": 12,
+        "hour": 14
+      },
+      {
+        "count": 0,
+        "hour": 15
+      },
+      {
+        "count": 6,
+        "hour": 16
+      },
+      {
+        "count": 0,
+        "hour": 17
+      },
+      {
+        "count": 0,
+        "hour": 18
+      },
+      {
+        "count": 0,
+        "hour": 19
+      },
+      {
+        "count": 0,
+        "hour": 20
+      },
+      {
+        "count": 0,
+        "hour": 21
+      },
+      {
+        "count": 0,
+        "hour": 22
+      },
+      {
+        "count": 0,
+        "hour": 23
+      }
+    ],
+    "by_site": [
+      {
+        "count": 36,
+        "domain": "reddit.com"
+      },
+      {
+        "count": 24,
+        "domain": "youtube.com"
+      },
+      {
+        "count": 18,
+        "domain": "x.com"
+      },
+      {
+        "count": 12,
+        "domain": "instagram.com"
+      }
+    ],
+    "by_weekday": [
+      {
+        "count": 15,
+        "days": 9,
+        "weekday": 0
+      },
+      {
+        "count": 15,
+        "days": 9,
+        "weekday": 1
+      },
+      {
+        "count": 14,
+        "days": 8,
+        "weekday": 2
+      },
+      {
+        "count": 13,
+        "days": 8,
+        "weekday": 3
+      },
+      {
+        "count": 12,
+        "days": 9,
+        "weekday": 4
+      },
+      {
+        "count": 11,
+        "days": 9,
+        "weekday": 5
+      },
+      {
+        "count": 10,
+        "days": 9,
+        "weekday": 6
+      }
+    ],
+    "coverage_note": null,
+    "dst_approximate": false,
+    "estimates_excluded": 0,
+    "gaps": [],
+    "movement": [
+      {
+        "count": 0,
+        "day": "2025-08-01",
+        "days": 7,
+        "seen": "whole",
+        "so_far": false,
+        "span": "week"
+      },
+      {
+        "count": 0,
+        "day": "2025-08-08",
+        "days": 7,
+        "seen": "whole",
+        "so_far": false,
+        "span": "week"
+      },
+      {
+        "count": 0,
+        "day": "2025-08-15",
+        "days": 7,
+        "seen": "whole",
+        "so_far": false,
+        "span": "week"
+      },
+      {
+        "count": 0,
+        "day": "2025-08-22",
+        "days": 7,
+        "seen": "whole",
+        "so_far": false,
+        "span": "week"
+      },
+      {
+        "count": 10,
+        "day": "2025-08-29",
+        "days": 7,
+        "seen": "whole",
+        "so_far": false,
+        "span": "week"
+      },
+      {
+        "count": 21,
+        "day": "2025-09-05",
+        "days": 7,
+        "seen": "whole",
+        "so_far": false,
+        "span": "week"
+      },
+      {
+        "count": 20,
+        "day": "2025-09-12",
+        "days": 7,
+        "seen": "whole",
+        "so_far": false,
+        "span": "week"
+      },
+      {
+        "count": 24,
+        "day": "2025-09-19",
+        "days": 7,
+        "seen": "whole",
+        "so_far": false,
+        "span": "week"
+      },
+      {
+        "count": 15,
+        "day": "2025-09-26",
+        "days": 5,
+        "seen": "whole",
+        "so_far": false,
+        "span": "week"
+      }
+    ],
+    "sealed": null
+  },
+  "answer_bytes": 1805,
+  "asked_at": 1791090227,
+  "core_ms": 0.8925339999999999,
+  "request": {
+    "args": {
+      "firstDay": "2025-08-01",
+      "lastDay": "2025-09-30",
+      "offsets": [
+        {
+          "from": 1754024400,
+          "offset": -18000
+        }
+      ],
+      "rangeEnd": 1759294800,
+      "rangeStart": 1754024400
+    },
+    "cmd": "summarize_reaches"
+  }
+}

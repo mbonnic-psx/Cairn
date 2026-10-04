@@ -24,3 +24,14 @@ Decisions `/cruise` took for this feature, one entry each. The owner's own answe
 - **Confidence:** medium · **Would reverse if:** the demo or the adversary pass finds a person misled by the run-together year and count
 - **Written to:** specs/003-reflection-and-history/slices/history-movement/tasks.md
 - **Status:** standing
+
+## D3 — The widest range freezes *Day by day* for about ten seconds: fix it here, or in `first-counted`?
+- **Stage:** demo (V29) · **Slice:** history-movement · **When:** 2026-10-04T05:30:00Z · **Iteration:** 12
+- **Question:** At the widest range the screen sends (From 1000-01-01; `isLocalDate` refuses earlier years, so the plan's 0100 case is unreachable), the core answers 53 574 weekly rows in 64 ms, but drawing them blocks the page for about 10 s, and returning to *Day by day* blocks it for 17 s. V29 hands the remedy to the owner: a coarser span, windowing, or the range starting at `first-counted`.
+- **Options:** carry it to `first-counted`, as the owner's M11 (Q3) already said: keep weeks however long, measure it, and let `first-counted` decide whether a range starts no earlier than Cairn's first count (recommended) · a coarser row beyond some length (a third `span`, a contract change) · window the list in the screen now
+- **Decision:** Carry it to `first-counted`, which decides with this measurement in hand. This slice merges with the freeze on record.
+- **Why:** The owner chose this on 2026-10-02 (M11), knowing the range could be centuries long. Reaching the freeze takes typing a year centuries back into *From*. Every range a person would use (weeks, months, a few years) draws at once. The rows are true as far as Cairn recorded.
+- **Decided by:** host (stage recommendation)
+- **Confidence:** medium · **Would reverse if:** the owner says a freeze any person can reach must not ship, even for a range typed on purpose
+- **Written to:** specs/003-reflection-and-history/slices/history-movement/tasks.md, specs/003-reflection-and-history/story-split.md
+- **Status:** standing

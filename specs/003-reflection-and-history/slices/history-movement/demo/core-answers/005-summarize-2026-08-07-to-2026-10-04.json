@@ -1,0 +1,271 @@
+{
+  "answer": {
+    "by_hour": [
+      {
+        "count": 2,
+        "hour": 0
+      },
+      {
+        "count": 0,
+        "hour": 1
+      },
+      {
+        "count": 0,
+        "hour": 2
+      },
+      {
+        "count": 0,
+        "hour": 3
+      },
+      {
+        "count": 0,
+        "hour": 4
+      },
+      {
+        "count": 0,
+        "hour": 5
+      },
+      {
+        "count": 0,
+        "hour": 6
+      },
+      {
+        "count": 0,
+        "hour": 7
+      },
+      {
+        "count": 0,
+        "hour": 8
+      },
+      {
+        "count": 49,
+        "hour": 9
+      },
+      {
+        "count": 47,
+        "hour": 10
+      },
+      {
+        "count": 13,
+        "hour": 11
+      },
+      {
+        "count": 46,
+        "hour": 12
+      },
+      {
+        "count": 10,
+        "hour": 13
+      },
+      {
+        "count": 43,
+        "hour": 14
+      },
+      {
+        "count": 4,
+        "hour": 15
+      },
+      {
+        "count": 38,
+        "hour": 16
+      },
+      {
+        "count": 2,
+        "hour": 17
+      },
+      {
+        "count": 33,
+        "hour": 18
+      },
+      {
+        "count": 0,
+        "hour": 19
+      },
+      {
+        "count": 28,
+        "hour": 20
+      },
+      {
+        "count": 23,
+        "hour": 21
+      },
+      {
+        "count": 19,
+        "hour": 22
+      },
+      {
+        "count": 1,
+        "hour": 23
+      }
+    ],
+    "by_site": [
+      {
+        "count": 91,
+        "domain": "x.com"
+      },
+      {
+        "count": 90,
+        "domain": "reddit.com"
+      },
+      {
+        "count": 89,
+        "domain": "instagram.com"
+      },
+      {
+        "count": 88,
+        "domain": "youtube.com"
+      }
+    ],
+    "by_weekday": [
+      {
+        "count": 26,
+        "days": 8,
+        "weekday": 0
+      },
+      {
+        "count": 94,
+        "days": 8,
+        "weekday": 1
+      },
+      {
+        "count": 56,
+        "days": 8,
+        "weekday": 2
+      },
+      {
+        "count": 7,
+        "days": 8,
+        "weekday": 3
+      },
+      {
+        "count": 40,
+        "days": 9,
+        "weekday": 4
+      },
+      {
+        "count": 88,
+        "days": 9,
+        "weekday": 5
+      },
+      {
+        "count": 47,
+        "days": 9,
+        "weekday": 6
+      }
+    ],
+    "coverage_note": "Cairn was not running for about 4 days across these days, so anything you reached for then is not here. This is what Cairn saw, not everything that happened.",
+    "dst_approximate": false,
+    "estimates_excluded": 0,
+    "gaps": [
+      {
+        "from": 1789275600,
+        "to": 1789448400
+      },
+      {
+        "from": 1790312400,
+        "to": 1790359200
+      },
+      {
+        "from": 1790485200,
+        "to": 1790528400
+      },
+      {
+        "from": 1790661600,
+        "to": 1790690400
+      }
+    ],
+    "movement": [
+      {
+        "count": 43,
+        "day": "2026-08-07",
+        "days": 7,
+        "seen": "whole",
+        "so_far": false,
+        "span": "week"
+      },
+      {
+        "count": 40,
+        "day": "2026-08-14",
+        "days": 7,
+        "seen": "whole",
+        "so_far": false,
+        "span": "week"
+      },
+      {
+        "count": 48,
+        "day": "2026-08-21",
+        "days": 7,
+        "seen": "whole",
+        "so_far": false,
+        "span": "week"
+      },
+      {
+        "count": 54,
+        "day": "2026-08-28",
+        "days": 7,
+        "seen": "whole",
+        "so_far": false,
+        "span": "week"
+      },
+      {
+        "count": 50,
+        "day": "2026-09-04",
+        "days": 7,
+        "seen": "whole",
+        "so_far": false,
+        "span": "week"
+      },
+      {
+        "count": 36,
+        "day": "2026-09-11",
+        "days": 7,
+        "seen": "whole",
+        "so_far": false,
+        "span": "week"
+      },
+      {
+        "count": 43,
+        "day": "2026-09-18",
+        "days": 7,
+        "seen": "whole",
+        "so_far": false,
+        "span": "week"
+      },
+      {
+        "count": 30,
+        "day": "2026-09-25",
+        "days": 7,
+        "seen": "whole",
+        "so_far": false,
+        "span": "week"
+      },
+      {
+        "count": 14,
+        "day": "2026-10-02",
+        "days": 3,
+        "seen": "whole",
+        "so_far": true,
+        "span": "week"
+      }
+    ],
+    "sealed": null
+  },
+  "answer_bytes": 2112,
+  "asked_at": 1791090212,
+  "core_ms": 1.167167,
+  "request": {
+    "args": {
+      "firstDay": "2026-08-07",
+      "lastDay": "2026-10-04",
+      "offsets": [
+        {
+          "from": 1786078800,
+          "offset": -18000
+        }
+      ],
+      "rangeEnd": 1791176400,
+      "rangeStart": 1786078800
+    },
+    "cmd": "summarize_reaches"
+  }
+}

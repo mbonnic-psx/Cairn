@@ -585,6 +585,69 @@
       ],
       "delegated": true,
       "signals": {}
+    },
+    {
+      "stage": "hand",
+      "started": "2026-10-04T04:55:14Z",
+      "planned": "hand: strong → host model — `strong` maps to the host model",
+      "tasks": {
+        "start": {
+          "open": 6,
+          "done": 42
+        },
+        "end": {
+          "open": 6,
+          "done": 42
+        }
+      },
+      "ended": "2026-10-04T05:11:50Z",
+      "seconds": 996,
+      "span": {
+        "from": {
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/23450b4b-4759-42e8-8ec2-16a744743411.jsonl": 633098,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/23450b4b-4759-42e8-8ec2-16a744743411/subagents/agent-a3a13295d0bc3e4f4.jsonl": 1780655
+        },
+        "to": {
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/23450b4b-4759-42e8-8ec2-16a744743411.jsonl": 682183,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/23450b4b-4759-42e8-8ec2-16a744743411/subagents/agent-a3a13295d0bc3e4f4.jsonl": 1780655,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/23450b4b-4759-42e8-8ec2-16a744743411/subagents/agent-adef7c790f2bad2af.jsonl": 2814585
+        }
+      },
+      "usage": {
+        "source": "claude",
+        "session": "23450b4b-4759-42e8-8ec2-16a744743411",
+        "read": "message.usage on each assistant line, once per requestId",
+        "host": {
+          "claude-opus-5-5": {
+            "input": 4,
+            "output": 3530,
+            "cache_read": 205092,
+            "cache_creation": 5694
+          }
+        },
+        "subagents": {
+          "claude-opus-5-5": {
+            "input": 128,
+            "output": 5223,
+            "cache_read": 5914762,
+            "cache_creation": 128783
+          }
+        },
+        "agents": [
+          "drive-hand"
+        ]
+      },
+      "ran": [
+        "claude-opus-5-5"
+      ],
+      "agents": [
+        "drive-hand"
+      ],
+      "delegated": true,
+      "signals": {
+        "driver": "cruise",
+        "outcome": "behaviour"
+      }
     }
   ]
 }

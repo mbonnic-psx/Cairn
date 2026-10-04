@@ -1,0 +1,422 @@
+{
+  "answer": {
+    "by_hour": [
+      {
+        "count": 0,
+        "hour": 0
+      },
+      {
+        "count": 0,
+        "hour": 1
+      },
+      {
+        "count": 0,
+        "hour": 2
+      },
+      {
+        "count": 0,
+        "hour": 3
+      },
+      {
+        "count": 0,
+        "hour": 4
+      },
+      {
+        "count": 0,
+        "hour": 5
+      },
+      {
+        "count": 0,
+        "hour": 6
+      },
+      {
+        "count": 0,
+        "hour": 7
+      },
+      {
+        "count": 0,
+        "hour": 8
+      },
+      {
+        "count": 30,
+        "hour": 9
+      },
+      {
+        "count": 24,
+        "hour": 10
+      },
+      {
+        "count": 0,
+        "hour": 11
+      },
+      {
+        "count": 18,
+        "hour": 12
+      },
+      {
+        "count": 0,
+        "hour": 13
+      },
+      {
+        "count": 12,
+        "hour": 14
+      },
+      {
+        "count": 0,
+        "hour": 15
+      },
+      {
+        "count": 6,
+        "hour": 16
+      },
+      {
+        "count": 0,
+        "hour": 17
+      },
+      {
+        "count": 0,
+        "hour": 18
+      },
+      {
+        "count": 0,
+        "hour": 19
+      },
+      {
+        "count": 0,
+        "hour": 20
+      },
+      {
+        "count": 0,
+        "hour": 21
+      },
+      {
+        "count": 0,
+        "hour": 22
+      },
+      {
+        "count": 0,
+        "hour": 23
+      }
+    ],
+    "by_site": [
+      {
+        "count": 36,
+        "domain": "reddit.com"
+      },
+      {
+        "count": 24,
+        "domain": "youtube.com"
+      },
+      {
+        "count": 18,
+        "domain": "x.com"
+      },
+      {
+        "count": 12,
+        "domain": "instagram.com"
+      }
+    ],
+    "by_weekday": [
+      {
+        "count": 15,
+        "days": 5,
+        "weekday": 0
+      },
+      {
+        "count": 15,
+        "days": 5,
+        "weekday": 1
+      },
+      {
+        "count": 14,
+        "days": 4,
+        "weekday": 2
+      },
+      {
+        "count": 13,
+        "days": 4,
+        "weekday": 3
+      },
+      {
+        "count": 12,
+        "days": 4,
+        "weekday": 4
+      },
+      {
+        "count": 11,
+        "days": 4,
+        "weekday": 5
+      },
+      {
+        "count": 10,
+        "days": 4,
+        "weekday": 6
+      }
+    ],
+    "coverage_note": null,
+    "dst_approximate": false,
+    "estimates_excluded": 0,
+    "gaps": [],
+    "movement": [
+      {
+        "count": 1,
+        "day": "2025-09-01",
+        "days": 1,
+        "seen": "whole",
+        "so_far": false,
+        "span": "day"
+      },
+      {
+        "count": 2,
+        "day": "2025-09-02",
+        "days": 1,
+        "seen": "whole",
+        "so_far": false,
+        "span": "day"
+      },
+      {
+        "count": 3,
+        "day": "2025-09-03",
+        "days": 1,
+        "seen": "whole",
+        "so_far": false,
+        "span": "day"
+      },
+      {
+        "count": 4,
+        "day": "2025-09-04",
+        "days": 1,
+        "seen": "whole",
+        "so_far": false,
+        "span": "day"
+      },
+      {
+        "count": 5,
+        "day": "2025-09-05",
+        "days": 1,
+        "seen": "whole",
+        "so_far": false,
+        "span": "day"
+      },
+      {
+        "count": 1,
+        "day": "2025-09-06",
+        "days": 1,
+        "seen": "whole",
+        "so_far": false,
+        "span": "day"
+      },
+      {
+        "count": 2,
+        "day": "2025-09-07",
+        "days": 1,
+        "seen": "whole",
+        "so_far": false,
+        "span": "day"
+      },
+      {
+        "count": 3,
+        "day": "2025-09-08",
+        "days": 1,
+        "seen": "whole",
+        "so_far": false,
+        "span": "day"
+      },
+      {
+        "count": 4,
+        "day": "2025-09-09",
+        "days": 1,
+        "seen": "whole",
+        "so_far": false,
+        "span": "day"
+      },
+      {
+        "count": 5,
+        "day": "2025-09-10",
+        "days": 1,
+        "seen": "whole",
+        "so_far": false,
+        "span": "day"
+      },
+      {
+        "count": 1,
+        "day": "2025-09-11",
+        "days": 1,
+        "seen": "whole",
+        "so_far": false,
+        "span": "day"
+      },
+      {
+        "count": 2,
+        "day": "2025-09-12",
+        "days": 1,
+        "seen": "whole",
+        "so_far": false,
+        "span": "day"
+      },
+      {
+        "count": 3,
+        "day": "2025-09-13",
+        "days": 1,
+        "seen": "whole",
+        "so_far": false,
+        "span": "day"
+      },
+      {
+        "count": 4,
+        "day": "2025-09-14",
+        "days": 1,
+        "seen": "whole",
+        "so_far": false,
+        "span": "day"
+      },
+      {
+        "count": 5,
+        "day": "2025-09-15",
+        "days": 1,
+        "seen": "whole",
+        "so_far": false,
+        "span": "day"
+      },
+      {
+        "count": 1,
+        "day": "2025-09-16",
+        "days": 1,
+        "seen": "whole",
+        "so_far": false,
+        "span": "day"
+      },
+      {
+        "count": 2,
+        "day": "2025-09-17",
+        "days": 1,
+        "seen": "whole",
+        "so_far": false,
+        "span": "day"
+      },
+      {
+        "count": 3,
+        "day": "2025-09-18",
+        "days": 1,
+        "seen": "whole",
+        "so_far": false,
+        "span": "day"
+      },
+      {
+        "count": 4,
+        "day": "2025-09-19",
+        "days": 1,
+        "seen": "whole",
+        "so_far": false,
+        "span": "day"
+      },
+      {
+        "count": 5,
+        "day": "2025-09-20",
+        "days": 1,
+        "seen": "whole",
+        "so_far": false,
+        "span": "day"
+      },
+      {
+        "count": 1,
+        "day": "2025-09-21",
+        "days": 1,
+        "seen": "whole",
+        "so_far": false,
+        "span": "day"
+      },
+      {
+        "count": 2,
+        "day": "2025-09-22",
+        "days": 1,
+        "seen": "whole",
+        "so_far": false,
+        "span": "day"
+      },
+      {
+        "count": 3,
+        "day": "2025-09-23",
+        "days": 1,
+        "seen": "whole",
+        "so_far": false,
+        "span": "day"
+      },
+      {
+        "count": 4,
+        "day": "2025-09-24",
+        "days": 1,
+        "seen": "whole",
+        "so_far": false,
+        "span": "day"
+      },
+      {
+        "count": 5,
+        "day": "2025-09-25",
+        "days": 1,
+        "seen": "whole",
+        "so_far": false,
+        "span": "day"
+      },
+      {
+        "count": 1,
+        "day": "2025-09-26",
+        "days": 1,
+        "seen": "whole",
+        "so_far": false,
+        "span": "day"
+      },
+      {
+        "count": 2,
+        "day": "2025-09-27",
+        "days": 1,
+        "seen": "whole",
+        "so_far": false,
+        "span": "day"
+      },
+      {
+        "count": 3,
+        "day": "2025-09-28",
+        "days": 1,
+        "seen": "whole",
+        "so_far": false,
+        "span": "day"
+      },
+      {
+        "count": 4,
+        "day": "2025-09-29",
+        "days": 1,
+        "seen": "whole",
+        "so_far": false,
+        "span": "day"
+      },
+      {
+        "count": 5,
+        "day": "2025-09-30",
+        "days": 1,
+        "seen": "whole",
+        "so_far": false,
+        "span": "day"
+      }
+    ],
+    "sealed": null
+  },
+  "answer_bytes": 3534,
+  "asked_at": 1791090226,
+  "core_ms": 1.105603,
+  "request": {
+    "args": {
+      "firstDay": "2025-09-01",
+      "lastDay": "2025-09-30",
+      "offsets": [
+        {
+          "from": 1756702800,
+          "offset": -18000
+        }
+      ],
+      "rangeEnd": 1759294800,
+      "rangeStart": 1756702800
+    },
+    "cmd": "summarize_reaches"
+  }
+}
