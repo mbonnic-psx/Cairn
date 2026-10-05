@@ -13,6 +13,8 @@ pub struct Day {
     pub gaps: Vec<Gap>,
     pub entry: Option<String>,
     pub estimate: Option<u32>,
+    /// When Cairn first counted (slice `first-counted`).
+    pub first_counted: Option<i64>,
 }
 
 /// The longest a local day can be: 25 hours at a clock change, and an hour
@@ -92,5 +94,6 @@ pub fn assemble(
         gaps,
         entry,
         estimate,
+        first_counted: history.first_count()?,
     })
 }

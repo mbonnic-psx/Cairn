@@ -184,7 +184,7 @@ fn assert_in_voice(sentence: &str) {
 // --- Scenario 12: the wire shape ---------------------------------------------
 
 #[test]
-fn the_answer_serialises_to_exactly_nine_keys() {
+fn the_answer_serialises_to_exactly_ten_keys() {
     let state_setup = setup();
     let state = app(&state_setup, &Keychain::available());
     let value = serde_json::to_value(summarize(&state)).unwrap();
@@ -204,11 +204,12 @@ fn the_answer_serialises_to_exactly_nine_keys() {
             "coverage_note",
             "dst_approximate",
             "estimates_excluded",
+            "first_counted",
             "gaps",
             "movement",
             "sealed"
         ],
-        "nine keys, movement among them"
+        "ten keys, movement and first_counted among them"
     );
 }
 
@@ -364,6 +365,7 @@ mod with_history {
                 gaps: Vec::new(),
                 coverage_note: None,
                 estimates_excluded: 0,
+                first_counted: None,
                 dst_approximate: false,
                 sealed: None,
             }

@@ -1,0 +1,310 @@
+//! Slice `first-counted`: when Cairn first counted, through the driving port.
+//!
+//! `specs/003-reflection-and-history/slices/first-counted/plan.md`, scenarios
+//! 2 (silence, protection off), 4 to 20. Each **When** enters through
+//! `AppState`, as the IPC commands serve it, and each **Then** is observed in
+//! what it returns or in the bytes of `history.db`. Scenarios 1, 2 (refused
+//! sockets) and 3 start a counting session, which is process-wide, and so live
+//! in `first_counted_session.rs`.
+//!
+//! Fixtures are integers, never a zone database. `NOW` is 2026-10-02 20:00 BST.
+#![allow(clippy::unwrap_used, clippy::expect_used)]
+#![cfg_attr(not(feature = "history"), allow(dead_code, unused_imports))]
+
+use std::path::{Path, PathBuf};
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
+
+use cairn::domain::dates::LocalDate;
+use cairn::domain::entries::ReachMode;
+use cairn::domain::normalize::ReservedNames;
+use cairn::enforcement::seed::CategoryStore;
+use cairn::helper::NoHelper;
+use cairn::ipc::state::{DayView, OffsetChange, Patterns, TodaysReaches};
+use cairn::ipc::AppState;
+use cairn::platform::hosts::SystemHosts;
+use cairn::services::{
+    CredentialStore, ElevationService, HelperStatus, Key, KeyUnavailable, Outcome,
+    Removal,
+};
+use cairn::store::config::{ChosenBy, ConfigStore, ProtectionIntent, ReachModeSetting};
+
+const A_KEY: [u8; 32] = [7u8; 32];
+
+const HOUR: i64 = 3600;
+const DAY: i64 = 86_400;
+
+/// 2026-10-02 20:00 BST.
+const NOW: i64 = 1_790_967_600;
+/// The instant the first count is fixed at where a test says "first".
+const FIRST: i64 = 1_790_000_000;
+
+fn date(text: &str) -> LocalDate {
+    serde_json::from_str(&format!("\"{text}\"")).unwrap()
+}
+
+/// London's 2026-10-02 (BST, +1 h): the bounds the screen would send.
+fn today_start() -> i64 {
+    date("2026-10-02").days_since_epoch() * DAY - HOUR
+}
+
+fn today_end() -> i64 {
+    today_start() + DAY
+}
+
+#[derive(Clone)]
+struct Keychain {
+    available: Arc<AtomicBool>,
+}
+
+impl Keychain {
+    fn available() -> Self {
+        Keychain {
+            available: Arc::new(AtomicBool::new(true)),
+        }
+    }
+    fn set_available(&self, on: bool) {
+        self.available.store(on, Ordering::SeqCst);
+    }
+}
+
+impl CredentialStore for Keychain {
+    fn get_or_create_history_key(&self) -> Result<Key, KeyUnavailable> {
+        if self.available.load(Ordering::SeqCst) {
+            Ok(Key::from_bytes(A_KEY))
+        } else {
+            Err(KeyUnavailable::Locked)
+        }
+    }
+    fn delete_history_key(&self) -> Outcome<()> {
+        Ok(())
+    }
+}
+
+struct NoElevation;
+
+impl ElevationService for NoElevation {
+    fn helper_status(&self) -> HelperStatus {
+        HelperStatus::NotInstalled
+    }
+    fn install_helper(&self) -> Outcome<HelperStatus> {
+        Ok(HelperStatus::NotInstalled)
+    }
+    fn uninstall_helper(&self) -> Outcome<Removal> {
+        Ok(Removal::clean())
+    }
+}
+
+struct Setup {
+    directory: tempfile::TempDir,
+    data: PathBuf,
+}
+
+fn setup() -> Setup {
+    let directory = tempfile::tempdir().unwrap();
+    let data = directory.path().join("cairn-data");
+    std::fs::create_dir_all(&data).unwrap();
+    Setup { directory, data }
+}
+
+fn app(setup: &Setup, keychain: &Keychain) -> AppState {
+    let shipped = Path::new(env!("CARGO_MANIFEST_DIR")).join("resources/categories");
+    AppState {
+        config: ConfigStore::at(&setup.data),
+        data_directory: setup.data.clone(),
+        credentials: Box::new(keychain.clone()),
+        categories: CategoryStore::at(&setup.data),
+        shipped_categories: shipped,
+        shipped_quotes: PathBuf::from("no-quotes-here.json"),
+        hosts: Box::new(SystemHosts::at(setup.directory.path().join("hosts"))),
+        helper: Box::new(NoHelper),
+        elevation: Box::new(NoElevation),
+        reserved: ReservedNames::default(),
+        now: || NOW,
+        roll: || 0,
+    }
+}
+
+/// The opening range the screen sends today: 2026-09-05 to 2026-10-02, London.
+fn ask_range(state: &AppState) -> Patterns {
+    let first = date("2026-09-05");
+    let last = date("2026-10-02");
+    let start = first.days_since_epoch() * DAY - HOUR;
+    let end = today_end();
+    state.summarize_reaches(
+        first,
+        last,
+        start,
+        end,
+        &[OffsetChange {
+            from: start,
+            offset: HOUR,
+        }],
+    )
+}
+
+fn ask_today(state: &AppState) -> TodaysReaches {
+    state.list_todays_reaches(today_start(), today_end())
+}
+
+fn ask_day(state: &AppState) -> DayView {
+    state.get_day(date("2026-10-02"), today_start(), today_end())
+}
+
+/// What the three reads say, in the order the plan names them.
+fn all_three(state: &AppState) -> [Option<i64>; 3] {
+    [
+        ask_range(state).first_counted,
+        ask_today(state).first_counted,
+        ask_day(state).first_counted,
+    ]
+}
+
+// --- The wire shape (scenario 10) ----------------------------------------------------
+
+fn keys_of(value: &impl serde::Serialize) -> Vec<String> {
+    let value = serde_json::to_value(value).unwrap();
+    let mut keys: Vec<String> = value.as_object().unwrap().keys().cloned().collect();
+    keys.sort();
+    keys
+}
+
+#[cfg(feature = "history")]
+mod with_history {
+    use super::*;
+
+    use cairn::store::history::{History, OpenHistory, HISTORY_FILE};
+    use cairn::store::key::HistoryKey;
+
+    fn seed(data: &Path) -> OpenHistory {
+        let History::Open(open) =
+            History::open(data, &HistoryKey::Available(Key::from_bytes(A_KEY)))
+        else {
+            panic!("a fresh directory with a good key should open");
+        };
+        open
+    }
+
+    fn history_bytes(data: &Path) -> Option<Vec<u8>> {
+        std::fs::read(data.join(HISTORY_FILE)).ok()
+    }
+
+    // Scenario 10
+    #[test]
+    fn the_three_answers_hold_ten_five_and_seven_keys_and_first_counted_is_an_integer() {
+        let setup = setup();
+        seed(&setup.data).note_counting(FIRST).unwrap();
+        let state = app(&setup, &Keychain::available());
+
+        let patterns = serde_json::to_value(ask_range(&state)).unwrap();
+        assert_eq!(patterns["first_counted"], serde_json::json!(FIRST));
+        assert_eq!(keys_of(&ask_range(&state)).len(), 10);
+        let today = serde_json::to_value(ask_today(&state)).unwrap();
+        assert_eq!(today["first_counted"], serde_json::json!(FIRST));
+        assert_eq!(keys_of(&ask_today(&state)).len(), 5);
+        let day = serde_json::to_value(ask_day(&state)).unwrap();
+        assert_eq!(day["first_counted"], serde_json::json!(FIRST));
+        assert_eq!(keys_of(&ask_day(&state)).len(), 7);
+    }
+
+    #[test]
+    fn where_cairn_has_never_counted_first_counted_is_null_not_absent() {
+        let setup = setup();
+        let state = app(&setup, &Keychain::available());
+
+        for value in [
+            serde_json::to_value(ask_range(&state)).unwrap(),
+            serde_json::to_value(ask_today(&state)).unwrap(),
+            serde_json::to_value(ask_day(&state)).unwrap(),
+        ] {
+            assert_eq!(value["first_counted"], serde_json::Value::Null);
+            assert!(value.as_object().unwrap().contains_key("first_counted"));
+        }
+    }
+
+    // Scenario 2: silence chosen, and protection off, never reach the note.
+    #[test]
+    fn silence_chosen_and_protection_off_each_leave_every_answer_at_null() {
+        for (intent, mode) in [
+            (ProtectionIntent::On, ReachMode::Silent),
+            (ProtectionIntent::Off, ReachMode::Counted),
+        ] {
+            let setup = setup();
+            let state = app(&setup, &Keychain::available());
+            let mut config = state.config.load().unwrap();
+            config.intent = intent;
+            config.reach_mode = ReachModeSetting {
+                mode,
+                chosen_by: ChosenBy::Person,
+                fallback_reason: None,
+            };
+            state.config.save(&config).unwrap();
+
+            state.start_counting().unwrap();
+
+            assert_eq!(all_three(&state), [None, None, None]);
+        }
+    }
+
+    // Scenario 18
+    #[test]
+    fn saving_an_entry_returns_the_day_with_first_counted() {
+        let setup = setup();
+        seed(&setup.data).note_counting(FIRST).unwrap();
+        let state = app(&setup, &Keychain::available());
+
+        let saved = state
+            .save_journal_entry(
+                date("2026-10-02"),
+                today_start(),
+                today_end(),
+                "a quiet day",
+            )
+            .unwrap();
+
+        assert_eq!(saved.first_counted, Some(FIRST));
+        assert_eq!(saved.entry.as_deref(), Some("a quiet day"));
+    }
+
+    // Scenario 19: a sealed history writes nothing and reads nothing.
+    #[test]
+    fn sealed_answers_carry_null_and_change_no_file() {
+        let setup = setup();
+        seed(&setup.data).note_counting(FIRST).unwrap();
+        let keychain = Keychain::available();
+        let state = app(&setup, &keychain);
+        let before = history_bytes(&setup.data);
+        keychain.set_available(false);
+
+        let range = ask_range(&state);
+        let today = ask_today(&state);
+        let day = ask_day(&state);
+
+        assert!(range.sealed.is_some() && today.sealed.is_some() && day.sealed.is_some());
+        assert_eq!(all_three(&state), [None, None, None]);
+        assert_eq!(
+            history_bytes(&setup.data),
+            before,
+            "history.db is untouched"
+        );
+    }
+}
+
+// --- Scenario 20: a build without the history ----------------------------------------
+
+#[cfg(not(feature = "history"))]
+#[test]
+fn a_build_without_the_history_seals_every_answer_with_null() {
+    let setup = setup();
+    let state = app(&setup, &Keychain::available());
+    let said = "This build of Cairn does not keep a history. Protection is unaffected.";
+
+    let range = ask_range(&state);
+    let today = ask_today(&state);
+    let day = ask_day(&state);
+
+    assert_eq!(range.sealed.as_deref(), Some(said));
+    assert_eq!(today.sealed.as_deref(), Some(said));
+    assert_eq!(day.sealed.as_deref(), Some(said));
+    assert_eq!(all_three(&state), [None, None, None]);
+}

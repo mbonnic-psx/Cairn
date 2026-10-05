@@ -80,6 +80,8 @@ pub struct Range {
     pub gaps: Vec<Gap>,
     /// How many days in the range hold the person's own estimate.
     pub estimates_excluded: u32,
+    /// When Cairn first counted (slice `first-counted`).
+    pub first_counted: Option<i64>,
 }
 
 /// The range between `range_start` and `range_end`, the bounds the interface
@@ -139,6 +141,7 @@ pub fn assemble(
         weekdays: weekdays_in(first_day, last_day),
         gaps,
         estimates_excluded: u32::try_from(estimates.len()).unwrap_or(u32::MAX),
+        first_counted: history.first_count()?,
     })
 }
 

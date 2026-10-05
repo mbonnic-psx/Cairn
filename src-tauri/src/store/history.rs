@@ -54,6 +54,11 @@ const GAPS_OVERLAPPING_RANGE: &str = "to_at > ?1 AND from_at < ?2";
 /// integer ranges above.
 const DAY_IN_RANGE: &str = "day >= ?1 AND day < ?2";
 
+/// The one row of `first_count`: written if there is none, moved only to an
+/// earlier instant, otherwise left alone.
+const NOTE_COUNTING: &str = "INSERT INTO first_count (id, at) VALUES (1, ?1) \
+     ON CONFLICT(id) DO UPDATE SET at = excluded.at WHERE excluded.at < first_count.at";
+
 /// One reach: where, and when. That is the whole of it.
 #[derive(Clone, PartialEq, Eq, Debug, serde::Serialize, serde::Deserialize)]
 pub struct Reach {
@@ -151,6 +156,15 @@ impl History {
         }
     }
 
+    /// Note that Cairn is counting at `at`, if there is anywhere to note it.
+    /// Says whether it was noted; a sealed history notes nothing.
+    pub fn note_counting(&self, at: i64) -> bool {
+        match self {
+            History::Open(history) => history.note_counting(at).is_ok(),
+            History::Sealed { .. } => false,
+        }
+    }
+
     pub fn is_open(&self) -> bool {
         matches!(self, History::Open(_))
     }
@@ -223,6 +237,10 @@ impl OpenHistory {
                  CREATE TABLE IF NOT EXISTS reach_estimates (
                      day   TEXT PRIMARY KEY,
                      count INTEGER NOT NULL
+                 );
+                 CREATE TABLE IF NOT EXISTS first_count (
+                     id INTEGER PRIMARY KEY CHECK (id = 1),
+                     at INTEGER NOT NULL
                  );",
             )
             .map_err(|_| cannot_prepare())?;
@@ -231,6 +249,24 @@ impl OpenHistory {
             connection,
             path: path.to_path_buf(),
         })
+    }
+
+    /// Notes `at` as a moment Cairn was counting; only ever earlier.
+    pub fn note_counting(&self, at: i64) -> Result<(), Trouble> {
+        self.connection
+            .execute(NOTE_COUNTING, rusqlite::params![at])
+            .map(|_| ())
+            .map_err(|_| Trouble::new("Cairn could not record that just now."))
+    }
+
+    /// When Cairn first counted, if it has.
+    pub fn first_count(&self) -> Result<Option<i64>, Trouble> {
+        self.connection
+            .query_row("SELECT at FROM first_count WHERE id = 1", [], |row| {
+                row.get::<_, i64>(0)
+            })
+            .optional()
+            .map_err(|_| unreadable())
     }
 
     pub fn record(&self, domain: &str, at: i64) -> Result<(), Trouble> {

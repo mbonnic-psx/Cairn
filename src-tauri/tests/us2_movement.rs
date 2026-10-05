@@ -226,7 +226,7 @@ fn occupied(patterns: &Patterns) -> Vec<(String, u32)> {
 // --- The wire shape ------------------------------------------------------------------
 
 #[test]
-fn the_answer_serialises_to_exactly_nine_keys_and_each_row_to_six() {
+fn the_answer_serialises_to_exactly_ten_keys_and_each_row_to_six() {
     let state_setup = setup();
     let state = app(&state_setup, &Keychain::available());
     let value = serde_json::to_value(Range::four_weeks().ask(&state)).unwrap();
@@ -242,6 +242,7 @@ fn the_answer_serialises_to_exactly_nine_keys_and_each_row_to_six() {
             "coverage_note",
             "dst_approximate",
             "estimates_excluded",
+            "first_counted",
             "gaps",
             "movement",
             "sealed"
