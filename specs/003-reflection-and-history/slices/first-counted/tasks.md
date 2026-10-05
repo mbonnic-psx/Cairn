@@ -395,7 +395,7 @@ Reviewed: 2026-10-05, N22 step 4, against `delivery/skills/web-interface-guideli
 
 ### Phase Convergence: what pass 1 found still owed
 
-- [ ] NC1 [US2] **HIGH** [rule 3, rule 6; Principle II (constitution lines 171–173), *Versioning and Compatibility*
+- [x] NC1 [US2] **HIGH** [rule 3, rule 6; Principle II (constitution lines 171–173), *Versioning and Compatibility*
   (lines 429–432)] **Two opens of a pre-slice history at once: the second is sealed.** `OpenHistory::connect` asks
   `table_exists(&connection, "first_count")` (`src-tauri/src/store/history.rs` line 266) *outside* the transaction,
   then runs `FILL_FIRST_COUNT` (line 66). Its `BEGIN IMMEDIATE` and its `CREATE TABLE first_count` (no
@@ -420,7 +420,7 @@ Reviewed: 2026-10-05, N22 step 4, against `delivery/skills/web-interface-guideli
   through `History::open`: (a) both opens in the race above succeed, and the fill runs once with the earliest moment;
   (b) N threads calling `History::open` on one legacy file all open and agree on `first_count()`; (c) the control
   stays green.
-- [ ] NC2 [US2] **LOW** [rule 6; Principle III (line 194)] **One of the three answers reads an unreadable first count
+- [x] NC2 [US2] **LOW** [rule 6; Principle III (line 194)] **One of the three answers reads an unreadable first count
   as "never counted".** `list_todays_reaches` takes `history.first_count().unwrap_or_default()`
   (`src-tauri/src/ipc/state.rs` line 791). A read error therefore answers `first_counted: null` and leaves the day's
   gaps uncut, so the time before the first count reads as a stretch Cairn was not running. `get_day`
@@ -431,7 +431,7 @@ Reviewed: 2026-10-05, N22 step 4, against `delivery/skills/web-interface-guideli
   **GREEN, the class:** every answer that carries `first_counted` treats an unreadable first count the same way: as
   the unreadable sentence with `null`, never as a fact. A store-level scenario pins `list_todays_reaches` beside the
   other two.
-- [ ] NC3 [US2] **LOW** [rule 12; Principle III (line 194)] **With the clock moved back, the start sentence names
+- [x] NC3 [US2] **LOW** [rule 12; Principle III (line 194)] **With the clock moved back, the start sentence names
   today, not the day Cairn started.** `limitOf` caps the limit at `todayDay` (`src/screens/Reaches.tsx` line 363).
   The sentence beside the date boxes is made from that capped limit, `startedOnWords(limit)` (line 487), not from
   `startedAt`.
