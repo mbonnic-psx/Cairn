@@ -66,6 +66,14 @@ An estimate carries **no site and no hour**, which is the whole reason FR-023 ex
 answer "how much" for a day and can never contribute to "which site" or "which hour", and the
 type reflects that rather than relying on a caller to remember.
 
+### `first_count` (slice `first-counted`, 2026-10-05)
+
+One row, `id` 1, `at` an epoch second: the first moment Cairn counted (gaps review F1). In the encrypted store
+because it can be a reach's own instant (F1's fill, F6). Every write is `min`: a counting session that is storing,
+each reach recorded, and, at open, the earliest reach. Once, on the first open by the build that adds it, it is filled
+from the earliest reach or gap. Deletion of reaches or gaps never touches it (F5); removing the history file
+removes it. It is not a gap, and the time before it is never stored as one (FR-022a).
+
 ## Additions to configuration
 
 Three fields join the existing `Config`. All three take `serde` defaults, so an existing
