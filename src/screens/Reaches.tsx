@@ -474,7 +474,12 @@ function OverTimeView({
                             }}
                           />
                         </div>
-                        <span className="nb-reaches-count">{row.count}</span>
+                        <span className="nb-reaches-count">
+                          {row.count}
+                          <span className="sr-only">
+                            {row.count === 1 ? ' reach' : ' reaches'}
+                          </span>
+                        </span>
                       </>
                     )}
                   </li>

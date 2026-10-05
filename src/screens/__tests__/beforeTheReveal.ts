@@ -56,6 +56,22 @@ export const DAY_BY_DAY_DELTA: Delta = {
   controls: { added: ['button | Day by day | disabled=false | pressed=false'] },
 };
 
+/**
+ * 2026-10-05, slice `first-counted`, rule 13 (F7, V47; D46): in every view of Over time a count is followed by a
+ * visually hidden unit, ` reach` for 1 and ` reaches` for any other number, inside the count's own element.
+ * `wordsOf` reads text whether or not it is visible (measured: with the unit in place, the captured list states
+ * differ from their records by exactly these runs), so each state that draws counts gains one run for each count it
+ * draws. A state's counts differ, so the delta is made for them; `COUNT_UNIT_DELTA` is the one the captured list
+ * states hold (their sites are counted 9, 4 and 1). Nothing is removed and the captured markup is untouched.
+ */
+export const countUnitDelta = (counts: number[]): Delta => ({
+  slice: 'first-counted',
+  decision: 'F7',
+  date: '2026-10-05',
+  words: { added: counts.map((count) => (count === 1 ? ' reach' : ' reaches')) },
+});
+export const COUNT_UNIT_DELTA: Delta = countUnitDelta([9, 4, 1]);
+
 /** record ∪ added − removed, in the fixed order. A removal takes out one occurrence; removing what is not there is an error. */
 function applied(record: string[], change: { added?: string[]; removed?: string[] }[]): string[] {
   const out = [...record];

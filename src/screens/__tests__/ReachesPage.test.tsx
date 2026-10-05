@@ -27,6 +27,7 @@ import {
   baseline,
   wordsOf,
   BY_DAY_DELTA,
+  COUNT_UNIT_DELTA,
   DAY_BY_DAY_DELTA,
   OVER_TIME,
   TODAY,
@@ -567,7 +568,7 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (name) 
         const answer = overTimeCases[state] as Patterns;
         const { spread } = await listed(answer);
         expect(words(spread!)).toEqual(
-          wordsOf(baseline(OVER_TIME[state]!), [BY_DAY_DELTA, DAY_BY_DAY_DELTA]),
+          wordsOf(baseline(OVER_TIME[state]!), [BY_DAY_DELTA, DAY_BY_DAY_DELTA, COUNT_UNIT_DELTA]),
         );
       },
     );
