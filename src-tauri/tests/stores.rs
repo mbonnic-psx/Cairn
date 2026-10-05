@@ -371,3 +371,57 @@ fn a_half_written_file_never_replaces_a_good_one() {
         "no temporary file left behind: {leftovers:?}"
     );
 }
+
+// --- The encrypted history: what recording a reach writes --------------------
+
+/// Characterisation (slice `first-counted`, N-C2), written green before any RED.
+///
+/// Today `OpenHistory::record` writes exactly one `reaches` row and touches
+/// nothing else: the tables are the four there are, and every other table holds
+/// the rows it held. Rule 4's RED (N11) changes this on purpose: a reach is then
+/// also noted as a counting moment in a fifth table, `first_count`. When that
+/// lands, this test is updated by N11, not deleted.
+#[cfg(feature = "history")]
+#[test]
+fn recording_a_reach_writes_one_row_in_one_table_and_nothing_else() {
+    use cairn::services::Key;
+    use cairn::store::history::{History, OpenHistory};
+    use cairn::store::key::HistoryKey;
+
+    fn counts(open: &OpenHistory) -> (i64, usize, i64, i64) {
+        (
+            open.between(i64::MIN, i64::MAX).unwrap().len() as i64,
+            open.gaps_between(i64::MIN, i64::MAX).unwrap().len(),
+            open.journal_entry_count().unwrap(),
+            open.reach_estimate_count().unwrap(),
+        )
+    }
+
+    let directory = tempfile::tempdir().unwrap();
+    let History::Open(open) = History::open(
+        directory.path(),
+        &HistoryKey::Available(Key::from_bytes([7u8; 32])),
+    ) else {
+        panic!("a fresh directory with a good key should open");
+    };
+
+    let mut tables_before = open.table_names().unwrap();
+    tables_before.sort();
+    let before = counts(&open);
+    assert_eq!(before, (0, 0, 0, 0));
+
+    open.record("example.com", 1_700_000_000).unwrap();
+
+    let mut tables_after = open.table_names().unwrap();
+    tables_after.sort();
+    assert_eq!(tables_after, tables_before, "no table is added by a record");
+    assert_eq!(
+        counts(&open),
+        (1, 0, 0, 0),
+        "one reaches row; no gap, entry or estimate"
+    );
+    assert_eq!(
+        open.columns_of_reaches().unwrap(),
+        vec!["domain".to_string(), "at".to_string()]
+    );
+}
