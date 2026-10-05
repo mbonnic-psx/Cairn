@@ -343,6 +343,16 @@ function TodayView({
   );
 }
 
+/**
+ * The earliest day *From* may take, from an answer: the computer's own date of the first count, never after
+ * today (a clock moved back). None for a sealed answer or one without the field.
+ */
+function limitOf(answer: Patterns, todayDay: string): string | undefined {
+  if (answer.sealed || typeof answer.first_counted !== 'number') return undefined;
+  const day = localToday(new Date(answer.first_counted * 1000));
+  return day > todayDay ? todayDay : day;
+}
+
 /** What the view holds: the answer for a range, nothing yet, or one sentence for a read that threw. */
 type Answer = Patterns | 'looking' | 'unreadable';
 
@@ -359,6 +369,9 @@ function OverTimeView({
   const todayDay = localToday(now());
   const [firstDay, setFirstDay] = useState(() => addDays(todayDay, -27));
   const [lastDay, setLastDay] = useState(todayDay);
+  // The earliest day *From* may take: the local day Cairn first counted, from the latest answer that carried it.
+  // Component state and nothing more, read afresh from each opening's answers (H2).
+  const [limit, setLimit] = useState<string | undefined>(undefined);
   const [answer, setAnswer] = useState<Answer>('looking');
   // Which breakdown of the one answer: forgotten with the range on leaving the view.
   const [seen, setSeen] = useState<Seen>('site');
@@ -369,7 +382,18 @@ function OverTimeView({
     setAnswer('looking');
     read
       .summarizeReaches(firstDay, lastDay, start, end, offsetChanges(firstDay, lastDay))
-      .then((patterns) => current && setAnswer(patterns))
+      .then((patterns) => {
+        if (!current) return;
+        const found = limitOf(patterns, todayDay);
+        if (found !== undefined) setLimit(found);
+        // An answer for days before the limit is not drawn: the range is moved up to it and asked for again.
+        if (found !== undefined && found > firstDay) {
+          setFirstDay(found);
+          if (lastDay < found) setLastDay(found);
+          return;
+        }
+        setAnswer(patterns);
+      })
       .catch(() => current && setAnswer('unreadable'));
     return () => {
       current = false;
@@ -379,7 +403,9 @@ function OverTimeView({
   }, [firstDay, lastDay]);
 
   const changeFirst = (value: string) => {
-    if (isLocalDate(value) && value <= lastDay) setFirstDay(value);
+    if (isLocalDate(value) && value <= lastDay) {
+      setFirstDay(limit !== undefined && value < limit ? limit : value);
+    }
   };
   const changeLast = (value: string) => {
     if (isLocalDate(value) && value >= firstDay && value <= todayDay) setLastDay(value);
@@ -390,6 +416,7 @@ function OverTimeView({
       firstDay={firstDay}
       lastDay={lastDay}
       todayDay={todayDay}
+      limit={limit}
       onFirst={changeFirst}
       onLast={changeLast}
     />
@@ -532,12 +559,14 @@ function DateBoxes({
   firstDay,
   lastDay,
   todayDay,
+  limit,
   onFirst,
   onLast,
 }: {
   firstDay: string;
   lastDay: string;
   todayDay: string;
+  limit: string | undefined;
   onFirst: (value: string) => void;
   onLast: (value: string) => void;
 }) {
@@ -548,6 +577,7 @@ function DateBoxes({
         <input
           type="date"
           value={firstDay}
+          min={limit}
           max={lastDay}
           onChange={(event) => onFirst(event.target.value)}
           className="nb-reaches-date"
