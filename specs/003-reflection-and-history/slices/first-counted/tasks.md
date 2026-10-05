@@ -303,7 +303,7 @@ neither A nor D. N22 joins B and C. Within a track no task is `[P]`.
 
 ### Join — the notebook page and its look (after N16–N21)
 
-- [ ] N22 [US2] [rules 9, 12, 13, 14, 16; scenarios 40, 41; styling] The screens on the notebook page, and their look.
+- [x] N22 [US2] [rules 9, 12, 13, 14, 16; scenarios 40, 41; styling] The screens on the notebook page, and their look.
   The styles come from the notebook's `src/styles/tonight-page.css` (004 `tonight-page`): F2's sentence under the date
   boxes, F3's with the asides on the left page, *Today*'s and the check-in's on their left pages, each in the class its
   neighbours use (`nb-reaches-aside`, `nb-reaches-note`, `nb-checkin-note`), in the notes' serif and never monospace; the
@@ -328,14 +328,14 @@ neither A nor D. N22 joins B and C. Within a track no task is `[P]`.
 
 ## Phase 3 — Hold it
 
-- [ ] N23 [US2] [mockups] Write back the states of this slice's white box as committed mockups, one per screen state:
+- [x] N23 [US2] [mockups] Write back the states of this slice's white box as committed mockups, one per screen state:
   *Over time* with *From* at the first count's day (F2's sentence), with the range holding the first count (F3's),
   never counted, *Today* and the check-in on the first day, and a grouped count with its width. The writeback goes where
   `check-model` expects it (`delivery/docs/event-model/mockups/`). `delivery/docs/event-model/` does not exist on this
   branch's head (as for the four history slices before it, whose V20 the host closed with no mockups). If it still
   does not, record in the demo log that there is no model here and the host decides. *Files:*
   `delivery/docs/event-model/mockups/` only.
-- [ ] N24 [US2] `contracts/ui-ipc.md`, `contracts/patterns.md` and `data-model.md`, as amended by N4–N6, match
+- [x] N24 [US2] `contracts/ui-ipc.md`, `contracts/patterns.md` and `data-model.md`, as amended by N4–N6, match
   `first_counted` on `DayView`, `TodaysReaches` and `Patterns` in Rust (`ipc/state.rs`), `first_count::unseen` and
   `gaps_since` in `domain/first_count.rs`, the `first_count` table in `store/history.rs`, and `first_counted?: number |
   null` in `src/ipc/reaches.ts` and `journal.ts`, field for field. N9's wire-shape tests hold the ten, five and seven
