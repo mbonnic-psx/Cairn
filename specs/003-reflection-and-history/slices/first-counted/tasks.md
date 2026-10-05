@@ -496,7 +496,7 @@ run (that is N25). `check-slice-scope` is red only because N6 and N7 also ride h
 
 ### Phase Convergence: what pass 2 found still owed
 
-- [ ] NC4 [US2] **CRITICAL** [rule 3, rule 6; Principle II, fail closed (constitution lines 171–173); *Versioning and
+- [x] NC4 [US2] **CRITICAL** [rule 3, rule 6; Principle II, fail closed (constitution lines 171–173); *Versioning and
   Compatibility* (lines 431–432)] **A reach recorded while any other connection writes `history.db` is dropped, and the
   rest of the run goes uncounted.** The NC1 follow-up (`4fed9d8`) begins `record` and `note_counting` with
   `unchecked_transaction()` (`src-tauri/src/store/history.rs` lines 363 and 338), a *deferred* transaction, and then
@@ -602,7 +602,7 @@ host after the demo. No task is derived from this phase._
 
 ### Phase 4 tasks from converge pass 2 (graded; none re-opens the loop)
 
-- [ ] NC5 [US2] **MEDIUM** [rule 6; *Versioning and Compatibility* (constitution lines 431–432); Principle II, fail
+- [x] NC5 [US2] **MEDIUM** [rule 6; *Versioning and Compatibility* (constitution lines 431–432); Principle II, fail
   closed (lines 171–173)] **A legacy history Cairn can read but not write is sealed, where the pre-slice build opened
   it.** `fill_first_count` (`src-tauri/src/store/history.rs` lines 290–308) treats only busy and locked as "the fill
   waits". Any other error from `BEGIN IMMEDIATE` or from the fill is `cannot_prepare()`, and the open is sealed.
@@ -615,3 +615,17 @@ host after the demo. No task is derived from this phase._
   history open with the fill owed, exactly as busy does now. Only a failure to *read* seals. Scenario: the
   reproduction opens, and `first_count()` reports unreadable, so the three answers give the unreadable sentence with
   `null` (NC2's path).
+
+### Pass 3 — the CRITICAL's confirmation (host, 2026-10-05)
+
+**Converged; the loop stopped at its bound after the one CRITICAL it re-opened for.** NC4 (CRITICAL) and NC5 (MEDIUM,
+riding along in the same function) are fixed in `6e117c2`. The sweep covered every transaction in
+`src-tauri/src/store/history.rs`: `record` and `note_counting` now begin IMMEDIATE through `begin_write` (lines 340–345),
+`delete_reach_history` likewise, `fill_first_count` already did, and the rest are single autocommit statements or reads.
+Confirmed by the host by mutation: with `begin_write` deferred, `first_counted` fails 3 of 33 (the two NC4 waits and
+scenario (c)); restored, 33 of 33 pass. NC5's read-only open is held by
+`a_legacy_history_that_cannot_be_written_opens_with_the_fill_owed` (`#[cfg(unix)]`). Principle II's "continue
+protecting and recording" and Versioning and Compatibility, unmet at pass 2 by NC4, are met by those lines; every other
+principle stands as pass 2 records it. No pass beyond this one: nothing open is CRITICAL, and the actor's demo is the
+better evidence now.
+
