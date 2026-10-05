@@ -294,7 +294,7 @@ track waits for the other. Within a track no task is `[P]`.
   count; today reads *so far*; the date is written as the computer writes it. This is where the plan's *assumed* is
   seen or refuted: that each webview's default locale follows the computer's. Record the platforms seen, the dates
   each showed, and the platforms not seen. *Files:* the demo log and its evidence only.
-- [ ] V24 After the merge, on `main` (the feature's `tasks.md`, `pinned.md` and `spec.md` are the host's): note T039–T045,
+- [x] V24 After the merge, on `main` (the feature's `tasks.md`, `pinned.md` and `spec.md` are the host's): note T039–T045,
   T047 and T049 as done for day by day, and T043, T044, T045 as covering all four breakdowns; first-counted (5e) is
   what remains. *Files:* none of this slice's.
 
