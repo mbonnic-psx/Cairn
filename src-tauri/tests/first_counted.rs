@@ -297,6 +297,136 @@ mod with_history {
         );
     }
 
+    /// Insert a reach straight into `reaches`, as an older build would write it.
+    fn insert_as_an_older_build(data: &Path, at: i64) {
+        let connection = rusqlite::Connection::open(data.join(HISTORY_FILE)).unwrap();
+        let hex: String = A_KEY.iter().map(|byte| format!("{byte:02x}")).collect();
+        connection
+            .pragma_update(None, "key", format!("x'{hex}'"))
+            .unwrap();
+        connection
+            .execute(
+                "INSERT INTO reaches (domain, at) VALUES ('old.example', ?1)",
+                [at],
+            )
+            .unwrap();
+    }
+
+    /// The range of the one UTC date `at` falls on, asked of the history.
+    fn that_date(state: &AppState, at: i64) -> Patterns {
+        let day = LocalDate::from_days_since_epoch(at.div_euclid(DAY));
+        let start = day.days_since_epoch() * DAY;
+        state.summarize_reaches(
+            day,
+            day,
+            start,
+            start + DAY,
+            &[OffsetChange {
+                from: start,
+                offset: 0,
+            }],
+        )
+    }
+
+    // Scenario 6
+    #[test]
+    fn a_reach_earlier_than_the_first_count_moves_it_back_and_a_later_one_does_not() {
+        let setup = setup();
+        let open = seed(&setup.data);
+        open.note_counting(FIRST).unwrap();
+        let state = app(&setup, &Keychain::available());
+
+        let earlier = FIRST - 3 * DAY;
+        open.record("a.example", earlier).unwrap();
+        assert_eq!(all_three(&state), [Some(earlier); 3]);
+        let that_day = that_date(&state, earlier);
+        assert_eq!(
+            that_day.by_site.len(),
+            1,
+            "the reach is in that date's range"
+        );
+        assert_eq!(that_day.by_site[0].domain, "a.example");
+
+        open.record("a.example", NOW).unwrap();
+        assert_eq!(
+            all_three(&state),
+            [Some(earlier); 3],
+            "a later reach changes nothing"
+        );
+    }
+
+    // Scenario 7
+    #[test]
+    fn a_reach_written_by_an_older_build_before_the_first_count_is_settled_at_the_next_open(
+    ) {
+        let setup = setup();
+        seed(&setup.data).note_counting(FIRST).unwrap();
+        insert_as_an_older_build(&setup.data, FIRST - HOUR);
+        let state = app(&setup, &Keychain::available());
+
+        assert_eq!(all_three(&state), [Some(FIRST - HOUR); 3]);
+    }
+
+    #[test]
+    fn an_ordinary_open_moves_nothing_and_a_reach_after_the_first_count_settles_nothing()
+    {
+        let setup = setup();
+        seed(&setup.data).note_counting(FIRST).unwrap();
+        insert_as_an_older_build(&setup.data, FIRST + HOUR);
+        let state = app(&setup, &Keychain::available());
+
+        assert_eq!(all_three(&state), [Some(FIRST); 3]);
+    }
+
+    #[test]
+    fn a_reach_with_no_row_at_all_settles_the_row_to_that_reach() {
+        let setup = setup();
+        legacy(&setup.data, &[], &[]);
+        drop(seed(&setup.data));
+        insert_as_an_older_build(&setup.data, FIRST + HOUR);
+        let state = app(&setup, &Keychain::available());
+
+        assert_eq!(all_three(&state), [Some(FIRST + HOUR); 3]);
+    }
+
+    // Scenario 8
+    #[test]
+    fn deleting_reach_history_never_moves_the_first_count() {
+        let setup = setup();
+        let open = seed(&setup.data);
+        open.note_counting(FIRST).unwrap();
+        open.record("a.example", FIRST + HOUR).unwrap();
+        open.record_gap(&cairn::store::history::CoverageGap {
+            from: FIRST + 2 * HOUR,
+            to: FIRST + 3 * HOUR,
+        })
+        .unwrap();
+        let state = app(&setup, &Keychain::available());
+
+        open.delete_reach_history(FIRST - DAY, NOW).unwrap();
+        assert_eq!(all_three(&state), [Some(FIRST); 3]);
+        assert!(ask_range(&state).gaps.is_empty(), "no gap is left to state");
+
+        open.record("a.example", FIRST + HOUR).unwrap();
+        open.delete_all_reach_history().unwrap();
+        assert_eq!(all_three(&state), [Some(FIRST); 3]);
+        assert!(ask_range(&state).gaps.is_empty());
+    }
+
+    // Scenario 9
+    #[test]
+    fn deleting_all_data_removes_the_file_and_a_fresh_key_says_null() {
+        let setup = setup();
+        seed(&setup.data).note_counting(FIRST).unwrap();
+        let state = app(&setup, &Keychain::available());
+        assert_eq!(all_three(&state), [Some(FIRST); 3]);
+
+        state.delete_all_data().unwrap();
+
+        assert!(!setup.data.join(HISTORY_FILE).exists());
+        assert_eq!(all_three(&state), [None; 3]);
+    }
+
     // Scenario 10
     #[test]
     fn the_three_answers_hold_ten_five_and_seven_keys_and_first_counted_is_an_integer() {

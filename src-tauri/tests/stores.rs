@@ -374,16 +374,12 @@ fn a_half_written_file_never_replaces_a_good_one() {
 
 // --- The encrypted history: what recording a reach writes --------------------
 
-/// Characterisation (slice `first-counted`, N-C2), written green before any RED.
-///
-/// Today `OpenHistory::record` writes exactly one `reaches` row and touches
-/// nothing else: the tables are the four there are, and every other table holds
-/// the rows it held. Rule 4's RED (N11) changes this on purpose: a reach is then
-/// also noted as a counting moment in a fifth table, `first_count`. When that
-/// lands, this test is updated by N11, not deleted.
+/// Recording a reach writes exactly one `reaches` row and nothing else, except
+/// that it may add or move the one `first_count` row, in the same transaction
+/// (slice `first-counted`, N-C2 as rewritten by N11).
 #[cfg(feature = "history")]
 #[test]
-fn recording_a_reach_writes_one_row_in_one_table_and_nothing_else() {
+fn recording_a_reach_writes_one_reach_row_and_notes_the_first_count_and_nothing_else() {
     use cairn::services::Key;
     use cairn::store::history::{History, OpenHistory};
     use cairn::store::key::HistoryKey;
@@ -409,8 +405,14 @@ fn recording_a_reach_writes_one_row_in_one_table_and_nothing_else() {
     tables_before.sort();
     let before = counts(&open);
     assert_eq!(before, (0, 0, 0, 0));
+    assert_eq!(open.first_count().unwrap(), None);
 
     open.record("example.com", 1_700_000_000).unwrap();
+    assert_eq!(
+        open.first_count().unwrap(),
+        Some(1_700_000_000),
+        "the one first_count row is added"
+    );
 
     let mut tables_after = open.table_names().unwrap();
     tables_after.sort();
@@ -420,8 +422,42 @@ fn recording_a_reach_writes_one_row_in_one_table_and_nothing_else() {
         (1, 0, 0, 0),
         "one reaches row; no gap, entry or estimate"
     );
+    assert_eq!(tables_after.len(), 5, "the five tables there are");
     assert_eq!(
         open.columns_of_reaches().unwrap(),
         vec!["domain".to_string(), "at".to_string()]
+    );
+}
+
+/// A failed note keeps no reach: the two are one transaction.
+#[cfg(feature = "history")]
+#[test]
+fn a_reach_whose_note_fails_is_not_kept() {
+    use cairn::services::Key;
+    use cairn::store::history::{History, HISTORY_FILE};
+    use cairn::store::key::HistoryKey;
+
+    let directory = tempfile::tempdir().unwrap();
+    let History::Open(open) = History::open(
+        directory.path(),
+        &HistoryKey::Available(Key::from_bytes([7u8; 32])),
+    ) else {
+        panic!("a fresh directory with a good key should open");
+    };
+    // Take the table the note writes to away from under it.
+    let connection =
+        rusqlite::Connection::open(directory.path().join(HISTORY_FILE)).unwrap();
+    let hex: String = [7u8; 32].iter().map(|byte| format!("{byte:02x}")).collect();
+    connection
+        .pragma_update(None, "key", format!("x'{hex}'"))
+        .unwrap();
+    connection.execute_batch("DROP TABLE first_count").unwrap();
+    drop(connection);
+
+    assert!(open.record("example.com", 1_700_000_000).is_err());
+    assert_eq!(
+        open.between(i64::MIN, i64::MAX).unwrap().len(),
+        0,
+        "no reach is kept without its note"
     );
 }

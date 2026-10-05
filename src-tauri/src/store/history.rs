@@ -270,10 +270,35 @@ impl OpenHistory {
             })?;
         }
 
-        Ok(OpenHistory {
+        let history = OpenHistory {
             connection,
             path: path.to_path_buf(),
-        })
+        };
+        history.settle_first_count();
+        Ok(history)
+    }
+
+    /// If a reach is earlier than the first count (or there is a reach and no
+    /// row), the row moves to it: repairs a reach an older build wrote after a
+    /// downgrade, or one whose note did not go through. It reads first and
+    /// writes only when it would move, so an ordinary open takes no write
+    /// lock; a settle that cannot write is left for the next open. Gaps are
+    /// not read here.
+    fn settle_first_count(&self) {
+        let earliest = self
+            .connection
+            .query_row("SELECT MIN(at) FROM reaches", [], |row| {
+                row.get::<_, Option<i64>>(0)
+            })
+            .ok()
+            .flatten();
+        let Some(earliest) = earliest else { return };
+        if self
+            .first_count()
+            .is_ok_and(|row| row.is_none_or(|row| earliest < row))
+        {
+            let _ = self.note_counting(earliest);
+        }
     }
 
     /// Notes `at` as a moment Cairn was counting; only ever earlier.
@@ -294,14 +319,24 @@ impl OpenHistory {
             .map_err(|_| unreadable())
     }
 
+    /// Stores a reach and notes `at` as a counting moment, in one transaction:
+    /// a failed note keeps no reach.
     pub fn record(&self, domain: &str, at: i64) -> Result<(), Trouble> {
-        self.connection
+        let failed = || Trouble::new("Cairn could not record that just now.");
+        let transaction = self
+            .connection
+            .unchecked_transaction()
+            .map_err(|_| failed())?;
+        transaction
             .execute(
                 "INSERT INTO reaches (domain, at) VALUES (?1, ?2)",
                 rusqlite::params![domain, at],
             )
-            .map(|_| ())
-            .map_err(|_| Trouble::new("Cairn could not record that just now."))
+            .map_err(|_| failed())?;
+        transaction
+            .execute(NOTE_COUNTING, rusqlite::params![at])
+            .map_err(|_| failed())?;
+        transaction.commit().map_err(|_| failed())
     }
 
     /// Rows whose key falls in `[from, to)`, generalized over every
