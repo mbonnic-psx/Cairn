@@ -393,7 +393,106 @@ Reviewed: 2026-10-05, N22 step 4, against `delivery/skills/web-interface-guideli
 
 ## Convergence
 
-_Pending: appended by the convergence pass after acceptance._
+### Phase Convergence: what pass 1 found still owed
+
+- [ ] NC1 [US2] **HIGH** [rule 3, rule 6; Principle II (constitution lines 171–173), *Versioning and Compatibility*
+  (lines 429–432)] **Two opens of a pre-slice history at once: the second is sealed.** `OpenHistory::connect` asks
+  `table_exists(&connection, "first_count")` (`src-tauri/src/store/history.rs` line 266) *outside* the transaction,
+  then runs `FILL_FIRST_COUNT` (line 66). Its `BEGIN IMMEDIATE` and its `CREATE TABLE first_count` (no
+  `IF NOT EXISTS`) turn any concurrent first open into `cannot_prepare()`. On the first launch after the upgrade,
+  the counting session's open (`ipc/state.rs` line 669) and the interface's first read (`list_todays_reaches`, line
+  771; `summarize_reaches`, line 989) can be that pair. If the counting session's open is the one sealed, that run
+  stores no reach, writes no mark and notes no first count, under a sentence saying the history could not be got
+  ready. That loses a whole session of recording, on an upgrade that "MUST be backward compatible with everything the
+  previous release wrote".
+  **Reproduction** (pass 1 ran this as a scratch test, then removed it): build a `legacy()` history as
+  `tests/first_counted.rs` line 194 writes it. A second keyed `rusqlite` connection runs `BEGIN IMMEDIATE; CREATE TABLE
+  first_count (...); INSERT INTO first_count VALUES (1, 1700000000);` and commits from a thread 300 ms later.
+  Meanwhile `History::open(dir, key)` returns `is_open() == false`. Control: the same write lock held against a
+  history that already has `first_count` opens (`is_open() == true`), so the sealing comes from this slice. A second
+  variant also seals where the pre-slice build opened: a writer holding the lock on a legacy file past rusqlite's 5 s
+  busy timeout.
+  **GREEN, the class:** every schema step in `connect` is safe under any number of concurrent openers of any history
+  an earlier build wrote. The fill decides whether it is owed *inside* the write transaction that does it (the
+  existence check after `BEGIN IMMEDIATE`, `CREATE TABLE IF NOT EXISTS`), so a loser that finds the table filled
+  carries on without filling. A fill that cannot take the write lock leaves the open usable where the table now
+  exists, and never seals a history the pre-slice build would have opened. Scenarios in `tests/first_counted.rs`
+  through `History::open`: (a) both opens in the race above succeed, and the fill runs once with the earliest moment;
+  (b) N threads calling `History::open` on one legacy file all open and agree on `first_count()`; (c) the control
+  stays green.
+- [ ] NC2 [US2] **LOW** [rule 6; Principle III (line 194)] **One of the three answers reads an unreadable first count
+  as "never counted".** `list_todays_reaches` takes `history.first_count().unwrap_or_default()`
+  (`src-tauri/src/ipc/state.rs` line 791). A read error therefore answers `first_counted: null` and leaves the day's
+  gaps uncut, so the time before the first count reads as a stretch Cairn was not running. `get_day`
+  (`reflection/checkin.rs` line 94) and `summarize_reaches` (`reflection/over_time.rs` line 134) pass the error on to
+  their sealed sentence instead.
+  **Reproduction:** found by reading the code. No route through `AppState` makes `SELECT at FROM first_count` fail
+  after a successful open without a mutation.
+  **GREEN, the class:** every answer that carries `first_counted` treats an unreadable first count the same way: as
+  the unreadable sentence with `null`, never as a fact. A store-level scenario pins `list_todays_reaches` beside the
+  other two.
+- [ ] NC3 [US2] **LOW** [rule 12; Principle III (line 194)] **With the clock moved back, the start sentence names
+  today, not the day Cairn started.** `limitOf` caps the limit at `todayDay` (`src/screens/Reaches.tsx` line 363).
+  The sentence beside the date boxes is made from that capped limit, `startedOnWords(limit)` (line 487), not from
+  `startedAt`.
+  **Reproduction:** the existing test *caps the limit at today when the first count is after it*
+  (`src/screens/__tests__/ReachesFirstCounted.test.tsx` line 151, with `first_counted` on Oct 5 and today Oct 2)
+  draws *Cairn started counting on Oct 2, 2026.*, but the history says Oct 5.
+  **GREEN, the class:** every sentence that names the start (F2's, F3's, *Today*'s, the check-in's) is made from the
+  first count's own instant and its own local date. Only *From*'s `min` and the moved range use the capped limit.
+  The test above asserts the sentence's date.
+
+### Verdict: pass 1 (2026-10-05)
+
+**Not converged.** One HIGH (NC1) re-opens the loop. NC2 and NC3 are LOW, and the slice may ship without them.
+
+Gates this pass ran: the six source guards (`check-banned-words`, `check-no-ambient-counts`, `check-no-streaks`,
+`check-free`, `check-unix-gated-tests`, `check-domain-purity`) are green on `HEAD` (`d3e6ed1`). `make verify` was not
+run (that is N25). `check-slice-scope` is red only because N6 and N7 also ride host PR #65, which is not a finding.
+
+**What the diff proves at each level, and what it does not.**
+
+- *Domain.* `domain/first_count.rs` lines 12–38 (`unseen`) and 42–50 (`gaps_since`) are pure and match
+  `contracts/patterns.md`, *Amended in slice `first-counted`*. `tests/domain_first_count.rs` holds rule 17. The
+  `coverage` totals narrowed to `u32` (`domain/patterns.rs` lines 467–500) saturate rather than wrap. Nothing missing
+  found.
+- *Use case and stores.* `NOTE_COUNTING` (`store/history.rs` line 59) only ever moves the first count earlier.
+  `record` (lines 324–340) writes the reach and the note in one transaction. The settle (lines 287–302) reads before
+  it writes. The note at session start runs only after `Counting::Available` *and* storing (`ipc/state.rs` lines
+  692–697). Rules 1–5 are proved through `AppState` and `OpenHistory`. **Not proved:** concurrent opens of a
+  pre-slice history (NC1), and how the Today answer handles an unreadable first count (NC2).
+- *Delivery adapter.* `TodaysReaches`, `DayView` and `Patterns` carry `first_counted: Option<i64>` (`ipc/state.rs`
+  lines 100, 125, 217), with `null` on every sealed constructor. `src/ipc/reaches.ts` and `src/ipc/journal.ts` carry
+  it too. No command is added and `CLASSIFIED` is unchanged. The wire tests assert ten, five and seven keys and an
+  integer. Nothing missing found.
+- *Screen.* *From* is held at the limit (`Reaches.tsx` lines 359–364 and 411–425, `changeFirst` at 435–437, `min` at
+  618). The start sentences are at lines 485–493 and 325–330, and in `CheckIn.tsx` at lines 411–417. The unit and the
+  grouping are at lines 470–474, 517 and 549–555, with `tonight-page.css` line 209. **Not proved:** the start
+  sentence's date when the clock was moved back (NC3).
+- *Published contract.* `contracts/ui-ipc.md` lines 288–306 and the amendment to `contracts/patterns.md` match the
+  code. The `first_count` table in `data-model.md` (N6, also on PR #65) matches the `FILL_FIRST_COUNT` schema. Nothing
+  missing found.
+
+**Each constitution principle the diff touches.**
+
+- **II, encrypted at rest** (line 168): the instant lives in `history.db` under the SQLCipher key, in the
+  `first_count` table created at `store/history.rs` line 66. Nothing is written to `last-seen` or `config.json`.
+- **II, fail closed** (lines 171–173): a sealed history notes nothing (`History::note_counting`, `store/history.rs`
+  line 183), and every sealed answer carries `null` (the sealed constructors in `ipc/state.rs`). **Unmet under
+  concurrency:** NC1. Another opener can seal an upgrade open, and recording stops for the run.
+- **II, local-first:** the diff adds no crate and no package, so nothing network-capable enters the build graph.
+- **III, verified state** (line 194): the note is written only after `session::start` returns `Counting::Available`
+  and the sink is storing (`ipc/state.rs` lines 692–697), never on intent. Time before the first count is *not seen*
+  and never a gap (`reflection/over_time.rs` lines 134–143, `reflection/checkin.rs` line 103). NC2 and NC3 weaken this.
+- **VI, voice and no day counts** (lines 250–256): the sentences name a clock time and a date, never a number of days
+  (`Reaches.tsx` lines 370–378 and 328, `CheckIn.tsx` line 415). `check-no-streaks` and `check-banned-words` are green.
+- **SC-006, no ambient counts:** the new `REACH_DATA` row (`scripts/check-no-ambient-counts.mjs` line 70) holds
+  `first_counted` to the navigated screens. `clockTimeInWords` in `localDays.ts` takes `at` and names nothing else.
+- **Versioning and Compatibility** (lines 429–432): the store change is additive, a fifth table, and nothing the
+  previous build wrote is altered or discarded. A failed fill rolls back (`store/history.rs` lines 266–271). **Unmet
+  under concurrency:** NC1.
+- **I, IV, V, VII:** not touched. The diff has no enforcement path, privileged write, notification capability or
+  payment path.
 
 ## Phase 4: After acceptance
 
