@@ -285,6 +285,26 @@ which stay as the record of when they were true.
 
 See `slices/history-movement/plan.md`, *The rows*, *What Cairn saw of each row* and *Today*.
 
+#### Amended in slice `first-counted` (2026-10-05)
+
+**No signature changes; one field on three answers.** `DayView` (`get_day`, `save_journal_entry`),
+`TodaysReaches` (`list_todays_reaches`) and `Patterns` (`summarize_reaches`) each carry:
+
+    first_counted: number | null   // epoch seconds: when Cairn first counted; null when it never has, or sealed
+
+- It is the same instant on every answer, whatever was asked. The interface compares it with the bounds it sent.
+- It is the first moment a counting session was accepting and storing (gaps review F1). For a history written
+  before this slice, it is the earliest reach or gap that history held when this build first opened it. A reach
+  recorded earlier moves it back to that reach (F6). Deleting reaches or gaps never moves it (F5). Erasing
+  everything removes it with the history.
+- Time before it is not seen: `summarize_reaches`' rows mark it so (`"none"` or `"part"`, by M12), and when it is
+  `null` the whole range is. It is never in `gaps` and never in `coverage_note`. A gap that began before it is cut to
+  begin at it (F3, FR-022a). The same holds for a day's `gaps` and `coverage_note`.
+- `Patterns` now holds ten keys. A reader treats an absent `first_counted` as not yet known (as above).
+
+The interface holds *From* to no earlier than the local date of `first_counted`, or to today when it is `null`
+(F2). The core still answers any range `check_range` places. See `slices/first-counted/plan.md`.
+
 ### `get_quote(day) -> string | null`
 
 A quote from the bundled set, or nothing. Never fetched. Null is a valid, complete answer —
