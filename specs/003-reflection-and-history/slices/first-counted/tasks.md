@@ -97,7 +97,7 @@ neither A nor D. N22 joins B and C. Within a track no task is `[P]`.
 
 ### Track A — the store and the wire (`src-tauri`)
 
-- [ ] N9 [US2] [rules 1, 2, 6, 7; scenarios 1, 2, 3, 10, 18, 19, 20; the wire shape] A counting session that is
+- [x] N9 [US2] [rules 1, 2, 6, 7; scenarios 1, 2, 3, 10, 18, 19, 20; the wire shape] A counting session that is
   accepting and storing is the first count, and it crosses the boundary.
   RED, from the driving port (`AppState`): with a helper that hands over its sockets (`Handing` of
   `counting_session_pin.rs`), `start_counting` at `NOW` makes `summarize_reaches`, `list_todays_reaches` and `get_day`
@@ -127,7 +127,7 @@ neither A nor D. N22 joins B and C. Within a track no task is `[P]`.
   `src-tauri/tests/journal_store.rs`, `src-tauri/tests/us2_by_site.rs`, `us2_by_hour.rs`, `us2_by_weekday.rs`,
   `us2_movement.rs`, `src-tauri/src/store/history.rs`, `src-tauri/src/counting/sink.rs` (only if the note goes through
   the sink), `src-tauri/src/ipc/state.rs`.
-- [ ] N10 [US2] [rules 3, 6; scenarios 4, 5] An install that already holds history takes the earliest moment it recorded
+- [x] N10 [US2] [rules 3, 6; scenarios 4, 5] An install that already holds history takes the earliest moment it recorded
   anything, once.
   RED: a `history.db` written as the previous build wrote it (the four tables of `history.rs`, no `first_count`, written
   through `rusqlite` with the same `PRAGMA key`) holding reaches at `R1 < R2` and a gap from `G < R1`: any answer says
@@ -141,7 +141,7 @@ neither A nor D. N22 joins B and C. Within a track no task is `[P]`.
   `MIN(coverage_gaps.from_at)` (empty when both are `NULL`). Gaps are read by this fill and never again. The fill
   failing is the schema step failing and seals the history as that step already does.
   *Files:* `src-tauri/tests/first_counted.rs`, `src-tauri/src/store/history.rs`.
-- [ ] N11 [US2] [rules 4, 5; scenarios 6, 7, 8, 9; N-C2] A reach recorded earlier than the first count moves it back, and
+- [x] N11 [US2] [rules 4, 5; scenarios 6, 7, 8, 9; N-C2] A reach recorded earlier than the first count moves it back, and
   only erasing everything moves it later.
   RED: with `first_counted` `FIRST`, a reach recorded at `FIRST − 3 × 86 400` makes `first_counted` that instant, and
   `summarize_reaches` for that date's range holds the reach; a reach recorded at `NOW` leaves it unchanged (scenario 6).
@@ -162,7 +162,7 @@ neither A nor D. N22 joins B and C. Within a track no task is `[P]`.
 
 ### Track D — the domain (`src-tauri`)
 
-- [ ] N12 [US2] [rule 17; scenario 22; contract `patterns.md`] The time before the first count is never presented as
+- [x] N12 [US2] [rule 17; scenario 22; contract `patterns.md`] The time before the first count is never presented as
   seen, and no gap's watching is lost after it.
   RED: `src-tauri/tests/domain_first_count.rs` (proptest, no feature gate). For any `first`, any `[from, to)` and any
   sorted, merged gaps inside it: `unseen` is sorted, disjoint and inside `[from, to)`; it covers `[from, min(first,
@@ -178,7 +178,7 @@ neither A nor D. N22 joins B and C. Within a track no task is `[P]`.
 
 ### Track A′ — what the answers say of the time before it (`src-tauri`; needs N9 and N12)
 
-- [ ] N13 [US2] [rules 8, 15; scenarios 11–16, 21; N-C1 (`us2_movement`)] In a range, the time before the first count is
+- [x] N13 [US2] [rules 8, 15; scenarios 11–16, 21; N-C1 (`us2_movement`)] In a range, the time before the first count is
   not seen, and never a gap.
   RED: with `first_counted` `FIRST`, reaches at 2026-10-01 15:00 and `1790929800`, and no gaps, the opening range's rows
   2026-09-05 to 09-30 are `"none"` with count 0, 2026-10-01 is `"part"` with count 1 (14 h 14 m of 24 h unseen, M12),
@@ -198,7 +198,7 @@ neither A nor D. N22 joins B and C. Within a track no task is `[P]`.
   *Files:* `src-tauri/tests/first_counted.rs`, `src-tauri/tests/us2_movement.rs`, `us2_by_site.rs`, `us2_by_hour.rs`,
   `us2_by_weekday.rs`, `src-tauri/tests/range_allocation.rs` (read only; edited only if it must compile), `src-tauri/src/reflection/over_time.rs`,
   `src-tauri/src/ipc/state.rs` (only to pass the field).
-- [ ] N14 [US2] [rules 8, 9; scenario 17 and N-C1 (`us1_write_tonight`)] On the first day, *Today* and the check-in do not
+- [x] N14 [US2] [rules 8, 9; scenario 17 and N-C1 (`us1_write_tonight`)] On the first day, *Today* and the check-in do not
   call the time before the first count a stretch Cairn was not running.
   RED: with `first_counted` `FIRST` and a gap from 2026-10-01 00:00 to 15:00 BST, `list_todays_reaches` and `get_day`
   for 2026-10-01's bounds each say `first_counted: FIRST` and hold the gap `[FIRST, 15:00)` only, with a coverage note
