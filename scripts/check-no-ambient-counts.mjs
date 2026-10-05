@@ -67,6 +67,7 @@ const REACH_DATA = [
   { pattern: /estimates_excluded|estimatesExcluded/, why: 'reach summary data' },
   { pattern: /\bby_hour\b|\bby_site\b|\bby_weekday\b/, why: 'a reach breakdown' },
   { pattern: /\bmovement\b/, why: 'a reach breakdown' },
+  { pattern: /\bfirst_counted\b|\bfirstCounted\b/, why: 'when Cairn first counted' },
 ];
 
 /**
