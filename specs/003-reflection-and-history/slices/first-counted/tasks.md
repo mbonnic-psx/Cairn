@@ -38,7 +38,7 @@ open.
 
 ## Phase 0 — Pin: before code that was here changes
 
-- [ ] N1 [US2] [pin] On the branch head, before any edit, re-read the constitution's version line (v1.5.0 when this was
+- [x] N1 [US2] [pin] On the branch head, before any edit, re-read the constitution's version line (v1.5.0 when this was
   written; `.specify/memory/constitution.md` line 546) and re-check the plan's *Constitution Check* against any later
   version. Then run and record green: `ipc_surface`, `gaps`, `stores`, `journal_store`, `counting_session_pin`,
   `fail_closed`, `us1_write_tonight`, `us2_by_site`, `us2_by_hour`, `us2_by_weekday`, `us2_movement`,
