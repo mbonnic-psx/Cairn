@@ -9,7 +9,7 @@
  * congratulation for a short list, no shame for a long one, no comparison with
  * yesterday, no total to beat. Just what happened, and what Cairn did not see.
  */
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useState, type CSSProperties, type ReactNode } from 'react';
 
 import {
   acrossInWords,
@@ -411,6 +411,11 @@ function OverTimeView({
   const quiet = list ? isQuiet(all) : false;
   const rows = !unseen || seen === 'movement' ? all : [];
   const largest = largestCount(rows);
+  // Every count in the view takes the width of the widest, grouped as it is written (V48).
+  const countChars = rows.reduce(
+    (widest, row) => (row.absent ? widest : Math.max(widest, row.count.toLocaleString().length)),
+    1,
+  );
   return (
     <>
       <div className="nb-page">
@@ -442,7 +447,10 @@ function OverTimeView({
               quiet && <p className="nb-reaches-empty">{NOTHING_THESE_DAYS}</p>
             )}
             {rows.length > 0 && (seen !== 'site' || !isQuiet(rows)) && (
-              <ul className="nb-reaches-log">
+              <ul
+                className="nb-reaches-log"
+                style={{ '--nb-count-chars': countChars } as CSSProperties}
+              >
                 {rows.map((row) => (
                   <li
                     key={row.key}
@@ -475,7 +483,7 @@ function OverTimeView({
                           />
                         </div>
                         <span className="nb-reaches-count">
-                          {row.count}
+                          {row.count.toLocaleString()}
                           <span className="sr-only">
                             {row.count === 1 ? ' reach' : ' reaches'}
                           </span>

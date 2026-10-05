@@ -101,3 +101,69 @@ describe('a count is read with its unit (scenario 37)', () => {
     expect(sunday.textContent).not.toMatch(/reach/);
   });
 });
+
+const grouped = (n: number) => n.toLocaleString();
+
+describe('a count is written in the computer\'s own grouping (scenario 38)', () => {
+  it('shows 1 234 as the computer groups it, and its bar is still full', async () => {
+    const page = await open(
+      patterns({ by_site: [{ domain: 'big.example', count: 1234 }] }),
+      'By site',
+    );
+    const count = counts(page)[0]!;
+    expect(count.firstChild?.textContent).toBe(grouped(1234));
+    expect(within(page).getByTestId('bar').style.width).toBe('100%');
+  });
+
+  it('scales a bar by the number, not by the text', async () => {
+    const page = await open(
+      patterns({
+        by_site: [
+          { domain: 'big.example', count: 1234 },
+          { domain: 'half.example', count: 617 },
+        ],
+      }),
+      'By site',
+    );
+    const widths = within(page).getAllByTestId('bar').map((bar) => bar.style.width);
+    expect(widths).toEqual(['100%', '50%']);
+  });
+});
+
+const nodeFs = 'node:' + 'fs';
+const { readFileSync } = (await import(/* @vite-ignore */ nodeFs)) as {
+  readFileSync: (path: string, encoding: 'utf8') => string;
+};
+const sheet = readFileSync('src/styles/tonight-page.css', 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+const bodyOf = (selector: string): string =>
+  Array.from(sheet.matchAll(/([^{}]+)\{([^{}]*)\}/g))
+    .filter((m) => m[1]!.split(',').some((one) => one.trim() === selector))
+    .map((m) => m[2]!)
+    .join('');
+
+describe('every count in a view takes one width (scenario 39)', () => {
+  it('sets the list to the length of the largest count, grouped', async () => {
+    const page = await open(
+      patterns({
+        by_site: [
+          { domain: 'a.example', count: 1234 },
+          { domain: 'b.example', count: 56 },
+          { domain: 'c.example', count: 7 },
+        ],
+      }),
+      'By site',
+    );
+    const list = within(page).getByRole('list');
+    expect(list.style.getPropertyValue('--nb-count-chars')).toBe(String(grouped(1234).length));
+    expect(counts(page)).toHaveLength(3);
+  });
+
+  it('takes the width from the sheet, with tabular numerals kept', () => {
+    expect(bodyOf('.nb-reaches-count')).toMatch(
+      /min-width:\s*calc\(var\(--nb-count-chars, 2\) \* 1ch\)/,
+    );
+    expect(bodyOf('.nb-reaches-count')).toMatch(
+      /font-variant-numeric:\s*tabular-nums/,
+    );
+  });
+});

@@ -206,7 +206,7 @@
   color: var(--nb-ink-quiet);
 }
 .nb-reaches-count {
-  min-width: 2ch;
+  min-width: calc(var(--nb-count-chars, 2) * 1ch);
   text-align: right;
 }
 /* Day by day: the name never wraps. It keeps one line beside the bar and count; the clause sits beside it when
