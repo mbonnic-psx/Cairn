@@ -788,7 +788,20 @@ impl AppState {
                             to: gap.to,
                         })
                         .collect::<Vec<_>>();
-                    let first_counted = history.first_count().unwrap_or_default();
+                    // An unreadable first count is not "never counted": it is
+                    // the unreadable sentence, as the other two answers say it.
+                    let first_counted = match history.first_count() {
+                        Ok(first_counted) => first_counted,
+                        Err(trouble) => {
+                            return TodaysReaches {
+                                reaches: Vec::new(),
+                                gaps: Vec::new(),
+                                coverage_note: None,
+                                first_counted: None,
+                                sealed: Some(trouble.message),
+                            };
+                        }
+                    };
                     let gaps = crate::reflection::checkin::cut_at_the_first_count(
                         &clipped(&gaps, day_start, day_end),
                         first_counted,

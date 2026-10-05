@@ -818,6 +818,34 @@ mod with_history {
         assert_eq!(first_count_of(&history), Some(earliest), "filled once");
     }
 
+    // NC2
+    #[test]
+    fn an_unreadable_first_count_is_the_unreadable_sentence_with_null_in_all_three_answers(
+    ) {
+        let setup = setup();
+        legacy(&setup.data, &[FIRST], &[]);
+        drop(open_now(&setup.data));
+        // The table is there and the open goes through; the row cannot be read.
+        keyed(&setup.data)
+            .execute_batch(
+                "DROP TABLE first_count;
+                 CREATE TABLE first_count (id INTEGER PRIMARY KEY, other INTEGER);",
+            )
+            .unwrap();
+        let state = app(&setup, &Keychain::available());
+
+        let (range, today, day) = (ask_range(&state), ask_today(&state), ask_day(&state));
+
+        assert!(range.sealed.is_some(), "range");
+        assert!(day.sealed.is_some(), "day");
+        assert_eq!(
+            today.sealed, range.sealed,
+            "Today says the same sentence the others do"
+        );
+        assert_eq!(all_three(&state), [None, None, None]);
+        assert!(today.gaps.is_empty() && today.reaches.is_empty());
+    }
+
     #[test]
     fn many_threads_opening_one_legacy_history_all_open_and_agree() {
         let g = FIRST + 5 * HOUR;
