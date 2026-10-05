@@ -285,3 +285,38 @@ describe('one sentence names the start, and M16 stays (rule 12)', () => {
     }
   });
 });
+
+describe('Today says when Cairn started counting, on the first day only (rule 9, scenario 35)', () => {
+  const SAME_DAY = new Date(2026, 9, 1, 20, 0);
+  const idle: ReachesReader = {
+    listTodaysReaches: async () => quietDay,
+    summarizeReaches: async () => patterns(),
+  };
+  const today = (over: Partial<TodaysReaches>): TodaysReaches => ({ ...quietDay, ...over });
+
+  it('stands under the title and before the standing note', () => {
+    render(<Reaches today={today({ first_counted: FIRST })} read={idle} now={() => SAME_DAY} />);
+
+    const found = startSentences();
+    expect(found).toHaveLength(1);
+    expect(found[0]!.textContent).toBe(`Cairn started counting at ${clockTimeInWords(FIRST)} today.`);
+    expectStartVoice(found[0]!.textContent!);
+    const title = screen.getByRole('heading', { name: 'Today' });
+    const standing = screen.getByText(/Cairn counts only while it is running/);
+    expect(title.compareDocumentPosition(found[0]!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(found[0]!.compareDocumentPosition(standing) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it.each([
+    ['another day', today({ first_counted: FIRST }), NOW],
+    ['an earlier first count', today({ first_counted: EARLY }), SAME_DAY],
+    ['never counted', today({ first_counted: null }), SAME_DAY],
+    ['no field', today({}), SAME_DAY],
+    ['a sealed answer', today({ first_counted: FIRST, sealed: 'Cairn could not read your history just now.' }), SAME_DAY],
+  ])('shows none for %s', (_name, answer, now) => {
+    render(<Reaches today={answer} read={idle} now={() => now} />);
+
+    expect(screen.getByRole('heading', { name: 'Today' })).toBeInTheDocument();
+    expect(startSentences()).toHaveLength(0);
+  });
+});

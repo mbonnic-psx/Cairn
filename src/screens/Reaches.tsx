@@ -322,6 +322,12 @@ function TodayView({
     <>
       <div className="nb-page">
         <h2 className="nb-reaches-title">{TODAY}</h2>
+        {typeof day.first_counted === 'number' &&
+          within(day.first_counted, dayBounds(localToday(now()))) && (
+            <p className="nb-reaches-aside">
+              {`Cairn started counting at ${clockTimeInWords(day.first_counted)} today.`}
+            </p>
+          )}
         <p className="nb-reaches-note">{day.coverage_note ?? COUNTED_ONLY_TODAY}</p>
       </div>
       <div className="nb-page nb-page--ruled">
