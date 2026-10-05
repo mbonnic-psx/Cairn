@@ -1035,6 +1035,34 @@ mod with_history {
         assert!(patterns.sealed.is_some());
         assert_eq!(patterns.movement, [], "never rows at zero");
     }
+
+    // Characterisation (slice `first-counted`, N-C1), written green before any RED.
+    // Rule 8's RED (N13, N14) changes it on purpose: the time before Cairn first
+    // counted will then read as not seen, where today it reads as seen with zero.
+    #[test]
+    fn the_dates_before_the_earliest_record_read_as_whole_with_no_reaches_today() {
+        let setup = setup();
+        let history = seed(&setup.data);
+        reaches_on(&history, "2026-09-07", 1);
+        let state = app(&setup, &Keychain::available());
+
+        let patterns = Range::four_weeks().ask(&state);
+
+        for index in [0, 1] {
+            let row = &patterns.movement[index];
+            assert_eq!(named(row), ["2026-09-05", "2026-09-06"][index]);
+            assert_eq!(
+                (row.seen, row.count),
+                (Seen::Whole, 0),
+                "H5's limit as it stands: before the first reach is seen, with nothing in it"
+            );
+        }
+        assert_eq!(
+            (patterns.movement[2].seen, patterns.movement[2].count),
+            (Seen::Whole, 1)
+        );
+        assert!(patterns.gaps.is_empty());
+    }
 }
 
 // --- Scenario 22: a build without the history -------------------------------------------

@@ -548,3 +548,31 @@ fn a_gap_that_ended_exactly_when_the_day_began_raises_no_note() {
     assert_eq!(reaches.coverage_note, None);
     assert!(reaches.gaps.is_empty());
 }
+
+// --- Characterisation (slice `first-counted`, N-C1) -------------------------
+
+/// Written green before any RED. The history's first record is a gap that began
+/// the evening before the day. Today `get_day` states all of that gap's part of
+/// the day, as though Cairn had been counting before the gap began. Rule 8's
+/// RED (N13, N14) changes it on purpose: a gap is cut to begin no earlier than
+/// the first count, so the part before it is not a gap in Cairn's watching.
+#[test]
+fn a_gap_that_began_the_evening_before_and_is_the_first_record_is_stated_whole_today() {
+    let setup = setup();
+    gap_around_midnight(&setup.data, TODAY_START - 3 * 3600, TODAY_START + 5 * 3600);
+    let state = app(&setup, &Keychain::available());
+
+    let day = get_today(&state);
+
+    assert_eq!(
+        day.gaps,
+        vec![Gap {
+            from: TODAY_START,
+            to: TODAY_START + 5 * 3600
+        }],
+        "the whole of the gap's hours in the day"
+    );
+    let note = day.coverage_note.expect("the unwatched hours are said");
+    assert!(note.contains("about 5 hour"), "{note}");
+    assert!(day.reaches.is_empty());
+}
