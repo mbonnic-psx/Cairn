@@ -464,10 +464,13 @@ fn coverage(
     rows: usize,
     unseen: &[(i64, i64)],
     now: i64,
-) -> Vec<(i64, i64)> {
+) -> Vec<(u32, u32)> {
     // Only what is before the present can have been seen or missed.
     let end = range.to.min(now).max(range.from);
-    let mut totals = vec![(0i64, 0i64); rows];
+    // A row holds at most a week and a clock change of seconds, so a pair of
+    // `u32` is wide enough and half the size of a pair of `i64`: a range of
+    // thousands of years is half a million rows (R5).
+    let mut totals = vec![(0u32, 0u32); rows];
     let mut next_gap = 0usize;
 
     for_each_piece(range, dates, length, |row, begins, ends| {
@@ -486,10 +489,14 @@ fn coverage(
             missed = missed.saturating_add(gap_to.min(to) - gap_from.max(from));
         }
         let total = &mut totals[row];
-        total.0 = total.0.saturating_add(to - from);
-        total.1 = total.1.saturating_add(missed);
+        total.0 = total.0.saturating_add(narrow(to - from));
+        total.1 = total.1.saturating_add(narrow(missed));
     });
     totals
+}
+
+fn narrow(seconds: i64) -> u32 {
+    u32::try_from(seconds).unwrap_or(u32::MAX)
 }
 
 /// Calls `visit(row, begins, ends)` for the pieces of `[range.from, range.to)`
