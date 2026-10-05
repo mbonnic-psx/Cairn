@@ -858,6 +858,93 @@ mod with_history {
         assert_eq!(first_count_of(&held), Some(FIRST));
     }
 
+    /// Holds the write lock on another connection for `hold`, with a journal
+    /// write inside it, then commits.
+    fn writer_elsewhere(
+        data: &Path,
+        hold: std::time::Duration,
+    ) -> std::thread::JoinHandle<()> {
+        let connection = keyed(data);
+        connection.execute_batch("BEGIN IMMEDIATE").unwrap();
+        connection
+            .execute(
+                "INSERT INTO journal_entries (day, text, written_at) VALUES ('2026-10-01', 't', 1)",
+                [],
+            )
+            .unwrap();
+        std::thread::spawn(move || {
+            std::thread::sleep(hold);
+            connection.execute_batch("COMMIT").unwrap();
+        })
+    }
+
+    // NC4
+    #[test]
+    fn a_reach_recorded_while_another_connection_writes_waits_and_is_stored() {
+        let setup = setup();
+        let held = seed(&setup.data);
+        held.note_counting(FIRST).unwrap();
+        let other = writer_elsewhere(&setup.data, std::time::Duration::from_millis(300));
+
+        let stored = History::Open(held).record("b.example", NOW);
+        other.join().unwrap();
+
+        assert!(stored, "the reach waits for the lock and is stored");
+    }
+
+    // NC4
+    #[test]
+    fn noting_a_counting_moment_while_another_connection_writes_waits_and_notes() {
+        let setup = setup();
+        let held = seed(&setup.data);
+        held.note_counting(FIRST).unwrap();
+        let other = writer_elsewhere(&setup.data, std::time::Duration::from_millis(300));
+
+        let noted = History::Open(held).note_counting(FIRST - HOUR);
+        other.join().unwrap();
+
+        assert!(noted, "the note waits for the lock and is made");
+    }
+
+    // NC4 (c)
+    #[test]
+    fn a_reach_with_the_fill_owed_waits_for_another_opener_filling_and_is_stored() {
+        let (old, new) = (FIRST + 10 * HOUR, FIRST + 20 * HOUR);
+        let setup = setup();
+        legacy(&setup.data, &[old], &[]);
+        let held = opened_with_the_fill_owed(&setup.data);
+        let other = first_opener_elsewhere(
+            &setup.data,
+            old,
+            std::time::Duration::from_millis(300),
+        );
+
+        let stored = held.record("b.example", new);
+        other.join().unwrap();
+
+        assert!(stored, "the reach waits and is stored");
+        assert_eq!(first_count_of(&held), Some(old));
+    }
+
+    // NC5
+    #[cfg(unix)]
+    #[test]
+    fn a_legacy_history_that_cannot_be_written_opens_with_the_fill_owed() {
+        use std::os::unix::fs::PermissionsExt;
+        let setup = setup();
+        legacy(&setup.data, &[FIRST], &[]);
+        let file = setup.data.join(HISTORY_FILE);
+        std::fs::set_permissions(&file, std::fs::Permissions::from_mode(0o444)).unwrap();
+
+        let opened = open_now(&setup.data);
+
+        assert!(opened.is_open(), "the pre-slice build opened this history");
+        let History::Open(open) = &opened else {
+            panic!()
+        };
+        assert!(open.first_count().is_err(), "the fill is still owed");
+    }
+
     // NC2
     #[test]
     fn an_unreadable_first_count_is_the_unreadable_sentence_with_null_in_all_three_answers(

@@ -293,18 +293,20 @@ impl OpenHistory {
         }
         match connection.execute_batch("BEGIN IMMEDIATE") {
             Ok(()) => {}
-            // Could not take the write lock: the build before this slice
-            // opened such a history, so this one does too. The fill waits for
-            // a later open, or for whoever holds the lock to do it.
-            Err(error) if is_busy(&error) => return Ok(()),
-            Err(_) => return Err(cannot_prepare()),
+            // Could not take the write lock for any reason (busy, locked,
+            // read-only): the build before this slice opened such a history,
+            // so this one does too. The fill waits for a later open, or for
+            // whoever holds the lock to do it.
+            Err(_) => return Ok(()),
         }
         let filled = Self::fill_if_owed(connection)
             .and_then(|()| connection.execute_batch("COMMIT"));
-        filled.map_err(|_| {
+        if filled.is_err() {
+            // Cannot write (read-only, full disk): the history stays open
+            // with the fill owed, and the writers' fill-if-owed repairs it.
             let _ = connection.execute_batch("ROLLBACK");
-            cannot_prepare()
-        })
+        }
+        Ok(())
     }
 
     /// If a reach is earlier than the first count (or there is a reach and no
@@ -330,13 +332,22 @@ impl OpenHistory {
         }
     }
 
+    /// Begins a transaction that takes the write lock with its first
+    /// statement. A deferred one that reads and then writes cannot upgrade
+    /// while another connection writes: SQLite refuses at once instead of
+    /// running the busy handler, and a reach is lost. IMMEDIATE waits on the
+    /// busy timeout, as the autocommit write before this slice did.
+    fn begin_write(&self) -> rusqlite::Result<rusqlite::Transaction<'_>> {
+        rusqlite::Transaction::new_unchecked(
+            &self.connection,
+            rusqlite::TransactionBehavior::Immediate,
+        )
+    }
+
     /// Notes `at` as a moment Cairn was counting; only ever earlier.
     pub fn note_counting(&self, at: i64) -> Result<(), Trouble> {
         let failed = || Trouble::new("Cairn could not record that just now.");
-        let transaction = self
-            .connection
-            .unchecked_transaction()
-            .map_err(|_| failed())?;
+        let transaction = self.begin_write().map_err(|_| failed())?;
         Self::fill_if_owed(&transaction).map_err(|_| failed())?;
         transaction
             .execute(NOTE_COUNTING, rusqlite::params![at])
@@ -358,10 +369,7 @@ impl OpenHistory {
     /// a failed note keeps no reach.
     pub fn record(&self, domain: &str, at: i64) -> Result<(), Trouble> {
         let failed = || Trouble::new("Cairn could not record that just now.");
-        let transaction = self
-            .connection
-            .unchecked_transaction()
-            .map_err(|_| failed())?;
+        let transaction = self.begin_write().map_err(|_| failed())?;
         Self::fill_if_owed(&transaction).map_err(|_| failed())?;
         transaction
             .execute(
@@ -577,7 +585,7 @@ impl OpenHistory {
     /// in its old, no-longer-accurate form, or a gap only half clipped.
     pub fn delete_reach_history(&self, from: i64, to: i64) -> Result<(), Trouble> {
         self.connection
-            .execute_batch("BEGIN")
+            .execute_batch("BEGIN IMMEDIATE")
             .map_err(|_| unreadable())?;
 
         let outcome = self.delete_reaches_and_clip_gaps(from, to);
