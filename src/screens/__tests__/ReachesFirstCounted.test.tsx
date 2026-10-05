@@ -168,3 +168,28 @@ describe('From is never earlier than the day Cairn first counted (rule 10)', () 
     expect(screen.getByLabelText('From')).not.toHaveAttribute('min');
   });
 });
+
+describe('where Cairn has never counted, From and To are held at today (rule 11, scenario 28)', () => {
+  it('asks for today alone and reads today in both boxes', async () => {
+    const { calls, read } = fakeRead([patterns({ first_counted: null, by_site: [] })]);
+    await openOverTime(read);
+    await waitFor(() => expect(calls).toHaveLength(2));
+
+    expect(calls.map(([from, to]) => [from, to])).toEqual([
+      ['2026-09-05', '2026-10-02'],
+      ['2026-10-02', '2026-10-02'],
+    ]);
+    expect(screen.getByLabelText('From')).toHaveValue('2026-10-02');
+    expect(screen.getByLabelText('To')).toHaveValue('2026-10-02');
+    expect(screen.getByLabelText('From')).toHaveAttribute('min', '2026-10-02');
+    expect(document.body.textContent).not.toMatch(/started counting/);
+  });
+
+  it('keeps M13 where every row is unseen', async () => {
+    const unseen: MovementRow = { day: '2026-10-02', days: 1, span: 'day', count: 0, seen: 'none', so_far: true };
+    const { read } = fakeRead([patterns({ first_counted: null, by_site: [], movement: [unseen] })]);
+    await openOverTime(read);
+
+    expect(await screen.findByText("Cairn wasn't counting on these days.")).toBeInTheDocument();
+  });
+});

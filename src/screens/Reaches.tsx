@@ -345,10 +345,12 @@ function TodayView({
 
 /**
  * The earliest day *From* may take, from an answer: the computer's own date of the first count, never after
- * today (a clock moved back). None for a sealed answer or one without the field.
+ * today (a clock moved back). Today itself where Cairn has never counted (`null`). None for a sealed answer or
+ * one without the field.
  */
 function limitOf(answer: Patterns, todayDay: string): string | undefined {
-  if (answer.sealed || typeof answer.first_counted !== 'number') return undefined;
+  if (answer.sealed || answer.first_counted === undefined) return undefined;
+  if (answer.first_counted === null) return todayDay;
   const day = localToday(new Date(answer.first_counted * 1000));
   return day > todayDay ? todayDay : day;
 }
