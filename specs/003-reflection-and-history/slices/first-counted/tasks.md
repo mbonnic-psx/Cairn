@@ -47,14 +47,14 @@ open.
   `npx vitest run src/screens/__tests__/TonightWordsKept.test.tsx src/screens/__tests__/ReachesPage.test.tsx src/screens/__tests__/ReachesByHourPage.test.tsx src/screens/__tests__/ReachesByDayPage.test.tsx src/screens/__tests__/ReachesMovementPage.test.tsx src/screens/__tests__/ReachesMovement.test.tsx src/screens/__tests__/ReachesOverTime.test.tsx src/screens/__tests__/ReachesToday.test.tsx src/screens/__tests__/Reaches.test.tsx src/look/__tests__/tonightPage.test.ts src/__tests__/localDays.test.ts`.
   The host appends the seven ledger rows of the plan's *Pin* section to `delivery/survey/pinned.md` before the change
   lands; this task confirms they are there. *Files:* none.
-- [ ] N2 [P] [US2] [pin; N-C1] Characterise the time before the first record as it reads today, green on this branch's
+- [x] N2 [P] [US2] [pin; N-C1] Characterise the time before the first record as it reads today, green on this branch's
   head before any RED. In `src-tauri/tests/us2_movement.rs`: for a history whose earliest record is a reach on
   2026-09-07 and the opening range (2026-09-05 to 2026-10-02, `Europe/London`), rows 2026-09-05 and 09-06 are
   `"whole"` with count 0 (H5's limit as it stands). In `src-tauri/tests/us1_write_tonight.rs`: for a day whose first
   record is a gap that began the evening before, `get_day` states the whole gap. Name each test for the behaviour it
   pins, with a comment that rule 8's RED changes it (N13, N14). *Files:* `src-tauri/tests/us2_movement.rs`,
   `src-tauri/tests/us1_write_tonight.rs`.
-- [ ] N3 [P] [US2] [pin; N-C2] Characterise `OpenHistory::record`: it writes exactly one row and nothing else
+- [x] N3 [P] [US2] [pin; N-C2] Characterise `OpenHistory::record`: it writes exactly one row and nothing else
   (`table_names` and the row count of each table, before and after), green on this branch's head before any RED. Rule
   4's RED (N11) changes it. *Files:* `src-tauri/tests/stores.rs`.
 
@@ -62,15 +62,15 @@ open.
 
 Five tasks, each with files no other open task touches.
 
-- [ ] N4 [P] [US2] [contract; plan, *Contract amendments*] Append the plan's `ui-ipc.md` amendment text, verbatim, as
+- [x] N4 [P] [US2] [contract; plan, *Contract amendments*] Append the plan's `ui-ipc.md` amendment text, verbatim, as
   *Amended in slice `first-counted` (2026-10-05)* after the `history-movement` amendment. A documentation task: its
   proof is N24's field-for-field match, and its RED is that match failing until the code exists. *Files:*
   `specs/003-reflection-and-history/contracts/ui-ipc.md`.
-- [ ] N5 [P] [US2] [contract] Append the plan's `patterns.md` amendment (`first_count::unseen`, `gaps_since`, and the
+- [x] N5 [P] [US2] [contract] Append the plan's `patterns.md` amendment (`first_count::unseen`, `gaps_since`, and the
   properties) after the `history-movement` amendment. *Files:* `specs/003-reflection-and-history/contracts/patterns.md`.
-- [ ] N6 [P] [US2] [contract] Append the plan's `data-model.md` text (`first_count`, one row) under *Additions to the
+- [x] N6 [P] [US2] [contract] Append the plan's `data-model.md` text (`first_count`, one row) under *Additions to the
   encrypted store*, after `reach_estimates`. *Files:* `specs/003-reflection-and-history/data-model.md`.
-- [ ] N7 [P] [US2] [rule 16; scenario 43; pin row 7; the ambient-counts guard] RED: plant `const at =
+- [x] N7 [P] [US2] [rule 16; scenario 43; pin row 7; the ambient-counts guard] RED: plant `const at =
   answer.first_counted;` in a new scratch file `src/plantedFirstCounted.ts` (not in `localDays.ts`, which N8 edits; the
   plan names `localDays.ts`, and any file outside the allowed places proves the same refusal) and run `npm run
   check:ambient-counts`. Record that it is **not** refused. GREEN: `REACH_DATA` gains `{ pattern:
@@ -78,7 +78,7 @@ Five tasks, each with files no other open task touches.
   the file and line. Record that refusal. Remove the plant and run `npm run check` clean (the words appear today in no
   `src/` file). The guard's allowed places do not change. *Files:* `scripts/check-no-ambient-counts.mjs`; the scratch
   `src/plantedFirstCounted.ts`, deleted in the same task.
-- [ ] N8 [P] [US2] [scenario 42] RED: add to `src/__tests__/localDays.test.ts`, under `process.env.TZ =
+- [x] N8 [P] [US2] [scenario 42] RED: add to `src/__tests__/localDays.test.ts`, under `process.env.TZ =
   'Pacific/Kiritimati'` at the top of the file if it is not already, `clockTimeInWords(FIRST)` equals exactly
   `new Date(FIRST * 1000).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })`, and under the +14 zone it
   names that zone's time, not London's or UTC's. Fails because the function does not exist. GREEN: `src/localDays.ts`
