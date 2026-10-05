@@ -212,7 +212,7 @@ neither A nor D. N22 joins B and C. Within a track no task is `[P]`.
 
 ### Track B — the interface, *Over time* and *Today* (`src`)
 
-- [ ] N15 [US2] [rule 13; scenario 37; pin row 6; closes V47] In all four views a screen reader hears a count with its
+- [x] N15 [US2] [rule 13; scenario 37; pin row 6; closes V47] In all four views a screen reader hears a count with its
   unit.
   RED: write `src/screens/__tests__/ReachesCounts.test.tsx` (`TZ=Europe/London`, a fake `read`, a fixed `now`, no
   `vi.mock`): one answer drawn in each of *By site*, *By hour*, *By day* and *Day by day* has every count element's
@@ -229,7 +229,7 @@ neither A nor D. N22 joins B and C. Within a track no task is `[P]`.
   `src/screens/__tests__/beforeTheReveal.ts`, `TonightWordsKept.test.tsx`, `ReachesPage.test.tsx`,
   `ReachesByHourPage.test.tsx`, `ReachesByDayPage.test.tsx`, `ReachesMovementPage.test.tsx`,
   `src/look/__tests__/tonightPage.test.ts`.
-- [ ] N16 [US2] [rule 14; scenarios 38, 39; styling; closes V48] A count is written in the computer's own grouping, and
+- [x] N16 [US2] [rule 14; scenarios 38, 39; styling; closes V48] A count is written in the computer's own grouping, and
   every count in a view takes the same width.
   RED, in `ReachesCounts.test.tsx`: a site with 1 234 reaches shows `(1234).toLocaleString()` as its visible count and
   its bar is 100 % (the width still comes from the number, not the text); counts 1 234, 56 and 7 in one view set the
@@ -241,7 +241,7 @@ neither A nor D. N22 joins B and C. Within a track no task is `[P]`.
   grouped text; `tonight-page.css` takes `min-width` from that variable and adds no colour, font or focus rule.
   *Files:* `src/screens/Reaches.tsx`, `src/screens/__tests__/ReachesCounts.test.tsx`, `src/styles/tonight-page.css`,
   the captured-state tests of N15 only where a count over 999 is read.
-- [ ] N17 [US2] [rule 10; scenarios 23–27; the types] *From* is never earlier than the day Cairn first counted.
+- [x] N17 [US2] [rule 10; scenarios 23–27; the types] *From* is never earlier than the day Cairn first counted.
   RED: write `src/screens/__tests__/ReachesFirstCounted.test.tsx` (`TZ=Europe/London`, `now` = `NOW`, a fake `read`, no
   `vi.mock`). A reader whose answer carries `first_counted: FIRST` opens *Over time*: the first call is for 2026-09-05
   to 2026-10-02 and the second for 2026-10-01 to 2026-10-02, *From* reads 2026-10-01 with `min` 2026-10-01, and nothing
@@ -259,12 +259,12 @@ neither A nor D. N22 joins B and C. Within a track no task is `[P]`.
   limit is component state, not remembered. `summarizeReaches` and `commands.rs` do not change.
   *Files:* `src/screens/Reaches.tsx`, `src/ipc/reaches.ts`, `src/ipc/journal.ts`,
   `src/screens/__tests__/ReachesFirstCounted.test.tsx` (new). Fixtures need no `first_counted` (optional field).
-- [ ] N18 [US2] [rule 11; scenario 28] Where Cairn has never counted, *From* and *To* are held at today.
+- [x] N18 [US2] [rule 11; scenario 28] Where Cairn has never counted, *From* and *To* are held at today.
   RED: with `first_counted: null`, the second call is for today alone, *From* and *To* read today, *From*'s `min` is
   today, no start sentence appears, and where every row is unseen M13's *Cairn wasn't counting on these days.* stands.
   Fails because `null` is treated as no limit. GREEN: `null` gives the limit `todayDay`, which pulls `lastDay` too.
   *Files:* `src/screens/Reaches.tsx`, `src/screens/__tests__/ReachesFirstCounted.test.tsx`.
-- [ ] N19 [US2] [rule 12; scenarios 29–34] One sentence names the start, and M16's stays.
+- [x] N19 [US2] [rule 12; scenarios 29–34] One sentence names the start, and M16's stays.
   RED: with `EARLY` and the opening range, beside the date boxes stands *Cairn started counting on* followed by
   `shortDateInWords('2025-01-01', true)` and a full stop, and F3's sentence does not appear (29). With scenario 23's
   settled state, among the notes and before any coverage note stands *Cairn started counting at*
@@ -282,7 +282,7 @@ neither A nor D. N22 joins B and C. Within a track no task is `[P]`.
   both and never in a sealed state, in the notes' serif face. The date is `shortDateInWords`, the time
   `clockTimeInWords`, the year by `namesYear`.
   *Files:* `src/screens/Reaches.tsx`, `src/screens/__tests__/ReachesFirstCounted.test.tsx`.
-- [ ] N20 [US2] [rule 9; scenario 35] *Today* says when Cairn started counting, on the first day only.
+- [x] N20 [US2] [rule 9; scenario 35] *Today* says when Cairn started counting, on the first day only.
   RED: with a `TodaysReaches` carrying `first_counted: FIRST` and `now` on 2026-10-01 at 20:00, under the title and
   before the standing note stands *Cairn started counting at* `clockTimeInWords(FIRST)` *today.*; `now` on 2026-10-02,
   `EARLY`, `null`, absent and a sealed answer each show none. The same scan as N19. Fails because *Today* has no
@@ -291,7 +291,7 @@ neither A nor D. N22 joins B and C. Within a track no task is `[P]`.
 
 ### Track C — the check-in (`src`; needs N8)
 
-- [ ] N21 [US2] [rule 9; scenario 36] The check-in says when Cairn started counting, on the first day only.
+- [x] N21 [US2] [rule 9; scenario 36] The check-in says when Cairn started counting, on the first day only.
   RED: write `src/screens/__tests__/CheckInFirstCounted.test.tsx` (`TZ=Europe/London`, a fake reader, no `vi.mock`). A
   `DayView` for 2026-10-01 with `first_counted: FIRST` shows, before the coverage note, *Cairn started counting at*
   `clockTimeInWords(FIRST)` *today.*; when the day has ended under the open check-in (`thisDay`) it ends *on Thursday 1
