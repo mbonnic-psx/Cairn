@@ -14,6 +14,8 @@ import { useEffect, useState, type CSSProperties, type ReactNode } from 'react';
 import {
   acrossInWords,
   addDays,
+  type Bounds,
+  clockTimeInWords,
   dayBounds,
   firstWeekday,
   hourInWords,
@@ -355,6 +357,20 @@ function limitOf(answer: Patterns, todayDay: string): string | undefined {
   return day > todayDay ? todayDay : day;
 }
 
+/** Whether an instant falls inside a range's bounds. */
+const within = (at: number, bounds: Bounds): boolean => bounds.start <= at && at < bounds.end;
+
+/** The day Cairn started counting, when the range does not hold it (F2): always with its year. */
+const startedOnWords = (day: string): string =>
+  `Cairn started counting on ${shortDateInWords(day, true)}.`;
+
+/** The time and day Cairn started counting, when the range holds it (F3): the year as the rows write it. */
+const startedAtWords = (at: number, firstDay: string, lastDay: string, todayDay: string): string =>
+  `Cairn started counting at ${clockTimeInWords(at)} on ${shortDateInWords(
+    localToday(new Date(at * 1000)),
+    namesYear(firstDay, lastDay, todayDay),
+  )}.`;
+
 /** What the view holds: the answer for a range, nothing yet, or one sentence for a read that threw. */
 type Answer = Patterns | 'looking' | 'unreadable';
 
@@ -374,6 +390,8 @@ function OverTimeView({
   // The earliest day *From* may take: the local day Cairn first counted, from the latest answer that carried it.
   // Component state and nothing more, read afresh from each opening's answers (H2).
   const [limit, setLimit] = useState<string | undefined>(undefined);
+  // The instant itself, kept only when Cairn has counted: what the one sentence about the start is made from.
+  const [startedAt, setStartedAt] = useState<number | undefined>(undefined);
   const [answer, setAnswer] = useState<Answer>('looking');
   // Which breakdown of the one answer: forgotten with the range on leaving the view.
   const [seen, setSeen] = useState<Seen>('site');
@@ -388,6 +406,9 @@ function OverTimeView({
         if (!current) return;
         const found = limitOf(patterns, todayDay);
         if (found !== undefined) setLimit(found);
+        if (!patterns.sealed && patterns.first_counted !== undefined) {
+          setStartedAt(patterns.first_counted ?? undefined);
+        }
         // An answer for days before the limit is not drawn: the range is moved up to it and asked for again.
         if (found !== undefined && found > firstDay) {
           setFirstDay(found);
@@ -440,6 +461,7 @@ function OverTimeView({
   const quiet = list ? isQuiet(all) : false;
   const rows = !unseen || seen === 'movement' ? all : [];
   const largest = largestCount(rows);
+  const holdsStart = startedAt !== undefined && within(startedAt, rangeBounds(firstDay, lastDay));
   // Every count in the view takes the width of the widest, grouped as it is written (V48).
   const countChars = rows.reduce(
     (widest, row) => (row.absent ? widest : Math.max(widest, row.count.toLocaleString().length)),
@@ -455,6 +477,14 @@ function OverTimeView({
           <p className="nb-reaches-sentence">{sentence}</p>
         ) : (
           <>
+            {startedAt !== undefined && !holdsStart && limit !== undefined && (
+              <p className="nb-reaches-aside">{startedOnWords(limit)}</p>
+            )}
+            {startedAt !== undefined && holdsStart && (
+              <p className="nb-reaches-aside">
+                {startedAtWords(startedAt, firstDay, lastDay, todayDay)}
+              </p>
+            )}
             {list.coverage_note && (
               <p className="nb-reaches-aside">{list.coverage_note}</p>
             )}

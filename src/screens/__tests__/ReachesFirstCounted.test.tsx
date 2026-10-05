@@ -13,7 +13,9 @@ import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 
 import type { MovementRow, Patterns, TodaysReaches } from '../../ipc/reaches';
+import { clockTimeInWords, shortDateInWords } from '../../localDays';
 import { Reaches, type ReachesReader } from '../Reaches';
+import { expectStartVoice, startSentences } from './startSentences';
 
 /** Friday 2 October 2026, 20:00 in London. */
 const NOW = new Date(2026, 9, 2, 20, 0);
@@ -191,5 +193,95 @@ describe('where Cairn has never counted, From and To are held at today (rule 11,
     await openOverTime(read);
 
     expect(await screen.findByText("Cairn wasn't counting on these days.")).toBeInTheDocument();
+  });
+});
+
+const STANDING = 'Cairn counts only while it is running. This is what it saw over these days.';
+const VIEWS = ['By site', 'By hour', 'By day', 'Day by day'];
+
+describe('one sentence names the start, and M16 stays (rule 12)', () => {
+  it("says the day beside the date boxes when the range does not hold the first count (scenario 29)", async () => {
+    const { read } = fakeRead([patterns({ first_counted: EARLY })]);
+    await openOverTime(read);
+    await screen.findByText('a.example');
+
+    const found = startSentences();
+    expect(found).toHaveLength(1);
+    expect(found[0]!.textContent).toBe(`Cairn started counting on ${shortDateInWords('2025-01-01', true)}.`);
+    expectStartVoice(found[0]!.textContent!);
+    expect(screen.queryByText(/Cairn started counting at/)).toBeNull();
+  });
+
+  it.each(VIEWS)('says the time and day among the notes, before a coverage note, in %s (scenario 30)', async (view) => {
+    const { read } = fakeRead([
+      patterns({ first_counted: FIRST, coverage_note: 'Cairn was not counting for 2 hours.' }),
+    ]);
+    const user = await openOverTime(read);
+    await screen.findByText(STANDING);
+    await user.click(screen.getByRole('button', { name: view }));
+
+    const found = startSentences();
+    expect(found).toHaveLength(1);
+    expect(found[0]!.textContent).toBe(
+      `Cairn started counting at ${clockTimeInWords(FIRST)} on ${shortDateInWords('2026-10-01', false)}.`,
+    );
+    expectStartVoice(found[0]!.textContent!);
+    const note = screen.getByText('Cairn was not counting for 2 hours.');
+    expect(found[0]!.compareDocumentPosition(note) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(screen.queryByText(/Cairn started counting on/)).toBeNull();
+  });
+
+  it('writes the year when the range names it (scenario 31)', async () => {
+    const first = seconds(new Date(2026, 11, 20, 9, 5));
+    const { read } = fakeRead([patterns({ first_counted: first })]);
+    await openOverTime(read, new Date(2027, 0, 10, 20, 0));
+    await screen.findByText(STANDING);
+
+    expect(startSentences()[0]!.textContent).toBe(
+      `Cairn started counting at ${clockTimeInWords(first)} on ${shortDateInWords('2026-12-20', true)}.`,
+    );
+  });
+
+  it('reads the time before the first count as not seen, with no clause about the start (scenario 32)', async () => {
+    const row = (day: string, seen: MovementRow['seen'], count: number): MovementRow => ({
+      day,
+      days: 1,
+      span: 'day',
+      count,
+      seen,
+      so_far: false,
+    });
+    const { read } = fakeRead([
+      patterns({
+        first_counted: FIRST,
+        movement: [row('2026-09-30', 'none', 0), row('2026-10-01', 'part', 3), row('2026-10-02', 'whole', 1)],
+      }),
+    ]);
+    const user = await openOverTime(read);
+    await screen.findByText(STANDING);
+    await user.click(screen.getByRole('button', { name: 'Day by day' }));
+
+    const lines = screen.getAllByRole('listitem').map((li) => li.textContent ?? '');
+    expect(lines[0]).toContain('not seen');
+    expect(lines[1]).toContain('partly seen');
+    expect(lines[1]).toContain('3');
+    for (const line of lines) expect(line).not.toMatch(/started/i);
+  });
+
+  it('draws neither sentence while looking, when unreadable or sealed (scenario 33)', async () => {
+    const never = new Promise<Patterns>(() => undefined);
+    const looking: ReachesReader = { listTodaysReaches: async () => quietDay, summarizeReaches: () => never };
+    await openOverTime(looking);
+    expect(startSentences()).toHaveLength(0);
+  });
+
+  it('closes every state that draws a list with the standing sentence, unchanged (scenario 34)', async () => {
+    for (const first of [FIRST, EARLY]) {
+      const { read } = fakeRead([patterns({ first_counted: first })]);
+      const { unmount } = render(<Reaches read={read} now={() => NOW} />);
+      await userEvent.setup().click(await screen.findByRole('button', { name: 'Over time' }));
+      expect(await screen.findByText(STANDING)).toBeInTheDocument();
+      unmount();
+    }
   });
 });
