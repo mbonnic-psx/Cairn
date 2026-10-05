@@ -462,6 +462,14 @@ Checked against FR-022, FR-022a, FR-024, H5, M11, M16, and the two findings carr
 - **F7 — how a count is read and written (V47, V48).** In all four views a screen reader hears a count with its unit
   ("3 reaches", "1 reach"), never a bare number run into the row's date, and a count is grouped in the computer's own
   form ("1,234"), so a wide count does not move its bar.
+- **F8 — one sentence, never two (owner, on the plan, 2026-10-05: "all yes").** Where F2's and F3's sentences would
+  both apply, the page says one: F3's, with its time, when the range holds the first count; F2's otherwise.
+- **F9 — before Cairn has ever counted (same message).** *From* and *To* are held at today, every row reads *not
+  seen*, and M13's "Cairn wasn't counting on these days." says it. No new sentence.
+- **F10 — a deleted reach that set the first count (same message).** F5 stands: the first count stays, since its
+  sentence names when Cairn started, never what was reached for.
+- **F11 — the first count's own row on *Day by day* (same message).** M12's judgement stands with no extra clause; the
+  sentence above the rows names the start. Times follow the computer's own form ("2:14 PM", "14:14"), as dates do (M10).
 
 ## Requirements *(mandatory)*
 
