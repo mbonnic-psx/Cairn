@@ -444,14 +444,20 @@ fn a_reach_whose_note_fails_is_not_kept() {
     ) else {
         panic!("a fresh directory with a good key should open");
     };
-    // Take the table the note writes to away from under it.
+    // Make the table the note writes to refuse the note (a missing table is
+    // now created and filled by the writer itself).
     let connection =
         rusqlite::Connection::open(directory.path().join(HISTORY_FILE)).unwrap();
     let hex: String = [7u8; 32].iter().map(|byte| format!("{byte:02x}")).collect();
     connection
         .pragma_update(None, "key", format!("x'{hex}'"))
         .unwrap();
-    connection.execute_batch("DROP TABLE first_count").unwrap();
+    connection
+        .execute_batch(
+            "DROP TABLE first_count;
+             CREATE TABLE first_count (id INTEGER PRIMARY KEY, other INTEGER);",
+        )
+        .unwrap();
     drop(connection);
 
     assert!(open.record("example.com", 1_700_000_000).is_err());

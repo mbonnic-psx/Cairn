@@ -818,6 +818,46 @@ mod with_history {
         assert_eq!(first_count_of(&history), Some(earliest), "filled once");
     }
 
+    /// An open whose fill could not take the write lock: `first_count` is not
+    /// there yet, and the history is open.
+    fn opened_with_the_fill_owed(data: &Path) -> History {
+        let connection = keyed(data);
+        connection.execute_batch("BEGIN IMMEDIATE").unwrap();
+        let release = std::thread::spawn(move || {
+            std::thread::sleep(std::time::Duration::from_secs(6));
+            connection.execute_batch("COMMIT").unwrap();
+        });
+        let held = open_now(data);
+        release.join().unwrap();
+        assert!(held.is_open());
+        held
+    }
+
+    #[test]
+    fn a_reach_recorded_while_the_fill_is_still_owed_is_stored_and_is_the_first_count() {
+        let (old, new) = (FIRST + 10 * HOUR, FIRST + 20 * HOUR);
+        let setup = setup();
+        legacy(&setup.data, &[old], &[]);
+        let held = opened_with_the_fill_owed(&setup.data);
+
+        assert!(held.record("b.example", new), "the reach is stored");
+
+        assert_eq!(first_count_of(&held), Some(old), "the earliest moment");
+        let History::Open(open) = &held else { panic!() };
+        assert_eq!(open.between(old, new + 1).unwrap().len(), 2);
+    }
+
+    #[test]
+    fn noting_a_counting_moment_while_the_fill_is_still_owed_creates_and_fills() {
+        let setup = setup();
+        legacy(&setup.data, &[], &[]);
+        let held = opened_with_the_fill_owed(&setup.data);
+
+        assert!(held.note_counting(FIRST));
+
+        assert_eq!(first_count_of(&held), Some(FIRST));
+    }
+
     // NC2
     #[test]
     fn an_unreadable_first_count_is_the_unreadable_sentence_with_null_in_all_three_answers(

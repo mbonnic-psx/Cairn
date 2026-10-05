@@ -276,6 +276,17 @@ impl OpenHistory {
         Ok(history)
     }
 
+    /// Inside a write transaction already open: creates and fills `first_count`
+    /// if it is not there. Every writer of the first count runs this first, so
+    /// a fill that could not take the lock at open never costs a reach.
+    fn fill_if_owed(connection: &Connection) -> rusqlite::Result<()> {
+        if table_exists(connection, "first_count")? {
+            Ok(())
+        } else {
+            connection.execute_batch(FILL_FIRST_COUNT)
+        }
+    }
+
     fn fill_first_count(connection: &Connection) -> Result<(), Trouble> {
         if table_exists(connection, "first_count").map_err(|_| cannot_prepare())? {
             return Ok(());
@@ -288,14 +299,7 @@ impl OpenHistory {
             Err(error) if is_busy(&error) => return Ok(()),
             Err(_) => return Err(cannot_prepare()),
         }
-        let filled = table_exists(connection, "first_count")
-            .and_then(|exists| {
-                if exists {
-                    Ok(())
-                } else {
-                    connection.execute_batch(FILL_FIRST_COUNT)
-                }
-            })
+        let filled = Self::fill_if_owed(connection)
             .and_then(|()| connection.execute_batch("COMMIT"));
         filled.map_err(|_| {
             let _ = connection.execute_batch("ROLLBACK");
@@ -328,10 +332,16 @@ impl OpenHistory {
 
     /// Notes `at` as a moment Cairn was counting; only ever earlier.
     pub fn note_counting(&self, at: i64) -> Result<(), Trouble> {
-        self.connection
+        let failed = || Trouble::new("Cairn could not record that just now.");
+        let transaction = self
+            .connection
+            .unchecked_transaction()
+            .map_err(|_| failed())?;
+        Self::fill_if_owed(&transaction).map_err(|_| failed())?;
+        transaction
             .execute(NOTE_COUNTING, rusqlite::params![at])
-            .map(|_| ())
-            .map_err(|_| Trouble::new("Cairn could not record that just now."))
+            .map_err(|_| failed())?;
+        transaction.commit().map_err(|_| failed())
     }
 
     /// When Cairn first counted, if it has.
@@ -352,6 +362,7 @@ impl OpenHistory {
             .connection
             .unchecked_transaction()
             .map_err(|_| failed())?;
+        Self::fill_if_owed(&transaction).map_err(|_| failed())?;
         transaction
             .execute(
                 "INSERT INTO reaches (domain, at) VALUES (?1, ?2)",
