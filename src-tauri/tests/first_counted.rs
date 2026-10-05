@@ -427,6 +427,197 @@ mod with_history {
         assert_eq!(all_three(&state), [None; 3]);
     }
 
+    /// The opening range of a screen in London, 2026-09-05 to 2026-10-02.
+    fn rows_of(patterns: &Patterns) -> Vec<(String, String, u32)> {
+        serde_json::to_value(&patterns.movement)
+            .unwrap()
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|row| {
+                (
+                    row["day"].as_str().unwrap().to_string(),
+                    row["seen"].as_str().unwrap().to_string(),
+                    row["count"].as_u64().unwrap() as u32,
+                )
+            })
+            .collect()
+    }
+
+    fn range_in_london(state: &AppState, first: &str, last: &str) -> Patterns {
+        let (first, last) = (date(first), date(last));
+        let start = first.days_since_epoch() * DAY - HOUR;
+        let end = (last.days_since_epoch() + 1) * DAY - HOUR;
+        state.summarize_reaches(
+            first,
+            last,
+            start,
+            end,
+            &[OffsetChange {
+                from: start,
+                offset: HOUR,
+            }],
+        )
+    }
+
+    /// 2026-10-01 14:14 BST: 14 h 14 m of that date is before it.
+    const STARTED: i64 = 1_790_860_440;
+    /// 2026-10-01 15:00 BST.
+    const REACH_ONE: i64 = 1_790_863_200;
+    /// 2026-10-02 09:30 BST.
+    const REACH_TWO: i64 = 1_790_929_800;
+
+    fn counting_since_the_afternoon(data: &Path) {
+        let open = seed(data);
+        open.note_counting(STARTED).unwrap();
+        open.record("a.example", REACH_ONE).unwrap();
+        open.record("a.example", REACH_TWO).unwrap();
+    }
+
+    // Scenario 11
+    #[test]
+    fn a_range_that_holds_the_first_count_reads_none_then_part_then_whole() {
+        let setup = setup();
+        counting_since_the_afternoon(&setup.data);
+        let state = app(&setup, &Keychain::available());
+
+        let patterns = range_in_london(&state, "2026-09-05", "2026-10-02");
+        let rows = rows_of(&patterns);
+
+        assert_eq!(rows.len(), 28);
+        for row in &rows[..26] {
+            assert_eq!((row.1.as_str(), row.2), ("none", 0), "{row:?}");
+        }
+        assert_eq!(
+            (rows[26].0.as_str(), rows[26].1.as_str(), rows[26].2),
+            ("2026-10-01", "part", 1)
+        );
+        assert_eq!(
+            (rows[27].0.as_str(), rows[27].1.as_str(), rows[27].2),
+            ("2026-10-02", "whole", 1)
+        );
+        assert!(
+            serde_json::to_value(&patterns.movement).unwrap()[27]["so_far"]
+                .as_bool()
+                .unwrap()
+        );
+        assert!(patterns.gaps.is_empty());
+        assert_eq!(patterns.coverage_note, None);
+        assert_eq!(patterns.first_counted, Some(STARTED));
+    }
+
+    // Scenario 12
+    #[test]
+    fn the_range_the_screen_sends_is_two_rows_and_no_note() {
+        let setup = setup();
+        counting_since_the_afternoon(&setup.data);
+        let state = app(&setup, &Keychain::available());
+
+        let patterns = range_in_london(&state, "2026-10-01", "2026-10-02");
+
+        assert_eq!(
+            rows_of(&patterns)
+                .iter()
+                .map(|row| row.1.as_str())
+                .collect::<Vec<_>>(),
+            ["part", "whole"]
+        );
+        assert_eq!(patterns.coverage_note, None);
+    }
+
+    // Scenario 13
+    #[test]
+    fn an_early_start_leaves_that_date_whole() {
+        let setup = setup();
+        let open = seed(&setup.data);
+        open.note_counting(1_790_838_000).unwrap(); // 2026-10-01 08:00 BST
+        let state = app(&setup, &Keychain::available());
+
+        let patterns = range_in_london(&state, "2026-10-01", "2026-10-02");
+
+        assert_eq!(
+            rows_of(&patterns)[0].1,
+            "whole",
+            "8 h of 24 unseen is not more than half"
+        );
+    }
+
+    // Scenario 14
+    #[test]
+    fn a_gap_that_began_before_the_first_count_is_stated_from_it() {
+        let setup = setup();
+        let open = seed(&setup.data);
+        open.note_counting(STARTED).unwrap();
+        let gap_from = 1_790_805_600; // 2026-09-30 23:00 BST
+        let gap_to = 1_790_866_800; // 2026-10-01 16:00 BST
+        open.record_gap(&cairn::store::history::CoverageGap {
+            from: gap_from,
+            to: gap_to,
+        })
+        .unwrap();
+        let state = app(&setup, &Keychain::available());
+
+        let patterns = range_in_london(&state, "2026-09-05", "2026-10-02");
+
+        assert_eq!(
+            patterns
+                .gaps
+                .iter()
+                .map(|gap| (gap.from, gap.to))
+                .collect::<Vec<_>>(),
+            vec![(STARTED, gap_to)]
+        );
+        let note = patterns
+            .coverage_note
+            .expect("the hours after the first count are said");
+        assert!(note.contains("about 2 hours"), "{note}");
+    }
+
+    // Scenario 15
+    #[test]
+    fn where_cairn_has_never_counted_every_row_is_none_and_gaps_are_as_recorded() {
+        let setup = setup();
+        let open = seed(&setup.data);
+        let gap = cairn::store::history::CoverageGap {
+            from: 1_790_000_000,
+            to: 1_790_003_600,
+        };
+        open.record_gap(&gap).unwrap();
+        let state = app(&setup, &Keychain::available());
+
+        let patterns = range_in_london(&state, "2026-09-05", "2026-10-02");
+
+        assert_eq!(patterns.first_counted, None);
+        assert!(rows_of(&patterns)
+            .iter()
+            .all(|row| row.1 == "none" && row.2 == 0));
+        assert_eq!(
+            patterns
+                .gaps
+                .iter()
+                .map(|g| (g.from, g.to))
+                .collect::<Vec<_>>(),
+            vec![(gap.from, gap.to)]
+        );
+    }
+
+    // Scenario 16
+    #[test]
+    fn a_range_wholly_before_the_first_count_is_none_throughout() {
+        let setup = setup();
+        counting_since_the_afternoon(&setup.data);
+        let state = app(&setup, &Keychain::available());
+
+        let patterns = range_in_london(&state, "2026-09-05", "2026-09-30");
+
+        let rows = rows_of(&patterns);
+        assert_eq!(rows.len(), 26);
+        assert!(
+            rows.iter().all(|row| row.1 == "none" && row.2 == 0),
+            "{rows:?}"
+        );
+    }
+
     // Scenario 10
     #[test]
     fn the_three_answers_hold_ten_five_and_seven_keys_and_first_counted_is_an_integer() {

@@ -1,6 +1,7 @@
 //! A range of days, assembled from the history (slice `history-by-site`).
 
 use crate::domain::dates::LocalDate;
+use crate::domain::first_count;
 use crate::domain::patterns::{
     by_hour, by_site, by_weekday, movement, weekdays_in, LocalRange, MovementRow,
     OffsetChange, Reach,
@@ -130,8 +131,16 @@ pub fn assemble(
         LocalDate::from_days_since_epoch(last_day.days_since_epoch() + 1);
     let estimates = history.estimates_between(first_day, day_after_last)?;
 
+    let first_counted = history.first_count()?;
     let gaps = clipped(&gaps, range_start, range_end);
-    let unseen: Vec<(i64, i64)> = gaps.iter().map(|gap| (gap.from, gap.to)).collect();
+    let recorded: Vec<(i64, i64)> = gaps.iter().map(|gap| (gap.from, gap.to)).collect();
+    // The time before Cairn first counted is not seen, and it is never a gap:
+    // the gaps are cut to begin at the first count (rule 8).
+    let unseen = first_count::unseen(first_counted, range_start, range_end, &recorded);
+    let gaps: Vec<Gap> = first_count::gaps_since(first_counted, &recorded)
+        .into_iter()
+        .map(|(from, to)| Gap { from, to })
+        .collect();
 
     Ok(Range {
         movement: movement(&reaches, range, &unseen, now),
@@ -141,7 +150,7 @@ pub fn assemble(
         weekdays: weekdays_in(first_day, last_day),
         gaps,
         estimates_excluded: u32::try_from(estimates.len()).unwrap_or(u32::MAX),
-        first_counted: history.first_count()?,
+        first_counted,
     })
 }
 

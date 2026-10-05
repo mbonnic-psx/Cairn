@@ -29,6 +29,10 @@ use cairn::store::config::ConfigStore;
 
 const A_KEY: [u8; 32] = [7u8; 32];
 
+/// 2025-01-01 00:00 UTC: where the fixtures say counting began.
+#[allow(dead_code)]
+const COUNTING_FROM: i64 = 1_735_689_600;
+
 #[cfg(feature = "history")]
 const HOUR: i64 = 3600;
 const DAY: i64 = 86_400;
@@ -230,6 +234,10 @@ mod with_history {
         else {
             panic!("a fresh directory with a good key should open");
         };
+        // Cairn was counting long before any range these scenarios ask for, so
+        // the time before their first record is not the time before it first
+        // counted (slice `first-counted`, pin row 1).
+        open.note_counting(COUNTING_FROM).unwrap();
         open
     }
 
@@ -365,7 +373,7 @@ mod with_history {
                 gaps: Vec::new(),
                 coverage_note: None,
                 estimates_excluded: 0,
-                first_counted: None,
+                first_counted: Some(COUNTING_FROM),
                 dst_approximate: false,
                 sealed: None,
             }

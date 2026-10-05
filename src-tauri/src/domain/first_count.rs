@@ -23,7 +23,7 @@ pub fn unseen(
             Vec::new()
         };
     };
-    let mut spans: Vec<(i64, i64)> = Vec::new();
+    let mut spans: Vec<(i64, i64)> = Vec::with_capacity(1 + gaps.len());
     let before = first.min(to);
     if from < before {
         spans.push((from, before));
