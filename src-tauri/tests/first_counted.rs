@@ -618,6 +618,44 @@ mod with_history {
         );
     }
 
+    // Scenario 17
+    #[test]
+    fn on_the_first_day_today_and_the_check_in_state_the_gap_from_the_first_count_only() {
+        let setup = setup();
+        let open = seed(&setup.data);
+        open.note_counting(STARTED).unwrap();
+        let day_start = 1_790_809_200; // 2026-10-01 00:00 BST
+        let day_end = day_start + DAY;
+        let gap_to = REACH_ONE; // 15:00 BST
+        open.record_gap(&cairn::store::history::CoverageGap {
+            from: day_start,
+            to: gap_to,
+        })
+        .unwrap();
+        let state = app(&setup, &Keychain::available());
+
+        let todays = state.list_todays_reaches(day_start, day_end);
+        let day = state.get_day(date("2026-10-01"), day_start, day_end);
+
+        assert_eq!(todays.first_counted, Some(STARTED));
+        assert_eq!(day.first_counted, Some(STARTED));
+        for (gaps, note) in [
+            (&todays.gaps, &todays.coverage_note),
+            (&day.gaps, &day.coverage_note),
+        ] {
+            assert_eq!(
+                gaps.iter()
+                    .map(|gap| (gap.from, gap.to))
+                    .collect::<Vec<_>>(),
+                vec![(STARTED, gap_to)]
+            );
+            let note = note
+                .as_deref()
+                .expect("the minutes after the first count are said");
+            assert!(note.contains("about 46 minutes"), "{note}");
+        }
+    }
+
     // Scenario 10
     #[test]
     fn the_three_answers_hold_ten_five_and_seven_keys_and_first_counted_is_an_integer() {

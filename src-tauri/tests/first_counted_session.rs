@@ -205,7 +205,12 @@ fn a_sealed_first_run_writes_nothing_and_the_next_start_is_the_first_count() {
     state.start_counting().unwrap();
 
     assert_eq!(first_counted_by_all_three(&state, t1), [Some(t1); 3]);
-    // The gap [T0, T1) is recorded; the exclusion from every answer is N13/N14's.
+    // The gap [T0, T1) is recorded, and no answer states any of it.
+    let (day, start, end) = today_bounds(t1);
+    let todays = state.list_todays_reaches(start, end);
+    let viewed = state.get_day(day, start, end);
+    assert!(todays.gaps.is_empty() && todays.coverage_note.is_none());
+    assert!(viewed.gaps.is_empty() && viewed.coverage_note.is_none());
     use cairn::store::history::{History, OpenHistory};
     use cairn::store::key::HistoryKey;
     let History::Open(history) =

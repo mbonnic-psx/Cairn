@@ -788,13 +788,17 @@ impl AppState {
                             to: gap.to,
                         })
                         .collect::<Vec<_>>();
-                    let gaps = clipped(&gaps, day_start, day_end);
+                    let first_counted = history.first_count().unwrap_or_default();
+                    let gaps = crate::reflection::checkin::cut_at_the_first_count(
+                        &clipped(&gaps, day_start, day_end),
+                        first_counted,
+                    );
 
                     TodaysReaches {
                         coverage_note: coverage_note(&gaps),
                         gaps,
                         reaches,
-                        first_counted: history.first_count().unwrap_or_default(),
+                        first_counted,
                         sealed: None,
                     }
                 }
