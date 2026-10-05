@@ -59,12 +59,13 @@ const DAY_IN_RANGE: &str = "day >= ?1 AND day < ?2";
 const NOTE_COUNTING: &str = "INSERT INTO first_count (id, at) VALUES (1, ?1) \
      ON CONFLICT(id) DO UPDATE SET at = excluded.at WHERE excluded.at < first_count.at";
 
-/// Creates `first_count` and fills it, once, with the earliest of the first
-/// reach and the first gap's start, or leaves it empty when there are neither.
-/// Gaps are read here and never again: after this, a gap that begins before the
-/// first count is a first run that was sealed, not a moment Cairn was counting.
-const FILL_FIRST_COUNT: &str = "BEGIN IMMEDIATE;
-     CREATE TABLE first_count (
+/// Creates `first_count` and fills it with the earliest of the first reach and
+/// the first gap's start, or leaves it empty when there are neither. Run inside
+/// the write transaction that decided it was owed, so two openers cannot both
+/// do it. Gaps are read here and never again: after this, a gap that begins
+/// before the first count is a first run that was sealed, not a moment Cairn
+/// was counting.
+const FILL_FIRST_COUNT: &str = "CREATE TABLE IF NOT EXISTS first_count (
          id INTEGER PRIMARY KEY CHECK (id = 1),
          at INTEGER NOT NULL
      );
@@ -75,8 +76,7 @@ const FILL_FIRST_COUNT: &str = "BEGIN IMMEDIATE;
                  UNION ALL
                  SELECT MIN(from_at) FROM coverage_gaps
              )
-         ) WHERE earliest IS NOT NULL;
-     COMMIT;";
+         ) WHERE earliest IS NOT NULL;";
 
 /// One reach: where, and when. That is the whole of it.
 #[derive(Clone, PartialEq, Eq, Debug, serde::Serialize, serde::Deserialize)]
@@ -261,14 +261,12 @@ impl OpenHistory {
             .map_err(|_| cannot_prepare())?;
 
         // A history written by an earlier build has no `first_count`. It is
-        // created and filled once, in one transaction, so it is never left
-        // there empty with the fill still owed (slice `first-counted`, F1).
-        if !table_exists(&connection, "first_count").map_err(|_| cannot_prepare())? {
-            connection.execute_batch(FILL_FIRST_COUNT).map_err(|_| {
-                let _ = connection.execute_batch("ROLLBACK");
-                cannot_prepare()
-            })?;
-        }
+        // created and filled once, in one transaction that decides inside
+        // itself whether the fill is owed, so it is never left there empty
+        // with the fill still owed, and an opener that loses the race to
+        // another finds the table filled and carries on (slice
+        // `first-counted`, F1).
+        Self::fill_first_count(&connection)?;
 
         let history = OpenHistory {
             connection,
@@ -276,6 +274,33 @@ impl OpenHistory {
         };
         history.settle_first_count();
         Ok(history)
+    }
+
+    fn fill_first_count(connection: &Connection) -> Result<(), Trouble> {
+        if table_exists(connection, "first_count").map_err(|_| cannot_prepare())? {
+            return Ok(());
+        }
+        match connection.execute_batch("BEGIN IMMEDIATE") {
+            Ok(()) => {}
+            // Could not take the write lock: the build before this slice
+            // opened such a history, so this one does too. The fill waits for
+            // a later open, or for whoever holds the lock to do it.
+            Err(error) if is_busy(&error) => return Ok(()),
+            Err(_) => return Err(cannot_prepare()),
+        }
+        let filled = table_exists(connection, "first_count")
+            .and_then(|exists| {
+                if exists {
+                    Ok(())
+                } else {
+                    connection.execute_batch(FILL_FIRST_COUNT)
+                }
+            })
+            .and_then(|()| connection.execute_batch("COMMIT"));
+        filled.map_err(|_| {
+            let _ = connection.execute_batch("ROLLBACK");
+            cannot_prepare()
+        })
     }
 
     /// If a reach is earlier than the first count (or there is a reach and no

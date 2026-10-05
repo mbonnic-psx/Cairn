@@ -755,6 +755,154 @@ mod with_history {
             "history.db is untouched"
         );
     }
+
+    // --- NC1: concurrent openers of one history -----------------------------------
+
+    fn keyed(data: &Path) -> rusqlite::Connection {
+        let connection = rusqlite::Connection::open(data.join(HISTORY_FILE)).unwrap();
+        let hex: String = A_KEY.iter().map(|byte| format!("{byte:02x}")).collect();
+        connection
+            .pragma_update(None, "key", format!("x'{hex}'"))
+            .unwrap();
+        connection
+    }
+
+    /// Another process opening the same history first: it takes the write lock
+    /// now, creates and fills `first_count` with `at`, and lets go after `hold`.
+    fn first_opener_elsewhere(
+        data: &Path,
+        at: i64,
+        hold: std::time::Duration,
+    ) -> std::thread::JoinHandle<()> {
+        let connection = keyed(data);
+        connection.execute_batch("BEGIN IMMEDIATE").unwrap();
+        std::thread::spawn(move || {
+            std::thread::sleep(hold);
+            connection
+                .execute_batch(&format!(
+                    "CREATE TABLE first_count (
+                         id INTEGER PRIMARY KEY CHECK (id = 1), at INTEGER NOT NULL);
+                     INSERT INTO first_count VALUES (1, {at});
+                     COMMIT;"
+                ))
+                .unwrap();
+        })
+    }
+
+    fn open_now(data: &Path) -> History {
+        History::open(data, &HistoryKey::Available(Key::from_bytes(A_KEY)))
+    }
+
+    fn first_count_of(history: &History) -> Option<i64> {
+        match history {
+            History::Open(open) => open.first_count().unwrap(),
+            History::Sealed { .. } => panic!("expected an open history"),
+        }
+    }
+
+    #[test]
+    fn an_open_that_loses_the_race_to_fill_carries_on_and_the_fill_runs_once() {
+        let setup = setup();
+        legacy(&setup.data, &[FIRST + 10 * HOUR], &[]);
+        let earliest = 1_700_000_000;
+        let other = first_opener_elsewhere(
+            &setup.data,
+            earliest,
+            std::time::Duration::from_millis(300),
+        );
+
+        let history = open_now(&setup.data);
+        other.join().unwrap();
+
+        assert!(history.is_open(), "the loser is not sealed");
+        assert_eq!(first_count_of(&history), Some(earliest), "filled once");
+    }
+
+    #[test]
+    fn many_threads_opening_one_legacy_history_all_open_and_agree() {
+        let g = FIRST + 5 * HOUR;
+        let setup = setup();
+        legacy(&setup.data, &[FIRST + 10 * HOUR], &[(g, g + HOUR)]);
+        let barrier = Arc::new(std::sync::Barrier::new(8));
+        let threads: Vec<_> = (0..8)
+            .map(|_| {
+                let (data, barrier) = (setup.data.clone(), barrier.clone());
+                std::thread::spawn(move || {
+                    barrier.wait();
+                    let history = open_now(&data);
+                    (
+                        history.is_open(),
+                        match &history {
+                            History::Open(open) => open.first_count().ok().flatten(),
+                            History::Sealed { .. } => None,
+                        },
+                    )
+                })
+            })
+            .collect();
+        for thread in threads {
+            assert_eq!(thread.join().unwrap(), (true, Some(g)));
+        }
+    }
+
+    #[test]
+    fn many_threads_opening_a_history_that_does_not_exist_yet_all_open() {
+        let setup = setup();
+        let barrier = Arc::new(std::sync::Barrier::new(8));
+        let threads: Vec<_> = (0..8)
+            .map(|_| {
+                let (data, barrier) = (setup.data.clone(), barrier.clone());
+                std::thread::spawn(move || {
+                    barrier.wait();
+                    open_now(&data).is_open()
+                })
+            })
+            .collect();
+        for thread in threads {
+            assert!(thread.join().unwrap());
+        }
+    }
+
+    #[test]
+    fn a_history_that_already_has_its_first_count_opens_while_another_holds_the_write_lock(
+    ) {
+        let setup = setup();
+        legacy(&setup.data, &[], &[]);
+        seed(&setup.data).note_counting(FIRST).unwrap();
+        let connection = keyed(&setup.data);
+        connection.execute_batch("BEGIN IMMEDIATE").unwrap();
+        let release = std::thread::spawn(move || {
+            std::thread::sleep(std::time::Duration::from_millis(300));
+            connection.execute_batch("COMMIT").unwrap();
+        });
+
+        let history = open_now(&setup.data);
+        release.join().unwrap();
+
+        assert!(history.is_open());
+        assert_eq!(first_count_of(&history), Some(FIRST));
+    }
+
+    #[test]
+    fn a_fill_that_cannot_take_the_write_lock_leaves_the_open_usable_and_the_next_open_fills(
+    ) {
+        let r = FIRST + 10 * HOUR;
+        let setup = setup();
+        legacy(&setup.data, &[r], &[]);
+        let connection = keyed(&setup.data);
+        connection.execute_batch("BEGIN IMMEDIATE").unwrap();
+        let release = std::thread::spawn(move || {
+            std::thread::sleep(std::time::Duration::from_secs(7));
+            connection.execute_batch("COMMIT").unwrap();
+        });
+
+        let held = open_now(&setup.data);
+        release.join().unwrap();
+        assert!(held.is_open(), "the pre-slice build opened this history");
+        drop(held);
+
+        assert_eq!(first_count_of(&open_now(&setup.data)), Some(r));
+    }
 }
 
 // --- Scenario 20: a build without the history ----------------------------------------
