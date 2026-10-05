@@ -189,6 +189,114 @@ mod with_history {
         std::fs::read(data.join(HISTORY_FILE)).ok()
     }
 
+    /// A `history.db` as the build before this slice wrote it: the four tables,
+    /// no `first_count`, under the same key.
+    fn legacy(data: &Path, reaches: &[i64], gaps: &[(i64, i64)]) {
+        let connection = rusqlite::Connection::open(data.join(HISTORY_FILE)).unwrap();
+        let hex: String = A_KEY.iter().map(|byte| format!("{byte:02x}")).collect();
+        connection
+            .pragma_update(None, "key", format!("x'{hex}'"))
+            .unwrap();
+        connection
+            .execute_batch(
+                "CREATE TABLE reaches (domain TEXT NOT NULL, at INTEGER NOT NULL);
+                 CREATE INDEX reaches_at ON reaches (at);
+                 CREATE TABLE coverage_gaps (from_at INTEGER NOT NULL, to_at INTEGER NOT NULL);
+                 CREATE TABLE journal_entries (
+                     day TEXT PRIMARY KEY, text TEXT NOT NULL, written_at INTEGER NOT NULL);
+                 CREATE TABLE reach_estimates (day TEXT PRIMARY KEY, count INTEGER NOT NULL);",
+            )
+            .unwrap();
+        for at in reaches {
+            connection
+                .execute(
+                    "INSERT INTO reaches (domain, at) VALUES ('a.example', ?1)",
+                    [at],
+                )
+                .unwrap();
+        }
+        for (from, to) in gaps {
+            connection
+                .execute(
+                    "INSERT INTO coverage_gaps (from_at, to_at) VALUES (?1, ?2)",
+                    [from, to],
+                )
+                .unwrap();
+        }
+    }
+
+    // Scenario 4
+    #[test]
+    fn an_install_that_holds_history_takes_the_earliest_moment_it_recorded_anything() {
+        let (r1, r2, g) = (FIRST + 10 * HOUR, FIRST + 20 * HOUR, FIRST + 5 * HOUR);
+
+        let setup = setup();
+        legacy(&setup.data, &[r1, r2], &[(g, g + HOUR)]);
+        let state = app(&setup, &Keychain::available());
+        assert_eq!(all_three(&state), [Some(g); 3], "the gap came first");
+
+        let setup = self::setup();
+        legacy(&setup.data, &[r2, r1], &[]);
+        let state = app(&setup, &Keychain::available());
+        assert_eq!(all_three(&state), [Some(r1); 3], "reaches only");
+
+        let setup = self::setup();
+        legacy(&setup.data, &[], &[]);
+        let state = app(&setup, &Keychain::available());
+        assert_eq!(all_three(&state), [None; 3], "neither");
+        seed(&setup.data).note_counting(NOW).unwrap();
+        assert_eq!(
+            all_three(&state),
+            [Some(NOW); 3],
+            "a later session makes it"
+        );
+    }
+
+    // Scenario 5
+    #[test]
+    fn the_fill_runs_once_and_a_later_gap_from_before_it_does_not_move_it() {
+        let (r1, g) = (FIRST + 10 * HOUR, FIRST + 5 * HOUR);
+        let setup = setup();
+        legacy(&setup.data, &[r1], &[(g, g + HOUR)]);
+        let state = app(&setup, &Keychain::available());
+        assert_eq!(all_three(&state), [Some(g); 3]);
+
+        seed(&setup.data)
+            .record_gap(&cairn::store::history::CoverageGap {
+                from: g - 3 * HOUR,
+                to: g - 2 * HOUR,
+            })
+            .unwrap();
+
+        assert_eq!(
+            all_three(&state),
+            [Some(g); 3],
+            "gaps are read by the fill only"
+        );
+    }
+
+    // Rule 6 for the fill: a sealed open writes nothing, and the fill waits.
+    #[test]
+    fn with_the_key_unavailable_the_file_is_not_opened_and_the_fill_waits() {
+        let r1 = FIRST + 10 * HOUR;
+        let setup = setup();
+        legacy(&setup.data, &[r1], &[]);
+        let keychain = Keychain::available();
+        keychain.set_available(false);
+        let state = app(&setup, &keychain);
+        let before = history_bytes(&setup.data);
+
+        assert_eq!(all_three(&state), [None; 3]);
+        assert_eq!(history_bytes(&setup.data), before, "bytes unchanged");
+
+        keychain.set_available(true);
+        assert_eq!(
+            all_three(&state),
+            [Some(r1); 3],
+            "the fill happens on the first open"
+        );
+    }
+
     // Scenario 10
     #[test]
     fn the_three_answers_hold_ten_five_and_seven_keys_and_first_counted_is_an_integer() {

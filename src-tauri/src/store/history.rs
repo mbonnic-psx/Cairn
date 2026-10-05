@@ -59,6 +59,25 @@ const DAY_IN_RANGE: &str = "day >= ?1 AND day < ?2";
 const NOTE_COUNTING: &str = "INSERT INTO first_count (id, at) VALUES (1, ?1) \
      ON CONFLICT(id) DO UPDATE SET at = excluded.at WHERE excluded.at < first_count.at";
 
+/// Creates `first_count` and fills it, once, with the earliest of the first
+/// reach and the first gap's start, or leaves it empty when there are neither.
+/// Gaps are read here and never again: after this, a gap that begins before the
+/// first count is a first run that was sealed, not a moment Cairn was counting.
+const FILL_FIRST_COUNT: &str = "BEGIN IMMEDIATE;
+     CREATE TABLE first_count (
+         id INTEGER PRIMARY KEY CHECK (id = 1),
+         at INTEGER NOT NULL
+     );
+     INSERT INTO first_count (id, at)
+         SELECT 1, earliest FROM (
+             SELECT MIN(moment) AS earliest FROM (
+                 SELECT MIN(at) AS moment FROM reaches
+                 UNION ALL
+                 SELECT MIN(from_at) FROM coverage_gaps
+             )
+         ) WHERE earliest IS NOT NULL;
+     COMMIT;";
+
 /// One reach: where, and when. That is the whole of it.
 #[derive(Clone, PartialEq, Eq, Debug, serde::Serialize, serde::Deserialize)]
 pub struct Reach {
@@ -237,13 +256,19 @@ impl OpenHistory {
                  CREATE TABLE IF NOT EXISTS reach_estimates (
                      day   TEXT PRIMARY KEY,
                      count INTEGER NOT NULL
-                 );
-                 CREATE TABLE IF NOT EXISTS first_count (
-                     id INTEGER PRIMARY KEY CHECK (id = 1),
-                     at INTEGER NOT NULL
                  );",
             )
             .map_err(|_| cannot_prepare())?;
+
+        // A history written by an earlier build has no `first_count`. It is
+        // created and filled once, in one transaction, so it is never left
+        // there empty with the fill still owed (slice `first-counted`, F1).
+        if !table_exists(&connection, "first_count").map_err(|_| cannot_prepare())? {
+            connection.execute_batch(FILL_FIRST_COUNT).map_err(|_| {
+                let _ = connection.execute_batch("ROLLBACK");
+                cannot_prepare()
+            })?;
+        }
 
         Ok(OpenHistory {
             connection,
@@ -657,6 +682,16 @@ fn sealed() -> Trouble {
         "Cairn could not open your history with the key it has, so your entries stay \
          sealed and exactly as they are. Protection is unaffected.",
     )
+}
+
+fn table_exists(connection: &Connection, name: &str) -> rusqlite::Result<bool> {
+    connection
+        .query_row(
+            "SELECT count(*) FROM sqlite_master WHERE type = 'table' AND name = ?1",
+            [name],
+            |row| row.get::<_, i64>(0),
+        )
+        .map(|found| found > 0)
 }
 
 fn is_busy(error: &rusqlite::Error) -> bool {
