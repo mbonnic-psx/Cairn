@@ -159,6 +159,9 @@ describe('From is never earlier than the day Cairn first counted (rule 10)', () 
       ['2026-10-02', '2026-10-02'],
     ]);
     expect(screen.getByLabelText('From')).toHaveAttribute('min', '2026-10-02');
+    // The sentence is made from the first count's own date, not the capped limit.
+    expect(screen.getByText('Cairn started counting on Oct 5, 2026.')).toBeInTheDocument();
+    expect(screen.queryByText(/started counting on Oct 2/)).toBeNull();
   });
 
   it('leaves From as it was for a sealed answer (scenario 33)', async () => {

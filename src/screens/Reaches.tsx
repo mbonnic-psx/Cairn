@@ -366,9 +366,9 @@ function limitOf(answer: Patterns, todayDay: string): string | undefined {
 /** Whether an instant falls inside a range's bounds. */
 const within = (at: number, bounds: Bounds): boolean => bounds.start <= at && at < bounds.end;
 
-/** The day Cairn started counting, when the range does not hold it (F2): always with its year. */
-const startedOnWords = (day: string): string =>
-  `Cairn started counting on ${shortDateInWords(day, true)}.`;
+/** The day Cairn started counting, when the range does not hold it (F2): the first count's own date, with its year. */
+const startedOnWords = (at: number): string =>
+  `Cairn started counting on ${shortDateInWords(localToday(new Date(at * 1000)), true)}.`;
 
 /** The time and day Cairn started counting, when the range holds it (F3): the year as the rows write it. */
 const startedAtWords = (at: number, firstDay: string, lastDay: string, todayDay: string): string =>
@@ -483,8 +483,8 @@ function OverTimeView({
           <p className="nb-reaches-sentence">{sentence}</p>
         ) : (
           <>
-            {startedAt !== undefined && !holdsStart && limit !== undefined && (
-              <p className="nb-reaches-aside">{startedOnWords(limit)}</p>
+            {startedAt !== undefined && !holdsStart && (
+              <p className="nb-reaches-aside">{startedOnWords(startedAt)}</p>
             )}
             {startedAt !== undefined && holdsStart && (
               <p className="nb-reaches-aside">
