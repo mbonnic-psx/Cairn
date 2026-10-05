@@ -494,7 +494,124 @@ run (that is N25). `check-slice-scope` is red only because N6 and N7 also ride h
 - **I, IV, V, VII:** not touched. The diff has no enforcement path, privileged write, notification capability or
   payment path.
 
+### Phase Convergence: what pass 2 found still owed
+
+- [ ] NC4 [US2] **CRITICAL** [rule 3, rule 6; Principle II, fail closed (constitution lines 171–173); *Versioning and
+  Compatibility* (lines 431–432)] **A reach recorded while any other connection writes `history.db` is dropped, and the
+  rest of the run goes uncounted.** The NC1 follow-up (`4fed9d8`) begins `record` and `note_counting` with
+  `unchecked_transaction()` (`src-tauri/src/store/history.rs` lines 363 and 338), a *deferred* transaction, and then
+  runs `fill_if_owed` (line 282), whose first statement *reads* `sqlite_master`. The read opens a read transaction.
+  The `INSERT` that follows must then upgrade it to a write. SQLite invokes the busy handler only for a connection
+  that holds no transaction yet (`sqlite3BtreeBeginTrans` retries only while `inTransaction == TRANS_NONE`). So when
+  another connection holds the write lock, the upgrade returns `SQLITE_BUSY` at once instead of waiting out the 5 s
+  busy timeout. The `RecordReach` sink (`src-tauri/src/counting/sink.rs` line 71) then sets `storing` to false for
+  the rest of the run. The reach is lost, and every moment after it is time Cairn did not see. Every interface
+  command opens its own connection (`ipc/state.rs` lines 771 and 1002), so the other writer can be a journal save, a
+  reach estimate, a deletion, or, after an upgrade, the interface's own open running the fill the counting session's
+  open could not take. That last case is the scenario NC1's class was meant to close. Every record pays this, not
+  only the first launch after an upgrade. The build before this slice stored such a reach: its autocommit `INSERT`
+  waited for the lock. So did pass 1's `HEAD` (`d3e6ed1`), whose deferred transaction began with the `INSERT`.
+  **Reproduction** (this pass ran it as a scratch test, then removed it): a history opened with `note_counting`
+  already done. A second keyed connection runs `BEGIN IMMEDIATE; INSERT INTO journal_entries ...` and commits from a
+  thread 300 ms later. Meanwhile `History::record("a.example", ..)` returns `false` after **55 µs**.
+  `History::note_counting` returns `false` the same way. **Control:** delete only the `fill_if_owed` line from
+  `record` and change nothing else. The same test stores the reach after **329 ms**, waiting out the lock. That file
+  was then restored with `git checkout -- src-tauri/src/store/history.rs`.
+  **GREEN, the class:** every write transaction on `OpenHistory` takes the write lock with its first statement, so
+  the busy handler applies exactly as it did to the pre-slice autocommit write. Either begin it `IMMEDIATE`
+  (`execute_batch("BEGIN IMMEDIATE")`, or `transaction_with_behavior(TransactionBehavior::Immediate)`), or make its
+  first statement a write. This covers `record`, `note_counting`, and the settle through `note_counting`.
+  Scenarios through `History`: (a) the reproduction above stores the reach and `storing` stays true; (b) the same with
+  `note_counting`; (c) a legacy history whose open found the fill owed (`opened_with_the_fill_owed`), while another
+  opener holds the lock for 300 ms to fill: `record` waits, stores the reach, and `first_count()` is the earliest
+  moment.
+
+### Verdict: pass 2 (2026-10-05), the confirming pass and the loop's bound
+
+**Not converged.** NC4 is **CRITICAL**: it is a regression against `main` in the one path the slice may never
+weaken, storing a reach. A build that drops a reach `main` would have kept, and stops counting for the rest of the
+run, may not ship. So NC4 re-opens the loop past the bound. The fix is one line in each of two functions, plus the
+three scenarios above. The other finding of this pass (NC5, MEDIUM) is filed under Phase 4 and does not re-open
+anything.
+
+**NC1–NC3, each against its whole class at `HEAD` (`451d1c2`).**
+
+- *NC1, closed for opens; its class re-broken for writes (NC4).* Pass 1's race reproduces green at `HEAD`.
+  `an_open_that_loses_the_race_to_fill_carries_on_and_the_fill_runs_once`,
+  `many_threads_opening_one_legacy_history_all_open_and_agree`,
+  `many_threads_opening_a_history_that_does_not_exist_yet_all_open`, the control
+  `a_history_that_already_has_its_first_count_opens_while_another_holds_the_write_lock`, and the busy-past-timeout
+  variant `a_fill_that_cannot_take_the_write_lock_leaves_the_open_usable_and_the_next_open_fills` all pass
+  (`tests/first_counted.rs`: 29 passed, `first_counted_session.rs`: 3, `stores.rs`: 14). The fill now decides inside
+  `BEGIN IMMEDIATE` (`store/history.rs` lines 290–308) with `CREATE TABLE IF NOT EXISTS` (line 68). Two things remain.
+  The follow-up's own write path drops reaches under contention (NC4). And a fill that ends in any error other than
+  busy still seals a history the pre-slice build opened (NC5).
+- *NC2, closed.* `list_todays_reaches` returns the unreadable sentence with `first_counted: null` and no reaches or
+  gaps (`ipc/state.rs` lines 793–804). `an_unreadable_first_count_is_the_unreadable_sentence_with_null_in_all_three_answers`
+  breaks the row by a wrong column and asserts that Today's sentence equals the range answer's, with all three `null`.
+- *NC3, closed.* `startedOnWords` takes the instant (`src/screens/Reaches.tsx` lines 370–371, used at line 487). The
+  other start sentences already read `first_counted` directly (`Reaches.tsx` line 328, `CheckIn.tsx` line 415). Only
+  `limitOf` (line 363) caps. `ReachesFirstCounted.test.tsx` asserts *Oct 5, 2026* and not *Oct 2* (25 passed).
+
+**What the diff proves at each level, and what it does not.**
+
+- *Domain.* Unchanged since pass 1: `domain/first_count.rs` (`unseen`, `gaps_since`) is pure and matches
+  `contracts/patterns.md`, and `check-domain-purity` holds it there. Nothing missing found.
+- *Use case and stores.* The open is safe under concurrent openers, which proves NC1's open half. `record` still
+  writes the reach and the note in one transaction (`a_reach_whose_note_fails_is_not_kept`, now broken by a missing
+  column, still proves a failed note keeps no reach). **Not proved, and false:** a record or note survives a
+  concurrent writer (NC4); a legacy history the pre-slice build could open read-only still opens (NC5).
+- *Delivery adapter.* The three answers carry `first_counted` and agree on an unreadable row (NC2). No command was
+  added and `CLASSIFIED` is unchanged. Nothing missing found.
+- *Screen.* Every start sentence is made from the first count's own instant (NC3). *From*'s `min` and the moved range
+  alone use the capped limit. Nothing missing found.
+- *Published contract.* `contracts/ui-ipc.md` and the `patterns.md` amendment are unchanged since pass 1 and still
+  match. In `data-model.md`'s `first_count` (on host PR #65), the schema matches `FILL_FIRST_COUNT` (now `IF NOT
+  EXISTS`, same columns). Nothing missing found.
+
+**Each constitution principle the diff touches.**
+
+- **II, encrypted at rest** (lines 168–171): `first_count` lives in `history.db` under the SQLCipher key
+  (`store/history.rs` line 68). Nothing is written elsewhere. Met.
+- **II, fail closed, "continue protecting and recording"** (lines 171–173): a sealed history notes nothing
+  (`History::note_counting`, line 180), and every sealed answer carries `null`. **Unmet: NC4.** A concurrent writer
+  makes `record` drop the reach at once (`store/history.rs` lines 359–376 with 282–288), and `sink.rs` line 71 stops
+  counting for the run. NC5 is weaker: a read-only legacy history is sealed, but its file is untouched.
+- **II, local-first:** no crate and no package were added. Met.
+- **III, verified state** (lines 193–194): the note follows `Counting::Available` and storing (`ipc/state.rs` lines
+  692–697). Today agrees with the other two on an unreadable row (lines 793–804, NC2), and the start sentence names
+  the stored date (NC3). Met.
+- **VI, voice, no day counts** (lines 250–256): the sentences name a time and a date, never a number of days
+  (`Reaches.tsx` lines 328 and 370–378, `CheckIn.tsx` line 415). Met.
+- **SC-006, no ambient counts:** `first_counted` stays on the navigated screens (`scripts/check-no-ambient-counts.mjs`
+  line 70). Met.
+- **Versioning and Compatibility** (lines 431–432): the change is additive and a failed fill rolls back (lines
+  300–307). **Unmet: NC4** (a write `main` kept is dropped). NC5 is a narrower case of the same promise.
+- **I, IV, V, VII:** not touched. The diff has no enforcement path, privileged write, notification or payment path.
+
+Gates this pass ran: `cargo test -p cairn --no-default-features --features history --test first_counted --test
+first_counted_session --test stores` (green), and `npx vitest run src/screens/__tests__/ReachesFirstCounted.test.tsx`
+(green). Both scratch tests and the one mutation were removed or restored. `git status` shows only the untracked
+`benchmark.json` that was there before. `make verify` was not run (N25). `check-slice-scope`'s failure on
+`scripts/check-no-ambient-counts.mjs` and `data-model.md` is host PR #65's and is not a finding.
+
 ## Phase 4: After acceptance
 
 _Placeholder: the adversary pass and the archive, which ride in this slice's own pull request, are appended here by the
 host after the demo. No task is derived from this phase._
+
+### Phase 4 tasks from converge pass 2 (graded; none re-opens the loop)
+
+- [ ] NC5 [US2] **MEDIUM** [rule 6; *Versioning and Compatibility* (constitution lines 431–432); Principle II, fail
+  closed (lines 171–173)] **A legacy history Cairn can read but not write is sealed, where the pre-slice build opened
+  it.** `fill_first_count` (`src-tauri/src/store/history.rs` lines 290–308) treats only busy and locked as "the fill
+  waits". Any other error from `BEGIN IMMEDIATE` or from the fill is `cannot_prepare()`, and the open is sealed.
+  **Reproduction** (scratch, removed): a `legacy()` history with a reach, file mode `0444`. `History::open` gives
+  `is_open() == false`. **Control:** the same read-only file with a `first_count` table already present opens
+  (`is_open() == true`). The pre-slice build's open is the same as that control: its `CREATE TABLE IF NOT EXISTS`
+  steps are no-ops there. So the sealing comes from this slice. Read-only history files are rare (a restored backup, a
+  read-only mount), and no data is lost: the file is untouched and the sentence is honest. That is why this is MEDIUM.
+  **GREEN, the class:** a fill that cannot *write*, for any reason (busy, locked, read-only, disk full), leaves the
+  history open with the fill owed, exactly as busy does now. Only a failure to *read* seals. Scenario: the
+  reproduction opens, and `first_count()` reports unreadable, so the three answers give the unreadable sentence with
+  `null` (NC2's path).
