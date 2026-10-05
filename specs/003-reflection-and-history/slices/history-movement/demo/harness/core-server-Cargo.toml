@@ -1,0 +1,11 @@
+[package]
+name = "hand-hm-core"
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+cairn = { path = "/home/mbonnic/Cairn-worktrees/history-movement/src-tauri", default-features = false, features = ["history"] }
+serde_json = "1"
+
+[workspace]

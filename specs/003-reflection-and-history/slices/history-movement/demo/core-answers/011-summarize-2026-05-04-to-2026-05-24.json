@@ -1,0 +1,338 @@
+{
+  "answer": {
+    "by_hour": [
+      {
+        "count": 0,
+        "hour": 0
+      },
+      {
+        "count": 0,
+        "hour": 1
+      },
+      {
+        "count": 0,
+        "hour": 2
+      },
+      {
+        "count": 0,
+        "hour": 3
+      },
+      {
+        "count": 0,
+        "hour": 4
+      },
+      {
+        "count": 0,
+        "hour": 5
+      },
+      {
+        "count": 0,
+        "hour": 6
+      },
+      {
+        "count": 0,
+        "hour": 7
+      },
+      {
+        "count": 0,
+        "hour": 8
+      },
+      {
+        "count": 0,
+        "hour": 9
+      },
+      {
+        "count": 0,
+        "hour": 10
+      },
+      {
+        "count": 0,
+        "hour": 11
+      },
+      {
+        "count": 0,
+        "hour": 12
+      },
+      {
+        "count": 0,
+        "hour": 13
+      },
+      {
+        "count": 0,
+        "hour": 14
+      },
+      {
+        "count": 0,
+        "hour": 15
+      },
+      {
+        "count": 0,
+        "hour": 16
+      },
+      {
+        "count": 0,
+        "hour": 17
+      },
+      {
+        "count": 0,
+        "hour": 18
+      },
+      {
+        "count": 0,
+        "hour": 19
+      },
+      {
+        "count": 0,
+        "hour": 20
+      },
+      {
+        "count": 0,
+        "hour": 21
+      },
+      {
+        "count": 0,
+        "hour": 22
+      },
+      {
+        "count": 0,
+        "hour": 23
+      }
+    ],
+    "by_site": [],
+    "by_weekday": [
+      {
+        "count": 0,
+        "days": 3,
+        "weekday": 0
+      },
+      {
+        "count": 0,
+        "days": 3,
+        "weekday": 1
+      },
+      {
+        "count": 0,
+        "days": 3,
+        "weekday": 2
+      },
+      {
+        "count": 0,
+        "days": 3,
+        "weekday": 3
+      },
+      {
+        "count": 0,
+        "days": 3,
+        "weekday": 4
+      },
+      {
+        "count": 0,
+        "days": 3,
+        "weekday": 5
+      },
+      {
+        "count": 0,
+        "days": 3,
+        "weekday": 6
+      }
+    ],
+    "coverage_note": "Cairn was not running for about 21 days across these days, so anything you reached for then is not here. This is what Cairn saw, not everything that happened.",
+    "dst_approximate": false,
+    "estimates_excluded": 0,
+    "gaps": [
+      {
+        "from": 1777870800,
+        "to": 1779685200
+      }
+    ],
+    "movement": [
+      {
+        "count": 0,
+        "day": "2026-05-04",
+        "days": 1,
+        "seen": "none",
+        "so_far": false,
+        "span": "day"
+      },
+      {
+        "count": 0,
+        "day": "2026-05-05",
+        "days": 1,
+        "seen": "none",
+        "so_far": false,
+        "span": "day"
+      },
+      {
+        "count": 0,
+        "day": "2026-05-06",
+        "days": 1,
+        "seen": "none",
+        "so_far": false,
+        "span": "day"
+      },
+      {
+        "count": 0,
+        "day": "2026-05-07",
+        "days": 1,
+        "seen": "none",
+        "so_far": false,
+        "span": "day"
+      },
+      {
+        "count": 0,
+        "day": "2026-05-08",
+        "days": 1,
+        "seen": "none",
+        "so_far": false,
+        "span": "day"
+      },
+      {
+        "count": 0,
+        "day": "2026-05-09",
+        "days": 1,
+        "seen": "none",
+        "so_far": false,
+        "span": "day"
+      },
+      {
+        "count": 0,
+        "day": "2026-05-10",
+        "days": 1,
+        "seen": "none",
+        "so_far": false,
+        "span": "day"
+      },
+      {
+        "count": 0,
+        "day": "2026-05-11",
+        "days": 1,
+        "seen": "none",
+        "so_far": false,
+        "span": "day"
+      },
+      {
+        "count": 0,
+        "day": "2026-05-12",
+        "days": 1,
+        "seen": "none",
+        "so_far": false,
+        "span": "day"
+      },
+      {
+        "count": 0,
+        "day": "2026-05-13",
+        "days": 1,
+        "seen": "none",
+        "so_far": false,
+        "span": "day"
+      },
+      {
+        "count": 0,
+        "day": "2026-05-14",
+        "days": 1,
+        "seen": "none",
+        "so_far": false,
+        "span": "day"
+      },
+      {
+        "count": 0,
+        "day": "2026-05-15",
+        "days": 1,
+        "seen": "none",
+        "so_far": false,
+        "span": "day"
+      },
+      {
+        "count": 0,
+        "day": "2026-05-16",
+        "days": 1,
+        "seen": "none",
+        "so_far": false,
+        "span": "day"
+      },
+      {
+        "count": 0,
+        "day": "2026-05-17",
+        "days": 1,
+        "seen": "none",
+        "so_far": false,
+        "span": "day"
+      },
+      {
+        "count": 0,
+        "day": "2026-05-18",
+        "days": 1,
+        "seen": "none",
+        "so_far": false,
+        "span": "day"
+      },
+      {
+        "count": 0,
+        "day": "2026-05-19",
+        "days": 1,
+        "seen": "none",
+        "so_far": false,
+        "span": "day"
+      },
+      {
+        "count": 0,
+        "day": "2026-05-20",
+        "days": 1,
+        "seen": "none",
+        "so_far": false,
+        "span": "day"
+      },
+      {
+        "count": 0,
+        "day": "2026-05-21",
+        "days": 1,
+        "seen": "none",
+        "so_far": false,
+        "span": "day"
+      },
+      {
+        "count": 0,
+        "day": "2026-05-22",
+        "days": 1,
+        "seen": "none",
+        "so_far": false,
+        "span": "day"
+      },
+      {
+        "count": 0,
+        "day": "2026-05-23",
+        "days": 1,
+        "seen": "none",
+        "so_far": false,
+        "span": "day"
+      },
+      {
+        "count": 0,
+        "day": "2026-05-24",
+        "days": 1,
+        "seen": "none",
+        "so_far": false,
+        "span": "day"
+      }
+    ],
+    "sealed": null
+  },
+  "answer_bytes": 2808,
+  "asked_at": 1791090238,
+  "core_ms": 0.9114909999999999,
+  "request": {
+    "args": {
+      "firstDay": "2026-05-04",
+      "lastDay": "2026-05-24",
+      "offsets": [
+        {
+          "from": 1777870800,
+          "offset": -18000
+        }
+      ],
+      "rangeEnd": 1779685200,
+      "rangeStart": 1777870800
+    },
+    "cmd": "summarize_reaches"
+  }
+}

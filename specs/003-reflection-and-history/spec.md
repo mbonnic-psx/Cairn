@@ -382,6 +382,61 @@ recommendation"):
 Already stated, and held by this slice as written: the time Cairn did not see is stated above the days (H4, H5); no
 ranking word, no colour that means good or bad (B3).
 
+### Gaps reviewed — slice `history-movement` (2026-10-02)
+
+Checked against US2 scenario 2, FR-020, FR-022–FR-024, the `movement` field of `contracts/ui-ipc.md`, R5 (a range
+may be very long), and the decisions of the three views before it. Decided by the owner ("1. yes, 2. yes, 3. yes,
+4. yes, 5. yes, 6. yes, 7. yes, 8. yes"):
+
+- **M1 — where it lives.** A fourth option in *Over time*'s choice, *Day by day*, after *By site*, *By hour* and
+  *By day*, sharing the same range. Not a screen of its own, nothing in the header (H1).
+- **M2 — how it reads.** One row per date, oldest first, each with its count and the same soft bar as the other
+  views. The movement is the shape of the bars; there is no chart to learn.
+- **M3 — long ranges.** A range of up to 8 weeks (56 days) is shown one row per day. A longer range is shown one
+  row per week, named by the date it begins ("week of 6 Oct"), so a year reads as about 52 rows rather than 365.
+  Nothing is hidden: every reach in the range is in exactly one row.
+- **M4 — no verdict on the movement.** No trend line, no average, no *up*, *down*, *better*, *worse* or "fewer than
+  last week", no comparison with an earlier range (H3), and no colour that means good or bad. A reach is
+  information; the person reads the shape themselves.
+- **M5 — days Cairn did not see.** A row Cairn was not counting for at all reads *not seen*, with no count and no
+  bar, never a zero (FR-022). A row Cairn saw only part of keeps its count with a quiet *partly seen* mark. The
+  coverage note above the rows still states the gaps, as for the other views (H4, H5).
+- **M6 — today.** The row holding today is marked *so far*, so an unfinished day does not read as a drop.
+- **M7 — estimates stay out.** A day's own estimate is not counted in its row, and the exclusion is stated as in
+  the other views (FR-023, W6).
+- **M8 — a quiet range.** The quiet sentence ("Nothing here for these days.", FR-024) and every row at zero under
+  it, as for hours (B5). Rows Cairn did not see still read *not seen* (M5).
+
+- **M9 — where a week begins (owner, 2026-10-02: "all yes").** A weekly row's week runs from the range's first day,
+  so every week holds seven dates except possibly the last, and a short last week says how many days it holds
+  ("across 3 days") beside its name.
+- **M10 — how a row's date is written (same message).** In the computer's own short form ("Oct 6" on a US computer,
+  "6 Oct" on a UK one), as the hours and weekday names follow the computer. Sentences stay Cairn's English.
+- **M11 — a range of centuries (same message).** Weekly rows however long the range: nothing is hidden. Whether a
+  range may start before Cairn first counted is left to slice `first-counted` (H5).
+
+- **M13 — a range Cairn saw none of (owner, at the demo, 2026-10-02: "recommended for all").** Where Cairn saw no part
+  of the range, the quiet sentence is not shown: the view says "Cairn wasn't counting on these days." instead.
+  "Nothing here for these days." would claim a quiet stretch Cairn never watched (FR-022). This holds for all four views
+  of *Over time* (by site, by hour, by day, day by day). Where Cairn saw any of the range and there were no reaches,
+  the quiet sentence stands (FR-024, M8).
+- **M14 — a range in a past year names its year (same message).** When a range does not lie wholly in the current
+  year, its title and every row's date carry the year. A range wholly in the current year stays as it is. This holds
+  for the title of all four views and for *Day by day*'s rows.
+- **M12 — when a row is *partly seen* (owner, after the demo, 2026-10-02: "do the recommended").** A row is *partly
+  seen* only when Cairn missed more than half of the time in it that has passed. A night with the computer off (about a
+  third of a day) does not mark it; a day Cairn missed most of does. The coverage note above the rows still states every
+  stretch Cairn was not running (H4). *Not seen* is unchanged (M5). This supersedes M5's "a row Cairn saw only part of".
+- **M15 — under "Cairn wasn't counting on these days." (same message).** *By hour* and *By day* show the sentence alone,
+  with no hours or days at zero under it: a zero would claim Cairn saw nothing there. *By site* shows none already.
+  *Day by day* keeps its dated rows, each *not seen*. This supersedes B5's and W3's zeros for that case only.
+- **M16 — the standing sentence (same message).** "Cairn counts only while it is running. This is what it saw over
+  these days." stays under every view, including a range Cairn saw none of (H5).
+
+Already stated, and held by this slice as written: no streak, day count or chain, and no "day N" (scenario 5) —
+rows are named by their dates, never numbered; everything is available with no journal entry ever written
+(scenario 3); a sealed answer shows the sentence and nothing else.
+
 ## Requirements *(mandatory)*
 
 ### Functional Requirements

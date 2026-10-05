@@ -85,10 +85,19 @@ export function dayInWords(day: string, withYear = false): string {
   return `${d} ${MONTHS[m]}${withYear ? ` ${y}` : ''}`;
 }
 
-/** A range in words: `From 3 September to 30 September`, the years named only across one. */
-export function rangeInWords(firstDay: string, lastDay: string): string {
-  const crossesYears = firstDay.slice(0, 4) !== lastDay.slice(0, 4);
-  return `From ${dayInWords(firstDay, crossesYears)} to ${dayInWords(lastDay, crossesYears)}`;
+/**
+ * Whether a range names its year: when either end is outside the year of `today`. A range that crosses a
+ * year always does. The day is given, never read, so this reads no clock.
+ */
+export function namesYear(firstDay: string, lastDay: string, today: string): boolean {
+  const year = today.slice(0, 4);
+  return firstDay.slice(0, 4) !== year || lastDay.slice(0, 4) !== year;
+}
+
+/** A range in words: `From 3 September to 30 September`, the year on both dates when `namesYear` says so. */
+export function rangeInWords(firstDay: string, lastDay: string, today: string): string {
+  const withYear = namesYear(firstDay, lastDay, today);
+  return `From ${dayInWords(firstDay, withYear)} to ${dayInWords(lastDay, withYear)}`;
 }
 
 /** An offset taking effect: from `from` (epoch seconds) the clock is `offset` seconds east of UTC. */
@@ -230,3 +239,28 @@ export function acrossInWords(weekday: number, days: number): string {
   if (days === 0) return 'not in these days';
   return `across ${days} ${weekdayInWords(weekday)}${days === 1 ? '' : 's'}`;
 }
+
+/**
+ * A date as the computer writes it short, `Oct 6` or `6 Oct`, with the year when asked. Made from a
+ * fixed instant in UTC, so no zone can move the date; `setUTCFullYear`, not `Date.UTC`, so years 0 to
+ * 99 are not read as 1900 to 1999.
+ */
+export function shortDateInWords(day: string, withYear: boolean): string {
+  // Not `parse`: `isLocalDate` round-trips through `format`, which does not pad the year, so 0100-01-04
+  // comes back as 100-01-04 and is refused (and `new Date(y, ...)` maps years 0–99 to 1900–1999).
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(day))
+    throw new RangeError(`not a calendar date: ${JSON.stringify(day)}`);
+  const [y, m, d] = split(day);
+  const at = new Date(0);
+  at.setUTCFullYear(y, m, d);
+  return at.toLocaleDateString([], {
+    day: 'numeric',
+    month: 'short',
+    ...(withYear ? { year: 'numeric' as const } : {}),
+    timeZone: 'UTC',
+  });
+}
+
+/** A week's name: `week of` and the date it begins on. */
+export const weekOfInWords = (day: string, withYear: boolean): string =>
+  `week of ${shortDateInWords(day, withYear)}`;

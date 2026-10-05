@@ -162,8 +162,8 @@ pub fn list_todays_reaches(
     state.list_todays_reaches(day_start, day_end)
 }
 
-/// A range of days, by site, by hour and by day of week, with the offsets the
-/// computer's clock had across it. **The Reaches screen is the only caller**
+/// A range of days, by site, by hour, by day of week and day by day (as rows
+/// per date or per week), with the offsets the computer's clock had across it. **The Reaches screen is the only caller**
 /// (FR-030a): an ESLint rule restricts `src/ipc/reaches.ts`.
 #[tauri::command]
 pub fn summarize_reaches(

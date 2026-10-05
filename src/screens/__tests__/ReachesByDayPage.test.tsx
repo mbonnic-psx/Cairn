@@ -40,6 +40,7 @@ const answer = (over: Partial<Patterns> = {}): Patterns => ({
   ],
   by_hour: hours({ 14: 6 }),
   by_weekday: week({ 0: 4, 2: 2 }),
+  movement: [],
   gaps: [],
   coverage_note: null,
   estimates_excluded: 0,
@@ -89,7 +90,7 @@ const choose = (name: 'By site' | 'By hour' | 'By day') =>
   screen.getByRole('button', { name });
 
 describe('Seen by, with By day, on a notebook page', () => {
-  it('sits on the left page under the date boxes, three buttons in the Which days classes', async () => {
+  it('sits on the left page under the date boxes, four buttons in the Which days classes', async () => {
     const { pages } = await byDayOnPage(answer());
     const [left] = pages();
 
@@ -102,6 +103,7 @@ describe('Seen by, with By day, on a notebook page', () => {
       ['By site', 'true'],
       ['By hour', 'false'],
       ['By day', 'false'],
+      ['Day by day', 'false'],
     ]);
     for (const button of buttons) expect(button).toHaveClass('nb-reaches-which__button');
   });
@@ -133,7 +135,9 @@ describe('the days, on the right page', () => {
     expect(lines).toHaveLength(7);
     lines.forEach((line, weekday) => {
       expect(line).toHaveClass('nb-reaches-line');
-      const [name, clause, bar, count] = Array.from(line.children) as HTMLElement[];
+      const [label, bar, count] = Array.from(line.children) as HTMLElement[];
+      expect(label).toHaveClass('nb-reaches-label');
+      const [name, clause] = Array.from(label!.children) as HTMLElement[];
       expect(name).toHaveTextContent(weekdayInWords(weekday));
       expect(name).toHaveClass('nb-reaches-site');
       expect(clause).toHaveTextContent(acrossInWords(weekday, 4));
@@ -142,7 +146,7 @@ describe('the days, on the right page', () => {
       expect(bar).toHaveAttribute('aria-hidden', 'true');
       expect(count).toHaveClass('nb-reaches-count');
       expect(count.textContent).toBe(String({ 0: 4, 2: 2 }[weekday as 0 | 2] ?? 0));
-      expect(line.children).toHaveLength(4);
+      expect(line.children).toHaveLength(3);
     });
     const widths = lines.map((line) => within(line).getByTestId('bar').style.width);
     expect(widths).toEqual(['100%', '0%', '50%', '0%', '0%', '0%', '0%']);
@@ -155,7 +159,7 @@ describe('the days, on the right page', () => {
 
     const names = within(right!)
       .getAllByRole('listitem')
-      .map((line) => line.firstElementChild?.textContent);
+      .map((line) => line.querySelector('.nb-reaches-site')?.textContent);
     expect(names).toEqual([6, 0, 1, 2, 3, 4, 5].map(weekdayInWords));
   });
 
@@ -170,15 +174,15 @@ describe('the days, on the right page', () => {
     for (const weekday of [0, 1, 2, 3]) {
       const line = lines[weekday];
       expect(line).toHaveClass('nb-reaches-line');
-      expect(line.children).toHaveLength(2);
-      const [name, clause] = Array.from(line.children) as HTMLElement[];
+      expect(line.children).toHaveLength(1);
+      const [name, clause] = Array.from(line.firstElementChild!.children) as HTMLElement[];
       expect(name).toHaveClass('nb-reaches-site');
       expect(name).toHaveTextContent(weekdayInWords(weekday));
       expect(clause).toHaveClass('nb-reaches-time');
       expect(clause).toHaveTextContent('not in these days');
       expect(within(line).queryByTestId('bar')).toBeNull();
     }
-    for (const weekday of [4, 5, 6]) expect(lines[weekday].children).toHaveLength(4);
+    for (const weekday of [4, 5, 6]) expect(lines[weekday].children).toHaveLength(3);
   });
 
   it('keep every note off the right page', async () => {

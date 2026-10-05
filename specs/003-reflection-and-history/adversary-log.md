@@ -123,3 +123,19 @@ Findings (triaged by the host):
 | W-A1 | LOW | confirmed (bundled `localDays.ts` under `TZ=America/Goose_Bay`, then the core) | fixed (contract amended, example pinned in `tests/patterns_by_weekday.rs`; Y23 already draws such a count) | Where a clock change crosses midnight (Goose Bay and Moncton put clocks back at 00:01 until 2010), a reach inside the range's instants falls on a local date outside `[first_day, last_day]`, so a weekday with `days` 0 holds a count even for the offsets the screen sends. None in tzdata from 2026 to 2100 |
 
 Held: placement at Santiago's 24:00 change, Sao Paulo and Asuncion midnight changes, Apia's skipped day refused plainly; `weekdays_in` matched brute force over 140 start/length pairs including 0000–9999, no saturation reachable; known weekdays right (proleptic Gregorian, as `Date`); week order right for Sunday-, Monday-, Saturday- and Friday-first locales, `und`/C/POSIX → en-US; card and page share one order; "across 1 Monday", "across 2 Mondays"; no ranking word; constant-time counts; no new error text. Noted, unconfirmed: `resolvedOptions().locale` strips a `-u-fw-` extension, which would lose a first-day choice carried that way (W9 does not read an OS setting).
+
+## history-movement · ab42def · 2026-10-04
+
+| Trigger | Status | Evidence |
+|---|---|---|
+| driving adapter (HTTP route, CLI command, queue consumer) | widened | `src-tauri/src/ipc/state.rs`: `Patterns` gains `movement` (`MovementRow`); `summarize_reaches`'s parameters unchanged |
+| driven adapter or the provider types behind one | already covered | range and gap reads unchanged since `history-by-site` (row above) |
+| authorisation decision (who can reach one that already exists) | not present | single local user; `Reads` (`tests/ipc_surface.rs`) |
+| concurrency, idempotency, ordering, retention, or time | widened | rows by local date under the offset in force, *partly seen* against the merged gaps, `so_far` from the core's clock (`domain/patterns.rs` `movement`, `coverage`, `for_each_piece`); the year by the screen's today (`src/localDays.ts` `namesYear`) |
+
+Spawned: reaches day by day · `drive-adversary` · host (Opus 5.5) · delegated, fresh context · manifest: `src-tauri/src/domain/patterns.rs`, `src-tauri/src/reflection/over_time.rs`, `src-tauri/src/ipc/state.rs`, `src-tauri/src/ipc/commands.rs`, `src-tauri/src/counting/presence.rs`, `src-tauri/tests/patterns_movement.rs`, `us2_movement.rs`, `us2_by_site.rs`, `patterns_at_scale.rs`, `range_allocation.rs`, `offset_changes.rs`, `src/ipc/reaches.ts`, `src/localDays.ts`, `src/screens/Reaches.tsx`, `src/styles/tonight-page.css`, and the slice's screen tests
+Omitted: authorisation · not present; driven adapter · already covered by the `history-by-site` row
+
+Findings: none.
+
+Held: a differential fuzzer against an independent per-minute model of the contract (about 5 470 accepted inputs over 8 seeds: ranges of 1–10 and 50–75 dates, offset walks of 30-minute steps up to ±3 h, merged gaps, reaches up to an hour outside the range, `now` anywhere): 0 mismatches in rows, `days`, `count`, `so_far` or `seen`. The half boundary (M12) at exactly half and half + 1 s on 24-, 25-, 23- and Lord Howe's 23.5-hour days; `now` exactly at and one second before a row's local midnight; `now` inside an open gap (both rows `none`, today's `so_far`; with a reach, `part`, never `none`); 60 dates as 8 weeks and a 4-day row; touching gaps counted once; Apia's skipped day refused by both checks (sealed, as before). Nothing accepted panics or allocates without bound (entries capped at days + 1, saturating arithmetic). M13's sentence only over a non-empty list of all-`none` rows; M14's year on any range across New Year. Noted, defined by the contract: at exactly local midnight today's row is `whole`, 0, *so far* for one second. The 10-second draw at the widest range is V29, decided in D3, and was not re-probed.

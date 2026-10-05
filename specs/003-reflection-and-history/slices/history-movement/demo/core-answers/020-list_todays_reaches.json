@@ -1,0 +1,23 @@
+{
+  "answer": {
+    "coverage_note": null,
+    "gaps": [],
+    "reaches": [
+      {
+        "at": 1791090060,
+        "domain": "youtube.com"
+      }
+    ],
+    "sealed": null
+  },
+  "answer_bytes": 99,
+  "asked_at": 1791090471,
+  "core_ms": 1.350314,
+  "request": {
+    "args": {
+      "dayEnd": 1791176400,
+      "dayStart": 1791090000
+    },
+    "cmd": "list_todays_reaches"
+  }
+}

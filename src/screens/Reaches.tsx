@@ -21,13 +21,17 @@ import {
   localToday,
   offsetChanges,
   rangeBounds,
+  namesYear,
   rangeInWords,
+  shortDateInWords,
   weekdayInWords,
+  weekOfInWords,
 } from '../localDays';
 import {
   largestCount,
   listTodaysReaches,
   summarizeReaches,
+  type MovementRow,
   type OffsetChange,
   type Patterns,
   type TodaysReaches,
@@ -60,6 +64,7 @@ const OVER_TIME = 'Over time';
 const LOOKING = 'Looking…';
 const NOTHING_TODAY = 'Nothing here for today.';
 const NOTHING_THESE_DAYS = 'Nothing here for these days.';
+const NOT_COUNTING_THESE_DAYS = "Cairn wasn't counting on these days.";
 const COUNTED_ONLY_TODAY =
   'Cairn counts only while it is running. This is what it saw today.';
 const COUNTED_ONLY_WHILE_RUNNING =
@@ -70,20 +75,21 @@ const SEEN_BY = 'Seen by';
 const BY_SITE = 'By site';
 const BY_HOUR = 'By hour';
 const BY_DAY = 'By day';
+const DAY_BY_DAY = 'Day by day';
 /**
  * Why an estimate is left out of the view it is left out of: it has no site and no hour, and it is not
  * something Cairn saw, which is all a day of the week is counted from (W6).
  */
 const estimatesSentence = (days: number, view: Seen) => {
   const reason =
-    view === 'weekday' ? 'Cairn counts only what it saw' : `an estimate has no ${view}`;
+    view === 'weekday' || view === 'movement' ? 'Cairn counts only what it saw' : `an estimate has no ${view}`;
   return days === 1
     ? `Your own estimate for 1 day is not counted here, because ${reason}.`
     : `Your own estimates for ${days} days are not counted here, because ${reason}.`;
 };
 
-/** The three ways to see a range: by the sites reached, the hours of the day, or the days of the week. */
-type Seen = 'site' | 'hour' | 'weekday';
+/** The four ways to see a range: by the sites reached, the hours of the day, the days of the week, or day by day. */
+type Seen = 'site' | 'hour' | 'weekday' | 'movement';
 
 /** One line of a range's list: a site, an hour or a day of the week, with its count. */
 interface Row {
@@ -96,12 +102,31 @@ interface Row {
   absent?: boolean;
 }
 
+/** What is said beside a row's name, joined by `, `: how many dates a short week holds, what was seen, then so far. */
+const clauseOf = (row: MovementRow): string => {
+  const parts: string[] = [];
+  // Only a week that holds fewer than seven dates says how many it holds; the core's `span` says which is a week.
+  if (row.span === 'week' && row.days < 7) {
+    parts.push(`across ${row.days} ${row.days === 1 ? 'day' : 'days'}`);
+  }
+  if (row.seen === 'none' && row.count === 0) parts.push('not seen');
+  // A count is never hidden (Y23): a row sent as none that holds a reach reads as part seen.
+  else if (row.seen !== 'whole') parts.push('partly seen');
+  if (row.so_far) parts.push('so far');
+  return parts.join(', ');
+};
+
 /**
  * The lines of the range in the view chosen: sites most first, all 24 hours from midnight, or the seven
  * days of the week from `weekStart`. Each day is picked by its own `weekday`, not by its place in the
  * answer.
  */
-const rowsOf = (answer: Patterns, seen: Seen, weekStart: number): Row[] => {
+const rowsOf = (
+  answer: Patterns,
+  seen: Seen,
+  weekStart: number,
+  todayDay: string,
+): Row[] => {
   if (seen === 'site') {
     return answer.by_site.map((site) => ({
       key: site.domain,
@@ -114,6 +139,26 @@ const rowsOf = (answer: Patterns, seen: Seen, weekStart: number): Row[] => {
       key: String(one.hour),
       name: hourInWords(one.hour),
       count: one.count,
+    }));
+  }
+  // Day by day: one row for each the answer holds, oldest first, as the core sent them.
+  if (seen === 'movement') {
+    const rows = answer.movement;
+    const last = rows[rows.length - 1];
+    // The year is written on every row when the range's own name writes it: the same rule, the same today.
+    const withYear =
+      last !== undefined &&
+      namesYear(rows[0]!.day, addDays(last.day, last.days - 1), todayDay);
+    return rows.map((row) => ({
+      key: row.day,
+      name:
+        row.span === 'week'
+          ? weekOfInWords(row.day, withYear)
+          : shortDateInWords(row.day, withYear),
+      count: row.count,
+      clause: clauseOf(row) || undefined,
+      // Not seen, and not a single reach: a name and its clause, never a zero (FR-022).
+      absent: row.seen === 'none' && row.count === 0,
     }));
   }
   // An answer with no days at all (sealed) draws none; otherwise all seven are drawn (W3), a weekday
@@ -138,8 +183,25 @@ const rowsOf = (answer: Patterns, seen: Seen, weekStart: number): Row[] => {
   );
 };
 
+/**
+ * Whether a row's name and clause are laid as one label: the name on a line of its own that never wraps, the
+ * clause beside it or under it. Every row of Day by day, and a row of By day with a clause (the tonight page
+ * sheet says how it falls).
+ */
+const labelled = (row: Row, seen: Seen): boolean =>
+  row.clause !== undefined || seen === 'movement';
+
 /** Whether the view has nothing to count: no sites, or no reach in any hour. */
 const isQuiet = (rows: Row[]) => rows.every((row) => row.count === 0);
+
+/**
+ * Whether Cairn saw none of the range: the answer holds a row, and every row is not seen with no reach.
+ * Judged once, from the core's own marks. An empty answer (sealed, or from before rows were sent) is
+ * never this, and a row holding a count is never unseen (Y23).
+ */
+const sawNone = (answer: Patterns): boolean =>
+  answer.movement?.length > 0 &&
+  answer.movement.every((row) => row.seen === 'none' && row.count === 0);
 
 /** Where a view sits: the two pages of a spread (the right one ruled and empty for now). */
 function Frame({ children }: { children: ReactNode }) {
@@ -343,12 +405,16 @@ function OverTimeView({
         : answer.sealed;
   // The answer to draw as a list: none while looking, unreadable or sealed.
   const list = typeof answer === 'string' || answer.sealed ? null : answer;
-  const rows = list ? rowsOf(list, seen, weekStart) : [];
+  const unseen = list !== null && sawNone(list);
+  // Under the sentence that Cairn saw none, only Day by day draws rows: each is true on its own.
+  const all = list ? rowsOf(list, seen, weekStart, todayDay) : [];
+  const quiet = list ? isQuiet(all) : false;
+  const rows = !unseen || seen === 'movement' ? all : [];
   const largest = largestCount(rows);
   return (
     <>
       <div className="nb-page">
-        <h2 className="nb-reaches-title">{rangeInWords(firstDay, lastDay)}</h2>
+        <h2 className="nb-reaches-title">{rangeInWords(firstDay, lastDay, todayDay)}</h2>
         {boxes}
         {choice}
         {!list ? (
@@ -370,14 +436,32 @@ function OverTimeView({
       <div className="nb-page nb-page--ruled">
         {!list ? null : (
           <>
-            {isQuiet(rows) && <p className="nb-reaches-empty">{NOTHING_THESE_DAYS}</p>}
+            {unseen ? (
+              <p className="nb-reaches-empty">{NOT_COUNTING_THESE_DAYS}</p>
+            ) : (
+              quiet && <p className="nb-reaches-empty">{NOTHING_THESE_DAYS}</p>
+            )}
             {rows.length > 0 && (seen !== 'site' || !isQuiet(rows)) && (
               <ul className="nb-reaches-log">
                 {rows.map((row) => (
-                  <li key={row.key} className="nb-reaches-line">
-                    <span className="nb-reaches-site">{row.name}</span>
-                    {row.clause !== undefined && (
-                      <span className="nb-reaches-time">{row.clause}</span>
+                  <li
+                    key={row.key}
+                    className={
+                      labelled(row, seen)
+                        ? 'nb-reaches-line nb-reaches-line--label'
+                        : 'nb-reaches-line'
+                    }
+                  >
+                    {labelled(row, seen) ? (
+                      <span className="nb-reaches-label">
+                        <span className="nb-reaches-site">{row.name}</span>
+                        {row.clause !== undefined && (
+                          <span className="nb-reaches-time">{row.clause}</span>
+                        )}
+                      </span>
+                    ) : (
+                      // Unlabelled means no clause (`labelled`), so the name stands alone.
+                      <span className="nb-reaches-site">{row.name}</span>
                     )}
                     {!row.absent && (
                       <>
@@ -404,7 +488,7 @@ function OverTimeView({
   );
 }
 
-/** By site | By hour | By day, under the date boxes in every state, so it never moves when an answer arrives. */
+/** By site | By hour | By day | Day by day, under the date boxes in every state, so it never moves when an answer arrives. */
 function SeenByChoice({
   seen,
   onChoose,
@@ -422,6 +506,9 @@ function SeenByChoice({
       </ViewButton>
       <ViewButton current={seen === 'weekday'} onClick={() => onChoose('weekday')}>
         {BY_DAY}
+      </ViewButton>
+      <ViewButton current={seen === 'movement'} onClick={() => onChoose('movement')}>
+        {DAY_BY_DAY}
       </ViewButton>
     </div>
   );

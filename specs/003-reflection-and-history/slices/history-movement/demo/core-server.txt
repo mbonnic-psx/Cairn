@@ -1,0 +1,23 @@
+serving the real core on 127.0.0.1:1462
+001-list_todays_reaches.json: 3.2 ms, 99 bytes
+002-list_todays_reaches.json: 0.6 ms, 99 bytes
+003-summarize-2026-09-07-to-2026-10-04.json: 1.0 ms, 3671 bytes
+004-summarize-2026-09-07-to-2026-10-04.json: 1.0 ms, 3671 bytes
+005-summarize-2026-08-07-to-2026-10-04.json: 1.2 ms, 2112 bytes
+006-summarize-2025-09-01-to-2026-10-04.json: 1.3 ms, 6201 bytes
+007-summarize-2025-09-01-to-2025-09-30.json: 1.1 ms, 3534 bytes
+008-summarize-2025-08-01-to-2025-09-30.json: 0.9 ms, 1805 bytes
+009-summarize-2025-08-01-to-2025-10-31.json: 0.8 ms, 2232 bytes
+010-summarize-2025-08-01-to-2026-05-24.json: 0.9 ms, 4855 bytes
+011-summarize-2026-05-04-to-2026-05-24.json: 0.9 ms, 2808 bytes
+012-summarize-2024-01-01-to-2026-05-24.json: 0.8 ms, 11750 bytes
+013-summarize-2024-01-01-to-2024-01-28.json: 0.9 ms, 3219 bytes
+014-summarize-2024-01-01-to-2026-10-04.json: 1.4 ms, 13516 bytes
+015-summarize-2026-09-07-to-2026-10-04.json: 1.0 ms, 3671 bytes
+016-summarize-2026-08-07-to-2026-10-04.json: 1.2 ms, 2112 bytes
+017-summarize-2026-09-07-to-2026-10-04.json: 1.0 ms, 3671 bytes
+018-summarize-1000-01-01-to-2026-10-04.json: 63.7 ms, 4501651 bytes
+019-list_todays_reaches.json: 3.0 ms, 99 bytes
+020-list_todays_reaches.json: 1.4 ms, 99 bytes
+021-summarize-2026-09-07-to-2026-10-04.json: 1.7 ms, 3671 bytes
+022-summarize-2026-09-07-to-2026-10-04.json: 1.5 ms, 3671 bytes

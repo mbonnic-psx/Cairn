@@ -13,6 +13,7 @@ use crate::domain::dates::LocalDate;
 use crate::domain::entries::{CategoryId, Domain, ReachMode, Trail};
 use crate::domain::gate::{PendingChange, PendingKind, TrustedClock};
 use crate::domain::normalize::{Rejection, ReservedNames};
+use crate::domain::patterns::MovementRow;
 use crate::enforcement::apply::{apply, current_state};
 use crate::enforcement::reach_mode;
 use crate::enforcement::reduce;
@@ -180,9 +181,8 @@ pub struct OffsetChange {
 /// (`contracts/ui-ipc.md`, `summarize_reaches`, as amended in slices
 /// `history-by-site`, `history-by-hour` and `history-by-weekday`).
 ///
-/// It carries only what this build can state truthfully. `movement` joins it
-/// when a slice computes it; until then its absence says nothing was
-/// computed, where an empty list would claim it had been.
+/// It carries only what this build can state truthfully. `movement` is the
+/// rows of the days (slice `history-movement`).
 #[derive(Clone, PartialEq, Eq, Debug, Serialize, Deserialize)]
 pub struct Patterns {
     /// Most first; equal counts by domain name, A to Z.
@@ -194,6 +194,10 @@ pub struct Patterns {
     /// included; empty only when `sealed`, where seven zeros would read as a
     /// quiet range (W6, FR-024).
     pub by_weekday: Vec<WeekdayCount>,
+    /// One row per date (or per week for a long range), oldest first, each
+    /// with its count, how much of it Cairn saw and whether it is not over;
+    /// empty only when `sealed`, where rows at zero would read as a quiet range.
+    pub movement: Vec<MovementRow>,
     /// Each cut to the part inside the range.
     pub gaps: Vec<Gap>,
     /// The gaps in one sentence, about the range.
@@ -217,6 +221,7 @@ impl Patterns {
             by_site: Vec::new(),
             by_hour: Vec::new(),
             by_weekday: Vec::new(),
+            movement: Vec::new(),
             gaps: Vec::new(),
             coverage_note: None,
             estimates_excluded: 0,
@@ -835,11 +840,13 @@ impl AppState {
     ) -> Patterns {
         #[cfg(feature = "history")]
         {
+            use crate::domain::patterns::LocalRange;
             use crate::reflection::over_time::{assemble, check_offsets, check_range};
             use crate::store::gaps::range_coverage_note;
 
+            let now = (self.now)();
             if let Err(trouble) =
-                check_range(first_day, last_day, range_start, range_end, (self.now)())
+                check_range(first_day, last_day, range_start, range_end, now)
             {
                 return Patterns::sealed(trouble.message);
             }
@@ -861,16 +868,17 @@ impl AppState {
                 Ok(history) => history,
                 Err(sentence) => return Patterns::sealed(sentence),
             };
-            match assemble(
-                &history,
+            let local = LocalRange {
                 first_day,
                 last_day,
-                range_start,
-                range_end,
+                from: range_start,
+                to: range_end,
                 first_offset,
-                &changes,
-            ) {
+                changes: &changes,
+            };
+            match assemble(&history, &local, now) {
                 Ok(range) => Patterns {
+                    movement: range.movement,
                     by_site: range
                         .by_site
                         .into_iter()

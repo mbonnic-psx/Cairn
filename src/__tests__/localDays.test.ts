@@ -16,6 +16,8 @@ import {
   isLocalDate,
   localToday,
   rangeBounds,
+  namesYear,
+  rangeInWords,
 } from '../localDays';
 
 const seconds = (d: Date) => Math.round(d.getTime() / 1000);
@@ -153,5 +155,47 @@ describe('dayInWords', () => {
   it('refuses what is not a calendar date, and says which', () => {
     expect(() => dayInWords('2026-02-30')).toThrow(RangeError);
     expect(() => dayInWords('2026-02-30')).toThrow('not a calendar date: "2026-02-30"');
+  });
+});
+
+describe('rangeInWords', () => {
+  const today = '2026-10-02';
+
+  it('names a range inside this year without the year', () => {
+    expect(rangeInWords('2026-09-05', '2026-10-02', today)).toBe('From 5 September to 2 October');
+  });
+
+  it('names the year on both dates for a range wholly in another year', () => {
+    expect(rangeInWords('2025-09-03', '2025-09-30', today)).toBe(
+      'From 3 September 2025 to 30 September 2025',
+    );
+  });
+
+  it('names the year on both dates where the range crosses one', () => {
+    expect(rangeInWords('2025-12-20', '2026-01-10', today)).toBe(
+      'From 20 December 2025 to 10 January 2026',
+    );
+  });
+
+  it('judges by the day it is given: a range in the year just ended names it once it is the new year', () => {
+    expect(rangeInWords('2026-12-04', '2026-12-31', '2026-12-31')).toBe(
+      'From 4 December to 31 December',
+    );
+    expect(rangeInWords('2026-12-04', '2026-12-31', '2027-01-01')).toBe(
+      'From 4 December 2026 to 31 December 2026',
+    );
+  });
+});
+
+describe('namesYear', () => {
+  it.each([
+    ['2026-09-05', '2026-10-02', '2026-10-02', false],
+    ['2025-09-03', '2025-09-30', '2026-10-02', true],
+    ['2025-12-20', '2026-01-10', '2026-10-02', true],
+    ['2026-12-04', '2026-12-31', '2027-01-01', true],
+    ['2026-12-04', '2026-12-31', '2026-12-31', false],
+    ['2026-12-20', '2027-01-03', '2026-12-28', true],
+  ])('%s to %s, today %s: %s', (first, last, today, expected) => {
+    expect(namesYear(first, last, today)).toBe(expected);
   });
 });

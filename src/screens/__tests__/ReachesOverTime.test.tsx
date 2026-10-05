@@ -31,6 +31,7 @@ const patterns = (over: Partial<Patterns> = {}): Patterns => ({
   ],
   by_hour: [],
   by_weekday: [],
+  movement: [],
   gaps: [],
   coverage_note: null,
   estimates_excluded: 0,
@@ -222,6 +223,48 @@ describe('the heading', () => {
     expect(
       screen.getByRole('heading', { name: 'From 20 December 2025 to 30 September 2026' }),
     ).toBeInTheDocument();
+  });
+
+  it('names the year on both dates for a range wholly in a past year', async () => {
+    const { calls, read } = fakeRead();
+    await openOverTime(read);
+    await screen.findByText('a.example');
+
+    fireEvent.change(screen.getByLabelText('From'), { target: { value: '2025-09-03' } });
+    fireEvent.change(screen.getByLabelText('To'), { target: { value: '2025-09-30' } });
+
+    await waitFor(() => expect(calls).toHaveLength(3));
+    expect(
+      screen.getByRole('heading', { name: 'From 3 September 2025 to 30 September 2025' }),
+    ).toBeInTheDocument();
+  });
+
+  it('names that year while looking, in each view, and when sealed or unreadable', async () => {
+    const answers: Array<() => Promise<Patterns>> = [
+      async () => patterns(),
+      async () => patterns({ by_site: [], sealed: 'Your history is sealed for now.' }),
+      async () => {
+        throw new Error('boom');
+      },
+    ];
+    for (const answer of answers) {
+      const { read } = fakeRead(answer);
+      const user = userEvent.setup();
+      const view = render(<Reaches read={read} now={() => NOW} />);
+      await user.click(await screen.findByRole('button', { name: 'Over time' }));
+      await waitFor(() => expect(screen.queryByText('Looking…')).toBeNull());
+      fireEvent.change(screen.getByLabelText('From'), { target: { value: '2025-09-03' } });
+      fireEvent.change(screen.getByLabelText('To'), { target: { value: '2025-09-30' } });
+      const heading = 'From 3 September 2025 to 30 September 2025';
+
+      expect(screen.getByRole('heading', { name: heading })).toBeInTheDocument();
+      await waitFor(() => expect(screen.queryByText('Looking…')).toBeNull());
+      for (const name of ['By hour', 'By day', 'Day by day', 'By site']) {
+        await user.click(screen.getByRole('button', { name }));
+        expect(screen.getByRole('heading', { name: heading })).toBeInTheDocument();
+      }
+      view.unmount();
+    }
   });
 
   it('holds no year, count or ranking word inside one year', async () => {
@@ -459,7 +502,7 @@ describe('what the view never holds', () => {
     await screen.findByText('a.example');
 
     const names = screen.getAllByRole('button').map((b) => b.textContent);
-    expect(names).toEqual(['Today', 'Over time', 'By site', 'By hour', 'By day']);
+    expect(names).toEqual(['Today', 'Over time', 'By site', 'By hour', 'By day', 'Day by day']);
     expect(text()).not.toMatch(/\b(unblock|pause|turn off|allow|snooze|disable)\b/i);
   });
 });

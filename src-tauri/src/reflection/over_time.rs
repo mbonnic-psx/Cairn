@@ -2,7 +2,8 @@
 
 use crate::domain::dates::LocalDate;
 use crate::domain::patterns::{
-    by_hour, by_site, by_weekday, weekdays_in, OffsetChange, Reach,
+    by_hour, by_site, by_weekday, movement, weekdays_in, LocalRange, MovementRow,
+    OffsetChange, Reach,
 };
 use crate::reflection::checkin::{could_begin, offset_from_midnight};
 use crate::services::Trouble;
@@ -72,6 +73,9 @@ pub struct Range {
     /// How many of each weekday the range holds (W4), by the calendar alone:
     /// the same index as `by_weekday`.
     pub weekdays: [u32; 7],
+    /// One row per date, or per week for a long range, oldest first, each with
+    /// its reaches (slice `history-movement`).
+    pub movement: Vec<MovementRow>,
     /// What Cairn did not see, each cut to the part inside the range.
     pub gaps: Vec<Gap>,
     /// How many days in the range hold the person's own estimate.
@@ -93,13 +97,17 @@ pub struct Range {
 /// change.
 pub fn assemble(
     history: &OpenHistory,
-    first_day: LocalDate,
-    last_day: LocalDate,
-    range_start: i64,
-    range_end: i64,
-    first_offset: i32,
-    changes: &[OffsetChange],
+    range: &LocalRange<'_>,
+    now: i64,
 ) -> Result<Range, Trouble> {
+    let LocalRange {
+        first_day,
+        last_day,
+        from: range_start,
+        to: range_end,
+        first_offset,
+        changes,
+    } = *range;
     let reaches: Vec<Reach> = history
         .between(range_start, range_end)?
         .into_iter()
@@ -120,12 +128,16 @@ pub fn assemble(
         LocalDate::from_days_since_epoch(last_day.days_since_epoch() + 1);
     let estimates = history.estimates_between(first_day, day_after_last)?;
 
+    let gaps = clipped(&gaps, range_start, range_end);
+    let unseen: Vec<(i64, i64)> = gaps.iter().map(|gap| (gap.from, gap.to)).collect();
+
     Ok(Range {
+        movement: movement(&reaches, range, &unseen, now),
         by_site: by_site(&reaches, range_start, range_end),
         by_hour: by_hour(&reaches, first_offset, changes, range_start, range_end),
         by_weekday: by_weekday(&reaches, first_offset, changes, range_start, range_end),
         weekdays: weekdays_in(first_day, last_day),
-        gaps: clipped(&gaps, range_start, range_end),
+        gaps,
         estimates_excluded: u32::try_from(estimates.len()).unwrap_or(u32::MAX),
     })
 }

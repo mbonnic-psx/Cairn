@@ -10,9 +10,11 @@
 #![allow(clippy::unwrap_used, clippy::expect_used)]
 
 use std::alloc::{GlobalAlloc, Layout, System};
+use std::mem::size_of;
 use std::sync::atomic::{AtomicUsize, Ordering};
 
 use cairn::domain::dates::LocalDate;
+use cairn::domain::patterns::{LocalRange, MovementRow};
 use cairn::reflection::over_time::assemble;
 use cairn::services::Key;
 use cairn::store::history::History;
@@ -78,12 +80,34 @@ fn a_range_of_thousands_of_years_holds_nothing_per_day() {
 
     let before = HELD.load(Ordering::SeqCst);
     PEAK.store(before, Ordering::SeqCst);
-    let range = assemble(&history, first, last, start, end, 0, &[]).unwrap();
+    let local = LocalRange {
+        first_day: first,
+        last_day: last,
+        from: start,
+        to: end,
+        first_offset: 0,
+        changes: &[],
+    };
+    let range = assemble(&history, &local, end).unwrap();
     let extra = PEAK.load(Ordering::SeqCst) - before;
 
+    let days = last.days_since_epoch() - first.days_since_epoch() + 1;
     assert_eq!(range.by_site, vec![("example.com".to_string(), 1)]);
+    assert_eq!(
+        range.movement.len() as i64,
+        (days + 6) / 7,
+        "one row a week"
+    );
+    assert_eq!(
+        range.movement.iter().map(|row| row.count).sum::<u32>(),
+        1,
+        "the one reach is in one row"
+    );
+    // The rows are what is returned; nothing else is held per day.
+    let bound = 8 * 1024 * 1024 + range.movement.len() * size_of::<MovementRow>();
     assert!(
-        extra < 8 * 1024 * 1024,
-        "{extra} bytes held at once for one site"
+        extra < bound,
+        "{extra} bytes held at once for one site and {} rows",
+        range.movement.len()
     );
 }

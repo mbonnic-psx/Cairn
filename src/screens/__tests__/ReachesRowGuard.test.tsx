@@ -12,7 +12,7 @@ import { cleanup, render, screen, waitFor, within } from '@testing-library/react
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
-import type { Patterns } from '../../ipc/reaches';
+import type { MovementRow, Patterns } from '../../ipc/reaches';
 import { NotebookShell } from '../../shell/NotebookShell';
 import { Reaches, type ReachesReader } from '../Reaches';
 import { evening, sealedSentence, todayCases } from './tonightCases';
@@ -30,10 +30,22 @@ const week = (counts: Record<number, number> = {}) =>
     days: 4,
   }));
 
+/** Three days, each held by one date, with `counts` by place. */
+const days = (counts: number[] = [0, 0, 0]): MovementRow[] =>
+  counts.map((count, place) => ({
+    day: `2026-09-0${place + 1}`,
+    days: 1,
+    span: 'day' as const,
+    count,
+    seen: 'whole' as const,
+    so_far: false,
+  }));
+
 const patterns = (over: Partial<Patterns>): Patterns => ({
   by_site: [{ domain: 'a.example', count: 5 }],
   by_hour: hours({ 14: 6 }),
   by_weekday: week({ 2: 3 }),
+  movement: days([0, 2, 0]),
   gaps: [],
   coverage_note: null,
   estimates_excluded: 0,
@@ -52,7 +64,7 @@ type Where = 'card' | 'page';
 async function open(
   where: Where,
   answer: Patterns,
-  view: 'By site' | 'By hour' | 'By day',
+  view: 'By site' | 'By hour' | 'By day' | 'Day by day',
 ) {
   const user = userEvent.setup();
   if (where === 'card') {
@@ -134,6 +146,28 @@ describe.each<Where>(['card', 'page'])('the list of a range, on the %s', (where)
     expect(document.querySelector('ul')).toBeNull();
   });
 
+  it('keeps every row under the sentence in the day-by-day view of a quiet range', async () => {
+    await open(
+      where,
+      patterns({ by_site: [], by_hour: hours(), movement: days() }),
+      'Day by day',
+    );
+    expect(screen.getByText(NOTHING)).toBeInTheDocument();
+    expect(lines()).toHaveLength(3);
+  });
+
+  it('draws every row with no sentence in the day-by-day view of a range with reaches', async () => {
+    await open(where, patterns({}), 'Day by day');
+    expect(screen.queryByText(NOTHING)).toBeNull();
+    expect(lines()).toHaveLength(3);
+  });
+
+  it('is not drawn in the day-by-day view when the answer holds no rows at all', async () => {
+    await open(where, patterns({ movement: [] }), 'Day by day');
+    expect(lines()).toHaveLength(0);
+    expect(document.querySelector('ul')).toBeNull();
+  });
+
   it('is not drawn in the site view when the answer holds nothing at all', async () => {
     await open(where, patterns({ by_site: [], by_hour: [] }), 'By site');
     expect(lines()).toHaveLength(0);
@@ -145,9 +179,10 @@ describe.each<Where>(['card', 'page'])('the list of a range, on the %s', (where)
       by_site: [],
       by_hour: [],
       by_weekday: [],
+      movement: [],
       sealed: sealedSentence,
     });
-    for (const view of ['By hour', 'By day'] as const) {
+    for (const view of ['By hour', 'By day', 'Day by day'] as const) {
       cleanup();
       await open(where, sealed, view);
       expect(screen.getAllByText(sealedSentence).length).toBeGreaterThan(0);

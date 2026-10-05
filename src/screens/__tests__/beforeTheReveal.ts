@@ -41,6 +41,21 @@ export const BY_DAY_DELTA: Delta = {
   controls: { added: ['button | By day | disabled=false | pressed=false'] },
 };
 
+/**
+ * 2026-10-02, slice `history-movement`, decision M1 (D46): Over time's Seen by group gains a fourth choice,
+ * *Day by day*, after *By day*. In every state of Over time that shows the group, one word and one control are
+ * added and nothing is removed. The words that belong to choosing it (a date, *week of …*, *across N days*,
+ * *partly seen*, *not seen*, *so far*) appear only once *Day by day* is chosen, which no captured state does, and
+ * are held by `ReachesMovement.test.tsx` and `ReachesMovementPage.test.tsx`.
+ */
+export const DAY_BY_DAY_DELTA: Delta = {
+  slice: 'history-movement',
+  decision: 'M1',
+  date: '2026-10-02',
+  words: { added: ['Day by day'] },
+  controls: { added: ['button | Day by day | disabled=false | pressed=false'] },
+};
+
 /** record ∪ added − removed, in the fixed order. A removal takes out one occurrence; removing what is not there is an error. */
 function applied(record: string[], change: { added?: string[]; removed?: string[] }[]): string[] {
   const out = [...record];

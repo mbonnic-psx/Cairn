@@ -253,6 +253,38 @@ This supersedes the original `[{ weekday, count }]` above by one field, `days`. 
 
 See `slices/history-by-weekday/plan.md`, *The day*, *The week* and *How many of each day*.
 
+#### Amended in slice `history-movement` (2026-10-02)
+
+**The signature does not change.** The rows are placed by the `offsets` of the `history-by-hour` amendment, as the
+hours and weekdays are. Whether a row is today's is judged by the core's own clock, the one `check_range` already
+holds the range against.
+
+**Fields.** Slice `history-movement` adds one, so the answer holds nine keys:
+
+    movement: [{ day, days, span, count, seen, so_far }]   // oldest first; [] when sealed
+
+This supersedes the original `[{ day, count }]` above. The field was never sent before. It also ends the three earlier
+statements that `movement` is absent (in the `history-by-site`, `history-by-hour` and `history-by-weekday` amendments),
+which stay as the record of when they were true.
+
+- `day` (`YYYY-MM-DD`) is the row's first date. `days` is how many dates it holds. `span` is `"day"` when the
+  range holds 56 dates or fewer, each row one date (`days: 1`), and `"week"` when it holds more, each row seven
+  dates from `first_day` (gaps review M3), the last possibly fewer. The rows are contiguous and their `days` sum
+  to the range's length.
+- `count` is the reaches whose instant falls in the row, by the local date of that instant under the offset in force
+  then (M3, W5). A local date before `first_day` or after `last_day`, which only a clock change across midnight
+  produces (adversary W-A1), counts in the nearest row. The counts sum to every reach in the range. Built from
+  reaches alone: an estimate is never counted in a row (M7), and `estimates_excluded` states it.
+- `seen` is `"whole"`, `"part"` or `"none"`: whether Cairn saw the row's instants before the present. `"none"` is
+  every one of them inside `gaps`; `"part"` is more than half of them inside `gaps` (M12, which replaced "any");
+  `"whole"` is half or less, so exactly half is whole. A row holding a reach is never `"none"`, so one Cairn missed
+  wholly is `"part"`. A row with no instant before the present is `"whole"`. The interface shows `"none"` as *not seen*, with no count and no bar, never a zero (FR-022).
+- `so_far` is true when any of the row's instants is at or after the present: the row holding today, and any row
+  after it (M6).
+- A quiet range has every row with `count` 0 (M8, FR-024). A sealed answer is `[]`, never rows at zero.
+
+See `slices/history-movement/plan.md`, *The rows*, *What Cairn saw of each row* and *Today*.
+
 ### `get_quote(day) -> string | null`
 
 A quote from the bundled set, or nothing. Never fetched. Null is a valid, complete answer —

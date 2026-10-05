@@ -270,7 +270,7 @@ fn assert_in_voice(sentence: &str) {
 // --- Scenario 19: the wire shape -----------------------------------------------
 
 #[test]
-fn the_answer_serialises_to_exactly_eight_keys_and_never_movement() {
+fn the_answer_serialises_to_exactly_nine_keys() {
     let state_setup = setup();
     let state = app(&state_setup, &Keychain::available());
     let value = serde_json::to_value(Range::four_whole_weeks().ask(&state)).unwrap();
@@ -287,9 +287,10 @@ fn the_answer_serialises_to_exactly_eight_keys_and_never_movement() {
             "dst_approximate",
             "estimates_excluded",
             "gaps",
+            "movement",
             "sealed"
         ],
-        "never movement: nothing computed it"
+        "nine keys, movement among them"
     );
     if cfg!(feature = "history") {
         let days = object["by_weekday"].as_array().expect("a list");
