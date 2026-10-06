@@ -930,11 +930,12 @@ mod with_history {
     #[cfg(unix)]
     #[test]
     fn a_legacy_history_that_cannot_be_written_opens_with_the_fill_owed() {
-        use std::os::unix::fs::PermissionsExt;
         let setup = setup();
         legacy(&setup.data, &[FIRST], &[]);
         let file = setup.data.join(HISTORY_FILE);
-        std::fs::set_permissions(&file, std::fs::Permissions::from_mode(0o444)).unwrap();
+        let mut read_only = std::fs::metadata(&file).unwrap().permissions();
+        read_only.set_readonly(true);
+        std::fs::set_permissions(&file, read_only).unwrap();
 
         let opened = open_now(&setup.data);
 
