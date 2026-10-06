@@ -1,0 +1,2003 @@
+{
+ "measured_at": "2026-10-06T18:03:09-0500",
+ "session": "fc26us",
+ "where": "Chromium (agent-browser 0.38.1, headless) on WSL2; Vite dev build on 127.0.0.1:1477; history answers from the real core (worktree src-tauri at 46dbf8e) over 127.0.0.1 HTTP, not Tauri IPC",
+ "readings": [
+  {
+   "state": "F2 Over time, By site (range does not hold the first count)",
+   "seed": "c",
+   "viewport": [
+    800,
+    600
+   ],
+   "nbUHeld": null,
+   "locale": "en-US",
+   "navigatorLanguage": "en-US",
+   "timeZone": "America/Chicago",
+   "nbU": 1,
+   "nbUOverride": null,
+   "heading": "From 9 September to 6 October",
+   "boxes": [
+    {
+     "value": "2026-09-09",
+     "min": "2025-01-01",
+     "max": "2026-10-06"
+    },
+    {
+     "value": "2026-10-06",
+     "min": "2026-09-09",
+     "max": "2026-10-06"
+    }
+   ],
+   "sentences": [
+    {
+     "text": "Cairn started counting on Jan 1, 2025.",
+     "cls": "nb-reaches-aside",
+     "page": "nb-page",
+     "height": 26.39,
+     "width": 294,
+     "lines": 1,
+     "lineHeight": "26.4px",
+     "fontSize": "16px",
+     "font": "\"Libre Caslon Text\"",
+     "marginTop": "16px"
+    }
+   ],
+   "countChars": "5",
+   "rowCount": 4,
+   "distinctBarStarts": [
+    573.67,
+    573.69
+   ],
+   "distinctCountWidths": [
+    36.02,
+    36
+   ],
+   "rows": [
+    {
+     "name": "reddit.com",
+     "clause": null,
+     "count": "1,234",
+     "barLeft": 573.67,
+     "barWidth": 82.31,
+     "countWidth": 36.02,
+     "rowHeight": 32
+    },
+    {
+     "name": "youtube.com",
+     "clause": null,
+     "count": "56",
+     "barLeft": 573.69,
+     "barWidth": 82.31,
+     "countWidth": 36,
+     "rowHeight": 32
+    },
+    {
+     "name": "x.com",
+     "clause": null,
+     "count": "7",
+     "barLeft": 573.69,
+     "barWidth": 82.31,
+     "countWidth": 36,
+     "rowHeight": 32
+    },
+    {
+     "name": "instagram.com",
+     "clause": null,
+     "count": "2",
+     "barLeft": 573.69,
+     "barWidth": 82.31,
+     "countWidth": 36,
+     "rowHeight": 32
+    }
+   ]
+  },
+  {
+   "state": "F3 Over time, Day by day, From 2025-01-01 (longest sentence; weekly rows, one over 999)",
+   "seed": "c",
+   "viewport": [
+    800,
+    600
+   ],
+   "nbUHeld": null,
+   "locale": "en-US",
+   "navigatorLanguage": "en-US",
+   "timeZone": "America/Chicago",
+   "nbU": 1,
+   "nbUOverride": null,
+   "heading": "From 1 January 2025 to 6 October 2026",
+   "boxes": [
+    {
+     "value": "2025-01-01",
+     "min": "2025-01-01",
+     "max": "2026-10-06"
+    },
+    {
+     "value": "2026-10-06",
+     "min": "2025-01-01",
+     "max": "2026-10-06"
+    }
+   ],
+   "sentences": [
+    {
+     "text": "Cairn started counting at 10:30 AM on Jan 1, 2025.",
+     "cls": "nb-reaches-aside",
+     "page": "nb-page",
+     "height": 52.78,
+     "width": 294,
+     "lines": 2,
+     "lineHeight": "26.4px",
+     "fontSize": "16px",
+     "font": "\"Libre Caslon Text\"",
+     "marginTop": "16px"
+    }
+   ],
+   "countChars": "5",
+   "rowCount": 92,
+   "distinctBarStarts": [
+    573.69,
+    573.67
+   ],
+   "distinctCountWidths": [
+    36,
+    36.02
+   ],
+   "rows": [
+    {
+     "name": "week of Jan 1, 2025",
+     "clause": null,
+     "count": "1",
+     "barLeft": 573.69,
+     "barWidth": 82.31,
+     "countWidth": 36,
+     "rowHeight": 32
+    },
+    {
+     "name": "week of Jan 8, 2025",
+     "clause": null,
+     "count": "1",
+     "barLeft": 573.69,
+     "barWidth": 82.31,
+     "countWidth": 36,
+     "rowHeight": 32
+    },
+    {
+     "name": "week of Jan 15, 2025",
+     "clause": null,
+     "count": "1",
+     "barLeft": 573.69,
+     "barWidth": 82.31,
+     "countWidth": 36,
+     "rowHeight": 32
+    },
+    {
+     "name": "week of Jan 22, 2025",
+     "clause": null,
+     "count": "1",
+     "barLeft": 573.69,
+     "barWidth": 82.31,
+     "countWidth": 36,
+     "rowHeight": 32
+    },
+    {
+     "name": "week of Jan 29, 2025",
+     "clause": null,
+     "count": "0",
+     "barLeft": 573.69,
+     "barWidth": 82.31,
+     "countWidth": 36,
+     "rowHeight": 32
+    },
+    {
+     "name": "week of Feb 5, 2025",
+     "clause": null,
+     "count": "1",
+     "barLeft": 573.69,
+     "barWidth": 82.31,
+     "countWidth": 36,
+     "rowHeight": 32
+    },
+    "... 80 rows ...",
+    {
+     "name": "week of Aug 26, 2026",
+     "clause": null,
+     "count": "1",
+     "barLeft": 573.69,
+     "barWidth": 82.31,
+     "countWidth": 36,
+     "rowHeight": 32
+    },
+    {
+     "name": "week of Sep 2, 2026",
+     "clause": null,
+     "count": "1",
+     "barLeft": 573.69,
+     "barWidth": 82.31,
+     "countWidth": 36,
+     "rowHeight": 32
+    },
+    {
+     "name": "week of Sep 9, 2026",
+     "clause": null,
+     "count": "1",
+     "barLeft": 573.69,
+     "barWidth": 82.31,
+     "countWidth": 36,
+     "rowHeight": 32
+    },
+    {
+     "name": "week of Sep 16, 2026",
+     "clause": null,
+     "count": "0",
+     "barLeft": 573.69,
+     "barWidth": 82.31,
+     "countWidth": 36,
+     "rowHeight": 32
+    },
+    {
+     "name": "week of Sep 23, 2026",
+     "clause": null,
+     "count": "1",
+     "barLeft": 573.69,
+     "barWidth": 82.31,
+     "countWidth": 36,
+     "rowHeight": 32
+    },
+    {
+     "name": "week of Sep 30, 2026",
+     "clause": "so far",
+     "count": "1,297",
+     "barLeft": 573.67,
+     "barWidth": 82.31,
+     "countWidth": 36.02,
+     "rowHeight": 64
+    }
+   ]
+  },
+  {
+   "state": "F3 Over time, By site, first count yesterday (no year)",
+   "seed": "d",
+   "viewport": [
+    800,
+    600
+   ],
+   "nbUHeld": null,
+   "locale": "en-US",
+   "navigatorLanguage": "en-US",
+   "timeZone": "America/Chicago",
+   "nbU": 1,
+   "nbUOverride": null,
+   "heading": "From 5 October to 6 October",
+   "boxes": [
+    {
+     "value": "2026-10-05",
+     "min": "2026-10-05",
+     "max": "2026-10-06"
+    },
+    {
+     "value": "2026-10-06",
+     "min": "2026-10-05",
+     "max": "2026-10-06"
+    }
+   ],
+   "sentences": [
+    {
+     "text": "Cairn started counting at 9:08 AM on Oct 5.",
+     "cls": "nb-reaches-aside",
+     "page": "nb-page",
+     "height": 52.78,
+     "width": 294,
+     "lines": 2,
+     "lineHeight": "26.4px",
+     "fontSize": "16px",
+     "font": "\"Libre Caslon Text\"",
+     "marginTop": "16px"
+    }
+   ],
+   "countChars": "1",
+   "rowCount": 3,
+   "distinctBarStarts": [
+    602.48
+   ],
+   "distinctCountWidths": [
+    7.2
+   ],
+   "rows": [
+    {
+     "name": "reddit.com",
+     "clause": null,
+     "count": "2",
+     "barLeft": 602.48,
+     "barWidth": 82.31,
+     "countWidth": 7.2,
+     "rowHeight": 32
+    },
+    {
+     "name": "youtube.com",
+     "clause": null,
+     "count": "2",
+     "barLeft": 602.48,
+     "barWidth": 82.31,
+     "countWidth": 7.2,
+     "rowHeight": 32
+    },
+    {
+     "name": "x.com",
+     "clause": null,
+     "count": "1",
+     "barLeft": 602.48,
+     "barWidth": 82.31,
+     "countWidth": 7.2,
+     "rowHeight": 32
+    }
+   ]
+  },
+  {
+   "state": "Today on the first day",
+   "seed": "f",
+   "viewport": [
+    800,
+    600
+   ],
+   "nbUHeld": null,
+   "locale": "en-US",
+   "navigatorLanguage": "en-US",
+   "timeZone": "America/Chicago",
+   "nbU": 1,
+   "nbUOverride": null,
+   "heading": "Today",
+   "boxes": [],
+   "sentences": [
+    {
+     "text": "Cairn started counting at 12:40 PM today.",
+     "cls": "nb-reaches-aside",
+     "page": "nb-page",
+     "height": 52.78,
+     "width": 294,
+     "lines": 2,
+     "lineHeight": "26.4px",
+     "fontSize": "16px",
+     "font": "\"Libre Caslon Text\"",
+     "marginTop": "16px"
+    }
+   ],
+   "countChars": "",
+   "rowCount": 4,
+   "distinctBarStarts": [],
+   "distinctCountWidths": [],
+   "rows": [
+    {
+     "name": "reddit.com",
+     "clause": "12:40 PM",
+     "count": null,
+     "barLeft": null,
+     "barWidth": null,
+     "countWidth": null,
+     "rowHeight": 32
+    },
+    {
+     "name": "youtube.com",
+     "clause": "01:25 PM",
+     "count": null,
+     "barLeft": null,
+     "barWidth": null,
+     "countWidth": null,
+     "rowHeight": 32
+    },
+    {
+     "name": "x.com",
+     "clause": "02:10 PM",
+     "count": null,
+     "barLeft": null,
+     "barWidth": null,
+     "countWidth": null,
+     "rowHeight": 32
+    },
+    {
+     "name": "reddit.com",
+     "clause": "02:50 PM",
+     "count": null,
+     "barLeft": null,
+     "barWidth": null,
+     "countWidth": null,
+     "rowHeight": 32
+    }
+   ]
+  },
+  {
+   "state": "Check-in on the first day",
+   "seed": "f",
+   "viewport": [
+    800,
+    600
+   ],
+   "nbUHeld": null,
+   "locale": "en-US",
+   "navigatorLanguage": "en-US",
+   "timeZone": "America/Chicago",
+   "nbU": 1,
+   "nbUOverride": null,
+   "heading": "Tonight",
+   "boxes": [],
+   "sentences": [
+    {
+     "text": "Cairn started counting at 12:40 PM today.",
+     "cls": "nb-checkin-note",
+     "page": "nb-page",
+     "height": 73.78,
+     "width": 294,
+     "lines": 2,
+     "lineHeight": "26.4px",
+     "fontSize": "16px",
+     "font": "\"Libre Caslon Text\"",
+     "marginTop": "24px"
+    }
+   ],
+   "countChars": null,
+   "rowCount": 0,
+   "distinctBarStarts": [],
+   "distinctCountWidths": [],
+   "rows": []
+  },
+  {
+   "state": "Today the next day (no sentence expected)",
+   "seed": "d",
+   "viewport": [
+    800,
+    600
+   ],
+   "nbUHeld": null,
+   "locale": "en-US",
+   "navigatorLanguage": "en-US",
+   "timeZone": "America/Chicago",
+   "nbU": 1,
+   "nbUOverride": null,
+   "heading": "Today",
+   "boxes": [],
+   "sentences": [],
+   "countChars": "",
+   "rowCount": 2,
+   "distinctBarStarts": [],
+   "distinctCountWidths": [],
+   "rows": [
+    {
+     "name": "reddit.com",
+     "clause": "08:30 AM",
+     "count": null,
+     "barLeft": null,
+     "barWidth": null,
+     "countWidth": null,
+     "rowHeight": 32
+    },
+    {
+     "name": "youtube.com",
+     "clause": "11:05 AM",
+     "count": null,
+     "barLeft": null,
+     "barWidth": null,
+     "countWidth": null,
+     "rowHeight": 32
+    }
+   ]
+  },
+  {
+   "state": "Check-in the next day (no sentence expected)",
+   "seed": "d",
+   "viewport": [
+    800,
+    600
+   ],
+   "nbUHeld": null,
+   "locale": "en-US",
+   "navigatorLanguage": "en-US",
+   "timeZone": "America/Chicago",
+   "nbU": 1,
+   "nbUOverride": null,
+   "heading": "Tonight",
+   "boxes": [],
+   "sentences": [],
+   "countChars": null,
+   "rowCount": 0,
+   "distinctBarStarts": [],
+   "distinctCountWidths": [],
+   "rows": []
+  },
+  {
+   "state": "F2 Over time, By site (range does not hold the first count)",
+   "seed": "c",
+   "viewport": [
+    800,
+    600
+   ],
+   "nbUHeld": "2px",
+   "locale": "en-US",
+   "navigatorLanguage": "en-US",
+   "timeZone": "America/Chicago",
+   "nbU": 2,
+   "nbUOverride": "2px",
+   "heading": "From 9 September to 6 October",
+   "boxes": [
+    {
+     "value": "2026-09-09",
+     "min": "2025-01-01",
+     "max": "2026-10-06"
+    },
+    {
+     "value": "2026-10-06",
+     "min": "2026-09-09",
+     "max": "2026-10-06"
+    }
+   ],
+   "sentences": [
+    {
+     "text": "Cairn started counting on Jan 1, 2025.",
+     "cls": "nb-reaches-aside",
+     "page": "nb-page",
+     "height": 158.39,
+     "width": 270,
+     "lines": 3,
+     "lineHeight": "52.8px",
+     "fontSize": "32px",
+     "font": "\"Libre Caslon Text\"",
+     "marginTop": "32px"
+    }
+   ],
+   "countChars": "5",
+   "rowCount": 4,
+   "distinctBarStarts": [
+    532.41,
+    532.42
+   ],
+   "distinctCountWidths": [
+    72,
+    71.98
+   ],
+   "rows": [
+    {
+     "name": "reddit.com",
+     "clause": null,
+     "count": "1,234",
+     "barLeft": 532.41,
+     "barWidth": 75.59,
+     "countWidth": 72,
+     "rowHeight": 192
+    },
+    {
+     "name": "youtube.com",
+     "clause": null,
+     "count": "56",
+     "barLeft": 532.42,
+     "barWidth": 75.59,
+     "countWidth": 71.98,
+     "rowHeight": 192
+    },
+    {
+     "name": "x.com",
+     "clause": null,
+     "count": "7",
+     "barLeft": 532.42,
+     "barWidth": 75.59,
+     "countWidth": 71.98,
+     "rowHeight": 128
+    },
+    {
+     "name": "instagram.com",
+     "clause": null,
+     "count": "2",
+     "barLeft": 532.42,
+     "barWidth": 75.59,
+     "countWidth": 71.98,
+     "rowHeight": 256
+    }
+   ]
+  },
+  {
+   "state": "F3 Over time, Day by day, From 2025-01-01 (longest sentence; weekly rows, one over 999)",
+   "seed": "c",
+   "viewport": [
+    800,
+    600
+   ],
+   "nbUHeld": "2px",
+   "locale": "en-US",
+   "navigatorLanguage": "en-US",
+   "timeZone": "America/Chicago",
+   "nbU": 2,
+   "nbUOverride": "2px",
+   "heading": "From 1 January 2025 to 6 October 2026",
+   "boxes": [
+    {
+     "value": "2025-01-01",
+     "min": "2025-01-01",
+     "max": "2026-10-06"
+    },
+    {
+     "value": "2026-10-06",
+     "min": "2025-01-01",
+     "max": "2026-10-06"
+    }
+   ],
+   "sentences": [
+    {
+     "text": "Cairn started counting at 10:30 AM on Jan 1, 2025.",
+     "cls": "nb-reaches-aside",
+     "page": "nb-page",
+     "height": 211.19,
+     "width": 270,
+     "lines": 4,
+     "lineHeight": "52.8px",
+     "fontSize": "32px",
+     "font": "\"Libre Caslon Text\"",
+     "marginTop": "32px"
+    }
+   ],
+   "countChars": "5",
+   "rowCount": 92,
+   "distinctBarStarts": [
+    532.42,
+    532.41
+   ],
+   "distinctCountWidths": [
+    71.98,
+    72
+   ],
+   "rows": [
+    {
+     "name": "week of Jan 1, 2025",
+     "clause": null,
+     "count": "1",
+     "barLeft": 532.42,
+     "barWidth": 75.59,
+     "countWidth": 71.98,
+     "rowHeight": 64
+    },
+    {
+     "name": "week of Jan 8, 2025",
+     "clause": null,
+     "count": "1",
+     "barLeft": 532.42,
+     "barWidth": 75.59,
+     "countWidth": 71.98,
+     "rowHeight": 64
+    },
+    {
+     "name": "week of Jan 15, 2025",
+     "clause": null,
+     "count": "1",
+     "barLeft": 532.42,
+     "barWidth": 75.59,
+     "countWidth": 71.98,
+     "rowHeight": 64
+    },
+    {
+     "name": "week of Jan 22, 2025",
+     "clause": null,
+     "count": "1",
+     "barLeft": 532.42,
+     "barWidth": 75.59,
+     "countWidth": 71.98,
+     "rowHeight": 64
+    },
+    {
+     "name": "week of Jan 29, 2025",
+     "clause": null,
+     "count": "0",
+     "barLeft": 532.42,
+     "barWidth": 75.59,
+     "countWidth": 71.98,
+     "rowHeight": 64
+    },
+    {
+     "name": "week of Feb 5, 2025",
+     "clause": null,
+     "count": "1",
+     "barLeft": 532.42,
+     "barWidth": 75.59,
+     "countWidth": 71.98,
+     "rowHeight": 64
+    },
+    "... 80 rows ...",
+    {
+     "name": "week of Aug 26, 2026",
+     "clause": null,
+     "count": "1",
+     "barLeft": 532.42,
+     "barWidth": 75.59,
+     "countWidth": 71.98,
+     "rowHeight": 64
+    },
+    {
+     "name": "week of Sep 2, 2026",
+     "clause": null,
+     "count": "1",
+     "barLeft": 532.42,
+     "barWidth": 75.59,
+     "countWidth": 71.98,
+     "rowHeight": 64
+    },
+    {
+     "name": "week of Sep 9, 2026",
+     "clause": null,
+     "count": "1",
+     "barLeft": 532.42,
+     "barWidth": 75.59,
+     "countWidth": 71.98,
+     "rowHeight": 64
+    },
+    {
+     "name": "week of Sep 16, 2026",
+     "clause": null,
+     "count": "0",
+     "barLeft": 532.42,
+     "barWidth": 75.59,
+     "countWidth": 71.98,
+     "rowHeight": 64
+    },
+    {
+     "name": "week of Sep 23, 2026",
+     "clause": null,
+     "count": "1",
+     "barLeft": 532.42,
+     "barWidth": 75.59,
+     "countWidth": 71.98,
+     "rowHeight": 64
+    },
+    {
+     "name": "week of Sep 30, 2026",
+     "clause": "so far",
+     "count": "1,297",
+     "barLeft": 532.41,
+     "barWidth": 75.59,
+     "countWidth": 72,
+     "rowHeight": 128
+    }
+   ]
+  },
+  {
+   "state": "F3 Over time, By site, first count yesterday (no year)",
+   "seed": "d",
+   "viewport": [
+    800,
+    600
+   ],
+   "nbUHeld": "2px",
+   "locale": "en-US",
+   "navigatorLanguage": "en-US",
+   "timeZone": "America/Chicago",
+   "nbU": 2,
+   "nbUOverride": "2px",
+   "heading": "From 5 October to 6 October",
+   "boxes": [
+    {
+     "value": "2026-10-05",
+     "min": "2026-10-05",
+     "max": "2026-10-06"
+    },
+    {
+     "value": "2026-10-06",
+     "min": "2026-10-05",
+     "max": "2026-10-06"
+    }
+   ],
+   "sentences": [
+    {
+     "text": "Cairn started counting at 9:08 AM on Oct 5.",
+     "cls": "nb-reaches-aside",
+     "page": "nb-page",
+     "height": 158.39,
+     "width": 270,
+     "lines": 3,
+     "lineHeight": "52.8px",
+     "fontSize": "32px",
+     "font": "\"Libre Caslon Text\"",
+     "marginTop": "32px"
+    }
+   ],
+   "countChars": "1",
+   "rowCount": 3,
+   "distinctBarStarts": [
+    590
+   ],
+   "distinctCountWidths": [
+    14.41
+   ],
+   "rows": [
+    {
+     "name": "reddit.com",
+     "clause": null,
+     "count": "2",
+     "barLeft": 590,
+     "barWidth": 75.59,
+     "countWidth": 14.41,
+     "rowHeight": 128
+    },
+    {
+     "name": "youtube.com",
+     "clause": null,
+     "count": "2",
+     "barLeft": 590,
+     "barWidth": 75.59,
+     "countWidth": 14.41,
+     "rowHeight": 128
+    },
+    {
+     "name": "x.com",
+     "clause": null,
+     "count": "1",
+     "barLeft": 590,
+     "barWidth": 75.59,
+     "countWidth": 14.41,
+     "rowHeight": 64
+    }
+   ]
+  },
+  {
+   "state": "Today on the first day",
+   "seed": "f",
+   "viewport": [
+    800,
+    600
+   ],
+   "nbUHeld": "2px",
+   "locale": "en-US",
+   "navigatorLanguage": "en-US",
+   "timeZone": "America/Chicago",
+   "nbU": 2,
+   "nbUOverride": "2px",
+   "heading": "Today",
+   "boxes": [],
+   "sentences": [
+    {
+     "text": "Cairn started counting at 12:40 PM today.",
+     "cls": "nb-reaches-aside",
+     "page": "nb-page",
+     "height": 158.39,
+     "width": 270,
+     "lines": 3,
+     "lineHeight": "52.8px",
+     "fontSize": "32px",
+     "font": "\"Libre Caslon Text\"",
+     "marginTop": "32px"
+    }
+   ],
+   "countChars": "",
+   "rowCount": 4,
+   "distinctBarStarts": [],
+   "distinctCountWidths": [],
+   "rows": [
+    {
+     "name": "reddit.com",
+     "clause": "12:40 PM",
+     "count": null,
+     "barLeft": null,
+     "barWidth": null,
+     "countWidth": null,
+     "rowHeight": 128
+    },
+    {
+     "name": "youtube.com",
+     "clause": "01:25 PM",
+     "count": null,
+     "barLeft": null,
+     "barWidth": null,
+     "countWidth": null,
+     "rowHeight": 128
+    },
+    {
+     "name": "x.com",
+     "clause": "02:10 PM",
+     "count": null,
+     "barLeft": null,
+     "barWidth": null,
+     "countWidth": null,
+     "rowHeight": 64
+    },
+    {
+     "name": "reddit.com",
+     "clause": "02:50 PM",
+     "count": null,
+     "barLeft": null,
+     "barWidth": null,
+     "countWidth": null,
+     "rowHeight": 128
+    }
+   ]
+  },
+  {
+   "state": "Check-in on the first day",
+   "seed": "f",
+   "viewport": [
+    800,
+    600
+   ],
+   "nbUHeld": "2px",
+   "locale": "en-US",
+   "navigatorLanguage": "en-US",
+   "timeZone": "America/Chicago",
+   "nbU": 2,
+   "nbUOverride": "2px",
+   "heading": "Tonight",
+   "boxes": [],
+   "sentences": [
+    {
+     "text": "Cairn started counting at 12:40 PM today.",
+     "cls": "nb-checkin-note",
+     "page": "nb-page",
+     "height": 199.39,
+     "width": 270,
+     "lines": 3,
+     "lineHeight": "52.8px",
+     "fontSize": "32px",
+     "font": "\"Libre Caslon Text\"",
+     "marginTop": "48px"
+    }
+   ],
+   "countChars": null,
+   "rowCount": 0,
+   "distinctBarStarts": [],
+   "distinctCountWidths": [],
+   "rows": []
+  },
+  {
+   "state": "Today the next day (no sentence expected)",
+   "seed": "d",
+   "viewport": [
+    800,
+    600
+   ],
+   "nbUHeld": "2px",
+   "locale": "en-US",
+   "navigatorLanguage": "en-US",
+   "timeZone": "America/Chicago",
+   "nbU": 2,
+   "nbUOverride": "2px",
+   "heading": "Today",
+   "boxes": [],
+   "sentences": [],
+   "countChars": "",
+   "rowCount": 2,
+   "distinctBarStarts": [],
+   "distinctCountWidths": [],
+   "rows": [
+    {
+     "name": "reddit.com",
+     "clause": "08:30 AM",
+     "count": null,
+     "barLeft": null,
+     "barWidth": null,
+     "countWidth": null,
+     "rowHeight": 128
+    },
+    {
+     "name": "youtube.com",
+     "clause": "11:05 AM",
+     "count": null,
+     "barLeft": null,
+     "barWidth": null,
+     "countWidth": null,
+     "rowHeight": 128
+    }
+   ]
+  },
+  {
+   "state": "Check-in the next day (no sentence expected)",
+   "seed": "d",
+   "viewport": [
+    800,
+    600
+   ],
+   "nbUHeld": "2px",
+   "locale": "en-US",
+   "navigatorLanguage": "en-US",
+   "timeZone": "America/Chicago",
+   "nbU": 2,
+   "nbUOverride": "2px",
+   "heading": "Tonight",
+   "boxes": [],
+   "sentences": [],
+   "countChars": null,
+   "rowCount": 0,
+   "distinctBarStarts": [],
+   "distinctCountWidths": [],
+   "rows": []
+  },
+  {
+   "state": "F2 Over time, By site (range does not hold the first count)",
+   "seed": "c",
+   "viewport": [
+    1280,
+    800
+   ],
+   "nbUHeld": null,
+   "locale": "en-US",
+   "navigatorLanguage": "en-US",
+   "timeZone": "America/Chicago",
+   "nbU": 1,
+   "nbUOverride": null,
+   "heading": "From 9 September to 6 October",
+   "boxes": [
+    {
+     "value": "2026-09-09",
+     "min": "2025-01-01",
+     "max": "2026-10-06"
+    },
+    {
+     "value": "2026-10-06",
+     "min": "2026-09-09",
+     "max": "2026-10-06"
+    }
+   ],
+   "sentences": [
+    {
+     "text": "Cairn started counting on Jan 1, 2025.",
+     "cls": "nb-reaches-aside",
+     "page": "nb-page",
+     "height": 26.39,
+     "width": 337,
+     "lines": 1,
+     "lineHeight": "26.4px",
+     "fontSize": "16px",
+     "font": "\"Libre Caslon Text\"",
+     "marginTop": "16px"
+    }
+   ],
+   "countChars": "5",
+   "rowCount": 4,
+   "distinctBarStarts": [
+    989.63,
+    989.64
+   ],
+   "distinctCountWidths": [
+    36.02,
+    36
+   ],
+   "rows": [
+    {
+     "name": "reddit.com",
+     "clause": null,
+     "count": "1,234",
+     "barLeft": 989.63,
+     "barWidth": 94.36,
+     "countWidth": 36.02,
+     "rowHeight": 32
+    },
+    {
+     "name": "youtube.com",
+     "clause": null,
+     "count": "56",
+     "barLeft": 989.64,
+     "barWidth": 94.36,
+     "countWidth": 36,
+     "rowHeight": 32
+    },
+    {
+     "name": "x.com",
+     "clause": null,
+     "count": "7",
+     "barLeft": 989.64,
+     "barWidth": 94.36,
+     "countWidth": 36,
+     "rowHeight": 32
+    },
+    {
+     "name": "instagram.com",
+     "clause": null,
+     "count": "2",
+     "barLeft": 989.64,
+     "barWidth": 94.36,
+     "countWidth": 36,
+     "rowHeight": 32
+    }
+   ]
+  },
+  {
+   "state": "F3 Over time, Day by day, From 2025-01-01 (longest sentence; weekly rows, one over 999)",
+   "seed": "c",
+   "viewport": [
+    1280,
+    800
+   ],
+   "nbUHeld": null,
+   "locale": "en-US",
+   "navigatorLanguage": "en-US",
+   "timeZone": "America/Chicago",
+   "nbU": 1,
+   "nbUOverride": null,
+   "heading": "From 1 January 2025 to 6 October 2026",
+   "boxes": [
+    {
+     "value": "2025-01-01",
+     "min": "2025-01-01",
+     "max": "2026-10-06"
+    },
+    {
+     "value": "2026-10-06",
+     "min": "2025-01-01",
+     "max": "2026-10-06"
+    }
+   ],
+   "sentences": [
+    {
+     "text": "Cairn started counting at 10:30 AM on Jan 1, 2025.",
+     "cls": "nb-reaches-aside",
+     "page": "nb-page",
+     "height": 52.78,
+     "width": 337,
+     "lines": 2,
+     "lineHeight": "26.4px",
+     "fontSize": "16px",
+     "font": "\"Libre Caslon Text\"",
+     "marginTop": "16px"
+    }
+   ],
+   "countChars": "5",
+   "rowCount": 92,
+   "distinctBarStarts": [
+    989.64,
+    989.63
+   ],
+   "distinctCountWidths": [
+    36,
+    36.02
+   ],
+   "rows": [
+    {
+     "name": "week of Jan 1, 2025",
+     "clause": null,
+     "count": "1",
+     "barLeft": 989.64,
+     "barWidth": 94.36,
+     "countWidth": 36,
+     "rowHeight": 32
+    },
+    {
+     "name": "week of Jan 8, 2025",
+     "clause": null,
+     "count": "1",
+     "barLeft": 989.64,
+     "barWidth": 94.36,
+     "countWidth": 36,
+     "rowHeight": 32
+    },
+    {
+     "name": "week of Jan 15, 2025",
+     "clause": null,
+     "count": "1",
+     "barLeft": 989.64,
+     "barWidth": 94.36,
+     "countWidth": 36,
+     "rowHeight": 32
+    },
+    {
+     "name": "week of Jan 22, 2025",
+     "clause": null,
+     "count": "1",
+     "barLeft": 989.64,
+     "barWidth": 94.36,
+     "countWidth": 36,
+     "rowHeight": 32
+    },
+    {
+     "name": "week of Jan 29, 2025",
+     "clause": null,
+     "count": "0",
+     "barLeft": 989.64,
+     "barWidth": 94.36,
+     "countWidth": 36,
+     "rowHeight": 32
+    },
+    {
+     "name": "week of Feb 5, 2025",
+     "clause": null,
+     "count": "1",
+     "barLeft": 989.64,
+     "barWidth": 94.36,
+     "countWidth": 36,
+     "rowHeight": 32
+    },
+    "... 80 rows ...",
+    {
+     "name": "week of Aug 26, 2026",
+     "clause": null,
+     "count": "1",
+     "barLeft": 989.64,
+     "barWidth": 94.36,
+     "countWidth": 36,
+     "rowHeight": 32
+    },
+    {
+     "name": "week of Sep 2, 2026",
+     "clause": null,
+     "count": "1",
+     "barLeft": 989.64,
+     "barWidth": 94.36,
+     "countWidth": 36,
+     "rowHeight": 32
+    },
+    {
+     "name": "week of Sep 9, 2026",
+     "clause": null,
+     "count": "1",
+     "barLeft": 989.64,
+     "barWidth": 94.36,
+     "countWidth": 36,
+     "rowHeight": 32
+    },
+    {
+     "name": "week of Sep 16, 2026",
+     "clause": null,
+     "count": "0",
+     "barLeft": 989.64,
+     "barWidth": 94.36,
+     "countWidth": 36,
+     "rowHeight": 32
+    },
+    {
+     "name": "week of Sep 23, 2026",
+     "clause": null,
+     "count": "1",
+     "barLeft": 989.64,
+     "barWidth": 94.36,
+     "countWidth": 36,
+     "rowHeight": 32
+    },
+    {
+     "name": "week of Sep 30, 2026",
+     "clause": "so far",
+     "count": "1,297",
+     "barLeft": 989.63,
+     "barWidth": 94.36,
+     "countWidth": 36.02,
+     "rowHeight": 64
+    }
+   ]
+  },
+  {
+   "state": "F3 Over time, By site, first count yesterday (no year)",
+   "seed": "d",
+   "viewport": [
+    1280,
+    800
+   ],
+   "nbUHeld": null,
+   "locale": "en-US",
+   "navigatorLanguage": "en-US",
+   "timeZone": "America/Chicago",
+   "nbU": 1,
+   "nbUOverride": null,
+   "heading": "From 5 October to 6 October",
+   "boxes": [
+    {
+     "value": "2026-10-05",
+     "min": "2026-10-05",
+     "max": "2026-10-06"
+    },
+    {
+     "value": "2026-10-06",
+     "min": "2026-10-05",
+     "max": "2026-10-06"
+    }
+   ],
+   "sentences": [
+    {
+     "text": "Cairn started counting at 9:08 AM on Oct 5.",
+     "cls": "nb-reaches-aside",
+     "page": "nb-page",
+     "height": 26.39,
+     "width": 337,
+     "lines": 1,
+     "lineHeight": "26.4px",
+     "fontSize": "16px",
+     "font": "\"Libre Caslon Text\"",
+     "marginTop": "16px"
+    }
+   ],
+   "countChars": "1",
+   "rowCount": 3,
+   "distinctBarStarts": [
+    1018.44
+   ],
+   "distinctCountWidths": [
+    7.2
+   ],
+   "rows": [
+    {
+     "name": "reddit.com",
+     "clause": null,
+     "count": "2",
+     "barLeft": 1018.44,
+     "barWidth": 94.36,
+     "countWidth": 7.2,
+     "rowHeight": 32
+    },
+    {
+     "name": "youtube.com",
+     "clause": null,
+     "count": "2",
+     "barLeft": 1018.44,
+     "barWidth": 94.36,
+     "countWidth": 7.2,
+     "rowHeight": 32
+    },
+    {
+     "name": "x.com",
+     "clause": null,
+     "count": "1",
+     "barLeft": 1018.44,
+     "barWidth": 94.36,
+     "countWidth": 7.2,
+     "rowHeight": 32
+    }
+   ]
+  },
+  {
+   "state": "Today on the first day",
+   "seed": "f",
+   "viewport": [
+    1280,
+    800
+   ],
+   "nbUHeld": null,
+   "locale": "en-US",
+   "navigatorLanguage": "en-US",
+   "timeZone": "America/Chicago",
+   "nbU": 1,
+   "nbUOverride": null,
+   "heading": "Today",
+   "boxes": [],
+   "sentences": [
+    {
+     "text": "Cairn started counting at 12:40 PM today.",
+     "cls": "nb-reaches-aside",
+     "page": "nb-page",
+     "height": 26.39,
+     "width": 337,
+     "lines": 1,
+     "lineHeight": "26.4px",
+     "fontSize": "16px",
+     "font": "\"Libre Caslon Text\"",
+     "marginTop": "16px"
+    }
+   ],
+   "countChars": "",
+   "rowCount": 4,
+   "distinctBarStarts": [],
+   "distinctCountWidths": [],
+   "rows": [
+    {
+     "name": "reddit.com",
+     "clause": "12:40 PM",
+     "count": null,
+     "barLeft": null,
+     "barWidth": null,
+     "countWidth": null,
+     "rowHeight": 32
+    },
+    {
+     "name": "youtube.com",
+     "clause": "01:25 PM",
+     "count": null,
+     "barLeft": null,
+     "barWidth": null,
+     "countWidth": null,
+     "rowHeight": 32
+    },
+    {
+     "name": "x.com",
+     "clause": "02:10 PM",
+     "count": null,
+     "barLeft": null,
+     "barWidth": null,
+     "countWidth": null,
+     "rowHeight": 32
+    },
+    {
+     "name": "reddit.com",
+     "clause": "02:50 PM",
+     "count": null,
+     "barLeft": null,
+     "barWidth": null,
+     "countWidth": null,
+     "rowHeight": 32
+    }
+   ]
+  },
+  {
+   "state": "Check-in on the first day",
+   "seed": "f",
+   "viewport": [
+    1280,
+    800
+   ],
+   "nbUHeld": null,
+   "locale": "en-US",
+   "navigatorLanguage": "en-US",
+   "timeZone": "America/Chicago",
+   "nbU": 1,
+   "nbUOverride": null,
+   "heading": "Tonight",
+   "boxes": [],
+   "sentences": [
+    {
+     "text": "Cairn started counting at 12:40 PM today.",
+     "cls": "nb-checkin-note",
+     "page": "nb-page",
+     "height": 47.39,
+     "width": 337,
+     "lines": 1,
+     "lineHeight": "26.4px",
+     "fontSize": "16px",
+     "font": "\"Libre Caslon Text\"",
+     "marginTop": "24px"
+    }
+   ],
+   "countChars": null,
+   "rowCount": 0,
+   "distinctBarStarts": [],
+   "distinctCountWidths": [],
+   "rows": []
+  },
+  {
+   "state": "Today the next day (no sentence expected)",
+   "seed": "d",
+   "viewport": [
+    1280,
+    800
+   ],
+   "nbUHeld": null,
+   "locale": "en-US",
+   "navigatorLanguage": "en-US",
+   "timeZone": "America/Chicago",
+   "nbU": 1,
+   "nbUOverride": null,
+   "heading": "Today",
+   "boxes": [],
+   "sentences": [],
+   "countChars": "",
+   "rowCount": 2,
+   "distinctBarStarts": [],
+   "distinctCountWidths": [],
+   "rows": [
+    {
+     "name": "reddit.com",
+     "clause": "08:30 AM",
+     "count": null,
+     "barLeft": null,
+     "barWidth": null,
+     "countWidth": null,
+     "rowHeight": 32
+    },
+    {
+     "name": "youtube.com",
+     "clause": "11:05 AM",
+     "count": null,
+     "barLeft": null,
+     "barWidth": null,
+     "countWidth": null,
+     "rowHeight": 32
+    }
+   ]
+  },
+  {
+   "state": "Check-in the next day (no sentence expected)",
+   "seed": "d",
+   "viewport": [
+    1280,
+    800
+   ],
+   "nbUHeld": null,
+   "locale": "en-US",
+   "navigatorLanguage": "en-US",
+   "timeZone": "America/Chicago",
+   "nbU": 1,
+   "nbUOverride": null,
+   "heading": "Tonight",
+   "boxes": [],
+   "sentences": [],
+   "countChars": null,
+   "rowCount": 0,
+   "distinctBarStarts": [],
+   "distinctCountWidths": [],
+   "rows": []
+  },
+  {
+   "state": "F2 Over time, By site (range does not hold the first count)",
+   "seed": "c",
+   "viewport": [
+    2560,
+    1600
+   ],
+   "nbUHeld": null,
+   "locale": "en-US",
+   "navigatorLanguage": "en-US",
+   "timeZone": "America/Chicago",
+   "nbU": 2,
+   "nbUOverride": null,
+   "heading": "From 9 September to 6 October",
+   "boxes": [
+    {
+     "value": "2026-09-09",
+     "min": "2025-01-01",
+     "max": "2026-10-06"
+    },
+    {
+     "value": "2026-10-06",
+     "min": "2026-09-09",
+     "max": "2026-10-06"
+    }
+   ],
+   "sentences": [
+    {
+     "text": "Cairn started counting on Jan 1, 2025.",
+     "cls": "nb-reaches-aside",
+     "page": "nb-page",
+     "height": 52.8,
+     "width": 674,
+     "lines": 1,
+     "lineHeight": "52.8px",
+     "fontSize": "32px",
+     "font": "\"Libre Caslon Text\"",
+     "marginTop": "32px"
+    }
+   ],
+   "countChars": "5",
+   "rowCount": 4,
+   "distinctBarStarts": [
+    1979.28,
+    1979.3
+   ],
+   "distinctCountWidths": [
+    72,
+    71.98
+   ],
+   "rows": [
+    {
+     "name": "reddit.com",
+     "clause": null,
+     "count": "1,234",
+     "barLeft": 1979.28,
+     "barWidth": 188.72,
+     "countWidth": 72,
+     "rowHeight": 64
+    },
+    {
+     "name": "youtube.com",
+     "clause": null,
+     "count": "56",
+     "barLeft": 1979.3,
+     "barWidth": 188.72,
+     "countWidth": 71.98,
+     "rowHeight": 64
+    },
+    {
+     "name": "x.com",
+     "clause": null,
+     "count": "7",
+     "barLeft": 1979.3,
+     "barWidth": 188.72,
+     "countWidth": 71.98,
+     "rowHeight": 64
+    },
+    {
+     "name": "instagram.com",
+     "clause": null,
+     "count": "2",
+     "barLeft": 1979.3,
+     "barWidth": 188.72,
+     "countWidth": 71.98,
+     "rowHeight": 64
+    }
+   ]
+  },
+  {
+   "state": "F3 Over time, Day by day, From 2025-01-01 (longest sentence; weekly rows, one over 999)",
+   "seed": "c",
+   "viewport": [
+    2560,
+    1600
+   ],
+   "nbUHeld": null,
+   "locale": "en-US",
+   "navigatorLanguage": "en-US",
+   "timeZone": "America/Chicago",
+   "nbU": 2,
+   "nbUOverride": null,
+   "heading": "From 1 January 2025 to 6 October 2026",
+   "boxes": [
+    {
+     "value": "2025-01-01",
+     "min": "2025-01-01",
+     "max": "2026-10-06"
+    },
+    {
+     "value": "2026-10-06",
+     "min": "2025-01-01",
+     "max": "2026-10-06"
+    }
+   ],
+   "sentences": [
+    {
+     "text": "Cairn started counting at 10:30 AM on Jan 1, 2025.",
+     "cls": "nb-reaches-aside",
+     "page": "nb-page",
+     "height": 105.59,
+     "width": 674,
+     "lines": 2,
+     "lineHeight": "52.8px",
+     "fontSize": "32px",
+     "font": "\"Libre Caslon Text\"",
+     "marginTop": "32px"
+    }
+   ],
+   "countChars": "5",
+   "rowCount": 92,
+   "distinctBarStarts": [
+    1979.3,
+    1979.28
+   ],
+   "distinctCountWidths": [
+    71.98,
+    72
+   ],
+   "rows": [
+    {
+     "name": "week of Jan 1, 2025",
+     "clause": null,
+     "count": "1",
+     "barLeft": 1979.3,
+     "barWidth": 188.72,
+     "countWidth": 71.98,
+     "rowHeight": 64
+    },
+    {
+     "name": "week of Jan 8, 2025",
+     "clause": null,
+     "count": "1",
+     "barLeft": 1979.3,
+     "barWidth": 188.72,
+     "countWidth": 71.98,
+     "rowHeight": 64
+    },
+    {
+     "name": "week of Jan 15, 2025",
+     "clause": null,
+     "count": "1",
+     "barLeft": 1979.3,
+     "barWidth": 188.72,
+     "countWidth": 71.98,
+     "rowHeight": 64
+    },
+    {
+     "name": "week of Jan 22, 2025",
+     "clause": null,
+     "count": "1",
+     "barLeft": 1979.3,
+     "barWidth": 188.72,
+     "countWidth": 71.98,
+     "rowHeight": 64
+    },
+    {
+     "name": "week of Jan 29, 2025",
+     "clause": null,
+     "count": "0",
+     "barLeft": 1979.3,
+     "barWidth": 188.72,
+     "countWidth": 71.98,
+     "rowHeight": 64
+    },
+    {
+     "name": "week of Feb 5, 2025",
+     "clause": null,
+     "count": "1",
+     "barLeft": 1979.3,
+     "barWidth": 188.72,
+     "countWidth": 71.98,
+     "rowHeight": 64
+    },
+    "... 80 rows ...",
+    {
+     "name": "week of Aug 26, 2026",
+     "clause": null,
+     "count": "1",
+     "barLeft": 1979.3,
+     "barWidth": 188.72,
+     "countWidth": 71.98,
+     "rowHeight": 64
+    },
+    {
+     "name": "week of Sep 2, 2026",
+     "clause": null,
+     "count": "1",
+     "barLeft": 1979.3,
+     "barWidth": 188.72,
+     "countWidth": 71.98,
+     "rowHeight": 64
+    },
+    {
+     "name": "week of Sep 9, 2026",
+     "clause": null,
+     "count": "1",
+     "barLeft": 1979.3,
+     "barWidth": 188.72,
+     "countWidth": 71.98,
+     "rowHeight": 64
+    },
+    {
+     "name": "week of Sep 16, 2026",
+     "clause": null,
+     "count": "0",
+     "barLeft": 1979.3,
+     "barWidth": 188.72,
+     "countWidth": 71.98,
+     "rowHeight": 64
+    },
+    {
+     "name": "week of Sep 23, 2026",
+     "clause": null,
+     "count": "1",
+     "barLeft": 1979.3,
+     "barWidth": 188.72,
+     "countWidth": 71.98,
+     "rowHeight": 64
+    },
+    {
+     "name": "week of Sep 30, 2026",
+     "clause": "so far",
+     "count": "1,297",
+     "barLeft": 1979.28,
+     "barWidth": 188.72,
+     "countWidth": 72,
+     "rowHeight": 128
+    }
+   ]
+  },
+  {
+   "state": "F3 Over time, By site, first count yesterday (no year)",
+   "seed": "d",
+   "viewport": [
+    2560,
+    1600
+   ],
+   "nbUHeld": null,
+   "locale": "en-US",
+   "navigatorLanguage": "en-US",
+   "timeZone": "America/Chicago",
+   "nbU": 2,
+   "nbUOverride": null,
+   "heading": "From 5 October to 6 October",
+   "boxes": [
+    {
+     "value": "2026-10-05",
+     "min": "2026-10-05",
+     "max": "2026-10-06"
+    },
+    {
+     "value": "2026-10-06",
+     "min": "2026-10-05",
+     "max": "2026-10-06"
+    }
+   ],
+   "sentences": [
+    {
+     "text": "Cairn started counting at 9:08 AM on Oct 5.",
+     "cls": "nb-reaches-aside",
+     "page": "nb-page",
+     "height": 52.8,
+     "width": 674,
+     "lines": 1,
+     "lineHeight": "52.8px",
+     "fontSize": "32px",
+     "font": "\"Libre Caslon Text\"",
+     "marginTop": "32px"
+    }
+   ],
+   "countChars": "1",
+   "rowCount": 3,
+   "distinctBarStarts": [
+    2036.88
+   ],
+   "distinctCountWidths": [
+    14.41
+   ],
+   "rows": [
+    {
+     "name": "reddit.com",
+     "clause": null,
+     "count": "2",
+     "barLeft": 2036.88,
+     "barWidth": 188.72,
+     "countWidth": 14.41,
+     "rowHeight": 64
+    },
+    {
+     "name": "youtube.com",
+     "clause": null,
+     "count": "2",
+     "barLeft": 2036.88,
+     "barWidth": 188.72,
+     "countWidth": 14.41,
+     "rowHeight": 64
+    },
+    {
+     "name": "x.com",
+     "clause": null,
+     "count": "1",
+     "barLeft": 2036.88,
+     "barWidth": 188.72,
+     "countWidth": 14.41,
+     "rowHeight": 64
+    }
+   ]
+  },
+  {
+   "state": "Today on the first day",
+   "seed": "f",
+   "viewport": [
+    2560,
+    1600
+   ],
+   "nbUHeld": null,
+   "locale": "en-US",
+   "navigatorLanguage": "en-US",
+   "timeZone": "America/Chicago",
+   "nbU": 2,
+   "nbUOverride": null,
+   "heading": "Today",
+   "boxes": [],
+   "sentences": [
+    {
+     "text": "Cairn started counting at 12:40 PM today.",
+     "cls": "nb-reaches-aside",
+     "page": "nb-page",
+     "height": 52.8,
+     "width": 674,
+     "lines": 1,
+     "lineHeight": "52.8px",
+     "fontSize": "32px",
+     "font": "\"Libre Caslon Text\"",
+     "marginTop": "32px"
+    }
+   ],
+   "countChars": "",
+   "rowCount": 4,
+   "distinctBarStarts": [],
+   "distinctCountWidths": [],
+   "rows": [
+    {
+     "name": "reddit.com",
+     "clause": "12:40 PM",
+     "count": null,
+     "barLeft": null,
+     "barWidth": null,
+     "countWidth": null,
+     "rowHeight": 64
+    },
+    {
+     "name": "youtube.com",
+     "clause": "01:25 PM",
+     "count": null,
+     "barLeft": null,
+     "barWidth": null,
+     "countWidth": null,
+     "rowHeight": 64
+    },
+    {
+     "name": "x.com",
+     "clause": "02:10 PM",
+     "count": null,
+     "barLeft": null,
+     "barWidth": null,
+     "countWidth": null,
+     "rowHeight": 64
+    },
+    {
+     "name": "reddit.com",
+     "clause": "02:50 PM",
+     "count": null,
+     "barLeft": null,
+     "barWidth": null,
+     "countWidth": null,
+     "rowHeight": 64
+    }
+   ]
+  },
+  {
+   "state": "Check-in on the first day",
+   "seed": "f",
+   "viewport": [
+    2560,
+    1600
+   ],
+   "nbUHeld": null,
+   "locale": "en-US",
+   "navigatorLanguage": "en-US",
+   "timeZone": "America/Chicago",
+   "nbU": 2,
+   "nbUOverride": null,
+   "heading": "Tonight",
+   "boxes": [],
+   "sentences": [
+    {
+     "text": "Cairn started counting at 12:40 PM today.",
+     "cls": "nb-checkin-note",
+     "page": "nb-page",
+     "height": 93.8,
+     "width": 674,
+     "lines": 1,
+     "lineHeight": "52.8px",
+     "fontSize": "32px",
+     "font": "\"Libre Caslon Text\"",
+     "marginTop": "48px"
+    }
+   ],
+   "countChars": null,
+   "rowCount": 0,
+   "distinctBarStarts": [],
+   "distinctCountWidths": [],
+   "rows": []
+  },
+  {
+   "state": "Today the next day (no sentence expected)",
+   "seed": "d",
+   "viewport": [
+    2560,
+    1600
+   ],
+   "nbUHeld": null,
+   "locale": "en-US",
+   "navigatorLanguage": "en-US",
+   "timeZone": "America/Chicago",
+   "nbU": 2,
+   "nbUOverride": null,
+   "heading": "Today",
+   "boxes": [],
+   "sentences": [],
+   "countChars": "",
+   "rowCount": 2,
+   "distinctBarStarts": [],
+   "distinctCountWidths": [],
+   "rows": [
+    {
+     "name": "reddit.com",
+     "clause": "08:30 AM",
+     "count": null,
+     "barLeft": null,
+     "barWidth": null,
+     "countWidth": null,
+     "rowHeight": 64
+    },
+    {
+     "name": "youtube.com",
+     "clause": "11:05 AM",
+     "count": null,
+     "barLeft": null,
+     "barWidth": null,
+     "countWidth": null,
+     "rowHeight": 64
+    }
+   ]
+  },
+  {
+   "state": "Check-in the next day (no sentence expected)",
+   "seed": "d",
+   "viewport": [
+    2560,
+    1600
+   ],
+   "nbUHeld": null,
+   "locale": "en-US",
+   "navigatorLanguage": "en-US",
+   "timeZone": "America/Chicago",
+   "nbU": 2,
+   "nbUOverride": null,
+   "heading": "Tonight",
+   "boxes": [],
+   "sentences": [],
+   "countChars": null,
+   "rowCount": 0,
+   "distinctBarStarts": [],
+   "distinctCountWidths": [],
+   "rows": []
+  }
+ ]
+}

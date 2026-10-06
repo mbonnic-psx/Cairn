@@ -26,7 +26,10 @@
     : 'in_force';
   const now = Math.round(Date.now() / 1000);
   // ?seed=a (installed today) -> core on 1471; ?seed=b (counting three weeks) -> core on 1472.
-  const CORE_URL = 'http://127.0.0.1:' + (params.get('seed') === 'b' ? 1472 : 1471) + '/';
+  // Added for N26: ?seed=c (since 2025, counts over 999) -> 1474; ?seed=d (installed yesterday) -> 1475;
+  // ?seed=e (a reach under a clock set centuries back, F6) -> 1476; ?seed=f (installed today, seeded at 17:12) -> 1478.
+  const PORTS = { b: 1472, c: 1474, d: 1475, e: 1476, f: 1478 };
+  const CORE_URL = 'http://127.0.0.1:' + (PORTS[params.get('seed')] || 1471) + '/';
   const forward = async (cmd, args) => {
     const r = await fetch(CORE_URL, { method: 'POST', body: JSON.stringify({ cmd, args }) });
     return r.json();

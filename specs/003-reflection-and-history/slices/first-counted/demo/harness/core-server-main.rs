@@ -93,7 +93,7 @@ fn app(data: &Path) -> AppState {
     }
 }
 
-/// `seed <data-dir> installed-today|three-weeks`: both go through the real store
+/// `seed <data-dir> installed-today|three-weeks|since-2025|installed-yesterday|centuries-back`: both go through the real store
 /// (`note_counting`, `record`, `record_gap`), so `first_count` is what the real code derives.
 fn seed(data: &Path, which: &str) {
     std::fs::create_dir_all(data).unwrap();
@@ -154,12 +154,64 @@ fn seed(data: &Path, which: &str) {
                 }
             }
         }
+        // N26 (added by the hand on 2026-10-06): a first count on 2025-01-01 at 10:30 AM CST
+        // (16:30 UTC), one instagram.com reach every ninth day since at 8:17 PM, and the last
+        // seven days carrying N16's counts: reddit.com 1 234, youtube.com 56, x.com 7.
+        "since-2025" => {
+            first = 1_735_749_000;
+            history.note_counting(first).unwrap();
+            let mut at = first + 10 * HOUR - 13 * 60; // 8:17 PM CST the same day
+            while at < m(7) {
+                history.record("instagram.com", at).unwrap();
+                log.push(json!({"site": "instagram.com", "at": at}));
+                at += 9 * DAY;
+            }
+            let window_start = m(6);
+            let window_end = now - 120;
+            for (site, n) in [("reddit.com", 1234i64), ("youtube.com", 56), ("x.com", 7)] {
+                for k in 0..n {
+                    let at = window_start + (window_end - window_start) * k / n + 7;
+                    history.record(site, at).unwrap();
+                }
+                log.push(json!({"site": site, "count": n, "from": window_start, "to": window_end}));
+            }
+        }
+        // N26: a fresh install seen the next day. Seed A's first count (9:08 AM), one day back.
+        "installed-yesterday" => {
+            first = m(1) + 9 * HOUR + 8 * 60;
+            history.note_counting(first).unwrap();
+            for (site, at) in [
+                ("reddit.com", first),
+                ("youtube.com", first + 45 * 60),
+                ("x.com", first + 5 * HOUR),
+                ("reddit.com", m(0) + 8 * HOUR + 30 * 60),
+                ("youtube.com", m(0) + 11 * HOUR + 5 * 60),
+            ] {
+                if at < now {
+                    history.record(site, at).unwrap();
+                    log.push(json!({"site": site, "at": at}));
+                }
+            }
+        }
+        // N26, F6's remaining freeze path: counting began 2025-01-01, but one reach was recorded
+        // under a clock set centuries back (1000-06-01 18:00 UTC). F6 moves the first count to it.
+        "centuries-back" => {
+            history.note_counting(1_735_749_000).unwrap();
+            history.record("reddit.com", 1_735_749_000 + HOUR).unwrap();
+            log.push(json!({"site": "reddit.com", "at": 1_735_749_000 + HOUR}));
+            let wrong_clock = -30_597_112_800i64;
+            history.record("instagram.com", wrong_clock).unwrap();
+            log.push(json!({"site": "instagram.com", "at": wrong_clock, "why": "a clock set centuries back"}));
+            first = wrong_clock;
+        }
         other => panic!("unknown seed {other}"),
     }
+    let first_count_read = history.first_count().ok().flatten();
     let summary = json!({
         "seed": which,
         "seeded_at": now,
         "first_count_intended": first,
+        "first_count_read_back": first_count_read,
         "today_local_midnight": m(0),
         "zone": "America/Chicago (CDT, -18000)",
         "gaps": gaps_log,
@@ -296,6 +348,6 @@ fn main() {
     match args.get(1).map(String::as_str) {
         Some("seed") => seed(Path::new(&args[2]), &args[3]),
         Some("serve") => serve(Path::new(&args[2]), args[3].parse().unwrap(), Path::new(&args[4])),
-        _ => eprintln!("usage: seed <dir> installed-today|three-weeks | serve <dir> <port> <log-dir>"),
+        _ => eprintln!("usage: seed <dir> installed-today|three-weeks|since-2025|installed-yesterday|centuries-back | serve <dir> <port> <log-dir>"),
     }
 }

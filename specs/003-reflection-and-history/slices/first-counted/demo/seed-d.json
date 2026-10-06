@@ -1,0 +1,32 @@
+{
+  "first_count_intended": 1791209280,
+  "first_count_read_back": 1791209280,
+  "gaps": [],
+  "reach_count": 5,
+  "reaches": [
+    {
+      "at": 1791209280,
+      "site": "reddit.com"
+    },
+    {
+      "at": 1791211980,
+      "site": "youtube.com"
+    },
+    {
+      "at": 1791227280,
+      "site": "x.com"
+    },
+    {
+      "at": 1791293400,
+      "site": "reddit.com"
+    },
+    {
+      "at": 1791302700,
+      "site": "youtube.com"
+    }
+  ],
+  "seed": "installed-yesterday",
+  "seeded_at": 1791324387,
+  "today_local_midnight": 1791262800,
+  "zone": "America/Chicago (CDT, -18000)"
+}
