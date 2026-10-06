@@ -1,0 +1,27 @@
+{
+  "first_count_intended": 1791222000,
+  "gaps": [],
+  "reach_count": 4,
+  "reaches": [
+    {
+      "at": 1791222000,
+      "site": "reddit.com"
+    },
+    {
+      "at": 1791224700,
+      "site": "youtube.com"
+    },
+    {
+      "at": 1791227400,
+      "site": "x.com"
+    },
+    {
+      "at": 1791229800,
+      "site": "reddit.com"
+    }
+  ],
+  "seed": "installed-today",
+  "seeded_at": 1791230507,
+  "today_local_midnight": 1791176400,
+  "zone": "America/Chicago (CDT, -18000)"
+}

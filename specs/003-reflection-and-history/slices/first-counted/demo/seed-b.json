@@ -1,0 +1,260 @@
+{
+  "first_count_intended": 1789413240,
+  "gaps": [
+    {
+      "from": 1790319600,
+      "to": 1790332200
+    }
+  ],
+  "reach_count": 61,
+  "reaches": [
+    {
+      "at": 1789413240,
+      "site": "youtube.com"
+    },
+    {
+      "at": 1789416240,
+      "site": "x.com"
+    },
+    {
+      "at": 1789419240,
+      "site": "instagram.com"
+    },
+    {
+      "at": 1789517820,
+      "site": "reddit.com"
+    },
+    {
+      "at": 1789525020,
+      "site": "youtube.com"
+    },
+    {
+      "at": 1789672620,
+      "site": "x.com"
+    },
+    {
+      "at": 1789679820,
+      "site": "instagram.com"
+    },
+    {
+      "at": 1789690620,
+      "site": "reddit.com"
+    },
+    {
+      "at": 1789697820,
+      "site": "youtube.com"
+    },
+    {
+      "at": 1789751820,
+      "site": "youtube.com"
+    },
+    {
+      "at": 1789759020,
+      "site": "x.com"
+    },
+    {
+      "at": 1789766220,
+      "site": "instagram.com"
+    },
+    {
+      "at": 1789827420,
+      "site": "reddit.com"
+    },
+    {
+      "at": 1789838220,
+      "site": "youtube.com"
+    },
+    {
+      "at": 1789921020,
+      "site": "instagram.com"
+    },
+    {
+      "at": 1789913820,
+      "site": "reddit.com"
+    },
+    {
+      "at": 1789924620,
+      "site": "youtube.com"
+    },
+    {
+      "at": 1789931820,
+      "site": "x.com"
+    },
+    {
+      "at": 1789939020,
+      "site": "instagram.com"
+    },
+    {
+      "at": 1790129820,
+      "site": "youtube.com"
+    },
+    {
+      "at": 1790133420,
+      "site": "x.com"
+    },
+    {
+      "at": 1790093820,
+      "site": "instagram.com"
+    },
+    {
+      "at": 1790209020,
+      "site": "reddit.com"
+    },
+    {
+      "at": 1790216220,
+      "site": "youtube.com"
+    },
+    {
+      "at": 1790284620,
+      "site": "instagram.com"
+    },
+    {
+      "at": 1790295420,
+      "site": "reddit.com"
+    },
+    {
+      "at": 1790302620,
+      "site": "youtube.com"
+    },
+    {
+      "at": 1790306220,
+      "site": "x.com"
+    },
+    {
+      "at": 1790266620,
+      "site": "instagram.com"
+    },
+    {
+      "at": 1790363820,
+      "site": "x.com"
+    },
+    {
+      "at": 1790371020,
+      "site": "instagram.com"
+    },
+    {
+      "at": 1790381820,
+      "site": "reddit.com"
+    },
+    {
+      "at": 1790389020,
+      "site": "youtube.com"
+    },
+    {
+      "at": 1790518620,
+      "site": "reddit.com"
+    },
+    {
+      "at": 1790529420,
+      "site": "youtube.com"
+    },
+    {
+      "at": 1790612220,
+      "site": "instagram.com"
+    },
+    {
+      "at": 1790605020,
+      "site": "reddit.com"
+    },
+    {
+      "at": 1790615820,
+      "site": "youtube.com"
+    },
+    {
+      "at": 1790623020,
+      "site": "x.com"
+    },
+    {
+      "at": 1790630220,
+      "site": "instagram.com"
+    },
+    {
+      "at": 1790738220,
+      "site": "x.com"
+    },
+    {
+      "at": 1790698620,
+      "site": "instagram.com"
+    },
+    {
+      "at": 1790691420,
+      "site": "reddit.com"
+    },
+    {
+      "at": 1790702220,
+      "site": "youtube.com"
+    },
+    {
+      "at": 1790821020,
+      "site": "youtube.com"
+    },
+    {
+      "at": 1790824620,
+      "site": "x.com"
+    },
+    {
+      "at": 1790785020,
+      "site": "instagram.com"
+    },
+    {
+      "at": 1790975820,
+      "site": "instagram.com"
+    },
+    {
+      "at": 1790986620,
+      "site": "reddit.com"
+    },
+    {
+      "at": 1790993820,
+      "site": "youtube.com"
+    },
+    {
+      "at": 1790997420,
+      "site": "x.com"
+    },
+    {
+      "at": 1790957820,
+      "site": "instagram.com"
+    },
+    {
+      "at": 1791055020,
+      "site": "x.com"
+    },
+    {
+      "at": 1791062220,
+      "site": "instagram.com"
+    },
+    {
+      "at": 1791073020,
+      "site": "reddit.com"
+    },
+    {
+      "at": 1791080220,
+      "site": "youtube.com"
+    },
+    {
+      "at": 1791134220,
+      "site": "youtube.com"
+    },
+    {
+      "at": 1791141420,
+      "site": "x.com"
+    },
+    {
+      "at": 1791148620,
+      "site": "instagram.com"
+    },
+    {
+      "at": 1791209820,
+      "site": "reddit.com"
+    },
+    {
+      "at": 1791220620,
+      "site": "youtube.com"
+    }
+  ],
+  "seed": "three-weeks",
+  "seeded_at": 1791230507,
+  "today_local_midnight": 1791176400,
+  "zone": "America/Chicago (CDT, -18000)"
+}
