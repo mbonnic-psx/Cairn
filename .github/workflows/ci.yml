@@ -6,6 +6,10 @@ on:
   # late.
   push:
     branches: ['**']
+  # A pull request from a branch in this repository is already checked by its
+  # push, at the same commit; running it twice doubled the jobs waiting for a
+  # hosted runner, and the ones never picked up came back cancelled. Every job
+  # below therefore runs on a pull request only when it comes from a fork.
   pull_request:
 
 env:
@@ -16,6 +20,7 @@ jobs:
   # They are cheap, they fail loudly, and a failure here is not a style problem.
   guards:
     name: Constitutional guards
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name != github.repository
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -43,6 +48,7 @@ jobs:
 
   frontend:
     name: Frontend
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name != github.repository
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -59,6 +65,7 @@ jobs:
   # dependencies, so they are tested on every platform without a GUI toolchain.
   domain:
     name: Domain (${{ matrix.os }})
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name != github.repository
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -118,6 +125,7 @@ jobs:
   # platform's own toolchain; on Linux it needs the webview libraries too.
   core:
     name: Core (${{ matrix.os }})
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name != github.repository
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
