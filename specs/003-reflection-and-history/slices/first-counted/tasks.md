@@ -341,7 +341,7 @@ neither A nor D. N22 joins B and C. Within a track no task is `[P]`.
   null` in `src/ipc/reaches.ts` and `journal.ts`, field for field. N9's wire-shape tests hold the ten, five and seven
   keys. Every sentence that claims an invariant of the first count is one the core enforces. *Files:* the three
   documents, if they differ.
-- [ ] N25 [US2] `make -f delivery/Makefile verify` green; `npm run check` (every guard, including N7's), `npm test`,
+- [x] N25 [US2] `make -f delivery/Makefile verify` green; `npm run check` (every guard, including N7's), `npm test`,
   `npm run lint` and `npm run build` green; `cargo fmt --all` and `cargo clippy --all-targets -- -D warnings` clean;
   N1's runs green again. `ipc_surface` passes with `CLASSIFIED` unchanged. Run `make smoke` if `main.rs` or the
   composition changed (the plan says neither does). *Files:* none.
