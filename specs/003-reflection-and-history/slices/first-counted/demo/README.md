@@ -17,11 +17,17 @@ bound to 127.0.0.1.
 The page opens on Protection: use the TODAY tab (then Today / Over time), and TONIGHT for the check-in.
 The "Look (testing)" switch at top left defaults to Morning (dev-only; greeting only).
 
-## PIDs (started 2026-10-05 about 15:02 CDT)
+## PIDs (as found on 2026-10-07 13:15 CDT)
 
 - core A `hand-fc-core serve` :1471 — PID 921162
 - core B `hand-fc-core serve` :1472 — PID 921163
 - Vite :1473 — PID 921176 (node; parent `npm exec` 921164)
+
+These are the processes started on 2026-10-05 about 15:02 CDT (`ps` shows another start time, because WSL's clock
+drifts after the computer sleeps). `core-a.pid` and `core-b.pid` name 1121813 and 1121814. Those two were started on
+2026-10-06 09:19 with the reseed below, stopped at once with `AddrInUse` (`core-a.log`), and are not running. Each core
+opens the history again for every request, so the cores from 2026-10-05 answer from the reseeded `data-a` and `data-b`.
+Vite :1473 is current: it took the N28 CSS by HMR on 2026-10-07 13:00 (`vite.log`).
 
 ## Stop everything
 
@@ -31,18 +37,24 @@ The "Look (testing)" switch at top left defaults to Morning (dev-only; greeting 
 
 ## Seed facts (zone America/Chicago, CDT, local clock)
 
-- A: first count today 2026-10-05 at 12:40 PM. 2:14 PM was already past when this was built (15:00), so
-  12:40 PM was used; the morning is unseen. Four reaches: reddit.com 12:40 PM, youtube.com 1:25 PM,
-  x.com 2:10 PM, reddit.com 2:50 PM. Nothing earlier, no gaps. (`seed-a.json`)
-- B: first count 2026-09-14 (21 days ago) at 2:14 PM. 61 reaches, 2-5 on most days up to today (days 4, 9,
-  14, 19 back hold none); 3 on the first day, from 2:14 PM. One recorded gap on 2026-09-25 from
-  2:00 AM to 5:30 AM (3.5 hours). (`seed-b.json`)
+The histories were reseeded on 2026-10-06 09:19 CDT. The 2026-10-05 histories are kept in `data-a.2026-10-05` and
+`data-b.2026-10-05`. The current seeds are in `~/.cache/cairn-scratch/hand-fc/seed-{a,b}.json`. This folder's
+`seed-a.json` and `seed-b.json` are still the 2026-10-05 ones.
+
+- A: first count 2026-10-06 at 9:09 AM, with one reach, reddit.com at 9:09 AM. Nothing earlier, and no gaps. On
+  2026-10-07 the first day is yesterday, so *Today* draws no start sentence.
+- B: first count 2026-09-15 at 2:14 PM. There are 60 reaches, two to five on most days, and three on the first day
+  from 2:14 PM. One gap is recorded on 2026-09-26 from 2:00 AM to 5:30 AM (3.5 hours).
+- N26 and N28 histories, each with its own core (not the owner's), are `data-c` to `data-g`. Their seeds are
+  `seed-c.json` to `seed-g.json` in this folder. Seed g (long site names that wrap, plus 1,234 reaches on one site) was
+  added for N28 on 2026-10-07. Those cores and the second Vite (:1477) run only during a hand's measurement.
 
 ## What to expect
 
 - A, TODAY (Today tab): "Cairn started counting at 12:40 PM today." above the four reaches. TONIGHT
   (check-in): "Cairn started counting at 12:40 PM" plus the day phrase the check-in writes. Over time with the
   default range: nothing earlier than today.
+- (Written for the 2026-10-05 seeds. Dates have moved since: see the seed facts above.)
 - B, TODAY then Over time: heading "From 14 September to 5 October"; From's min is 2026-09-14 (To's min too),
   so From cannot go earlier. The range holds the first count, so the line reads "Cairn started counting at
   2:14 PM on Sep 14." Move From later (e.g. to Sep 16) and it reads "Cairn started counting on Sep 14,

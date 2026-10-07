@@ -117,3 +117,91 @@ The 0.02 px spread comes from the grouped *1,234* measuring 36.02 px against 5ch
 - **Stopped:**
   - Stopped: the N26 cores on :1474, :1475, :1476 and :1478, the second Vite on :1477, and the two agent-browser sessions `fc26us` and `fc26gb`.
   - Left running: the owner's harness on :1471–:1473, as found.
+
+## 2026-10-07T18:20:00Z — accepted · N28 re-measure · drive-hand (claude-opus-5-5)
+
+- **Against:** `3d2882c` (N28: Over time's `ul` gets `nb-reaches-log--bars`, a grid `minmax(min-content, 1fr) minmax(0, 28%) auto` with every row on `subgrid`, inside `@supports (grid-template-columns: subgrid)`). The change is frontend only.
+- **Harness:**
+  - **Vite:** a fresh one on 127.0.0.1:1477 (`demo/harness/vite.n26.config.ts`), so it served the CSS as committed.
+  - **Cores:** `since-2025` on :1474 and `installed-yesterday` on :1475, serving the N26 histories `data-c` and `data-d` as they were seeded on 2026-10-06. Both run `hand-fc-core`, rebuilt for one new seed arm.
+  - **Seed g (`long-names`):** a new history in `data-g`, served on :1479. It holds five sites: three names long enough to wrap (up to 63 characters), *reddit.com*, *x.com*, and 1,234 reaches on one long name (`demo/seed-g.json`). It was added because no earlier seed had a name that wraps.
+  - **Harness files:** `fake-core.js` maps `?seed=g` to :1479. The owner's :1471–:1473 were not touched.
+  - **Dates:** today is 2026-10-07, so *Day by day* from 2025-01-01 now draws **93** weekly rows (N26 had 92). The new week, *week of Oct 7, 2026*, holds 0.
+- **Engines:**
+  - **Chromium:** agent-browser, headless, sessions `fc28us` (Intl `en-US`) and `fc28gb` (`en-GB`), `--allowed-domains 127.0.0.1`.
+  - **WebKitGTK 2.52.6** (PyGObject, Xvfb), in three runs:
+    - preferred language `en-US`: Intl `en-US`, writes *1,234*;
+    - preferred language `en-GB`;
+    - the computer's own C locale: Intl `en-US-u-va-posix`, writes *1234*, and the count box is 4ch.
+
+  Both engines report `CSS.supports('grid-template-columns', 'subgrid')` true. Both lay the list out as `grid` and every row as `grid`.
+- **How "before" was measured:** in each engine, each key state was measured twice on the same page, with the same answers and fonts:
+  1. as committed;
+  2. with `nb-reaches-log--bars` taken off the `ul` in place.
+
+  Every N28 rule hangs on that class, so the second reading is the flex layout N26 measured. It is also what an engine without `subgrid` draws. The "before" counts reproduce N26 exactly (77 and 56).
+- **Gap measure** (`demo/harness/n28-measure.js`): bar's left edge minus the right edge of the name's *text* (its line boxes, not its element box, since a one-line name can overflow its box), divided by `--nb-u`. A second reading takes the whole label, the name plus the clause beside it. It is 0 rows under 12 everywhere, so it is not repeated below.
+
+### Day by day, since 2025 (93 weekly rows, *week of Sept 30* 1,297)
+
+| Engine, locale | Window | Rows under 12 units, before → after | Tightest after (units) | Bar start, before → after (px) | Bar width, before → after | Bar end | Start / end spread after | Rows past the page / page scrolls sideways |
+|---|---|---|---|---|---|---|---|---|
+| Chromium en-US | 800×600 | **77 → 0** | 12.00 *week of May 20, 2026* | 573.67–573.69 → **589.25** | 82.31 → **66.73** | 655.98 (unchanged) | 0 / 0 | 0 / no |
+| Chromium en-GB | 800×600 | **56 → 0** | 12.00 *week of 30 Sept 2026* | 573.67–573.69 → **586.28** | 82.31 → **69.70** | 655.98 | 0 / 0 | 0 / no |
+| WebKitGTK en-US | 800×600 | **78 → 0** | 12.00 | 573.67–573.69 → **589.25** | 82.31 → **66.73** | 655.98 | 0 / 0 | 0 / no |
+| WebKitGTK en-GB | 800×600 | **56 → 0** | 12.01 | 573.67–573.69 → **586.28** | 82.31 → **69.70** | 655.98 | 0 / 0 | 0 / no |
+| WebKitGTK C (posix) | 800×600 | **42 → 0** | 12.00 | 580.88–580.89 → **589.25** | 82.31 → **73.94** | 663.19 | 0 / 0 | 0 / no |
+| Chromium en-US | 1280×800 | 0 → 0 | 27.38 | 989.63–989.64 → 989.63 | 94.36 → 94.36 | 1083.98 | 0 / 0 | 0 / no |
+| Chromium en-GB | 1280×800 | 0 → 0 | 30.34 | 989.63–989.64 → 989.63 | 94.36 | 1083.98 | 0 / 0 | 0 / no |
+| WebKitGTK en-US | 1280×800 | 0 → 0 | 27.38 | 989.63–989.64 → 989.63 | 94.36 | 1083.98 | 0 / 0 | 0 / no |
+| WebKitGTK en-GB | 1280×800 | 0 → 0 | 30.35 | 989.63–989.64 → 989.63 | 94.36 | 1083.98 | 0 / 0 | 0 / no |
+| WebKitGTK C (posix) | 1280×800 | 0 → 0 | 34.58 | 996.83–996.84 → 996.83 | 94.36 | 1091.19 | 0 / 0 | 0 / no |
+
+WebKitGTK en-US counts one row more than Chromium before the change (78 against 77): one row sits just under 12 in one engine and just over in the other. Row heights (32 or 64 units) and each name's line count are identical before and after, in every state compared.
+
+### Every other view (after; bar figures identical in Chromium en-US, en-GB and WebKitGTK en-US, en-GB; gaps are Chromium's, WebKitGTK's within 0.7 units)
+
+| View | Rows | 800×600: bar start / width / end; tightest gap | 1280×800: bar start / width / end; tightest gap | Changed from before? |
+|---|---|---|---|---|
+| By site, 1,234 / 56 / 7 / 2 (seed c, N26's `n26-10`) | 4 | 573.67 / 82.31 / 655.98; 53.3 | 989.63 / 94.36 / 1083.98; 84.3 | start spread 0.02 → 0 (the 36.02 px count is now one column); nothing else |
+| By site, From 2025-01-01 (seed c) | 4 | 573.67 / 82.31 / 655.98; 53.3 | 989.63 / 94.36 / 1083.98; 84.3 | (not compared; same as above) |
+| By site, short names 2 / 2 / 1 (seed d) | 3 | 602.48 / 82.31 / 684.80; 93.5 | 1018.44 / 94.36 / 1112.80; 124.4 | no: N26 read 602.48 and 1018.44 |
+| By site, long names that wrap (seed g) | 5 | 573.67 / 82.31 / 655.98; 16.8; names on 4, 4, 3 lines (rows 128, 128, 96) | 989.63 / 94.36 / 1083.98; 20.9; names on 3 lines | start spread 0.02 → 0; line counts, row heights and gaps the same |
+| By hour (seeds c, g) | 24 | 595.28 / 82.31 / 677.59; 108.7 en-US, 139.8 en-GB | 1011.23 / 94.36 / 1105.59 | no |
+| By day (seeds c, g) | 7 | 588.08 / 82.31 / 670.39; 90.8 | 1004.03 / 94.36 / 1098.39 | no |
+| Day by day, opening range, daily rows (seeds c, g) | 28, 21 | 588.08 / 82.31 / 670.39; 125.8 en-US, 120.2 en-GB | 1004.03 / 94.36 / 1098.39 | (not compared; width is the full 28%) |
+
+In the C locale, WebKitGTK's views with a four-digit count start 7.21 px further right (4ch count box): 580.88 at 800×600 and 996.83 at 1280×800. Its long-name *By site* has its tightest gap at 12.41 units. Every reading in every engine has a bar-start spread of **0** and a bar-end spread of **0**. No row reaches past its page, and the document never scrolls sideways (`scrollWidth` equals the window width).
+
+### What moved
+
+- **Only one thing moved: the weekly list at 800×600.** Its name column grew to the longest one-line name plus the 12-unit column gap. The bars give way together: they now start 15.58 px later in en-US (12.61 px in en-GB, 8.37 px in the C locale) and end where they did. The bar is 66.73 px long in en-US where it was 82.31, a 19% cut, and 69.70 px in en-GB.
+- **Nothing else moved.** At 1280×800, and in every other view at both sizes, bar start, width and end are what N26 read, to the hundredth. The one exception is the 0.01–0.02 px start spread from the grouped *1,234*, which is gone.
+- **Wrapping names are unchanged.** Long site names still wrap first (`minmax(min-content, …)` with `overflow-wrap: anywhere`). They keep their line counts, the bar keeps its 28%, and the gap is unchanged.
+
+### Verdict against N28's Done-when
+
+**Met.** At 800×600 and 1280×800, in en-US and en-GB, in Chromium and in WebKitGTK, every Over time view has **no row under the 12-unit gap**. The tightest is 12.00, which is the column gap itself. **Every bar start is within 0.02 px**: the spread is 0.00 in every reading. The C-locale WebKitGTK run agrees as well.
+
+Not seen: the Tauri window over IPC, WebView2 (Windows) and WKWebView (macOS). The flex fallback was seen only by taking the class off in Chromium and WebKitGTK, not in an engine that lacks `subgrid`. In such an engine the weekly overlap would remain as N26 found it (77 and 56).
+
+- **Evidence:**
+  - Screenshots in `demo/` (Chromium):
+    - `n28-c-daybyday-since2025-{en-US,en-GB}-{800x600,1280x800}.png`, scrolled to the tightest row
+    - `n28-c-bysite-default-{en-US,en-GB}-800x600.png`
+    - `n28-c-byhour-since2025-{en-US,en-GB}-800x600.png`
+    - `n28-d-bysite-default-{en-US,en-GB}-800x600.png`
+    - `n28-g-bysite-default-{en-US,en-GB}-{800x600,1280x800}.png`
+    - `n28-g-bysite-default-{en-US,en-GB}-800x600-class-off.png` (the before)
+  - Screenshots in `demo/` (WebKitGTK): `n28-webkitgtk-{en-US,en-GB,default}-{c-daybyday-since2025,g-bysite-default}-{800x600,1280x800}.png`
+  - Measurements:
+    - `demo/n28-chromium-en-US.json` and `-en-GB.json` (every row of every state)
+    - `demo/n28-chromium-before-after-en-US.json` and `-en-GB.json`
+    - `demo/n28-webkitgtk-en-US.json`, `-en-GB.json` and `-default.json` (with the before for the two compared states)
+  - Seed: `demo/seed-g.json`
+  - Harness: `demo/harness/n28-measure.js`, `n28_table.py`, `n28_before_after.py`, `n28_webkitgtk.py`, plus the `long-names` arm in `core-server-main.rs` and `?seed=g` in `fake-core.js`
+- **Feedback:**
+  - **design:** at 800×600 the weekly bars are 19% shorter than the bars of every other view in the same window (66.73 against 82.31 px), so switching from *By day* to *Day by day* visibly shortens the scale (`n28-c-daybyday-since2025-en-US-800x600.png`). This is the trade N28 chose (bars give way together), and it is recorded only so the next slice sees it.
+  - **design (not new):** a site name that wraps to four lines centres its bar on the row's middle line (row 128 units, bar at the centre), not on the name's first line as *Day by day* does (`n28-g-bysite-default-en-US-800x600.png`). It is identical with the class off, so N28 did not change it.
+  - **note (harness):** WebKitGTK's `get_snapshot` needs pycairo's foreign converter, which this computer lacks. The WebKitGTK screenshots are the offscreen window's own pixbuf.
+- **Stopped:** the cores on :1474, :1475 and :1479, the Vite on :1477, and the agent-browser sessions `fc28us` and `fc28gb`. Left running, as found: the owner's :1471–:1473.

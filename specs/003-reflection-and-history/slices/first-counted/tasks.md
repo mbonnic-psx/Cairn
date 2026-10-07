@@ -345,7 +345,7 @@ neither A nor D. N22 joins B and C. Within a track no task is `[P]`.
   `npm run lint` and `npm run build` green; `cargo fmt --all` and `cargo clippy --all-targets -- -D warnings` clean;
   N1's runs green again. `ipc_surface` passes with `CLASSIFIED` unchanged. Run `make smoke` if `main.rs` or the
   composition changed (the plan says neither does). *Files:* none.
-- [ ] N26 [US2] [demo; scenario 44; rule 15] In the running app, on every platform at hand: with a first count on
+- [x] N26 [US2] [demo; scenario 44; rule 15] In the running app, on every platform at hand: with a first count on
   2025-01-01 and *From* typed as 1000-01-01, *From* reads 2025-01-01 and *Day by day* draws its weekly rows with the page
   responsive, timed as V29 timed it (`demo/v29-timing.json`), and the figures go into the demo log. On a fresh install
   the opening range is moved up to today's own count, *Today* says *Cairn started counting at … today.*, and the next
@@ -602,7 +602,7 @@ host after the demo. No task is derived from this phase._
 
 ### From the demo (N26; the owner chose to fix it here, 2026-10-07)
 
-- [ ] N28 [US2] [rule 15; scenario 39] **A weekly name runs into its bar at 800×600.** The demo measured 77 of 92 rows in
+- [x] N28 [US2] [rule 15; scenario 39] **A weekly name runs into its bar at 800×600.** The demo measured 77 of 92 rows in
   en-US and 56 of 92 in en-GB under the 12-unit gap, *week of May 20, 2026* 3.56 px into the bar (`demo/n26-14`,
   `demo/n26-12`): the name is `nowrap` with `min-width: 0` and overflows its flex share, made visible by N16's wider
   count. Over time's rows now share the list's three columns (`subgrid`), the name's column no narrower than its

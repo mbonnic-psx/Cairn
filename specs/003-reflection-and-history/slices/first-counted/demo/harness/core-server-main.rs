@@ -204,6 +204,29 @@ fn seed(data: &Path, which: &str) {
             log.push(json!({"site": "instagram.com", "at": wrong_clock, "why": "a clock set centuries back"}));
             first = wrong_clock;
         }
+        // N28 (added by the hand on 2026-10-07): site names long enough to wrap beside their bar, with
+        // short ones and a count over 999, so By site shows wrapping names and grouped counts together.
+        // First count 20 days back at 9:00 AM; every reach in the last fourteen days.
+        "long-names" => {
+            first = m(20) + 9 * HOUR;
+            history.note_counting(first).unwrap();
+            let sites: [(&str, i64); 5] = [
+                ("community.forums.an-unusually-long-hobby-site-name.example.org", 1234),
+                ("video.streaming-service-with-a-long-name.example.com", 41),
+                ("reddit.com", 17),
+                ("x.com", 3),
+                ("news.a-regional-newspaper-with-a-long-name.co.uk", 1),
+            ];
+            let window_start = m(13);
+            let window_end = now - 120;
+            for (site, n) in sites {
+                for k in 0..n {
+                    let at = window_start + (window_end - window_start) * k / n + 11;
+                    history.record(site, at).unwrap();
+                }
+                log.push(json!({"site": site, "count": n, "from": window_start, "to": window_end}));
+            }
+        }
         other => panic!("unknown seed {other}"),
     }
     let first_count_read = history.first_count().ok().flatten();
@@ -348,6 +371,6 @@ fn main() {
     match args.get(1).map(String::as_str) {
         Some("seed") => seed(Path::new(&args[2]), &args[3]),
         Some("serve") => serve(Path::new(&args[2]), args[3].parse().unwrap(), Path::new(&args[4])),
-        _ => eprintln!("usage: seed <dir> installed-today|three-weeks|since-2025|installed-yesterday|centuries-back | serve <dir> <port> <log-dir>"),
+        _ => eprintln!("usage: seed <dir> installed-today|three-weeks|since-2025|installed-yesterday|centuries-back|long-names | serve <dir> <port> <log-dir>"),
     }
 }
