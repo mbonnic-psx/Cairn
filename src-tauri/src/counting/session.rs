@@ -23,6 +23,57 @@ use crate::helper::{Handover, HelperChannel};
 struct Session {
     stop: Arc<AtomicBool>,
     threads: Vec<JoinHandle<()>>,
+    /// Where the accept threads send what they read. The threads outlive any
+    /// one history, so the destination is the part that can be replaced.
+    sink: Arc<Forward>,
+}
+
+/// What the accept threads hold: a destination that can be swapped while they
+/// run, so that a session never keeps noting into a history that has since
+/// been erased or that was never open (FR-022, Principle III).
+struct Forward(Mutex<Arc<dyn NoteReach>>);
+
+impl Forward {
+    fn replace(&self, sink: Arc<dyn NoteReach>) {
+        // The previous sink is dropped here, after any note in flight on it has
+        // finished (`note` holds this lock), so nothing still holds its
+        // connection once this returns.
+        let previous = {
+            let mut held = match self.0.lock() {
+                Ok(held) => held,
+                Err(poisoned) => poisoned.into_inner(),
+            };
+            std::mem::replace(&mut *held, sink)
+        };
+        drop(previous);
+    }
+}
+
+impl NoteReach for Forward {
+    fn note(&self, domain: &str, at: i64) {
+        let held = match self.0.lock() {
+            Ok(held) => held,
+            Err(poisoned) => poisoned.into_inner(),
+        };
+        held.note(domain, at);
+    }
+}
+
+/// A destination that keeps nothing: the reaches it is handed are dropped.
+struct Keeps;
+
+impl NoteReach for Keeps {
+    fn note(&self, _domain: &str, _at: i64) {}
+}
+
+/// Hand the held session a destination that keeps nothing, and let go of the
+/// one it had. Does nothing when no session is held.
+///
+/// Called before the history file is removed, so that no connection holds it.
+pub fn keep_nothing() {
+    if let Some(session) = held().as_ref() {
+        session.sink.replace(Arc::new(Keeps));
+    }
 }
 
 fn current() -> &'static Mutex<Option<Session>> {
@@ -51,15 +102,18 @@ pub fn is_running() -> bool {
 /// mode. Anything that stops this short of accepting comes back as
 /// [`Counting::Unavailable`] carrying the sentence to show — never as available.
 ///
-/// Starting twice does nothing the second time. The ports are already Cairn's
-/// and already being accepted on.
+/// Starting while a session is held takes no ports a second time: the ports are
+/// already Cairn's and already being accepted on. What changes is where the
+/// running session sends what it reads — to `sink`, the history this start
+/// opened — and the sink it had is let go.
 pub fn start(
     helper: &dyn HelperChannel,
     sink: Arc<dyn NoteReach>,
     now: fn() -> i64,
 ) -> Counting {
     let mut held = held();
-    if held.is_some() {
+    if let Some(session) = held.as_ref() {
+        session.sink.replace(sink);
         return Counting::Available;
     }
 
@@ -81,6 +135,7 @@ pub fn start(
     };
 
     let stop = Arc::new(AtomicBool::new(false));
+    let sink = Arc::new(Forward(Mutex::new(sink)));
     let mut threads = Vec::new();
 
     for listener in listeners {
@@ -91,7 +146,11 @@ pub fn start(
         }));
     }
 
-    *held = Some(Session { stop, threads });
+    *held = Some(Session {
+        stop,
+        threads,
+        sink,
+    });
     Counting::Available
 }
 

@@ -6,7 +6,8 @@
 #![allow(clippy::unwrap_used, clippy::expect_used)]
 #![cfg(all(unix, feature = "history"))]
 
-use std::net::{Ipv4Addr, TcpListener};
+use std::io::Write;
+use std::net::{Ipv4Addr, SocketAddr, TcpListener, TcpStream};
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, AtomicI64, Ordering};
 use std::sync::{Arc, Mutex};
@@ -31,6 +32,8 @@ const DAY: i64 = 86_400;
 
 static ONE_SESSION: Mutex<()> = Mutex::new(());
 static CLOCK: AtomicI64 = AtomicI64::new(T0);
+/// Where the last handed-over listener accepts.
+static HANDED: Mutex<Option<SocketAddr>> = Mutex::new(None);
 
 fn clock() -> i64 {
     CLOCK.load(Ordering::SeqCst)
@@ -59,6 +62,7 @@ impl HelperChannel for Handing {
     }
     fn take_counting_sockets(&self) -> Result<Handover, Trouble> {
         let listener = TcpListener::bind((Ipv4Addr::LOCALHOST, 0)).unwrap();
+        *HANDED.lock().unwrap() = Some(listener.local_addr().unwrap());
         Ok(Handover::Took(vec![listener]))
     }
 }
@@ -134,11 +138,43 @@ fn first_counted_by_all_three(state: &AppState, at: i64) -> [Option<i64>; 3] {
     ]
 }
 
+/// A real reach: a connection naming `domain`, to the port the session accepts
+/// on. Waits for it to show in today's reaches; says whether it did.
+fn reach_is_stored(state: &AppState, domain: &str) -> bool {
+    let addr = HANDED
+        .lock()
+        .unwrap()
+        .expect("a session was handed sockets");
+    let mut stream = TcpStream::connect(addr).unwrap();
+    write!(stream, "GET / HTTP/1.1\r\nHost: {domain}\r\n\r\n").unwrap();
+    drop(stream);
+    let (_, start, end) = today_bounds(clock());
+    for _ in 0..40 {
+        if state
+            .list_todays_reaches(start, end)
+            .reaches
+            .iter()
+            .any(|reach| reach.domain == domain)
+        {
+            return true;
+        }
+        std::thread::sleep(std::time::Duration::from_millis(100));
+    }
+    false
+}
+
+fn turn_protection(state: &AppState, intent: ProtectionIntent) {
+    let mut config = state.config.load().unwrap();
+    config.intent = intent;
+    state.config.save(&config).unwrap();
+}
+
 // Scenario 1
 #[test]
 fn a_session_that_is_accepting_and_storing_is_the_first_count_and_a_later_one_leaves_it()
 {
     let _one = ONE_SESSION.lock().unwrap_or_else(|p| p.into_inner());
+    session::stop(); // a failed scenario leaves its session held
     let directory = tempfile::tempdir().unwrap();
     let data = directory.path().join("cairn-data");
     std::fs::create_dir_all(&data).unwrap();
@@ -166,6 +202,7 @@ fn a_session_that_is_accepting_and_storing_is_the_first_count_and_a_later_one_le
 #[test]
 fn a_helper_that_refuses_the_sockets_leaves_every_answer_at_null() {
     let _one = ONE_SESSION.lock().unwrap_or_else(|p| p.into_inner());
+    session::stop(); // a failed scenario leaves its session held
     let directory = tempfile::tempdir().unwrap();
     let data = directory.path().join("cairn-data");
     std::fs::create_dir_all(&data).unwrap();
@@ -183,6 +220,7 @@ fn a_helper_that_refuses_the_sockets_leaves_every_answer_at_null() {
 #[test]
 fn a_sealed_first_run_writes_nothing_and_the_next_start_is_the_first_count() {
     let _one = ONE_SESSION.lock().unwrap_or_else(|p| p.into_inner());
+    session::stop(); // a failed scenario leaves its session held
     let directory = tempfile::tempdir().unwrap();
     let data = directory.path().join("cairn-data");
     std::fs::create_dir_all(&data).unwrap();
@@ -192,7 +230,6 @@ fn a_sealed_first_run_writes_nothing_and_the_next_start_is_the_first_count() {
     CLOCK.store(T0, Ordering::SeqCst);
     state.start_counting().unwrap();
     assert!(session::is_running());
-    session::stop();
     assert!(
         !data.join(HISTORY_FILE).exists(),
         "a sealed first run writes no history.db"
@@ -205,6 +242,10 @@ fn a_sealed_first_run_writes_nothing_and_the_next_start_is_the_first_count() {
     state.start_counting().unwrap();
 
     assert_eq!(first_counted_by_all_three(&state, t1), [Some(t1); 3]);
+    assert!(
+        reach_is_stored(&state, "late.example"),
+        "the held session records into the history the second start opened"
+    );
     // The gap [T0, T1) is recorded, and no answer states any of it.
     let (day, start, end) = today_bounds(t1);
     let todays = state.list_todays_reaches(start, end);
@@ -226,5 +267,57 @@ fn a_sealed_first_run_writes_nothing_and_the_next_start_is_the_first_count() {
             .collect::<Vec<_>>(),
         vec![(T0, t1)]
     );
+    session::stop();
+}
+
+// AD1 (FC-A1): erase everything, then protection again in the same run
+#[test]
+fn after_erasing_everything_a_reach_goes_to_the_new_history() {
+    let _one = ONE_SESSION.lock().unwrap_or_else(|p| p.into_inner());
+    session::stop(); // a failed scenario leaves its session held
+    let directory = tempfile::tempdir().unwrap();
+    let data = directory.path().join("cairn-data");
+    std::fs::create_dir_all(&data).unwrap();
+    let key_works = Arc::new(AtomicBool::new(true));
+    let state = state(directory.path(), &data, &key_works, Box::new(Handing));
+
+    CLOCK.store(T0, Ordering::SeqCst);
+    state.start_counting().unwrap();
+    assert!(reach_is_stored(&state, "before.example"));
+
+    turn_protection(&state, ProtectionIntent::Off);
+    state.delete_all_data().unwrap();
+    assert!(!data.join(HISTORY_FILE).exists());
+
+    turn_protection(&state, ProtectionIntent::On);
+    CLOCK.store(T0 + 600, Ordering::SeqCst);
+    state.start_counting().unwrap();
+    assert!(session::is_running());
+    assert!(
+        reach_is_stored(&state, "after.example"),
+        "the reach after the erase is in the new history"
+    );
+    session::stop();
+}
+
+// AD1 (FC-A2): a start on a sealed history, then the key back, no stop between
+#[test]
+fn a_session_started_sealed_stores_reaches_once_the_next_start_opens_the_history() {
+    let _one = ONE_SESSION.lock().unwrap_or_else(|p| p.into_inner());
+    session::stop(); // a failed scenario leaves its session held
+    let directory = tempfile::tempdir().unwrap();
+    let data = directory.path().join("cairn-data");
+    std::fs::create_dir_all(&data).unwrap();
+    let key_works = Arc::new(AtomicBool::new(false));
+    let state = state(directory.path(), &data, &key_works, Box::new(Handing));
+
+    CLOCK.store(T0, Ordering::SeqCst);
+    state.start_counting().unwrap();
+    assert!(session::is_running());
+
+    key_works.store(true, Ordering::SeqCst);
+    CLOCK.store(T0 + 600, Ordering::SeqCst);
+    state.start_counting().unwrap();
+    assert!(reach_is_stored(&state, "back.example"));
     session::stop();
 }

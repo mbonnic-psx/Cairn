@@ -487,6 +487,14 @@ impl AppState {
             deleted.push("your own copies of the category lists".into());
         }
 
+        // A running session holds the history's connection, and the presence
+        // mark claims it is being kept. Let both go before the file does.
+        #[cfg(feature = "history")]
+        {
+            crate::counting::session::keep_nothing();
+            retire_storing(None);
+        }
+
         // The history itself, and then the key. In that order: a key removed
         // first would leave a file nothing could ever open, which is residue
         // rather than deletion.
@@ -685,6 +693,9 @@ impl AppState {
 
         let for_session: Arc<dyn crate::counting::listener::NoteReach> = sink.clone();
         let counting = session::start(self.helper.as_ref(), for_session, self.now);
+        // A held session now records into this history, and the one before it
+        // is let go: its mark thread must stop claiming it is keeping.
+        retire_storing(Some(storing.clone()));
 
         // The mark says "Cairn was counting, and keeping it, at this moment", so
         // it is only kept while that is true.
@@ -1210,4 +1221,22 @@ fn day_view(
         },
         Err(trouble) => DayView::sealed(trouble.message),
     }
+}
+
+/// The flag the live marking thread reads, so a session whose history was
+/// replaced or erased stops being claimed as kept. Sets the previous flag false
+/// and remembers `next`.
+#[cfg(feature = "history")]
+fn retire_storing(next: Option<std::sync::Arc<std::sync::atomic::AtomicBool>>) {
+    use std::sync::atomic::AtomicBool;
+    use std::sync::{Arc, Mutex};
+    static CURRENT: Mutex<Option<Arc<AtomicBool>>> = Mutex::new(None);
+    let mut current = match CURRENT.lock() {
+        Ok(current) => current,
+        Err(poisoned) => poisoned.into_inner(),
+    };
+    if let Some(previous) = current.take() {
+        previous.store(false, std::sync::atomic::Ordering::SeqCst);
+    }
+    *current = next;
 }
