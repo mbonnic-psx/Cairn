@@ -167,3 +167,30 @@ describe('every count in a view takes one width (scenario 39)', () => {
     );
   });
 });
+
+describe('a long name widens its column for every row, never runs into its bar (N28)', () => {
+  it('marks the Over time list as the one whose rows share columns', async () => {
+    const page = await open(
+      patterns({ by_site: [{ domain: 'a.example', count: 1234 }] }),
+      'By site',
+    );
+    expect(within(page).getByRole('list')).toHaveClass('nb-reaches-log--bars');
+  });
+
+  it('gives the name a column no narrower than the longest name, and the bars what is left', () => {
+    const list = bodyOf('.nb-reaches-log--bars');
+    expect(list).toMatch(/display:\s*grid/);
+    expect(list).toMatch(
+      /grid-template-columns:\s*minmax\(min-content, 1fr\) minmax\(0, 28%\) auto/,
+    );
+    const row = bodyOf('.nb-reaches-log--bars > .nb-reaches-line');
+    expect(row).toMatch(/grid-template-columns:\s*subgrid/);
+    expect(row).toMatch(/grid-column:\s*1 \/ -1/);
+  });
+
+  it('lays rows out only where a row can share its list\'s columns, and as before where it cannot', () => {
+    expect(
+      readFileSync('src/styles/tonight-page.css', 'utf8'),
+    ).toMatch(/@supports \(grid-template-columns: subgrid\)\s*\{\s*\.nb-reaches-log--bars\s*\{/);
+  });
+});

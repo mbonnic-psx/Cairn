@@ -600,6 +600,18 @@ first_counted_session --test stores` (green), and `npx vitest run src/screens/__
 _Placeholder: the adversary pass and the archive, which ride in this slice's own pull request, are appended here by the
 host after the demo. No task is derived from this phase._
 
+### From the demo (N26; the owner chose to fix it here, 2026-10-07)
+
+- [ ] N28 [US2] [rule 15; scenario 39] **A weekly name runs into its bar at 800×600.** The demo measured 77 of 92 rows in
+  en-US and 56 of 92 in en-GB under the 12-unit gap, *week of May 20, 2026* 3.56 px into the bar (`demo/n26-14`,
+  `demo/n26-12`): the name is `nowrap` with `min-width: 0` and overflows its flex share, made visible by N16's wider
+  count. Over time's rows now share the list's three columns (`subgrid`), the name's column no narrower than its
+  longest one-line name, so the bars give way together and still start and end in one place; without `subgrid` the
+  rows stay the flex lines they were. **Done when** the N26 measurement at 800×600 and 1280×800, en-US and en-GB, in
+  Chromium and WebKitGTK, finds no row under the 12-unit gap and every bar start within 0.02 px, and the result is in
+  the demo log. *Files:* `src/screens/Reaches.tsx`, `src/styles/tonight-page.css`,
+  `src/screens/__tests__/ReachesCounts.test.tsx`, the demo log.
+
 ### Phase 4 tasks from converge pass 2 (graded; none re-opens the loop)
 
 - [x] NC5 [US2] **MEDIUM** [rule 6; *Versioning and Compatibility* (constitution lines 431–432); Principle II, fail

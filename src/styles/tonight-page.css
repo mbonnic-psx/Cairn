@@ -233,6 +233,23 @@
   margin-top: calc(13 * var(--nb-u));
 }
 
+/* Over time: every row shares the list's three columns, so a name that needs more than its share widens the
+   name's column for every row and every bar gives way together, still starting and ending in one place. A name
+   on one line (Day by day) sets the column's least width; a site name still wraps first (N28). Where a row
+   cannot share its list's columns, the rows stay the flex lines above. */
+@supports (grid-template-columns: subgrid) {
+  .nb-reaches-log--bars {
+    display: grid;
+    grid-template-columns: minmax(min-content, 1fr) minmax(0, 28%) auto;
+    column-gap: calc(12 * var(--nb-u));
+  }
+  .nb-reaches-log--bars > .nb-reaches-line {
+    display: grid;
+    grid-column: 1 / -1;
+    grid-template-columns: subgrid;
+  }
+}
+
 /* "Nothing here…": where the first line of the log would begin. */
 .nb-reaches-empty {
   margin: 0;

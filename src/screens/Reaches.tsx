@@ -513,7 +513,7 @@ function OverTimeView({
             )}
             {rows.length > 0 && (seen !== 'site' || !isQuiet(rows)) && (
               <ul
-                className="nb-reaches-log"
+                className="nb-reaches-log nb-reaches-log--bars"
                 style={{ '--nb-count-chars': countChars } as CSSProperties}
               >
                 {rows.map((row) => (
