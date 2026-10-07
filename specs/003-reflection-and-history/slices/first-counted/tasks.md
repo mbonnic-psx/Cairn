@@ -641,3 +641,22 @@ protecting and recording" and Versioning and Compatibility, unmet at pass 2 by N
 principle stands as pass 2 records it. No pass beyond this one: nothing open is CRITICAL, and the actor's demo is the
 better evidence now.
 
+### From the adversary pass (2026-10-07; `../../adversary-log.md`, row `first-counted · bbb3d74`)
+
+- [ ] AD1 [US2] **HIGH** [rule 1, rule 2, rule 5; Principle III] **FC-A1, FC-A2: a start while a session is held
+  notes the first count on a sink the session never uses.** `session::start` returns `Available` while a session is
+  held and drops the new sink, so after *erase everything* every reach goes to the deleted file's connection, and after
+  a sealed start every reach is dropped, while the new history's first count and the presence mark say Cairn is
+  counting and keeping. The held session takes the new sink: from that start on, its accept threads record into the
+  history that start opened, and the old sink (and its connection) is let go. *Erase everything* hands the session a
+  sink that keeps nothing before it removes the file, so no connection holds `history.db` while it is removed.
+  **Done when** (each first RED through `AppState` with a loopback reach, as the adversary reproduced): erase, start
+  again, reach → the reach is in the new history; sealed start, key back, start again, reach → the reach is stored;
+  scenario 3 of `tests/first_counted_session.rs` no longer stops the session between starts. *Files:*
+  `src-tauri/src/counting/session.rs`, `src-tauri/src/ipc/state.rs`, `src-tauri/tests/first_counted_session.rs`.
+- [ ] AD2 [US2] **LOW** [rule 5] **FC-A4: a deletion while the fill is owed moves the first count later.**
+  `delete_reach_history` and `delete_all_reach_history` fill an owed first count inside their write transaction, before
+  deleting, as every other writer does (NC1). **Done when** the adversary's reproduction (a legacy history opened while
+  another connection holds `BEGIN IMMEDIATE` past the timeout, then a range deletion, then `note_counting` later) keeps
+  the earliest reach as the first count. *Files:* `src-tauri/src/store/history.rs`, `src-tauri/tests/first_counted.rs`.
+

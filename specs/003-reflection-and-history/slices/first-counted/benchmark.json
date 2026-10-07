@@ -610,6 +610,96 @@
       "signals": {
         "outcome": "accepted"
       }
+    },
+    {
+      "stage": "adversary",
+      "started": "2026-10-07T18:19:06Z",
+      "planned": "adversary: strong → host model — `strong` maps to the host model",
+      "tasks": {
+        "start": {
+          "open": 1,
+          "done": 32
+        },
+        "end": {
+          "open": 1,
+          "done": 32
+        }
+      },
+      "ended": "2026-10-07T18:26:51Z",
+      "seconds": 465,
+      "span": {
+        "from": {
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/963a3e71-ea7b-492b-8b6e-31f4c5d7fd03.jsonl": 1647242,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/963a3e71-ea7b-492b-8b6e-31f4c5d7fd03/subagents/agent-a2ec6d26550e00257.jsonl": 1993305,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/963a3e71-ea7b-492b-8b6e-31f4c5d7fd03/subagents/agent-aa8beb583681e32bf.jsonl": 5247286
+        },
+        "to": {
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/963a3e71-ea7b-492b-8b6e-31f4c5d7fd03.jsonl": 1821090,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/963a3e71-ea7b-492b-8b6e-31f4c5d7fd03/subagents/agent-a2ec6d26550e00257.jsonl": 1993305,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/963a3e71-ea7b-492b-8b6e-31f4c5d7fd03/subagents/agent-a433a5377ea5388e7.jsonl": 742283,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/963a3e71-ea7b-492b-8b6e-31f4c5d7fd03/subagents/agent-aa8beb583681e32bf.jsonl": 5247286,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/963a3e71-ea7b-492b-8b6e-31f4c5d7fd03/subagents/agent-adafb74c547f6f309.jsonl": 719564
+        }
+      },
+      "usage": {
+        "source": "claude",
+        "session": "963a3e71-ea7b-492b-8b6e-31f4c5d7fd03",
+        "read": "message.usage on each assistant line, once per requestId",
+        "host": {
+          "claude-opus-5-5": {
+            "input": 16,
+            "output": 6601,
+            "cache_read": 1026777,
+            "cache_creation": 18581
+          }
+        },
+        "subagents": {
+          "claude-opus-5-5": {
+            "input": 98,
+            "output": 578,
+            "cache_read": 3946789,
+            "cache_creation": 235879
+          }
+        },
+        "agents": [
+          "drive-adversary"
+        ]
+      },
+      "ran": [
+        "claude-opus-5-5"
+      ],
+      "agents": [
+        "drive-adversary"
+      ],
+      "delegated": true,
+      "signals": {
+        "findings": 6,
+        "seams": 2
+      }
+    },
+    {
+      "stage": "implement",
+      "started": "2026-10-07T18:27:17Z",
+      "planned": "implement: fast → sonnet — Claude Code: the Agent tool's `model` parameter, set per call",
+      "tasks": {
+        "start": {
+          "open": 3,
+          "done": 32
+        }
+      },
+      "cursor": {
+        "source": "claude",
+        "session": "963a3e71-ea7b-492b-8b6e-31f4c5d7fd03",
+        "files": {
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/963a3e71-ea7b-492b-8b6e-31f4c5d7fd03.jsonl": 1851916
+        },
+        "subagents": {
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/963a3e71-ea7b-492b-8b6e-31f4c5d7fd03/subagents/agent-a2ec6d26550e00257.jsonl": 1993305,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/963a3e71-ea7b-492b-8b6e-31f4c5d7fd03/subagents/agent-a433a5377ea5388e7.jsonl": 742283,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/963a3e71-ea7b-492b-8b6e-31f4c5d7fd03/subagents/agent-aa8beb583681e32bf.jsonl": 5247286,
+          "/home/mbonnic/.claude/projects/-home-mbonnic-Cairn/963a3e71-ea7b-492b-8b6e-31f4c5d7fd03/subagents/agent-adafb74c547f6f309.jsonl": 719564
+        }
+      }
     }
   ]
 }
