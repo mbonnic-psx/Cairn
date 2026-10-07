@@ -437,6 +437,40 @@ Already stated, and held by this slice as written: no streak, day count or chain
 rows are named by their dates, never numbered; everything is available with no journal entry ever written
 (scenario 3); a sealed answer shows the sentence and nothing else.
 
+### Gaps reviewed — slice `first-counted` (2026-10-05)
+
+Checked against FR-022, FR-022a, FR-024, H5, M11, M16, and the two findings carried here from `history-movement`
+(`decisions.md` D2: V47, V48; D3: V29's freeze at the widest range). Decided by the owner ("all yes"):
+
+- **F1 — when Cairn first counted is recorded.** Cairn records the moment it first counts, once. An install that
+  already holds history and no such record takes the earliest moment it recorded anything (a reach or a gap). That
+  may be later than the true start, so Cairn may claim to have seen less than it did, never more.
+- **F2 — a range starts no earlier than the first count.** The earliest *From* a person can choose is the day Cairn
+  first counted; an earlier date typed in is moved up to it, and beside the range the screen says "Cairn started
+  counting on Oct 1, 2026." (in the computer's own date form, M10). The widest range is therefore "since Cairn
+  started", which retires the freeze at 1000-01-01 (D3, M11).
+- **F3 — the start is named, not listed as a gap.** Where a range or a row holds the moment Cairn first counted, the
+  coverage note says so in a sentence of its own ("Cairn started counting at 2:14 pm on Oct 1."). The time before it
+  is never shown as a quiet stretch (FR-022) and never as one of the gaps (FR-022a: it is not a blind spot in
+  Cairn's watching, it is before there was any). M16's standing sentence stays.
+- **F4 — the first day, on Today and the check-in.** On the day Cairn first counted, Today and the check-in say
+  "Cairn started counting at 2:14 pm today.", so the hours before it do not read as a quiet morning.
+- **F5 — a deletion never moves it.** Deleting reaches, gaps or entries leaves the first count where it is (FR-022a).
+  Only erasing everything clears it; that belongs to slice `theirs`.
+- **F6 — a reach recorded before it.** A reach whose time is earlier than the recorded first count (a clock that was
+  wrong) moves the first count back to that reach, so no recorded reach is ever hidden by the range limit.
+- **F7 — how a count is read and written (V47, V48).** In all four views a screen reader hears a count with its unit
+  ("3 reaches", "1 reach"), never a bare number run into the row's date, and a count is grouped in the computer's own
+  form ("1,234"), so a wide count does not move its bar.
+- **F8 — one sentence, never two (owner, on the plan, 2026-10-05: "all yes").** Where F2's and F3's sentences would
+  both apply, the page says one: F3's, with its time, when the range holds the first count; F2's otherwise.
+- **F9 — before Cairn has ever counted (same message).** *From* and *To* are held at today, every row reads *not
+  seen*, and M13's "Cairn wasn't counting on these days." says it. No new sentence.
+- **F10 — a deleted reach that set the first count (same message).** F5 stands: the first count stays, since its
+  sentence names when Cairn started, never what was reached for.
+- **F11 — the first count's own row on *Day by day* (same message).** M12's judgement stands with no extra clause; the
+  sentence above the rows names the start. Times follow the computer's own form ("2:14 PM", "14:14"), as dates do (M10).
+
 ## Requirements *(mandatory)*
 
 ### Functional Requirements

@@ -54,6 +54,30 @@ const GAPS_OVERLAPPING_RANGE: &str = "to_at > ?1 AND from_at < ?2";
 /// integer ranges above.
 const DAY_IN_RANGE: &str = "day >= ?1 AND day < ?2";
 
+/// The one row of `first_count`: written if there is none, moved only to an
+/// earlier instant, otherwise left alone.
+const NOTE_COUNTING: &str = "INSERT INTO first_count (id, at) VALUES (1, ?1) \
+     ON CONFLICT(id) DO UPDATE SET at = excluded.at WHERE excluded.at < first_count.at";
+
+/// Creates `first_count` and fills it with the earliest of the first reach and
+/// the first gap's start, or leaves it empty when there are neither. Run inside
+/// the write transaction that decided it was owed, so two openers cannot both
+/// do it. Gaps are read here and never again: after this, a gap that begins
+/// before the first count is a first run that was sealed, not a moment Cairn
+/// was counting.
+const FILL_FIRST_COUNT: &str = "CREATE TABLE IF NOT EXISTS first_count (
+         id INTEGER PRIMARY KEY CHECK (id = 1),
+         at INTEGER NOT NULL
+     );
+     INSERT INTO first_count (id, at)
+         SELECT 1, earliest FROM (
+             SELECT MIN(moment) AS earliest FROM (
+                 SELECT MIN(at) AS moment FROM reaches
+                 UNION ALL
+                 SELECT MIN(from_at) FROM coverage_gaps
+             )
+         ) WHERE earliest IS NOT NULL;";
+
 /// One reach: where, and when. That is the whole of it.
 #[derive(Clone, PartialEq, Eq, Debug, serde::Serialize, serde::Deserialize)]
 pub struct Reach {
@@ -151,6 +175,15 @@ impl History {
         }
     }
 
+    /// Note that Cairn is counting at `at`, if there is anywhere to note it.
+    /// Says whether it was noted; a sealed history notes nothing.
+    pub fn note_counting(&self, at: i64) -> bool {
+        match self {
+            History::Open(history) => history.note_counting(at).is_ok(),
+            History::Sealed { .. } => false,
+        }
+    }
+
     pub fn is_open(&self) -> bool {
         matches!(self, History::Open(_))
     }
@@ -227,20 +260,127 @@ impl OpenHistory {
             )
             .map_err(|_| cannot_prepare())?;
 
-        Ok(OpenHistory {
+        // A history written by an earlier build has no `first_count`. It is
+        // created and filled once, in one transaction that decides inside
+        // itself whether the fill is owed, so it is never left there empty
+        // with the fill still owed, and an opener that loses the race to
+        // another finds the table filled and carries on (slice
+        // `first-counted`, F1).
+        Self::fill_first_count(&connection)?;
+
+        let history = OpenHistory {
             connection,
             path: path.to_path_buf(),
-        })
+        };
+        history.settle_first_count();
+        Ok(history)
     }
 
-    pub fn record(&self, domain: &str, at: i64) -> Result<(), Trouble> {
+    /// Inside a write transaction already open: creates and fills `first_count`
+    /// if it is not there. Every writer of the first count runs this first, so
+    /// a fill that could not take the lock at open never costs a reach.
+    fn fill_if_owed(connection: &Connection) -> rusqlite::Result<()> {
+        if table_exists(connection, "first_count")? {
+            Ok(())
+        } else {
+            connection.execute_batch(FILL_FIRST_COUNT)
+        }
+    }
+
+    fn fill_first_count(connection: &Connection) -> Result<(), Trouble> {
+        if table_exists(connection, "first_count").map_err(|_| cannot_prepare())? {
+            return Ok(());
+        }
+        match connection.execute_batch("BEGIN IMMEDIATE") {
+            Ok(()) => {}
+            // Could not take the write lock for any reason (busy, locked,
+            // read-only): the build before this slice opened such a history,
+            // so this one does too. The fill waits for a later open, or for
+            // whoever holds the lock to do it.
+            Err(_) => return Ok(()),
+        }
+        let filled = Self::fill_if_owed(connection)
+            .and_then(|()| connection.execute_batch("COMMIT"));
+        if filled.is_err() {
+            // Cannot write (read-only, full disk): the history stays open
+            // with the fill owed, and the writers' fill-if-owed repairs it.
+            let _ = connection.execute_batch("ROLLBACK");
+        }
+        Ok(())
+    }
+
+    /// If a reach is earlier than the first count (or there is a reach and no
+    /// row), the row moves to it: repairs a reach an older build wrote after a
+    /// downgrade, or one whose note did not go through. It reads first and
+    /// writes only when it would move, so an ordinary open takes no write
+    /// lock; a settle that cannot write is left for the next open. Gaps are
+    /// not read here.
+    fn settle_first_count(&self) {
+        let earliest = self
+            .connection
+            .query_row("SELECT MIN(at) FROM reaches", [], |row| {
+                row.get::<_, Option<i64>>(0)
+            })
+            .ok()
+            .flatten();
+        let Some(earliest) = earliest else { return };
+        if self
+            .first_count()
+            .is_ok_and(|row| row.is_none_or(|row| earliest < row))
+        {
+            let _ = self.note_counting(earliest);
+        }
+    }
+
+    /// Begins a transaction that takes the write lock with its first
+    /// statement. A deferred one that reads and then writes cannot upgrade
+    /// while another connection writes: SQLite refuses at once instead of
+    /// running the busy handler, and a reach is lost. IMMEDIATE waits on the
+    /// busy timeout, as the autocommit write before this slice did.
+    fn begin_write(&self) -> rusqlite::Result<rusqlite::Transaction<'_>> {
+        rusqlite::Transaction::new_unchecked(
+            &self.connection,
+            rusqlite::TransactionBehavior::Immediate,
+        )
+    }
+
+    /// Notes `at` as a moment Cairn was counting; only ever earlier.
+    pub fn note_counting(&self, at: i64) -> Result<(), Trouble> {
+        let failed = || Trouble::new("Cairn could not record that just now.");
+        let transaction = self.begin_write().map_err(|_| failed())?;
+        Self::fill_if_owed(&transaction).map_err(|_| failed())?;
+        transaction
+            .execute(NOTE_COUNTING, rusqlite::params![at])
+            .map_err(|_| failed())?;
+        transaction.commit().map_err(|_| failed())
+    }
+
+    /// When Cairn first counted, if it has.
+    pub fn first_count(&self) -> Result<Option<i64>, Trouble> {
         self.connection
+            .query_row("SELECT at FROM first_count WHERE id = 1", [], |row| {
+                row.get::<_, i64>(0)
+            })
+            .optional()
+            .map_err(|_| unreadable())
+    }
+
+    /// Stores a reach and notes `at` as a counting moment, in one transaction:
+    /// a failed note keeps no reach.
+    pub fn record(&self, domain: &str, at: i64) -> Result<(), Trouble> {
+        let failed = || Trouble::new("Cairn could not record that just now.");
+        let transaction = self.begin_write().map_err(|_| failed())?;
+        Self::fill_if_owed(&transaction).map_err(|_| failed())?;
+        transaction
             .execute(
                 "INSERT INTO reaches (domain, at) VALUES (?1, ?2)",
                 rusqlite::params![domain, at],
             )
-            .map(|_| ())
-            .map_err(|_| Trouble::new("Cairn could not record that just now."))
+            .map_err(|_| failed())?;
+        transaction
+            .execute(NOTE_COUNTING, rusqlite::params![at])
+            .map_err(|_| failed())?;
+        transaction.commit().map_err(|_| failed())
     }
 
     /// Rows whose key falls in `[from, to)`, generalized over every
@@ -445,7 +585,7 @@ impl OpenHistory {
     /// in its old, no-longer-accurate form, or a gap only half clipped.
     pub fn delete_reach_history(&self, from: i64, to: i64) -> Result<(), Trouble> {
         self.connection
-            .execute_batch("BEGIN")
+            .execute_batch("BEGIN IMMEDIATE")
             .map_err(|_| unreadable())?;
 
         let outcome = self.delete_reaches_and_clip_gaps(from, to);
@@ -621,6 +761,16 @@ fn sealed() -> Trouble {
         "Cairn could not open your history with the key it has, so your entries stay \
          sealed and exactly as they are. Protection is unaffected.",
     )
+}
+
+fn table_exists(connection: &Connection, name: &str) -> rusqlite::Result<bool> {
+    connection
+        .query_row(
+            "SELECT count(*) FROM sqlite_master WHERE type = 'table' AND name = ?1",
+            [name],
+            |row| row.get::<_, i64>(0),
+        )
+        .map(|found| found > 0)
 }
 
 fn is_busy(error: &rusqlite::Error) -> bool {

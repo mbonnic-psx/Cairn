@@ -1,0 +1,403 @@
+{
+  "answer": {
+    "by_hour": [
+      {
+        "count": 0,
+        "hour": 0
+      },
+      {
+        "count": 0,
+        "hour": 1
+      },
+      {
+        "count": 0,
+        "hour": 2
+      },
+      {
+        "count": 0,
+        "hour": 3
+      },
+      {
+        "count": 0,
+        "hour": 4
+      },
+      {
+        "count": 0,
+        "hour": 5
+      },
+      {
+        "count": 0,
+        "hour": 6
+      },
+      {
+        "count": 0,
+        "hour": 7
+      },
+      {
+        "count": 0,
+        "hour": 8
+      },
+      {
+        "count": 0,
+        "hour": 9
+      },
+      {
+        "count": 0,
+        "hour": 10
+      },
+      {
+        "count": 0,
+        "hour": 11
+      },
+      {
+        "count": 1,
+        "hour": 12
+      },
+      {
+        "count": 1,
+        "hour": 13
+      },
+      {
+        "count": 2,
+        "hour": 14
+      },
+      {
+        "count": 0,
+        "hour": 15
+      },
+      {
+        "count": 0,
+        "hour": 16
+      },
+      {
+        "count": 0,
+        "hour": 17
+      },
+      {
+        "count": 0,
+        "hour": 18
+      },
+      {
+        "count": 0,
+        "hour": 19
+      },
+      {
+        "count": 0,
+        "hour": 20
+      },
+      {
+        "count": 0,
+        "hour": 21
+      },
+      {
+        "count": 0,
+        "hour": 22
+      },
+      {
+        "count": 0,
+        "hour": 23
+      }
+    ],
+    "by_site": [
+      {
+        "count": 2,
+        "domain": "reddit.com"
+      },
+      {
+        "count": 1,
+        "domain": "x.com"
+      },
+      {
+        "count": 1,
+        "domain": "youtube.com"
+      }
+    ],
+    "by_weekday": [
+      {
+        "count": 0,
+        "days": 4,
+        "weekday": 0
+      },
+      {
+        "count": 4,
+        "days": 4,
+        "weekday": 1
+      },
+      {
+        "count": 0,
+        "days": 4,
+        "weekday": 2
+      },
+      {
+        "count": 0,
+        "days": 4,
+        "weekday": 3
+      },
+      {
+        "count": 0,
+        "days": 4,
+        "weekday": 4
+      },
+      {
+        "count": 0,
+        "days": 4,
+        "weekday": 5
+      },
+      {
+        "count": 0,
+        "days": 4,
+        "weekday": 6
+      }
+    ],
+    "coverage_note": null,
+    "dst_approximate": false,
+    "estimates_excluded": 0,
+    "first_counted": 1791308400,
+    "gaps": [],
+    "movement": [
+      {
+        "count": 0,
+        "day": "2026-09-09",
+        "days": 1,
+        "seen": "none",
+        "so_far": false,
+        "span": "day"
+      },
+      {
+        "count": 0,
+        "day": "2026-09-10",
+        "days": 1,
+        "seen": "none",
+        "so_far": false,
+        "span": "day"
+      },
+      {
+        "count": 0,
+        "day": "2026-09-11",
+        "days": 1,
+        "seen": "none",
+        "so_far": false,
+        "span": "day"
+      },
+      {
+        "count": 0,
+        "day": "2026-09-12",
+        "days": 1,
+        "seen": "none",
+        "so_far": false,
+        "span": "day"
+      },
+      {
+        "count": 0,
+        "day": "2026-09-13",
+        "days": 1,
+        "seen": "none",
+        "so_far": false,
+        "span": "day"
+      },
+      {
+        "count": 0,
+        "day": "2026-09-14",
+        "days": 1,
+        "seen": "none",
+        "so_far": false,
+        "span": "day"
+      },
+      {
+        "count": 0,
+        "day": "2026-09-15",
+        "days": 1,
+        "seen": "none",
+        "so_far": false,
+        "span": "day"
+      },
+      {
+        "count": 0,
+        "day": "2026-09-16",
+        "days": 1,
+        "seen": "none",
+        "so_far": false,
+        "span": "day"
+      },
+      {
+        "count": 0,
+        "day": "2026-09-17",
+        "days": 1,
+        "seen": "none",
+        "so_far": false,
+        "span": "day"
+      },
+      {
+        "count": 0,
+        "day": "2026-09-18",
+        "days": 1,
+        "seen": "none",
+        "so_far": false,
+        "span": "day"
+      },
+      {
+        "count": 0,
+        "day": "2026-09-19",
+        "days": 1,
+        "seen": "none",
+        "so_far": false,
+        "span": "day"
+      },
+      {
+        "count": 0,
+        "day": "2026-09-20",
+        "days": 1,
+        "seen": "none",
+        "so_far": false,
+        "span": "day"
+      },
+      {
+        "count": 0,
+        "day": "2026-09-21",
+        "days": 1,
+        "seen": "none",
+        "so_far": false,
+        "span": "day"
+      },
+      {
+        "count": 0,
+        "day": "2026-09-22",
+        "days": 1,
+        "seen": "none",
+        "so_far": false,
+        "span": "day"
+      },
+      {
+        "count": 0,
+        "day": "2026-09-23",
+        "days": 1,
+        "seen": "none",
+        "so_far": false,
+        "span": "day"
+      },
+      {
+        "count": 0,
+        "day": "2026-09-24",
+        "days": 1,
+        "seen": "none",
+        "so_far": false,
+        "span": "day"
+      },
+      {
+        "count": 0,
+        "day": "2026-09-25",
+        "days": 1,
+        "seen": "none",
+        "so_far": false,
+        "span": "day"
+      },
+      {
+        "count": 0,
+        "day": "2026-09-26",
+        "days": 1,
+        "seen": "none",
+        "so_far": false,
+        "span": "day"
+      },
+      {
+        "count": 0,
+        "day": "2026-09-27",
+        "days": 1,
+        "seen": "none",
+        "so_far": false,
+        "span": "day"
+      },
+      {
+        "count": 0,
+        "day": "2026-09-28",
+        "days": 1,
+        "seen": "none",
+        "so_far": false,
+        "span": "day"
+      },
+      {
+        "count": 0,
+        "day": "2026-09-29",
+        "days": 1,
+        "seen": "none",
+        "so_far": false,
+        "span": "day"
+      },
+      {
+        "count": 0,
+        "day": "2026-09-30",
+        "days": 1,
+        "seen": "none",
+        "so_far": false,
+        "span": "day"
+      },
+      {
+        "count": 0,
+        "day": "2026-10-01",
+        "days": 1,
+        "seen": "none",
+        "so_far": false,
+        "span": "day"
+      },
+      {
+        "count": 0,
+        "day": "2026-10-02",
+        "days": 1,
+        "seen": "none",
+        "so_far": false,
+        "span": "day"
+      },
+      {
+        "count": 0,
+        "day": "2026-10-03",
+        "days": 1,
+        "seen": "none",
+        "so_far": false,
+        "span": "day"
+      },
+      {
+        "count": 0,
+        "day": "2026-10-04",
+        "days": 1,
+        "seen": "none",
+        "so_far": false,
+        "span": "day"
+      },
+      {
+        "count": 0,
+        "day": "2026-10-05",
+        "days": 1,
+        "seen": "none",
+        "so_far": false,
+        "span": "day"
+      },
+      {
+        "count": 4,
+        "day": "2026-10-06",
+        "days": 1,
+        "seen": "part",
+        "so_far": true,
+        "span": "day"
+      }
+    ],
+    "sealed": null
+  },
+  "answer_bytes": 3314,
+  "asked_at": 1791327909,
+  "core_ms": 1.254356,
+  "request": {
+    "args": {
+      "firstDay": "2026-09-09",
+      "lastDay": "2026-10-06",
+      "offsets": [
+        {
+          "from": 1788930000,
+          "offset": -18000
+        }
+      ],
+      "rangeEnd": 1791349200,
+      "rangeStart": 1788930000
+    },
+    "cmd": "summarize_reaches"
+  }
+}

@@ -153,7 +153,7 @@ describe('the rows, on the right page', () => {
     expect(bar).toHaveClass('nb-reaches-bar');
     expect(bar).toHaveAttribute('aria-hidden', 'true');
     expect(count).toHaveClass('nb-reaches-count');
-    expect(count.textContent).toBe('4');
+    expect(count.firstChild?.textContent).toBe('4');
     expect(first.children).toHaveLength(3);
 
     const last = lines[8]!;
@@ -260,7 +260,8 @@ describe('the rows, on the right page', () => {
     await user.click(choose('Day by day'));
 
     const notOurs = Array.from(spread.querySelectorAll('*')).flatMap((el) =>
-      Array.from(el.classList).filter((c) => !c.startsWith('nb-')),
+      // `sr-only` is the one shared class: the count's hidden unit, as the shell hides its heading.
+      Array.from(el.classList).filter((c) => !c.startsWith('nb-') && c !== 'sr-only'),
     );
     expect(notOurs).toEqual([]);
     expect(main.querySelector('.settle')).toBeNull();

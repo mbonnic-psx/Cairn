@@ -29,7 +29,7 @@ import {
   setQuotesShown,
   type DayView,
 } from '../ipc/journal';
-import { dayBounds, localToday } from '../localDays';
+import { clockTimeInWords, dayBounds, localToday } from '../localDays';
 
 /**
  * Text that shows nothing is empty (G4), here as in the store: the same
@@ -408,6 +408,13 @@ export function CheckIn({ session }: { session?: CheckInSession }) {
             ))}
           </ul>
         )}
+        {typeof view.first_counted === 'number' &&
+          view.first_counted >= opened.start &&
+          view.first_counted < opened.end && (
+            <p className="nb-checkin-note">
+              {`Cairn started counting at ${clockTimeInWords(view.first_counted)} ${ended ? `on ${thisDay}` : thisDay}.`}
+            </p>
+          )}
         {view.coverage_note && <p className="nb-checkin-note">{view.coverage_note}</p>}
       </div>
       <div className="nb-page nb-page--ruled">

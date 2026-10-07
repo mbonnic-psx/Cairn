@@ -41,6 +41,16 @@ impl RecordReach {
         }
     }
 
+    /// Notes that Cairn is counting, and keeping it, at `at` (slice
+    /// `first-counted`). Says whether it was noted.
+    pub fn note_counting(&self, at: i64) -> bool {
+        let history = match self.history.lock() {
+            Ok(history) => history,
+            Err(poisoned) => poisoned.into_inner(),
+        };
+        history.note_counting(at)
+    }
+
     /// Whether what Cairn counts has all been stored: the presence mark is
     /// only refreshed while this holds (FR-022).
     pub fn storing(&self) -> Arc<AtomicBool> {

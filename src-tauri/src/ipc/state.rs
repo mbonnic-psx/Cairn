@@ -95,6 +95,9 @@ pub struct TodaysReaches {
     pub gaps: Vec<Gap>,
     /// Shown above the list when part of the day was not observed (FR-030).
     pub coverage_note: Option<String>,
+    /// When Cairn first counted, in epoch seconds; `null` when it never has,
+    /// or the history is sealed (slice `first-counted`).
+    pub first_counted: Option<i64>,
     /// Present when the history could not be opened. Protection is unaffected,
     /// and the sentence says so (FR-036).
     pub sealed: Option<String>,
@@ -117,6 +120,9 @@ pub struct DayView {
     pub entry: Option<String>,
     /// The person's own estimate for a silent day.
     pub estimate: Option<u32>,
+    /// When Cairn first counted, in epoch seconds; `null` when it never has,
+    /// or the history is sealed (slice `first-counted`).
+    pub first_counted: Option<i64>,
     /// Present when the history could not be opened or read. Then nothing
     /// else is, and the interface shows this sentence and offers no space to
     /// write (FR-029).
@@ -131,6 +137,7 @@ impl DayView {
             coverage_note: None,
             entry: None,
             estimate: None,
+            first_counted: None,
             sealed: Some(sentence),
         }
     }
@@ -205,6 +212,9 @@ pub struct Patterns {
     /// How many days in the range hold the person's own estimate, which has
     /// no site and no hour, and so is in no list (FR-023).
     pub estimates_excluded: u32,
+    /// When Cairn first counted, in epoch seconds; `null` when it never has,
+    /// or the history is sealed (slice `first-counted`).
+    pub first_counted: Option<i64>,
     /// Always `false`. It was R4's flag for one offset applied across a clock
     /// change; under gaps review B4 every hour is bucketed by the offset in
     /// force at its instant, so none is approximate. It stays on the wire so
@@ -225,6 +235,7 @@ impl Patterns {
             gaps: Vec::new(),
             coverage_note: None,
             estimates_excluded: 0,
+            first_counted: None,
             dst_approximate: false,
             sealed: Some(sentence),
         }
@@ -651,11 +662,14 @@ impl AppState {
         use crate::store::history::History;
         use crate::store::key::HistoryKey;
 
+        // Read once: the gap since the last mark ends at this instant and
+        // counting begins at it, so the two agree.
+        let now = (self.now)();
         let key = HistoryKey::obtain(self.credentials.as_ref());
         let history = History::open(&self.data_directory, &key);
 
         let mark = presence::Mark::at(&self.data_directory);
-        presence::record_gap_since_last_seen(&history, &mark, (self.now)());
+        presence::record_gap_since_last_seen(&history, &mark, now);
 
         let sink = Arc::new(RecordReach::over(history));
         let storing = sink.storing();
@@ -666,14 +680,21 @@ impl AppState {
         // first run there is no mark yet, and this start is where the unseen
         // time begins.
         if !storing.load(std::sync::atomic::Ordering::SeqCst) && mark.read().is_none() {
-            mark.write((self.now)());
+            mark.write(now);
         }
 
-        let counting = session::start(self.helper.as_ref(), sink, self.now);
+        let for_session: Arc<dyn crate::counting::listener::NoteReach> = sink.clone();
+        let counting = session::start(self.helper.as_ref(), for_session, self.now);
 
         // The mark says "Cairn was counting, and keeping it, at this moment", so
         // it is only kept while that is true.
         if counting == Counting::Available {
+            // Counting and keeping it: this is a moment Cairn verified, not
+            // one it intended (Principle III). Nothing is noted before
+            // `session::start`, on a sealed history, or when it did not count.
+            if storing.load(std::sync::atomic::Ordering::SeqCst) {
+                sink.note_counting(now);
+            }
             presence::keep_marking(
                 presence::Mark::at(&self.data_directory),
                 self.now,
@@ -767,12 +788,30 @@ impl AppState {
                             to: gap.to,
                         })
                         .collect::<Vec<_>>();
-                    let gaps = clipped(&gaps, day_start, day_end);
+                    // An unreadable first count is not "never counted": it is
+                    // the unreadable sentence, as the other two answers say it.
+                    let first_counted = match history.first_count() {
+                        Ok(first_counted) => first_counted,
+                        Err(trouble) => {
+                            return TodaysReaches {
+                                reaches: Vec::new(),
+                                gaps: Vec::new(),
+                                coverage_note: None,
+                                first_counted: None,
+                                sealed: Some(trouble.message),
+                            };
+                        }
+                    };
+                    let gaps = crate::reflection::checkin::cut_at_the_first_count(
+                        &clipped(&gaps, day_start, day_end),
+                        first_counted,
+                    );
 
                     TodaysReaches {
                         coverage_note: coverage_note(&gaps),
                         gaps,
                         reaches,
+                        first_counted,
                         sealed: None,
                     }
                 }
@@ -780,6 +819,7 @@ impl AppState {
                     reaches: Vec::new(),
                     gaps: Vec::new(),
                     coverage_note: None,
+                    first_counted: None,
                     sealed: Some(sealed.unwrap_or(because)),
                 },
             }
@@ -792,6 +832,7 @@ impl AppState {
                 reaches: Vec::new(),
                 gaps: Vec::new(),
                 coverage_note: None,
+                first_counted: None,
                 sealed: Some(
                     "This build of Cairn does not keep a history. Protection is \
                      unaffected."
@@ -904,6 +945,7 @@ impl AppState {
                     coverage_note: range_coverage_note(&range.gaps),
                     gaps: range.gaps,
                     estimates_excluded: range.estimates_excluded,
+                    first_counted: range.first_counted,
                     dst_approximate: false,
                     sealed: None,
                 },
@@ -1163,6 +1205,7 @@ fn day_view(
             gaps: assembled.gaps,
             entry: assembled.entry,
             estimate: assembled.estimate,
+            first_counted: assembled.first_counted,
             sealed: None,
         },
         Err(trouble) => DayView::sealed(trouble.message),
