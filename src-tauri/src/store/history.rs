@@ -608,6 +608,9 @@ impl OpenHistory {
     /// so it can return a plain `rusqlite::Error` and let its caller decide
     /// once, in one place, whether to commit or roll back.
     fn delete_reaches_and_clip_gaps(&self, from: i64, to: i64) -> rusqlite::Result<()> {
+        // An owed first count is filled before anything is deleted, as every
+        // writer does: afterwards it would be the earliest of what is left.
+        Self::fill_if_owed(&self.connection)?;
         self.connection.execute(
             &format!("DELETE FROM reaches WHERE {REACHES_IN_RANGE}"),
             rusqlite::params![from, to],
@@ -662,9 +665,14 @@ impl OpenHistory {
     /// operation rather than a range wide enough to hope it covers
     /// everything.
     pub fn delete_all_reach_history(&self) -> Result<(), Trouble> {
-        self.connection
+        let failed = || Trouble::new("Cairn could not delete that just now.");
+        let transaction = self.begin_write().map_err(|_| failed())?;
+        // Filled first, so the deletion does not move the first count later.
+        Self::fill_if_owed(&transaction).map_err(|_| failed())?;
+        transaction
             .execute_batch("DELETE FROM reaches; DELETE FROM coverage_gaps;")
-            .map_err(|_| Trouble::new("Cairn could not delete that just now."))
+            .map_err(|_| failed())?;
+        transaction.commit().map_err(|_| failed())
     }
 
     /// Every column a table has. Shared by the column-list assertions for

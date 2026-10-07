@@ -858,6 +858,37 @@ mod with_history {
         assert_eq!(first_count_of(&held), Some(FIRST));
     }
 
+    // AD2 (FC-A4): a deletion while the fill is owed does not move the first count
+    #[test]
+    fn a_range_deletion_while_the_fill_is_owed_keeps_the_earliest_reach_as_the_first_count(
+    ) {
+        let (old, later) = (FIRST + 10 * HOUR, FIRST + 20 * HOUR);
+        let setup = setup();
+        legacy(&setup.data, &[old, later], &[]);
+        let held = opened_with_the_fill_owed(&setup.data);
+        let History::Open(open) = &held else { panic!() };
+
+        open.delete_reach_history(old, old + 1).unwrap();
+        assert!(held.note_counting(later + HOUR));
+
+        assert_eq!(first_count_of(&held), Some(old));
+    }
+
+    #[test]
+    fn deleting_everything_while_the_fill_is_owed_keeps_the_earliest_reach_as_the_first_count(
+    ) {
+        let (old, later) = (FIRST + 10 * HOUR, FIRST + 20 * HOUR);
+        let setup = setup();
+        legacy(&setup.data, &[old, later], &[]);
+        let held = opened_with_the_fill_owed(&setup.data);
+        let History::Open(open) = &held else { panic!() };
+
+        open.delete_all_reach_history().unwrap();
+        assert!(held.note_counting(later + HOUR));
+
+        assert_eq!(first_count_of(&held), Some(old));
+    }
+
     /// Holds the write lock on another connection for `hold`, with a journal
     /// write inside it, then commits.
     fn writer_elsewhere(
