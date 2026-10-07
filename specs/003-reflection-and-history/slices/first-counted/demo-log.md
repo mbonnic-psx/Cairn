@@ -1,10 +1,9 @@
 # Demo log — first-counted
 
-## 2026-10-06 — accepted · owner demo · the owner
+## 2026-10-06T23:20:00Z — accepted · iteration 12 · drive-hand (claude-opus-5-5)
 
-- **Accepted by the owner on 2026-10-06**, in the harness that `demo/README.md` describes (Vite on 127.0.0.1:1473, seed A on core :1471, seed B on core :1472). The benchmark's demo stage was closed `outcome=accepted` (ended 2026-10-06T21:00:12Z). What follows under N26 is the evidence that task asks for, gathered after the acceptance. It does not reopen the acceptance.
-
-## 2026-10-06T23:20:00Z — accepted · N26 evidence · drive-hand (claude-opus-5-5)
+- **Owner:** accepted on 2026-10-06, in the harness that `demo/README.md` describes (Vite on 127.0.0.1:1473, seed A on core :1471, seed B on core :1472). The benchmark's demo stage was closed `outcome=accepted` (ended 2026-10-06T21:00:12Z). What follows under N26 is the evidence that task asks for, gathered after the acceptance. It does not reopen the acceptance.
+- **Iteration:** none of its own; /cruise stopped in iteration 12 (2026-10-05) and this slice was driven by hand after it, so its entries carry 12.
 
 - **Started with:** the owner's harness, left untouched (Vite :1473 PID 921176, core A :1471 PID 921162, core B :1472 PID 921163). Two exceptions, both reads: two `list_todays_reaches` reads reached core A (`logs-a/012`, `013`) before the second Vite was up. For N26 the hand added four histories, seeded by `hand-fc-core seed` (`demo/harness/core-server-main.rs`, the same program with three new seed arms), and each was served by its own core: `since-2025` on :1474, `installed-yesterday` on :1475, `centuries-back` on :1476 and a fresh `installed-today` on :1478. Their data directories are `~/.cache/cairn-scratch/hand-fc/data-{c,d,e,f}`. The cores were built by cargo against this worktree at 46dbf8e, and cargo found the `cairn` library up to date. A second Vite ran on 127.0.0.1:1477 (`demo/harness/vite.n26.config.ts`, dependency cache under `~/.cache/cairn-scratch/hand-fc/vite-cache-n26`). The first Vite keeps serving its cached `fake-core.js`, because it does not watch `specs/`, so the new `?seed=c|d|e|f` mapping is only live on :1477. Every extra server was stopped afterwards (below).
 - **Seeded** (zone America/Chicago; `demo/seed-{c,d,e,f}.json` each carries `first_count_read_back`, the store's own `first_count()` after seeding):
@@ -17,6 +16,8 @@
   - **WebKitGTK:** WebKitGTK 2.52.6, the engine Tauri's window uses on Linux, driven through PyGObject (WebKit2 4.1) under Xvfb (`demo/harness/n26_webkitgtk.py`). It loaded the same page and got the same real-core answers, but it is **not** the Tauri window and not IPC.
   - **Tauri:** the Tauri window itself was not driven.
 - **Platforms seen:** WSL2 (Linux), in Chromium and in WebKitGTK as a bare engine. **Not seen:** the Tauri window on Linux (WebKitGTK over IPC), Windows (WebView2), macOS (WKWebView).
+
+- **Examples:** the N26 clauses, each below as seen, partly seen or not seen.
 
 ### N26, clause by clause
 
@@ -118,16 +119,18 @@ The 0.02 px spread comes from the grouped *1,234* measuring 36.02 px against 5ch
   - Stopped: the N26 cores on :1474, :1475, :1476 and :1478, the second Vite on :1477, and the two agent-browser sessions `fc26us` and `fc26gb`.
   - Left running: the owner's harness on :1471–:1473, as found.
 
-## 2026-10-07T18:20:00Z — accepted · N28 re-measure · drive-hand (claude-opus-5-5)
+## 2026-10-07T18:20:00Z — accepted · iteration 12 · drive-hand (claude-opus-5-5)
 
-- **Against:** `3d2882c` (N28: Over time's `ul` gets `nb-reaches-log--bars`, a grid `minmax(min-content, 1fr) minmax(0, 28%) auto` with every row on `subgrid`, inside `@supports (grid-template-columns: subgrid)`). The change is frontend only.
+- **Re-measure:** N28, after the owner chose to fix the weekly overlap in this slice.
+
+- **Started with:** `3d2882c` (N28: Over time's `ul` gets `nb-reaches-log--bars`, a grid `minmax(min-content, 1fr) minmax(0, 28%) auto` with every row on `subgrid`, inside `@supports (grid-template-columns: subgrid)`). The change is frontend only.
 - **Harness:**
   - **Vite:** a fresh one on 127.0.0.1:1477 (`demo/harness/vite.n26.config.ts`), so it served the CSS as committed.
   - **Cores:** `since-2025` on :1474 and `installed-yesterday` on :1475, serving the N26 histories `data-c` and `data-d` as they were seeded on 2026-10-06. Both run `hand-fc-core`, rebuilt for one new seed arm.
   - **Seed g (`long-names`):** a new history in `data-g`, served on :1479. It holds five sites: three names long enough to wrap (up to 63 characters), *reddit.com*, *x.com*, and 1,234 reaches on one long name (`demo/seed-g.json`). It was added because no earlier seed had a name that wraps.
   - **Harness files:** `fake-core.js` maps `?seed=g` to :1479. The owner's :1471–:1473 were not touched.
   - **Dates:** today is 2026-10-07, so *Day by day* from 2025-01-01 now draws **93** weekly rows (N26 had 92). The new week, *week of Oct 7, 2026*, holds 0.
-- **Engines:**
+- **Driven through:**
   - **Chromium:** agent-browser, headless, sessions `fc28us` (Intl `en-US`) and `fc28gb` (`en-GB`), `--allowed-domains 127.0.0.1`.
   - **WebKitGTK 2.52.6** (PyGObject, Xvfb), in three runs:
     - preferred language `en-US`: Intl `en-US`, writes *1,234*;
@@ -141,6 +144,8 @@ The 0.02 px spread comes from the grouped *1,234* measuring 36.02 px against 5ch
 
   Every N28 rule hangs on that class, so the second reading is the flex layout N26 measured. It is also what an engine without `subgrid` draws. The "before" counts reproduce N26 exactly (77 and 56).
 - **Gap measure** (`demo/harness/n28-measure.js`): bar's left edge minus the right edge of the name's *text* (its line boxes, not its element box, since a one-line name can overflow its box), divided by `--nb-u`. A second reading takes the whole label, the name plus the clause beside it. It is 0 rows under 12 everywhere, so it is not repeated below.
+
+- **Examples:** N28's Done-when, measured below.
 
 ### Day by day, since 2025 (93 weekly rows, *week of Sept 30* 1,297)
 
