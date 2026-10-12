@@ -25,6 +25,11 @@ export interface DayView {
   estimate: number | null;
   /** Present when the history could not be opened. Then nothing else is, and no space is offered. */
   sealed: string | null;
+  /**
+   * The moment Cairn first counted, in epoch seconds; `null` when it never has. A reader treats an answer
+   * without the key as not yet known (an answer from before this field).
+   */
+  first_counted?: number | null;
 }
 
 /** `day` is the local date as YYYY-MM-DD; the bounds are its local midnights, in epoch seconds. */

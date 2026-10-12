@@ -11,6 +11,7 @@ import { fireEvent, render, screen, waitFor, within } from '@testing-library/rea
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 
+import { shown } from './countText';
 import { Reaches, type ReachesReader } from '../Reaches';
 import type { Patterns, TodaysReaches } from '../../ipc/reaches';
 
@@ -333,7 +334,7 @@ describe('how it reads', () => {
     await screen.findByText('a.example');
 
     const items = screen.getAllByRole('listitem');
-    expect(items.map((li) => li.textContent)).toEqual([
+    expect(items.map((li) => shown(li))).toEqual([
       'a.example5',
       'b.example2',
       'c.example2',

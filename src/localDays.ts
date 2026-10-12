@@ -264,3 +264,11 @@ export function shortDateInWords(day: string, withYear: boolean): string {
 /** A week's name: `week of` and the date it begins on. */
 export const weekOfInWords = (day: string, withYear: boolean): string =>
   `week of ${shortDateInWords(day, withYear)}`;
+
+/**
+ * The clock time of an instant in the computer's own zone and locale, as a person
+ * would read it ("1:30 AM"). Takes the instant it is asked about and names nothing else.
+ */
+export function clockTimeInWords(at: number): string {
+  return new Date(at * 1000).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+}

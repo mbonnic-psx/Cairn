@@ -1,0 +1,30 @@
+{
+  "measured_at": "2026-10-06T17:55:00-05:00 to 18:30:00-05:00",
+  "how": "history-movement's V29 measurement (demo/harness/v29.js) as demo/harness/n26-v29.js: From is typed as 1000-01-01 through the input's own setter while Day by day shows the opening range, and every animation frame records the longest gap between frames until Day by day shows weekly rows. View switches after drawing are timed the same way.",
+  "answers_from": "the real core (worktree src-tauri at 46dbf8e, hand-fc-core serve) over 127.0.0.1 HTTP, not Tauri IPC; Vite dev build on 127.0.0.1:1477",
+  "scenario_44_first_count_2025_01_01": {
+    "seed": "since-2025 (seed-c.json; core :1474)",
+    "from_box_after_typing_1000_01_01": "2025-01-01",
+    "requests_the_core_received": "2026-09-09..2026-10-06 (opening range) and 2025-01-01..2026-10-06; none for 1000-01-01 (n26-core-answers/c-009-*)",
+    "rows": 92,
+    "core_ms_inside_summarize_reaches": 17.8,
+    "answer_bytes": 8836,
+    "chromium_en_US_1280x800": {"ms_input_to_rows_on_page": 170, "longest_main_thread_block_ms": 62,
+      "after_drawn": {"switch_to_by_site_ms": 11, "switch_back_to_day_by_day_ms": 24, "switch_to_by_hour_ms": 9, "switch_back_again_ms": 19}},
+    "chromium_en_GB_1280x800": {"ms_input_to_rows_on_page": 70, "longest_main_thread_block_ms": 41},
+    "webkitgtk_2_52_6_C_locale_1280x800": {"ms_input_to_rows_on_page": 159, "longest_main_thread_block_ms": 135},
+    "webkitgtk_2_52_6_en_GB_1280x800": {"ms_input_to_rows_on_page": 244, "longest_main_thread_block_ms": 194},
+    "v29_for_comparison": {"rows": 53574, "ms_input_to_rows_on_page": 10269, "longest_main_thread_block_ms": 9812}
+  },
+  "f6_remaining_path_a_reach_under_a_clock_set_centuries_back": {
+    "seed": "centuries-back (seed-e.json; core :1476): counting noted 2025-01-01, one reach recorded at 1000-06-01 18:00 UTC; the store's first_count read back is that reach (-30597112800)",
+    "from_box_after_typing_1000_01_01": "1000-06-01",
+    "rows": 53553,
+    "core_ms_inside_summarize_reaches": 185.9,
+    "answer_bytes": 4499473,
+    "chromium_en_US_1280x800": {"ms_input_to_rows_on_page": 18833, "longest_main_thread_block_ms": 17862,
+      "after_drawn": {"switch_to_by_site_ms": [1751, 1261], "switch_back_to_day_by_day_ms": [51460, 30311]}},
+    "webkitgtk_2_52_6_C_locale_1280x800": {"ms_input_to_rows_on_page": 107568, "longest_main_thread_block_ms": 105649}
+  },
+  "not_measured": "the Tauri window itself (WebKitGTK inside Tauri, over IPC) on Linux, WebView2 on Windows, WKWebView on macOS"
+}

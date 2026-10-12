@@ -14,7 +14,7 @@ import { describe, expect, it, vi } from 'vitest';
 import type { Patterns } from '../../ipc/reaches';
 import { NotebookShell } from '../../shell/NotebookShell';
 import { Reaches } from '../Reaches';
-import { BY_DAY_DELTA, BY_HOUR_WORDS, DAY_BY_DAY_DELTA } from './beforeTheReveal';
+import { BY_DAY_DELTA, BY_HOUR_WORDS, countUnitDelta, DAY_BY_DAY_DELTA } from './beforeTheReveal';
 import { evening, rangeCoverageNote, sealedSentence, todayCases } from './tonightCases';
 import { never } from './fakeCore';
 
@@ -153,7 +153,7 @@ describe('the hours, on the right page', () => {
       expect(bar).toHaveClass('nb-reaches-bar');
       expect(bar).toHaveAttribute('aria-hidden', 'true');
       expect(count).toHaveClass('nb-reaches-count');
-      expect(count.textContent).toBe(String({ 2: 2, 14: 6, 15: 3 }[hour] ?? 0));
+      expect(count.firstChild?.textContent).toBe(String({ 2: 2, 14: 6, 15: 3 }[hour] ?? 0));
       expect(line.children).toHaveLength(3);
     });
     const widths = lines.map((line) => within(line).getByTestId('bar').style.width);
@@ -220,12 +220,20 @@ describe('the hours, on the right page', () => {
     await user.click(choose('By hour'));
 
     const notOurs = Array.from(spread.querySelectorAll('*')).flatMap((el) =>
-      Array.from(el.classList).filter((c) => !c.startsWith('nb-')),
+      // `sr-only` is the one shared class: the count's hidden unit, as the shell hides its heading.
+      Array.from(el.classList).filter((c) => !c.startsWith('nb-') && c !== 'sr-only'),
     );
     expect(notOurs).toEqual([]);
     expect(main.querySelector('.settle')).toBeNull();
   });
 });
+
+/** The record without the numbers of the counts it holds: each is read as the unit's leaf, not its own. */
+function withoutCounts(record: string[], counts: number[]): string[] {
+  const out = [...record];
+  for (const count of counts) out.splice(out.indexOf(String(count)), 1);
+  return out;
+}
 
 describe('the words it said before the notebook', () => {
   it.each([
@@ -240,7 +248,13 @@ describe('the words it said before the notebook', () => {
     await pageUser.click(choose('By hour'));
 
     expect(words(spread)).toEqual(
-      [...BY_HOUR_WORDS[name]!, ...BY_DAY_DELTA.words!.added!, ...DAY_BY_DAY_DELTA.words!.added!].sort(),
+      // This reader takes leaf elements: a count's number is no longer one (its unit is inside it), so it is the unit alone.
+      [
+        ...withoutCounts(BY_HOUR_WORDS[name]!, patterns.by_hour.map((one) => one.count)),
+        ...BY_DAY_DELTA.words!.added!,
+        ...DAY_BY_DAY_DELTA.words!.added!,
+        ...countUnitDelta(patterns.by_hour.map((one) => one.count)).words!.added!,
+      ].sort(),
     );
   });
 });

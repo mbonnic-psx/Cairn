@@ -63,6 +63,9 @@ command, apart from `quote` and `one-day`, which both edit `CheckIn.tsx`. Run th
   first count: at the widest range the screen sends (1000-01-01), *Day by day* blocks the page for about 10 s
   (`decisions.md` D3, M11). It also takes V47 and V48, the count's unit for a screen reader and its grouping (D2).
 
+- `theirs` clears the first count only when the person erases everything; any narrower deletion leaves it where it
+  is (gaps review F5, 2026-10-05).
+
 ## History, split (2026-10-01)
 
 Split by **rule** (SPIDR): each breakdown is a rule a person can use alone, and the range and the screen are

@@ -31,6 +31,11 @@ export interface TodaysReaches {
   coverage_note: string | null;
   /** Present when the history could not be opened. Protection is unaffected. */
   sealed: string | null;
+  /**
+   * The moment Cairn first counted, in epoch seconds; `null` when it never has. A reader treats an answer
+   * without the key as not yet known (an answer from before this field), which only a test fixture is.
+   */
+  first_counted?: number | null;
 }
 
 export const listTodaysReaches = (dayStart: number, dayEnd: number) =>
@@ -109,6 +114,11 @@ export interface Patterns {
   dst_approximate: boolean;
   /** Present when the history could not be read, or the range was not one Cairn could place. */
   sealed: string | null;
+  /**
+   * The moment Cairn first counted, in epoch seconds; `null` when it never has. A reader treats an answer
+   * without the key as not yet known (an answer from before this field), which only a test fixture is.
+   */
+  first_counted?: number | null;
 }
 
 /**

@@ -9,11 +9,13 @@
  * congratulation for a short list, no shame for a long one, no comparison with
  * yesterday, no total to beat. Just what happened, and what Cairn did not see.
  */
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useState, type CSSProperties, type ReactNode } from 'react';
 
 import {
   acrossInWords,
   addDays,
+  type Bounds,
+  clockTimeInWords,
   dayBounds,
   firstWeekday,
   hourInWords,
@@ -320,6 +322,12 @@ function TodayView({
     <>
       <div className="nb-page">
         <h2 className="nb-reaches-title">{TODAY}</h2>
+        {typeof day.first_counted === 'number' &&
+          within(day.first_counted, dayBounds(localToday(now()))) && (
+            <p className="nb-reaches-aside">
+              {`Cairn started counting at ${clockTimeInWords(day.first_counted)} today.`}
+            </p>
+          )}
         <p className="nb-reaches-note">{day.coverage_note ?? COUNTED_ONLY_TODAY}</p>
       </div>
       <div className="nb-page nb-page--ruled">
@@ -343,6 +351,32 @@ function TodayView({
   );
 }
 
+/**
+ * The earliest day *From* may take, from an answer: the computer's own date of the first count, never after
+ * today (a clock moved back). Today itself where Cairn has never counted (`null`). None for a sealed answer or
+ * one without the field.
+ */
+function limitOf(answer: Patterns, todayDay: string): string | undefined {
+  if (answer.sealed || answer.first_counted === undefined) return undefined;
+  if (answer.first_counted === null) return todayDay;
+  const day = localToday(new Date(answer.first_counted * 1000));
+  return day > todayDay ? todayDay : day;
+}
+
+/** Whether an instant falls inside a range's bounds. */
+const within = (at: number, bounds: Bounds): boolean => bounds.start <= at && at < bounds.end;
+
+/** The day Cairn started counting, when the range does not hold it (F2): the first count's own date, with its year. */
+const startedOnWords = (at: number): string =>
+  `Cairn started counting on ${shortDateInWords(localToday(new Date(at * 1000)), true)}.`;
+
+/** The time and day Cairn started counting, when the range holds it (F3): the year as the rows write it. */
+const startedAtWords = (at: number, firstDay: string, lastDay: string, todayDay: string): string =>
+  `Cairn started counting at ${clockTimeInWords(at)} on ${shortDateInWords(
+    localToday(new Date(at * 1000)),
+    namesYear(firstDay, lastDay, todayDay),
+  )}.`;
+
 /** What the view holds: the answer for a range, nothing yet, or one sentence for a read that threw. */
 type Answer = Patterns | 'looking' | 'unreadable';
 
@@ -359,6 +393,11 @@ function OverTimeView({
   const todayDay = localToday(now());
   const [firstDay, setFirstDay] = useState(() => addDays(todayDay, -27));
   const [lastDay, setLastDay] = useState(todayDay);
+  // The earliest day *From* may take: the local day Cairn first counted, from the latest answer that carried it.
+  // Component state and nothing more, read afresh from each opening's answers (H2).
+  const [limit, setLimit] = useState<string | undefined>(undefined);
+  // The instant itself, kept only when Cairn has counted: what the one sentence about the start is made from.
+  const [startedAt, setStartedAt] = useState<number | undefined>(undefined);
   const [answer, setAnswer] = useState<Answer>('looking');
   // Which breakdown of the one answer: forgotten with the range on leaving the view.
   const [seen, setSeen] = useState<Seen>('site');
@@ -369,7 +408,21 @@ function OverTimeView({
     setAnswer('looking');
     read
       .summarizeReaches(firstDay, lastDay, start, end, offsetChanges(firstDay, lastDay))
-      .then((patterns) => current && setAnswer(patterns))
+      .then((patterns) => {
+        if (!current) return;
+        const found = limitOf(patterns, todayDay);
+        if (found !== undefined) setLimit(found);
+        if (!patterns.sealed && patterns.first_counted !== undefined) {
+          setStartedAt(patterns.first_counted ?? undefined);
+        }
+        // An answer for days before the limit is not drawn: the range is moved up to it and asked for again.
+        if (found !== undefined && found > firstDay) {
+          setFirstDay(found);
+          if (lastDay < found) setLastDay(found);
+          return;
+        }
+        setAnswer(patterns);
+      })
       .catch(() => current && setAnswer('unreadable'));
     return () => {
       current = false;
@@ -379,7 +432,9 @@ function OverTimeView({
   }, [firstDay, lastDay]);
 
   const changeFirst = (value: string) => {
-    if (isLocalDate(value) && value <= lastDay) setFirstDay(value);
+    if (isLocalDate(value) && value <= lastDay) {
+      setFirstDay(limit !== undefined && value < limit ? limit : value);
+    }
   };
   const changeLast = (value: string) => {
     if (isLocalDate(value) && value >= firstDay && value <= todayDay) setLastDay(value);
@@ -390,6 +445,7 @@ function OverTimeView({
       firstDay={firstDay}
       lastDay={lastDay}
       todayDay={todayDay}
+      limit={limit}
       onFirst={changeFirst}
       onLast={changeLast}
     />
@@ -411,6 +467,12 @@ function OverTimeView({
   const quiet = list ? isQuiet(all) : false;
   const rows = !unseen || seen === 'movement' ? all : [];
   const largest = largestCount(rows);
+  const holdsStart = startedAt !== undefined && within(startedAt, rangeBounds(firstDay, lastDay));
+  // Every count in the view takes the width of the widest, grouped as it is written (V48).
+  const countChars = rows.reduce(
+    (widest, row) => (row.absent ? widest : Math.max(widest, row.count.toLocaleString().length)),
+    1,
+  );
   return (
     <>
       <div className="nb-page">
@@ -421,6 +483,14 @@ function OverTimeView({
           <p className="nb-reaches-sentence">{sentence}</p>
         ) : (
           <>
+            {startedAt !== undefined && !holdsStart && (
+              <p className="nb-reaches-aside">{startedOnWords(startedAt)}</p>
+            )}
+            {startedAt !== undefined && holdsStart && (
+              <p className="nb-reaches-aside">
+                {startedAtWords(startedAt, firstDay, lastDay, todayDay)}
+              </p>
+            )}
             {list.coverage_note && (
               <p className="nb-reaches-aside">{list.coverage_note}</p>
             )}
@@ -442,7 +512,10 @@ function OverTimeView({
               quiet && <p className="nb-reaches-empty">{NOTHING_THESE_DAYS}</p>
             )}
             {rows.length > 0 && (seen !== 'site' || !isQuiet(rows)) && (
-              <ul className="nb-reaches-log">
+              <ul
+                className="nb-reaches-log nb-reaches-log--bars"
+                style={{ '--nb-count-chars': countChars } as CSSProperties}
+              >
                 {rows.map((row) => (
                   <li
                     key={row.key}
@@ -474,7 +547,12 @@ function OverTimeView({
                             }}
                           />
                         </div>
-                        <span className="nb-reaches-count">{row.count}</span>
+                        <span className="nb-reaches-count">
+                          {row.count.toLocaleString()}
+                          <span className="sr-only">
+                            {row.count === 1 ? ' reach' : ' reaches'}
+                          </span>
+                        </span>
                       </>
                     )}
                   </li>
@@ -519,12 +597,14 @@ function DateBoxes({
   firstDay,
   lastDay,
   todayDay,
+  limit,
   onFirst,
   onLast,
 }: {
   firstDay: string;
   lastDay: string;
   todayDay: string;
+  limit: string | undefined;
   onFirst: (value: string) => void;
   onLast: (value: string) => void;
 }) {
@@ -535,6 +615,7 @@ function DateBoxes({
         <input
           type="date"
           value={firstDay}
+          min={limit}
           max={lastDay}
           onChange={(event) => onFirst(event.target.value)}
           className="nb-reaches-date"

@@ -1,6 +1,7 @@
 //! One day, whole, as the history holds it (T029).
 
 use crate::domain::dates::LocalDate;
+use crate::domain::first_count;
 use crate::services::Trouble;
 use crate::store::gaps::{clipped, Gap};
 use crate::store::history::{OpenHistory, Reach};
@@ -13,6 +14,21 @@ pub struct Day {
     pub gaps: Vec<Gap>,
     pub entry: Option<String>,
     pub estimate: Option<u32>,
+    /// When Cairn first counted (slice `first-counted`).
+    pub first_counted: Option<i64>,
+}
+
+/// Each gap cut to begin no earlier than the first count: the time before it
+/// is not a stretch Cairn was not running (slice `first-counted`, rule 8).
+pub(crate) fn cut_at_the_first_count(
+    gaps: &[Gap],
+    first_counted: Option<i64>,
+) -> Vec<Gap> {
+    let spans: Vec<(i64, i64)> = gaps.iter().map(|gap| (gap.from, gap.to)).collect();
+    first_count::gaps_since(first_counted, &spans)
+        .into_iter()
+        .map(|(from, to)| Gap { from, to })
+        .collect()
 }
 
 /// The longest a local day can be: 25 hours at a clock change, and an hour
@@ -75,6 +91,7 @@ pub fn assemble(
     day_end: i64,
 ) -> Result<Day, Trouble> {
     let reaches = history.between(day_start, day_end)?;
+    let first_counted = history.first_count()?;
     let gaps: Vec<Gap> = history
         .gaps_between(day_start, day_end)?
         .into_iter()
@@ -83,7 +100,7 @@ pub fn assemble(
             to: gap.to,
         })
         .collect();
-    let gaps = clipped(&gaps, day_start, day_end);
+    let gaps = cut_at_the_first_count(&clipped(&gaps, day_start, day_end), first_counted);
     let entry = history.entry_for(day)?.map(|entry| entry.text);
     let estimate = history.estimate_for(day)?.map(|estimate| estimate.count);
 
@@ -92,5 +109,6 @@ pub fn assemble(
         gaps,
         entry,
         estimate,
+        first_counted,
     })
 }

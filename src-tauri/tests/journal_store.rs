@@ -240,6 +240,7 @@ fn no_side_table_exists_to_hold_a_previous_version_of_an_entry() {
         tables,
         vec![
             "coverage_gaps".to_string(),
+            "first_count".to_string(),
             "journal_entries".to_string(),
             "reach_estimates".to_string(),
             "reaches".to_string(),

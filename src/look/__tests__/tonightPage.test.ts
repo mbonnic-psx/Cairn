@@ -72,7 +72,7 @@ const SHELL = ['nb-spread', 'nb-page', 'nb-page--ruled', 'nb-label'];
 const OWN = ['nb-reaches-', 'nb-checkin-'];
 const isOwn = (name: string) => OWN.some((p) => name.startsWith(p));
 
-const classesIn = (text: string) => new Set(text.match(/\bnb-[a-z0-9]+(?:[-_]{1,2}[a-z0-9]+)*/g) ?? []);
+const classesIn = (text: string) => new Set(text.match(/(?<!-)\bnb-[a-z0-9]+(?:[-_]{1,2}[a-z0-9]+)*/g) ?? []);
 const named = classesIn(sources);
 const styled = new Set([...css.matchAll(/\.(nb-[a-z0-9]+(?:[-_]{1,2}[a-z0-9]+)*)/g)].map((m) => m[1]!));
 
@@ -138,7 +138,10 @@ describe('the tonight-page stylesheet', () => {
 
   it('takes colour only from the look tokens, each defined in every look', () => {
     // --nb-u is the one length a page sheet sizes by, defined once for every look (boardScale.test.ts holds its use).
-    const used = [...css.matchAll(/var\((--[a-z0-9-]+)/g)].map((m) => m[1]!).filter((name) => name !== '--nb-u');
+    // --nb-count-chars is the other: a length the list sets from its largest count (a custom property, not a class).
+    const used = [...css.matchAll(/var\((--[a-z0-9-]+)/g)]
+      .map((m) => m[1]!)
+      .filter((name) => name !== '--nb-u' && name !== '--nb-count-chars');
     expect(used.length).toBeGreaterThan(0);
     for (const name of used) expect([...COLOURS, ...FONTS], name).toContain(name);
     for (const look of LOOKS) {

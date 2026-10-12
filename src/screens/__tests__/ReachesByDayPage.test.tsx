@@ -145,7 +145,7 @@ describe('the days, on the right page', () => {
       expect(bar).toHaveClass('nb-reaches-bar');
       expect(bar).toHaveAttribute('aria-hidden', 'true');
       expect(count).toHaveClass('nb-reaches-count');
-      expect(count.textContent).toBe(String({ 0: 4, 2: 2 }[weekday as 0 | 2] ?? 0));
+      expect(count.firstChild?.textContent).toBe(String({ 0: 4, 2: 2 }[weekday as 0 | 2] ?? 0));
       expect(line.children).toHaveLength(3);
     });
     const widths = lines.map((line) => within(line).getByTestId('bar').style.width);
@@ -247,7 +247,8 @@ describe('the days, on the right page', () => {
     await user.click(choose('By day'));
 
     const notOurs = Array.from(spread.querySelectorAll('*')).flatMap((el) =>
-      Array.from(el.classList).filter((c) => !c.startsWith('nb-')),
+      // `sr-only` is the one shared class: the count's hidden unit, as the shell hides its heading.
+      Array.from(el.classList).filter((c) => !c.startsWith('nb-') && c !== 'sr-only'),
     );
     expect(notOurs).toEqual([]);
     expect(main.querySelector('.settle')).toBeNull();

@@ -139,3 +139,29 @@ Omitted: authorisation · not present; driven adapter · already covered by the 
 Findings: none.
 
 Held: a differential fuzzer against an independent per-minute model of the contract (about 5 470 accepted inputs over 8 seeds: ranges of 1–10 and 50–75 dates, offset walks of 30-minute steps up to ±3 h, merged gaps, reaches up to an hour outside the range, `now` anywhere): 0 mismatches in rows, `days`, `count`, `so_far` or `seen`. The half boundary (M12) at exactly half and half + 1 s on 24-, 25-, 23- and Lord Howe's 23.5-hour days; `now` exactly at and one second before a row's local midnight; `now` inside an open gap (both rows `none`, today's `so_far`; with a reach, `part`, never `none`); 60 dates as 8 weeks and a 4-day row; touching gaps counted once; Apia's skipped day refused by both checks (sealed, as before). Nothing accepted panics or allocates without bound (entries capped at days + 1, saturating arithmetic). M13's sentence only over a non-empty list of all-`none` rows; M14's year on any range across New Year. Noted, defined by the contract: at exactly local midnight today's row is `whole`, 0, *so far* for one second. The 10-second draw at the widest range is V29, decided in D3, and was not re-probed.
+
+## first-counted · bbb3d74 · 2026-10-07
+
+| Trigger | Status | Evidence |
+|---|---|---|
+| driving adapter (HTTP route, CLI command, queue consumer) | widened | `src-tauri/src/ipc/state.rs`: `DayView`, `TodaysReaches` and `Patterns` gain `first_counted`; no command added (`tests/ipc_surface.rs` unchanged) |
+| driven adapter or the provider types behind one | widened | `src-tauri/src/store/history.rs`: the `first_count` table, the legacy fill at open, write transactions begin IMMEDIATE; `src-tauri/src/counting/sink.rs` `note_counting` |
+| authorisation decision (who can reach one that already exists) | not present | single local user; `Reads` (`tests/ipc_surface.rs`) |
+| concurrency, idempotency, ordering, retention, or time | widened | the fill decided inside its write transaction (NC1, NC4); F6 moves the first count back; the time before it is never seen (`domain/first_count.rs`, `reflection/over_time.rs`, `reflection/checkin.rs`) |
+
+Spawned: the first count's store · `drive-adversary` · host (Opus 5.5) · delegated, fresh context · manifest: `src-tauri/src/store/history.rs`, `src-tauri/src/counting/sink.rs`, `src-tauri/src/domain/first_count.rs`, `src-tauri/src/domain/mod.rs`, `src-tauri/tests/first_counted.rs`, `src-tauri/tests/first_counted_session.rs`, `src-tauri/tests/stores.rs`, `src-tauri/tests/domain_first_count.rs`, `specs/003-reflection-and-history/data-model.md`
+Spawned: the three answers and the time before the first count · `drive-adversary` · host (Opus 5.5) · delegated, fresh context · manifest: `src-tauri/src/ipc/state.rs`, `src-tauri/src/reflection/checkin.rs`, `src-tauri/src/reflection/over_time.rs`, `src-tauri/src/domain/patterns.rs`, `src-tauri/src/domain/first_count.rs`, `src-tauri/tests/first_counted.rs`, `src-tauri/tests/first_counted_session.rs`, `src-tauri/tests/ipc_surface.rs`, `src/ipc/reaches.ts`, `src/ipc/journal.ts`, `src/localDays.ts`, `src/screens/Reaches.tsx`, `src/screens/CheckIn.tsx`, `src/screens/__tests__/ReachesFirstCounted.test.tsx`, `src/screens/__tests__/ReachesFirstCountedPage.test.tsx`, `src/screens/__tests__/ReachesCounts.test.tsx`, `src/screens/__tests__/CheckInFirstCounted.test.tsx`
+Omitted: authorisation · not present
+
+Findings (triaged by the host):
+
+| # | Severity | Triage | State | Finding |
+|---|---|---|---|---|
+| FC-A1 | HIGH | confirmed (read: `counting/session.rs` `start` returns `Available` while a session is held, and `begin_counting_session`, `ipc/state.rs` 687–697, then notes the first count on a sink that session never uses) | fixed (b59af69) | Erase everything, then turn protection on again in the same run: the first count is noted in the new history and every reach goes to the deleted file's connection. Reaches dropped after an erase predate the slice; the false first count is this slice's |
+| FC-A2 | HIGH | confirmed (same read as FC-A1) | fixed (b59af69) | A session started on a sealed history is reused once the key is back: the first count is written, every reach is dropped until restart (rule 2). `tests/first_counted_session.rs` scenario 3 calls `session::stop()` between starts, which the app never does |
+| FC-A3 | MEDIUM | confirmed (read: `ipc/state.rs` `remove_if_present` returns `false` for a failed removal too, and `delete_all_data` deletes the key regardless) | open | Erase everything when `history.db` cannot be removed deletes the key anyway; the history stays sealed for good. Predates the slice (002); likely the normal case on Windows while a connection is open |
+| FC-A4 | LOW | confirmed (read: `delete_reach_history`, `delete_all_reach_history` do not fill an owed first count) | fixed (b1f39e4) | A deletion while the fill is owed moves the first count later (rule 5). No IPC command reaches it yet |
+| FC-A5 | LOW | confirmed (agent reproduction; erase code is 002's) | open | A hot journal from a crash survives *erase everything* until the next open. Predates the slice |
+| FC-B1 | MEDIUM | question (product wording) | open | A day wholly before the first count (never counted, or the clock moved back) reads on *Today* and the check-in as "This is what it saw today. Nothing here for today.", while Over time says Cairn wasn't counting (rule 8, FR-022) |
+
+Held: the store's first-count SQL under races, busy and read-only opens, interrupted fills, tampered rows (a second row, NULL, TEXT, extreme i64); a sealed history writes and reads nothing; *From* never earlier and never drawn under stale and racing answers; one start sentence (NC3); the three answers agree, NC2 holds; midnight, 23:59, DST gap and overlap, zone changes. Not seen: Windows.

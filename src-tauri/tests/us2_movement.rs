@@ -39,6 +39,10 @@ use cairn::store::config::ConfigStore;
 
 const A_KEY: [u8; 32] = [7u8; 32];
 
+/// 2025-01-01 00:00 UTC: where the fixtures say counting began.
+#[allow(dead_code)]
+const COUNTING_FROM: i64 = 1_735_689_600;
+
 const HOUR: i64 = 3600;
 const DAY: i64 = 86_400;
 
@@ -226,8 +230,10 @@ fn occupied(patterns: &Patterns) -> Vec<(String, u32)> {
 // --- The wire shape ------------------------------------------------------------------
 
 #[test]
-fn the_answer_serialises_to_exactly_nine_keys_and_each_row_to_six() {
+fn the_answer_serialises_to_exactly_ten_keys_and_each_row_to_six() {
     let state_setup = setup();
+    #[cfg(feature = "history")]
+    with_history::counting_from_2025(&state_setup.data);
     let state = app(&state_setup, &Keychain::available());
     let value = serde_json::to_value(Range::four_weeks().ask(&state)).unwrap();
     let object = value.as_object().expect("an object");
@@ -242,6 +248,7 @@ fn the_answer_serialises_to_exactly_nine_keys_and_each_row_to_six() {
             "coverage_note",
             "dst_approximate",
             "estimates_excluded",
+            "first_counted",
             "gaps",
             "movement",
             "sealed"
@@ -279,7 +286,17 @@ mod with_history {
         else {
             panic!("a fresh directory with a good key should open");
         };
+        // Cairn was counting long before any range these scenarios ask for, so
+        // the time before their first record is not the time before it first
+        // counted (slice `first-counted`, pin row 1).
+        open.note_counting(COUNTING_FROM).unwrap();
         open
+    }
+
+    /// Notes counting from 2025-01-01, for the scenarios that ask without a
+    /// seed of their own.
+    pub fn counting_from_2025(data: &Path) {
+        drop(seed(data));
     }
 
     /// `count` reaches in the day from `day`'s UTC midnight, a minute apart.
@@ -1034,6 +1051,41 @@ mod with_history {
 
         assert!(patterns.sealed.is_some());
         assert_eq!(patterns.movement, [], "never rows at zero");
+    }
+
+    // Slice `first-counted`, N-C1 as rewritten by N13 (rule 8): the time before
+    // Cairn first counted is not seen, where it once read as seen with zero.
+    #[test]
+    fn the_dates_before_the_first_count_read_as_none_with_no_reaches() {
+        let setup = setup();
+        let History::Open(history) =
+            History::open(&setup.data, &HistoryKey::Available(Key::from_bytes(A_KEY)))
+        else {
+            panic!("a fresh directory with a good key should open");
+        };
+        // Cairn first counted with the reach on 2026-09-07 00:01: no fixture
+        // note of an earlier start here.
+        reaches_on(&history, "2026-09-07", 1);
+        let state = app(&setup, &Keychain::available());
+
+        let patterns = Range::four_weeks().ask(&state);
+
+        for index in [0, 1] {
+            let row = &patterns.movement[index];
+            assert_eq!(named(row), ["2026-09-05", "2026-09-06"][index]);
+            assert_eq!(
+                (row.seen, row.count),
+                (Seen::None, 0),
+                "before the first count is not seen"
+            );
+        }
+        assert_eq!(
+            (patterns.movement[2].seen, patterns.movement[2].count),
+            (Seen::Whole, 1),
+            "the date Cairn first counted on, an hour of it before"
+        );
+        assert!(patterns.gaps.is_empty());
+        assert_eq!(patterns.coverage_note, None);
     }
 }
 

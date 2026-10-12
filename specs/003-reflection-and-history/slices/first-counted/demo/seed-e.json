@@ -1,0 +1,21 @@
+{
+  "first_count_intended": -30597112800,
+  "first_count_read_back": -30597112800,
+  "gaps": [],
+  "reach_count": 2,
+  "reaches": [
+    {
+      "at": 1735752600,
+      "site": "reddit.com"
+    },
+    {
+      "at": -30597112800,
+      "site": "instagram.com",
+      "why": "a clock set centuries back"
+    }
+  ],
+  "seed": "centuries-back",
+  "seeded_at": 1791324387,
+  "today_local_midnight": 1791262800,
+  "zone": "America/Chicago (CDT, -18000)"
+}

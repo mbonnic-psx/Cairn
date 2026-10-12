@@ -1,0 +1,36 @@
+{
+  "answer": {
+    "coverage_note": null,
+    "first_counted": 1791308400,
+    "gaps": [],
+    "reaches": [
+      {
+        "at": 1791308400,
+        "domain": "reddit.com"
+      },
+      {
+        "at": 1791311100,
+        "domain": "youtube.com"
+      },
+      {
+        "at": 1791313800,
+        "domain": "x.com"
+      },
+      {
+        "at": 1791316200,
+        "domain": "reddit.com"
+      }
+    ],
+    "sealed": null
+  },
+  "answer_bytes": 241,
+  "asked_at": 1791327909,
+  "core_ms": 1.0423360000000002,
+  "request": {
+    "args": {
+      "dayEnd": 1791349200,
+      "dayStart": 1791262800
+    },
+    "cmd": "list_todays_reaches"
+  }
+}

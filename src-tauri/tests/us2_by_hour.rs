@@ -37,6 +37,10 @@ use cairn::store::config::ConfigStore;
 
 const A_KEY: [u8; 32] = [7u8; 32];
 
+/// 2025-01-01 00:00 UTC: where the fixtures say counting began.
+#[allow(dead_code)]
+const COUNTING_FROM: i64 = 1_735_689_600;
+
 const HOUR: i64 = 3600;
 const DAY: i64 = 86_400;
 
@@ -278,7 +282,7 @@ fn assert_in_voice(sentence: &str) {
 // --- Scenario 16: the wire shape -----------------------------------------------
 
 #[test]
-fn the_answer_serialises_to_exactly_nine_keys_and_dst_approximate_is_false() {
+fn the_answer_serialises_to_exactly_ten_keys_and_dst_approximate_is_false() {
     let state_setup = setup();
     let state = app(&state_setup, &Keychain::available());
     let value = serde_json::to_value(Range::four_weeks_in_utc().ask(&state)).unwrap();
@@ -294,11 +298,12 @@ fn the_answer_serialises_to_exactly_nine_keys_and_dst_approximate_is_false() {
             "coverage_note",
             "dst_approximate",
             "estimates_excluded",
+            "first_counted",
             "gaps",
             "movement",
             "sealed"
         ],
-        "nine keys, movement among them"
+        "ten keys, movement and first_counted among them"
     );
     assert_eq!(object["dst_approximate"], serde_json::json!(false));
 }
@@ -318,6 +323,10 @@ mod with_history {
         else {
             panic!("a fresh directory with a good key should open");
         };
+        // Cairn was counting long before any range these scenarios ask for, so
+        // the time before their first record is not the time before it first
+        // counted (slice `first-counted`, pin row 1).
+        open.note_counting(COUNTING_FROM).unwrap();
         open
     }
 

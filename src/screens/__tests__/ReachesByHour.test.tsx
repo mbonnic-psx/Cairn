@@ -13,6 +13,7 @@ import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 
 import type { OffsetChange, Patterns, TodaysReaches } from '../../ipc/reaches';
+import { shown } from './countText';
 import { Reaches, type ReachesReader } from '../Reaches';
 
 /** Monday 2 November 2026, 20:00 in London. */
@@ -228,7 +229,7 @@ describe('how the hours read', () => {
     const counts = { 2: 2, 14: 6, 15: 3 } as Record<number, number>;
     lines.forEach((line, hour) => {
       const count = counts[hour] ?? 0;
-      expect(line.textContent).toBe(`${label(hour)}${count}`);
+      expect(shown(line)).toBe(`${label(hour)}${count}`);
       const bar = within(line).getByTestId('bar');
       expect(bar.style.width).toBe(`${Math.round((count / 6) * 100)}%`);
       expect(bar.parentElement).toHaveAttribute('aria-hidden', 'true');
@@ -241,7 +242,7 @@ describe('how the hours read', () => {
 
     const lines = await screen.findAllByRole('listitem');
     const midnight = lines[0];
-    expect(midnight.textContent).toBe(`${label(0)}0`);
+    expect(shown(midnight)).toBe(`${label(0)}0`);
     expect(within(midnight).getByTestId('bar').style.width).toBe('0%');
     // And not marked in any way that the others are not.
     expect(midnight.className).toBe(lines[14].className);
@@ -346,7 +347,7 @@ describe('a quiet range', () => {
     expect(
       sentence.compareDocumentPosition(lines[0]) & Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy();
-    lines.forEach((line, hour) => expect(line.textContent).toBe(`${label(hour)}0`));
+    lines.forEach((line, hour) => expect(shown(line)).toBe(`${label(hour)}0`));
     expect(text()).not.toMatch(/well done|great|good|calm|nothing to worry|keep it up/i);
   });
 });

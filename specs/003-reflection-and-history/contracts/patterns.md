@@ -138,6 +138,22 @@ dates beyond; every reach in `[from, to)` is in exactly one row, so the counts s
 holds its instant; the reaches' order does not matter; estimates never come in; adding unseen time never makes a
 row more seen; no row holding a reach is `None`; nothing is allocated per date.
 
+#### Amended in slice `first-counted` (2026-10-05)
+
+```rust
+pub mod first_count {
+    pub fn unseen(first: Option<i64>, from: i64, to: i64, gaps: &[(i64, i64)]) -> Vec<(i64, i64)>
+    pub fn gaps_since(first: Option<i64>, gaps: &[(i64, i64)]) -> Vec<(i64, i64)>
+}
+```
+
+`gaps` are sorted, merged and inside `[from, to)`, as `store::gaps::clipped` returns them. `unseen` is
+`[from, min(first, to))` (all of `[from, to)` when `first` is `None`) followed by `gaps_since`, sorted and disjoint,
+and it is what `movement`'s `unseen` is given. Properties: inside `[from, to)`; covers everything before `first`;
+covers nothing after `first` that no gap covers; a later `first` never covers less. `gaps_since` cuts each gap to
+begin no earlier than `first`, drops what is left empty, and returns them unchanged when `first` is `None`.
+`movement` is unchanged.
+
 ### Deliberately not in this module
 
 No formatting, no labels, no words. `by_weekday` returns `0–6`, not "Monday". The pure layer

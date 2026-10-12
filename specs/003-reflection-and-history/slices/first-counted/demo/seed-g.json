@@ -1,0 +1,42 @@
+{
+  "first_count_intended": 1789653600,
+  "first_count_read_back": 1789653600,
+  "gaps": [],
+  "reach_count": 5,
+  "reaches": [
+    {
+      "count": 1234,
+      "from": 1790226000,
+      "site": "community.forums.an-unusually-long-hobby-site-name.example.org",
+      "to": 1791396036
+    },
+    {
+      "count": 41,
+      "from": 1790226000,
+      "site": "video.streaming-service-with-a-long-name.example.com",
+      "to": 1791396036
+    },
+    {
+      "count": 17,
+      "from": 1790226000,
+      "site": "reddit.com",
+      "to": 1791396036
+    },
+    {
+      "count": 3,
+      "from": 1790226000,
+      "site": "x.com",
+      "to": 1791396036
+    },
+    {
+      "count": 1,
+      "from": 1790226000,
+      "site": "news.a-regional-newspaper-with-a-long-name.co.uk",
+      "to": 1791396036
+    }
+  ],
+  "seed": "long-names",
+  "seeded_at": 1791396156,
+  "today_local_midnight": 1791349200,
+  "zone": "America/Chicago (CDT, -18000)"
+}

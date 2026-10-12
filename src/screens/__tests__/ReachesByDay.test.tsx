@@ -17,6 +17,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 
 import type { OffsetChange, Patterns, TodaysReaches } from '../../ipc/reaches';
 import { acrossInWords, weekdayInWords } from '../../localDays';
+import { leavesOf } from './countText';
 import { Reaches, type ReachesReader } from '../Reaches';
 
 /** Monday 2 November 2026, 20:00 in London. */
@@ -94,10 +95,7 @@ const text = () => document.body.textContent ?? '';
 const lines = () => screen.queryAllByRole('listitem');
 
 /** What a line says, in the order it says it: the leaves of its markup. */
-const leaves = (line: HTMLElement) =>
-  Array.from(line.querySelectorAll('*'))
-    .filter((el) => el.children.length === 0 && el.textContent)
-    .map((el) => el.textContent as string);
+const leaves = (line: HTMLElement) => leavesOf(line);
 
 const barOf = (line: HTMLElement) => within(line).queryByTestId('bar');
 

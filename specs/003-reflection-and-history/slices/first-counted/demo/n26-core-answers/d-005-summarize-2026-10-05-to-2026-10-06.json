@@ -1,0 +1,195 @@
+{
+  "answer": {
+    "by_hour": [
+      {
+        "count": 0,
+        "hour": 0
+      },
+      {
+        "count": 0,
+        "hour": 1
+      },
+      {
+        "count": 0,
+        "hour": 2
+      },
+      {
+        "count": 0,
+        "hour": 3
+      },
+      {
+        "count": 0,
+        "hour": 4
+      },
+      {
+        "count": 0,
+        "hour": 5
+      },
+      {
+        "count": 0,
+        "hour": 6
+      },
+      {
+        "count": 0,
+        "hour": 7
+      },
+      {
+        "count": 1,
+        "hour": 8
+      },
+      {
+        "count": 2,
+        "hour": 9
+      },
+      {
+        "count": 0,
+        "hour": 10
+      },
+      {
+        "count": 1,
+        "hour": 11
+      },
+      {
+        "count": 0,
+        "hour": 12
+      },
+      {
+        "count": 0,
+        "hour": 13
+      },
+      {
+        "count": 1,
+        "hour": 14
+      },
+      {
+        "count": 0,
+        "hour": 15
+      },
+      {
+        "count": 0,
+        "hour": 16
+      },
+      {
+        "count": 0,
+        "hour": 17
+      },
+      {
+        "count": 0,
+        "hour": 18
+      },
+      {
+        "count": 0,
+        "hour": 19
+      },
+      {
+        "count": 0,
+        "hour": 20
+      },
+      {
+        "count": 0,
+        "hour": 21
+      },
+      {
+        "count": 0,
+        "hour": 22
+      },
+      {
+        "count": 0,
+        "hour": 23
+      }
+    ],
+    "by_site": [
+      {
+        "count": 2,
+        "domain": "reddit.com"
+      },
+      {
+        "count": 2,
+        "domain": "youtube.com"
+      },
+      {
+        "count": 1,
+        "domain": "x.com"
+      }
+    ],
+    "by_weekday": [
+      {
+        "count": 3,
+        "days": 1,
+        "weekday": 0
+      },
+      {
+        "count": 2,
+        "days": 1,
+        "weekday": 1
+      },
+      {
+        "count": 0,
+        "days": 0,
+        "weekday": 2
+      },
+      {
+        "count": 0,
+        "days": 0,
+        "weekday": 3
+      },
+      {
+        "count": 0,
+        "days": 0,
+        "weekday": 4
+      },
+      {
+        "count": 0,
+        "days": 0,
+        "weekday": 5
+      },
+      {
+        "count": 0,
+        "days": 0,
+        "weekday": 6
+      }
+    ],
+    "coverage_note": null,
+    "dst_approximate": false,
+    "estimates_excluded": 0,
+    "first_counted": 1791209280,
+    "gaps": [],
+    "movement": [
+      {
+        "count": 3,
+        "day": "2026-10-05",
+        "days": 1,
+        "seen": "whole",
+        "so_far": false,
+        "span": "day"
+      },
+      {
+        "count": 2,
+        "day": "2026-10-06",
+        "days": 1,
+        "seen": "whole",
+        "so_far": true,
+        "span": "day"
+      }
+    ],
+    "sealed": null
+  },
+  "answer_bytes": 1184,
+  "asked_at": 1791327706,
+  "core_ms": 1.7673910000000002,
+  "request": {
+    "args": {
+      "firstDay": "2026-10-05",
+      "lastDay": "2026-10-06",
+      "offsets": [
+        {
+          "from": 1791176400,
+          "offset": -18000
+        }
+      ],
+      "rangeEnd": 1791349200,
+      "rangeStart": 1791176400
+    },
+    "cmd": "summarize_reaches"
+  }
+}

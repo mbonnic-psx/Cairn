@@ -16,6 +16,7 @@ import {
   structureOf,
   wordsOf,
   BY_DAY_DELTA,
+  COUNT_UNIT_DELTA,
   DAY_BY_DAY_DELTA,
   OVER_TIME,
   TODAY,
@@ -95,7 +96,8 @@ describe.each(['morning', 'midday', 'night'] as const)('in the %s look', (look) 
     } else if (answer !== 'looking') {
       await screen.findByText(answer.sealed ?? 'Cairn counts only while it is running. This is what it saw over these days.');
     }
-    expectKept(main, OVER_TIME[name]!, [BY_DAY_DELTA, DAY_BY_DAY_DELTA]);
+    const draws = answer !== 'looking' && answer !== 'unreadable' && answer.by_site.length > 0 && !answer.sealed;
+    expectKept(main, OVER_TIME[name]!, [BY_DAY_DELTA, DAY_BY_DAY_DELTA, ...(draws ? [COUNT_UNIT_DELTA] : [])]);
   });
 
   it.each(Object.keys(tonightCases))('Tonight, %s, keeps its words and controls', async (name) => {

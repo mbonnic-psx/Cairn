@@ -15,6 +15,7 @@ import { describe, expect, it, vi } from 'vitest';
 import type { MovementRow, Patterns } from '../../ipc/reaches';
 import { NotebookShell } from '../../shell/NotebookShell';
 import { Reaches, type ReachesReader } from '../Reaches';
+import { shown } from './countText';
 import { evening, sealedSentence, todayCases } from './tonightCases';
 import { never } from './fakeCore';
 
@@ -103,7 +104,7 @@ describe.each<Where>(['card', 'page'])('the list of a range, on the %s', (where)
   it('is drawn in the site view when a site has reaches', async () => {
     await open(where, patterns({}), 'By site');
     expect(screen.queryByText(NOTHING)).toBeNull();
-    expect(lines().map((li) => li.textContent)).toEqual(['a.example5']);
+    expect(lines().map((li) => shown(li))).toEqual(['a.example5']);
   });
 
   it('keeps all 24 zero hours under the sentence in the hour view of a quiet range', async () => {
