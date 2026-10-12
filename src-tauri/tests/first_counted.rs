@@ -819,17 +819,16 @@ mod with_history {
     }
 
     /// An open whose fill could not take the write lock: `first_count` is not
-    /// there yet, and the history is open.
+    /// there yet, and the history is open. The lock is let go only once the
+    /// open has returned, so its fill cannot win it however slow the machine.
     fn opened_with_the_fill_owed(data: &Path) -> History {
         let connection = keyed(data);
         connection.execute_batch("BEGIN IMMEDIATE").unwrap();
-        let release = std::thread::spawn(move || {
-            std::thread::sleep(std::time::Duration::from_secs(6));
-            connection.execute_batch("COMMIT").unwrap();
-        });
         let held = open_now(data);
-        release.join().unwrap();
+        connection.execute_batch("COMMIT").unwrap();
         assert!(held.is_open());
+        let History::Open(open) = &held else { panic!() };
+        assert!(open.first_count().is_err(), "the fill is still owed");
         held
     }
 
